@@ -111,7 +111,7 @@
         .empty-state { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 3rem 1rem; color: var(--text-muted); text-align: center; }
         .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
 
-        /* ── CHAT ── */
+        /* ââ CHAT ââ */
         #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
 
         .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
@@ -122,6 +122,8 @@
         .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
         .online-count { font-size: 0.72rem; color: var(--green); font-weight: 600; }
 
+        .chat-actions-right { display: flex; align-items: center; gap: 0.5rem; }
+        .btn-call { background: var(--green); color: #fff; border: none; padding: 0.6rem 1rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(16,185,129,0.35); }
         .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(239,68,68,0.35); transition: transform 0.15s; }
         .btn-panic:active { transform: scale(0.95); }
 
@@ -167,46 +169,55 @@
         .chat-input-area input:focus { border-color: var(--purple-accent); }
         .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s; }
         .btn-send:active { transform: scale(0.9); }
+        
+        /* Llamada UI */
+        .call-alert { position: fixed; top: 20%; left: 50%; transform: translateX(-50%); background: var(--bg-card); border: 2px solid var(--green); padding: 1.5rem; border-radius: 20px; z-index: 3000; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; }
+        .call-alert h3 { margin-bottom: 1rem; }
+        .call-alert button { padding: 0.5rem 1.5rem; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; margin: 0 0.5rem; }
+        .call-alert .btn-accept { background: var(--green); color: #fff; }
+        .call-alert .btn-reject { background: var(--red); color: #fff; }
     </style>
 </head>
 <body>
 
+<!-- ââ TIENDA ââ -->
 <div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100vh;">
     <header>
-        <div class="logo">VibeStore ✦</div>
+        <div class="logo">VibeStore â¦</div>
         <div class="header-actions">
-            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Cambiar tema">🌙</button>
+            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Cambiar tema">ð</button>
             <button class="icon-btn cart-btn" onclick="openCart()" aria-label="Ver carrito">
-                🛍️<span class="badge" id="cartBadge">0</span>
+                ðï¸<span class="badge" id="cartBadge">0</span>
             </button>
         </div>
     </header>
 
     <nav class="nav-scroller">
-        <button class="btn-cat active" onclick="filterCat('all',this)">⚡ Todo</button>
-        <button class="btn-cat" onclick="filterCat('maquillaje',this)">💄 Maquillaje</button>
-        <button class="btn-cat" onclick="filterCat('tecnologia',this)">🔌 Tecnología</button>
-        <button class="btn-cat" onclick="filterCat('hogar',this)">🏠 Hogar</button>
-        <button class="btn-cat" onclick="filterCat('deportes',this)">⚽ Deportes</button>
+        <button class="btn-cat active" onclick="filterCat('all',this)">â¡ Todo</button>
+        <button class="btn-cat" onclick="filterCat('maquillaje',this)">ð Maquillaje</button>
+        <button class="btn-cat" onclick="filterCat('tecnologia',this)">ð TecnologÃ­a</button>
+        <button class="btn-cat" onclick="filterCat('hogar',this)">ð  Hogar</button>
+        <button class="btn-cat" onclick="filterCat('deportes',this)">â½ Deportes</button>
     </nav>
 
     <main class="main-content">
         <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="search" id="searchBox" class="search-input" placeholder="Buscar productos…" oninput="filterSearch(this)" autocomplete="off">
-            <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+            <span class="search-icon">ð</span>
+            <input type="search" id="searchBox" class="search-input" placeholder="Buscar productosâ¦" oninput="filterSearch(this)" autocomplete="off">
+            <button class="search-clear" id="searchClear" onclick="clearSearch()">â</button>
         </div>
         <div class="grid-productos" id="productGrid"></div>
     </main>
 
     <div class="footer-checkout">
         <div class="footer-inner">
-            <button class="btn-view-cart" onclick="openCart()">🛍️ Carrito <span id="footerCount">(0)</span></button>
-            <button class="btn-checkout" onclick="handleCheckout()">Pagar →</button>
+            <button class="btn-view-cart" onclick="openCart()">ðï¸ Carrito <span id="footerCount">(0)</span></button>
+            <button class="btn-checkout" onclick="handleCheckout()">Pagar â</button>
         </div>
     </div>
 </div>
 
+<!-- ââ CART DRAWER ââ -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
     <div class="drawer-handle"></div>
@@ -219,16 +230,25 @@
     <button class="btn-pay" onclick="closeCart(); handleCheckout();">Proceder al Pago</button>
 </div>
 
+<!-- ââ TOAST ââ -->
 <div class="toast" id="toast"></div>
 
+<!-- ââ CHAT ââ -->
 <div id="seccion-chat">
 
+    <div class="call-alert" id="callAlert">
+        <h3>ð Llamada entrante...</h3>
+        <button class="btn-accept" onclick="acceptCall()">Aceptar</button>
+        <button class="btn-reject" onclick="rejectCall()">Rechazar</button>
+    </div>
+
+    <!-- Modal nombre -->
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
-            <h2>👋 ¿Cómo te llamas?</h2>
-            <p>Tu nombre aparecerá en el chat seguro</p>
-            <input type="text" id="nameInput" placeholder="Tu nombre o alias…" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
-            <button class="btn-join" onclick="joinChat()">Entrar al canal →</button>
+            <h2>ð Â¿CÃ³mo te llamas?</h2>
+            <p>Tu nombre aparecerÃ¡ en el chat seguro</p>
+            <input type="text" id="nameInput" placeholder="Tu nombre o aliasâ¦" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
+            <button class="btn-join" onclick="joinChat()">Entrar al canal â</button>
         </div>
     </div>
 
@@ -237,13 +257,17 @@
             <div class="chat-status-dot"></div>
             <div class="chat-header-info">
                 <p>SecureChannel</p>
-                <p id="onlineStatus">Conectando…</p>
+                <p id="onlineStatus">Conectandoâ¦</p>
             </div>
         </div>
-        <button class="btn-panic" onclick="panicExit()">⚠ PÁNICO</button>
+        <div class="chat-actions-right">
+            <button class="btn-call" onclick="initiateCall()">ð Llamar</button>
+            <button class="btn-panic" onclick="panicExit()">â  PÃNICO</button>
+        </div>
     </div>
 
     <div class="chat-messages" id="chatWorkspace">
+        <audio id="remoteAudio" autoplay></audio>
         <div class="typing-wrap" id="typingWrap">
             <span class="typing-name" id="typingName"></span>
             <div class="typing-bubble">
@@ -253,17 +277,18 @@
     </div>
 
     <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
-        <button class="btn-send" onclick="sendMsg()">➤</button>
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguroâ¦" onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
+        <button class="btn-send" onclick="sendMsg()">â¤</button>
     </div>
 </div>
 
+<!-- Firebase SDK -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, off, remove }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    /* ── FIREBASE CONFIG ── */
+    /* ââ FIREBASE CONFIG ââ */
     const firebaseConfig = {
         apiKey: "AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo",
         authDomain: "data-base-store-3bbf8.firebaseapp.com",
@@ -277,58 +302,57 @@
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
-    /* ── STORE DATA ── */
+    /* ââ STORE DATA ââ */
     const CAT_META = {
-        maquillaje: { emoji: '💄', avgPrice: 20 },
-        tecnologia:  { emoji: '🔌', avgPrice: 65 },
-        hogar:       { emoji: '🏠', avgPrice: 25 },
-        deportes:    { emoji: '⚽', avgPrice: 18 },
+        maquillaje: { emoji: 'ð', avgPrice: 20 },
+        tecnologia:  { emoji: 'ð', avgPrice: 65 },
+        hogar:       { emoji: 'ð ', avgPrice: 25 },
+        deportes:    { emoji: 'â½', avgPrice: 18 },
     };
 
     const products = [
         { id:1,  cat:'maquillaje', name:'Paleta Nude Rose',        desc:'18 tonos ultra pigmentados satinados y mate.',         price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:2,  cat:'maquillaje', name:'Labial Matte Crimson',    desc:'Fórmula líquida indeleble 24 horas de fijación.',      price:18.50, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
-        { id:3,  cat:'maquillaje', name:'Base Hydra Glow',         desc:'Acabado natural con ácido hialurónico.',               price:29.00, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
-        { id:4,  cat:'maquillaje', name:'Máscara Lash Lift',       desc:'Volumen extremo y curvas perfectas sin grumos.',       price:16.00, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
-        { id:5,  cat:'maquillaje', name:'Iluminador Stardust',     desc:'Polvo compacto con destellos holográficos.',           price:22.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
-        { id:6,  cat:'maquillaje', name:'Fijador de Maquillaje',   desc:'Bruma hidratante acabado mate larga duración.',        price:15.00, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
+        { id:2,  cat:'maquillaje', name:'Labial Matte Crimson',    desc:'FÃ³rmula lÃ­quida indeleble 24 horas de fijaciÃ³n.',      price:18.50, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
+        { id:3,  cat:'maquillaje', name:'Base Hydra Glow',         desc:'Acabado natural con Ã¡cido hialurÃ³nico.',               price:29.00, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
+        { id:4,  cat:'maquillaje', name:'MÃ¡scara Lash Lift',       desc:'Volumen extremo y curvas perfectas sin grumos.',       price:16.00, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
+        { id:5,  cat:'maquillaje', name:'Iluminador Stardust',     desc:'Polvo compacto con destellos hologrÃ¡ficos.',           price:22.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
+        { id:6,  cat:'maquillaje', name:'Fijador de Maquillaje',   desc:'Bruma hidratante acabado mate larga duraciÃ³n.',        price:15.00, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
         { id:7,  cat:'maquillaje', name:'Corrector Full Coverage', desc:'Oculta imperfecciones de forma ligera.',               price:14.20, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300' },
-        { id:8,  cat:'maquillaje', name:'Rubor Líquido Blush',     desc:'Tono coral natural de fácil difuminado.',              price:19.00, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
+        { id:8,  cat:'maquillaje', name:'Rubor LÃ­quido Blush',     desc:'Tono coral natural de fÃ¡cil difuminado.',              price:19.00, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
         { id:9,  cat:'maquillaje', name:'Delineador Ink Black',    desc:'Punta de fieltro a prueba de agua y sudor.',          price:12.50, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
-        { id:10, cat:'maquillaje', name:'Sérum Primer Control',    desc:'Prepara la piel minimizando poros abiertos.',         price:26.00, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
-        { id:11, cat:'tecnologia', name:'Pods Max Pro',             desc:'Audio espacial inmersivo y cancelación activa.',      price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
-        { id:12, cat:'tecnologia', name:'Smartband Series 7',      desc:'Monitor de oxígeno y pantalla AMOLED de 1.69".',      price:45.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
-        { id:13, cat:'tecnologia', name:'Teclado Mecánico Swift',  desc:'Switches lineales amarillos y layout del 65%.',       price:89.00, img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300' },
-        { id:14, cat:'tecnologia', name:'Mouse Ergonómico Air',    desc:'Sensor óptico de 16000 DPI con agarre premium.',      price:54.00, img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300' },
-        { id:15, cat:'tecnologia', name:'Cargador GaN 65W',        desc:'Triple puerto de carga rápida ultra compacto.',       price:32.00, img:'https://images.unsplash.com/photo-1619134177114-f8605c2a13ba?w=300' },
+        { id:10, cat:'maquillaje', name:'SÃ©rum Primer Control',    desc:'Prepara la piel minimizando poros abiertos.',         price:26.00, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
+        { id:11, cat:'tecnologia', name:'Pods Max Pro',             desc:'Audio espacial inmersivo y cancelaciÃ³n activa.',      price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
+        { id:12, cat:'tecnologia', name:'Smartband Series 7',      desc:'Monitor de oxÃ­geno y pantalla AMOLED de 1.69".',      price:45.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
+        { id:13, cat:'tecnologia', name:'Teclado MecÃ¡nico Swift',  desc:'Switches lineales amarillos y layout del 65%.',       price:89.00, img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300' },
+        { id:14, cat:'tecnologia', name:'Mouse ErgonÃ³mico Air',    desc:'Sensor Ã³ptico de 16000 DPI con agarre premium.',      price:54.00, img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300' },
+        { id:15, cat:'tecnologia', name:'Cargador GaN 65W',        desc:'Triple puerto de carga rÃ¡pida ultra compacto.',       price:32.00, img:'https://images.unsplash.com/photo-1619134177114-f8605c2a13ba?w=300' },
         { id:16, cat:'tecnologia', name:'Hub USB-C 8 en 1',        desc:'Salida HDMI 4K, lectores SD y puertos USB 3.0.',      price:39.99, img:'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=300' },
-        { id:17, cat:'tecnologia', name:'Batería Magsafe Slim',    desc:'Ajuste magnético perfecto de 10000mAh.',              price:42.00, img:'https://images.unsplash.com/photo-1622445262465-2481c4574875?w=300' },
-        { id:18, cat:'tecnologia', name:'Luz LED Streamer RGB',    desc:'Panel de iluminación regulable mediante app.',        price:68.00, img:'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=300' },
-        { id:19, cat:'tecnologia', name:'Bocina BT Waterproof',    desc:'Sonido estéreo 360 grados resistente al agua.',       price:59.00, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
-        { id:20, cat:'tecnologia', name:'Micrófono USB Vocal',     desc:'Patrón cardioide ideal para pódcast y llamadas.',     price:79.00, img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300' },
-        { id:21, cat:'hogar',      name:'Difusor Ultrasónico',     desc:'Luz ambiental y vaporización de aceites esenciales.', price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
-        { id:22, cat:'hogar',      name:'Taza Térmica Inteligente',desc:'Mantiene la temperatura exacta de tus bebidas.',      price:35.00, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300' },
-        { id:23, cat:'hogar',      name:'Lámpara de Luna 3D',      desc:'Esfera táctil recargable con 3 tonos de luz.',        price:19.99, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
-        { id:24, cat:'hogar',      name:'Set de Cojines Velvet',   desc:'Dos piezas de texturas suaves color gris nórdico.',   price:28.00, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
-        { id:25, cat:'hogar',      name:'Velitas Aromáticas Cera', desc:'Pack de 3 aromas relajantes de lavanda y vainilla.',  price:15.00, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
-        { id:26, cat:'hogar',      name:'Organizador Escritorio',  desc:'Madera de bambú sustentable de alta calidad.',        price:22.50, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
-        { id:27, cat:'hogar',      name:'Planta Artificial Monstera',desc:'Maceta cerámica incluida, decoración minimalista.', price:31.00, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
+        { id:17, cat:'tecnologia', name:'BaterÃ­a Magsafe Slim',    desc:'Ajuste magnÃ©tico perfecto de 10000mAh.',              price:42.00, img:'https://images.unsplash.com/photo-1622445262465-2481c4574875?w=300' },
+        { id:18, cat:'tecnologia', name:'Luz LED Streamer RGB',    desc:'Panel de iluminaciÃ³n regulable mediante app.',        price:68.00, img:'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=300' },
+        { id:19, cat:'tecnologia', name:'Bocina BT Waterproof',    desc:'Sonido estÃ©reo 360 grados resistente al agua.',       price:59.00, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
+        { id:20, cat:'tecnologia', name:'MicrÃ³fono USB Vocal',     desc:'PatrÃ³n cardioide ideal para pÃ³dcast y llamadas.',     price:79.00, img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300' },
+        { id:21, cat:'hogar',      name:'Difusor UltrasÃ³nico',     desc:'Luz ambiental y vaporizaciÃ³n de aceites esenciales.', price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
+        { id:22, cat:'hogar',      name:'Taza TÃ©rmica Inteligente',desc:'Mantiene la temperatura exacta de tus bebidas.',      price:35.00, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300' },
+        { id:23, cat:'hogar',      name:'LÃ¡mpara de Luna 3D',      desc:'Esfera tÃ¡ctil recargable con 3 tonos de luz.',        price:19.99, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
+        { id:24, cat:'hogar',      name:'Set de Cojines Velvet',   desc:'Dos piezas de texturas suaves color gris nÃ³rdico.',   price:28.00, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
+        { id:25, cat:'hogar',      name:'Velitas AromÃ¡ticas Cera', desc:'Pack de 3 aromas relajantes de lavanda y vainilla.',  price:15.00, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
+        { id:26, cat:'hogar',      name:'Organizador Escritorio',  desc:'Madera de bambÃº sustentable de alta calidad.',        price:22.50, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        { id:27, cat:'hogar',      name:'Planta Artificial Monstera',desc:'Maceta cerÃ¡mica incluida, decoraciÃ³n minimalista.', price:31.00, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
         { id:28, cat:'hogar',      name:'Cafetera Prensa Francesa', desc:'Vidrio borosilicato resistente a altas temperaturas.',price:26.90, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300' },
-        { id:29, cat:'hogar',      name:'Espejo de Mesa LED',      desc:'Aumento de 5x con rotación ajustable.',               price:18.00, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
-        { id:30, cat:'hogar',      name:'Humidificador Cute Pet',  desc:'Diseño compacto ideal para buró de noche.',           price:14.00, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
-        { id:31, cat:'deportes',   name:'Botella de Acero Pro',    desc:'Aislamiento al vacío térmico por 24 horas.',          price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
-        { id:32, cat:'deportes',   name:'Bandas de Resistencia',   desc:'Set de 5 intensidades con agarres cómodos.',         price:16.50, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' },
-        { id:33, cat:'deportes',   name:'Mat de Yoga Ecológico',   desc:'Grosor antideslizante de 6mm TPE premium.',           price:35.00, img:'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=300' },
+        { id:29, cat:'hogar',      name:'Espejo de Mesa LED',      desc:'Aumento de 5x con rotaciÃ³n ajustable.',               price:18.00, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
+        { id:30, cat:'hogar',      name:'Humidificador Cute Pet',  desc:'DiseÃ±o compacto ideal para burÃ³ de noche.',           price:14.00, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
+        { id:31, cat:'deportes',   name:'Botella de Acero Pro',    desc:'Aislamiento al vacÃ­o tÃ©rmico por 24 horas.',          price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
+        { id:32, cat:'deportes',   name:'Bandas de Resistencia',   desc:'Set de 5 intensidades con agarres cÃ³modos.',         price:16.50, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' },
+        { id:33, cat:'deportes',   name:'Mat de Yoga EcolÃ³gico',   desc:'Grosor antideslizante de 6mm TPE premium.',           price:35.00, img:'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=300' },
         { id:34, cat:'deportes',   name:'Cuerda Saltar Speed',     desc:'Baleros de alta velocidad entrenamiento funcional.',  price:12.00, img:'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=300' },
-        { id:35, cat:'deportes',   name:'Mancuernas Neopreno Hex', desc:'Par de pesas de 2.5kg con diseño texturizado.',      price:24.00, img:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300' },
-        { id:36, cat:'deportes',   name:'Maletín Deportivo Active',desc:'Compartimento separado para tenis húmedos.',         price:39.00, img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300' },
-        { id:37, cat:'deportes',   name:'Rodillo Masajeador Foam', desc:'Liberación miofascial post-entrenamiento.',          price:19.50, img:'https://images.unsplash.com/photo-1600881333168-2ef49b341f30?w=300' },
-        { id:38, cat:'deportes',   name:'Guantes Gimnasio Breath', desc:'Protección con gel antideslizante en las palmas.',   price:14.00, img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300' },
-        { id:39, cat:'deportes',   name:'Smart Shaker Pro',        desc:'Mezclador de proteína con compartimentos internos.',  price:15.90, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
-        { id:40, cat:'deportes',   name:'Toalla Microfibra Dry',   desc:'Secado súper rápido, compacta y ultra absorbente.',   price:9.99,  img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300' },
+        { id:35, cat:'deportes',   name:'Mancuernas Neopreno Hex', desc:'Par de pesas de 2.5kg con diseÃ±o texturizado.',      price:24.00, img:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300' },
+        { id:36, cat:'deportes',   name:'MaletÃ­n Deportivo Active',desc:'Compartimento separado para tenis hÃºmedos.',         price:39.00, img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300' },
+        { id:37, cat:'deportes',   name:'Rodillo Masajeador Foam', desc:'LiberaciÃ³n miofascial post-entrenamiento.',          price:19.50, img:'https://images.unsplash.com/photo-1600881333168-2ef49b341f30?w=300' },
+        { id:38, cat:'deportes',   name:'Guantes Gimnasio Breath', desc:'ProtecciÃ³n con gel antideslizante en las palmas.',   price:14.00, img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300' },
+        { id:39, cat:'deportes',   name:'Smart Shaker Pro',        desc:'Mezclador de proteÃ­na con compartimentos internos.',  price:15.90, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
+        { id:40, cat:'deportes',   name:'Toalla Microfibra Dry',   desc:'Secado sÃºper rÃ¡pido, compacta y ultra absorbente.',   price:9.99,  img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300' },
     ];
 
-    /* ── STATE ── */
     let cart      = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 };
     let curCat    = 'all';
     let toastTimer;
@@ -339,14 +363,15 @@
 
     const SECRET_PIN = atob("MTAyMzEwMTg=");
 
-    /* ── REFS Firebase ── */
     const messagesRef = ref(db, 'chat/messages');
     const typingRef   = ref(db, 'chat/typing/' + myId);
     const presenceRef = ref(db, 'chat/presence/' + myId);
+    
+    let peerConnection;
+    let localStream;
+    const callRef = ref(db, 'chat/calls');
+    const configuration = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-    /* ════════════════════
-       STORE
-    ════════════════════ */
     function escHtml(s) {
         return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
@@ -359,7 +384,7 @@
             (p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query))
         );
         if (!list.length) {
-            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados</p><small>Prueba otra categoría.</small></div>`;
+            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">ð</div><p>Sin resultados</p><small>Prueba otra categorÃ­a.</small></div>`;
             return;
         }
         grid.innerHTML = list.map(p => `
@@ -388,11 +413,11 @@
         badge.classList.remove('pop');
         void badge.offsetWidth;
         badge.classList.add('pop');
-        btn.classList.add('added'); btn.textContent = '✓';
+        btn.classList.add('added'); btn.textContent = 'â';
         setTimeout(() => { btn.classList.remove('added'); btn.textContent = '+'; }, 700);
         document.getElementById('footerCount').textContent = `(${total})`;
         const p = products.find(x => x.id === id);
-        showToast(`${p.name} añadido ✓`);
+        showToast(`${p.name} aÃ±adido â`);
     };
 
     function changeQty(cat, delta) {
@@ -413,7 +438,7 @@
         const wrap = document.getElementById('cartItems');
         const total = totalItems();
         if (!total) {
-            wrap.innerHTML = `<div class="cart-empty-msg">🛒 Tu carrito está vacío.</div>`;
+            wrap.innerHTML = `<div class="cart-empty-msg">ð Tu carrito estÃ¡ vacÃ­o.</div>`;
             document.getElementById('cartTotal').textContent = '$0.00';
             return;
         }
@@ -422,7 +447,7 @@
             <div class="cart-item-row">
                 <span class="cat-name">${CAT_META[cat].emoji} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</span>
                 <div class="cat-qty">
-                    <button class="qty-btn" onclick="changeQty('${cat}',-1)">−</button>
+                    <button class="qty-btn" onclick="changeQty('${cat}',-1)">â</button>
                     <span class="qty-num">${qty}</span>
                     <button class="qty-btn" onclick="changeQty('${cat}',1)">+</button>
                 </div>
@@ -452,7 +477,7 @@
     window.toggleTheme = function() {
         const dark = document.body.getAttribute('data-theme') === 'dark';
         document.body.setAttribute('data-theme', dark ? '' : 'dark');
-        document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
+        document.getElementById('themeBtn').textContent = dark ? 'ð' : 'âï¸';
     };
 
     function showToast(msg) {
@@ -464,7 +489,7 @@
     }
 
     window.handleCheckout = function() {
-        if (!totalItems()) { showToast('Tu carrito está vacío 🛒'); return; }
+        if (!totalItems()) { showToast('Tu carrito estÃ¡ vacÃ­o ð'); return; }
         const m = cart.maquillaje, t = cart.tecnologia, h = cart.hogar, d = cart.deportes;
         if ((m+t===5) && h===0 && d===0) {
             const pin = prompt("Canal seguro detectado. Ingresa el PIN:");
@@ -472,7 +497,6 @@
                 document.getElementById('vista-tienda').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'flex';
                 resetCart();
-                // Mostrar modal de nombre
                 document.getElementById('nameModal').style.display = 'flex';
                 setTimeout(() => document.getElementById('nameInput').focus(), 100);
             } else if (pin !== null) {
@@ -480,7 +504,7 @@
                 resetCart();
             }
         } else {
-            showToast('Error de comunicación con el banco. Intenta más tarde.');
+            showToast('Error de comunicaciÃ³n con el banco. Intenta mÃ¡s tarde.');
             resetCart();
         }
     };
@@ -492,22 +516,18 @@
         window.closeCart();
     }
 
-    /* ════════════════════
-       CHAT REAL (Firebase)
-    ════════════════════ */
-
-    // Permiso para notificaciones sigilosas
+    /* ââ CHAT REAL (Firebase) ââ */
     if ("Notification" in window && Notification.permission !== "granted") {
         Notification.requestPermission();
     }
 
     const fakeNotifications = [
-        "🔥 ¡Oferta flash: 50% de descuento en maquillaje!",
-        "⚡ Envío gratis en tu próxima compra de tecnología.",
-        "🏠 ¡Nuevos artículos para el hogar disponibles!",
-        "⚽ ¡Rebajas de temporada en toda la sección de deportes!",
-        "🎁 Cupón secreto desbloqueado: revisa tu bandeja.",
-        "🌟 Producto estrella de la semana con rebaja."
+        "ð¥ Â¡Oferta flash: 50% de descuento en maquillaje!",
+        "â¡ EnvÃ­o gratis en tu prÃ³xima compra de tecnologÃ­a.",
+        "ð  Â¡Nuevos artÃ­culos para el hogar disponibles!",
+        "â½ Â¡Rebajas de temporada en toda la secciÃ³n de deportes!",
+        "ð CupÃ³n secreto desbloqueado: revisa tu bandeja.",
+        "ð Producto estrella de la semana con rebaja."
     ];
 
     const offerSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869.wav");
@@ -520,14 +540,10 @@
         document.getElementById('nameModal').style.display = 'none';
         document.getElementById('chatInput').focus();
 
-        // Presencia: marcar online y limpiar al desconectar
         set(presenceRef, { name: myName, online: true });
         onDisconnect(presenceRef).remove();
-
-        // Limpiar typing al desconectar
         onDisconnect(typingRef).remove();
 
-        // Escuchar mensajes en tiempo real
         onValue(messagesRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
@@ -536,9 +552,8 @@
                     seenKeys.add(key);
                     renderMessage(msg);
 
-                    // Alerta de oferta sigilosa (sonido y notificación) para mensajes de otros usuarios
                     if (msg.type === 'text' && msg.senderId !== myId) {
-                        offerSound.play().catch(err => console.log("Audio bloqueado por el navegador"));
+                        offerSound.play().catch(err => console.log("Audio bloqueado"));
                         if ("Notification" in window && Notification.permission === "granted") {
                             const randomMsg = fakeNotifications[Math.floor(Math.random() * fakeNotifications.length)];
                             new Notification("VibeStore", {
@@ -551,17 +566,37 @@
             });
         });
 
-        // Escuchar presencia (quién está online)
+        onValue(callRef, async (snapshot) => {
+            const data = snapshot.val();
+            if (!data) return;
+            
+            for (const [id, callData] of Object.entries(data)) {
+                if (callData.target === myId && callData.status === 'offer' && !peerConnection) {
+                    document.getElementById('callAlert').style.display = 'block';
+                    window.incomingCallData = { callerId: callData.callerId, offer: callData.offer };
+                } else if (callData.callerId === myId && callData.status === 'answer') {
+                    if (peerConnection && peerConnection.signalingState !== 'stable') {
+                        await peerConnection.setRemoteDescription(new RTCSessionDescription(callData.answer));
+                    }
+                } else if ((callData.target === myId || callData.callerId === myId) && callData.status === 'ice') {
+                    if (peerConnection && callData.iceCandidate) {
+                        try {
+                            await peerConnection.addIceCandidate(new RTCIceCandidate(callData.iceCandidate));
+                        } catch(e){}
+                    }
+                }
+            }
+        });
+
         const presAllRef = ref(db, 'chat/presence');
         onValue(presAllRef, (snapshot) => {
             const data = snapshot.val() || {};
             const users = Object.values(data).filter(u => u.online);
             const count = users.length;
             document.getElementById('onlineStatus').textContent =
-                count === 1 ? '1 persona en línea' : `${count} personas en línea`;
+                count === 1 ? '1 persona en lÃ­nea' : `${count} personas en lÃ­nea`;
         });
 
-        // Escuchar typing de otros
         const typingAllRef = ref(db, 'chat/typing');
         onValue(typingAllRef, (snapshot) => {
             const data = snapshot.val() || {};
@@ -571,7 +606,7 @@
             const wrap = document.getElementById('typingWrap');
             const nameEl = document.getElementById('typingName');
             if (others.length > 0) {
-                nameEl.textContent = others[0] + ' está escribiendo';
+                nameEl.textContent = others[0] + ' estÃ¡ escribiendo';
                 wrap.classList.add('show');
                 scrollChat();
             } else {
@@ -579,8 +614,73 @@
             }
         });
 
-        // Mensaje de bienvenida al sistema
-        pushSystemMsg(`${myName} entró al canal`);
+        pushSystemMsg(`${myName} entrÃ³ al canal`);
+    };
+
+    window.initiateCall = async function() {
+        const presAllRef = ref(db, 'chat/presence');
+        onValue(presAllRef, async (snapshot) => {
+            const data = snapshot.val() || {};
+            const targets = Object.entries(data).filter(([id, u]) => id !== myId && u.online);
+            if(targets.length === 0) {
+                alert("No hay nadie mÃ¡s conectado para llamar.");
+                return;
+            }
+            const targetId = targets[0][0];
+            
+            peerConnection = new RTCPeerConnection(configuration);
+            
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    push(callRef, { callerId: myId, target: targetId, status: 'ice', iceCandidate: event.candidate });
+                }
+            };
+
+            peerConnection.ontrack = (event) => {
+                document.getElementById('remoteAudio').srcObject = event.streams[0];
+            };
+
+            const offer = await peerConnection.createOffer();
+            await peerConnection.setLocalDescription(offer);
+            
+            push(callRef, { callerId: myId, target: targetId, status: 'offer', offer: offer });
+            alert("Llamada saliente iniciada...");
+        }, { onlyOnce: true });
+    };
+
+    window.acceptCall = async function() {
+        document.getElementById('callAlert').style.display = 'none';
+        const { callerId, offer } = window.incomingCallData;
+        
+        peerConnection = new RTCPeerConnection(configuration);
+        
+        localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                push(callRef, { callerId: myId, target: callerId, status: 'ice', iceCandidate: event.candidate });
+            }
+        };
+
+        peerConnection.ontrack = (event) => {
+            document.getElementById('remoteAudio').srcObject = event.streams[0];
+        };
+
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+        
+        push(callRef, { callerId: myId, target: callerId, status: 'answer', answer: answer });
+        alert("Llamada conectada.");
+    };
+
+    window.rejectCall = function() {
+        document.getElementById('callAlert').style.display = 'none';
+        alert("Llamada rechazada.");
     };
 
     function renderMessage(msg) {
@@ -632,7 +732,6 @@
             ts: Date.now()
         });
 
-        // Limpiar typing
         set(typingRef, null);
         clearTimeout(typingTimer);
         input.value = '';
@@ -648,8 +747,7 @@
     };
 
     window.panicExit = function() {
-        if (confirm('¿Salir y borrar rastro de la base de datos?')) {
-            // Elimina por completo los mensajes del canal al presionar pánico
+        if (confirm('Â¿Salir y borrar rastro de la base de datos?')) {
             remove(messagesRef).then(() => {
                 set(presenceRef, null);
                 set(typingRef, null);
@@ -661,7 +759,6 @@
         }
     };
 
-    /* ── INIT ── */
     renderStore();
 
 </script>
