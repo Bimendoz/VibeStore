@@ -171,7 +171,6 @@
 </head>
 <body>
 
-<!-- ── TIENDA ── -->
 <div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100vh;">
     <header>
         <div class="logo">VibeStore ✦</div>
@@ -208,7 +207,6 @@
     </div>
 </div>
 
-<!-- ── CART DRAWER ── -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
     <div class="drawer-handle"></div>
@@ -221,13 +219,10 @@
     <button class="btn-pay" onclick="closeCart(); handleCheckout();">Proceder al Pago</button>
 </div>
 
-<!-- ── TOAST ── -->
 <div class="toast" id="toast"></div>
 
-<!-- ── CHAT ── -->
 <div id="seccion-chat">
 
-    <!-- Modal nombre -->
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
             <h2>👋 ¿Cómo te llamas?</h2>
@@ -263,10 +258,9 @@
     </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, off }
+    import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, off, remove }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     /* ── FIREBASE CONFIG ── */
@@ -502,6 +496,22 @@
        CHAT REAL (Firebase)
     ════════════════════ */
 
+    // Permiso para notificaciones sigilosas
+    if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+
+    const fakeNotifications = [
+        "🔥 ¡Oferta flash: 50% de descuento en maquillaje!",
+        "⚡ Envío gratis en tu próxima compra de tecnología.",
+        "🏠 ¡Nuevos artículos para el hogar disponibles!",
+        "⚽ ¡Rebajas de temporada en toda la sección de deportes!",
+        "🎁 Cupón secreto desbloqueado: revisa tu bandeja.",
+        "🌟 Producto estrella de la semana con rebaja."
+    ];
+
+    const offerSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869.wav");
+
     window.joinChat = function() {
         const input = document.getElementById('nameInput');
         const name  = input.value.trim();
@@ -525,6 +535,18 @@
                 if (!seenKeys.has(key)) {
                     seenKeys.add(key);
                     renderMessage(msg);
+
+                    // Alerta de oferta sigilosa (sonido y notificación) para mensajes de otros usuarios
+                    if (msg.type === 'text' && msg.senderId !== myId) {
+                        offerSound.play().catch(err => console.log("Audio bloqueado por el navegador"));
+                        if ("Notification" in window && Notification.permission === "granted") {
+                            const randomMsg = fakeNotifications[Math.floor(Math.random() * fakeNotifications.length)];
+                            new Notification("VibeStore", {
+                                body: randomMsg,
+                                icon: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=100"
+                            });
+                        }
+                    }
                 }
             });
         });
@@ -626,10 +648,16 @@
     };
 
     window.panicExit = function() {
-        if (confirm('¿Salir y borrar rastro?')) {
-            set(presenceRef, null);
-            set(typingRef, null);
-            location.reload();
+        if (confirm('¿Salir y borrar rastro de la base de datos?')) {
+            // Elimina por completo los mensajes del canal al presionar pánico
+            remove(messagesRef).then(() => {
+                set(presenceRef, null);
+                set(typingRef, null);
+                location.reload();
+            }).catch((err) => {
+                console.error("Error al limpiar historial", err);
+                location.reload();
+            });
         }
     };
 
