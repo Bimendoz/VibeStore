@@ -7,175 +7,234 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="VibeStore">
-
     <style>
         :root {
-            --bg-body: #f3f4f9;
-            --bg-card: #ffffff;
-            --bg-nav: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --purple-accent: #8b5cf6;
-            --purple-light: #ede9fe;
-            --green: #10b981;
-            --red: #ef4444;
-            --border-color: #e2e8f0;
+            --bg-body: #f3f4f9; --bg-card: #ffffff; --bg-nav: #ffffff;
+            --text-main: #0f172a; --text-muted: #64748b;
+            --purple-accent: #8b5cf6; --purple-light: #ede9fe;
+            --green: #10b981; --red: #ef4444; --border-color: #e2e8f0;
             --shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
         [data-theme="dark"] {
-            --bg-body: #0f0f12; --bg-card: #18181c; --bg-nav: #18181c;
-            --text-main: #f8fafc; --text-muted: #94a3b8; --purple-accent: #a78bfa;
-            --purple-light: #2e1065; --border-color: #27272a;
-            --shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            --bg-body:#0f0f12; --bg-card:#18181c; --bg-nav:#18181c;
+            --text-main:#f8fafc; --text-muted:#94a3b8; --purple-accent:#a78bfa;
+            --purple-light:#2e1065; --border-color:#27272a;
+            --shadow:0 10px 25px -5px rgba(0,0,0,0.5);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent;}
+        body{background-color:var(--bg-body);color:var(--text-main);transition:background-color .3s,color .3s;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
 
         /* HEADER */
-        header { background-color: var(--bg-nav); padding: calc(var(--safe-top) + 1rem) 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
-        .header-actions { display: flex; align-items: center; gap: 1rem; }
-        .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: transform 0.15s; }
-        .icon-btn:active { transform: scale(0.92); }
-        .cart-btn { background: var(--purple-light); color: var(--purple-accent); position: relative; }
-        .badge { position: absolute; top: -3px; right: -3px; background-color: var(--red); color: #fff; font-size: 0.65rem; font-weight: 800; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; border: 2px solid var(--bg-nav); display: flex; align-items: center; justify-content: center; }
-        .badge.pop { animation: pop 0.3s cubic-bezier(0.36,0.07,0.19,0.97); }
-        @keyframes pop { 0%,100%{transform:scale(1)} 40%{transform:scale(1.45)} 70%{transform:scale(0.9)} }
+        header{background-color:var(--bg-nav);padding:calc(var(--safe-top) + 1rem) 1.5rem 1rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100;}
+        .logo{font-size:1.4rem;font-weight:800;letter-spacing:-.5px;}
+        .header-actions{display:flex;align-items:center;gap:1rem;}
+        .icon-btn{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-main);display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;transition:transform .15s;}
+        .icon-btn:active{transform:scale(.92);}
+        .cart-btn{background:var(--purple-light);color:var(--purple-accent);position:relative;}
+        .badge{position:absolute;top:-3px;right:-3px;background-color:var(--red);color:#fff;font-size:.65rem;font-weight:800;min-width:18px;height:18px;padding:0 4px;border-radius:9px;border:2px solid var(--bg-nav);display:flex;align-items:center;justify-content:center;}
+        .badge.pop{animation:pop .3s cubic-bezier(.36,.07,.19,.97);}
+        @keyframes pop{0%,100%{transform:scale(1)}40%{transform:scale(1.45)}70%{transform:scale(.9)}}
 
         /* NAV */
-        .nav-scroller { overflow-x: auto; white-space: nowrap; padding: 0.85rem 1.5rem; background: var(--bg-nav); border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .nav-scroller::-webkit-scrollbar { display: none; }
-        .btn-cat { display: inline-flex; align-items: center; gap: 0.3rem; background: transparent; border: none; color: var(--text-muted); padding: 0.55rem 1.1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-right: 0.4rem; cursor: pointer; transition: all 0.2s; }
-        .btn-cat.active { background: var(--purple-accent); color: #fff; box-shadow: 0 4px 12px rgba(139,92,246,0.3); }
+        .nav-scroller{overflow-x:auto;white-space:nowrap;padding:.85rem 1.5rem;background:var(--bg-nav);border-bottom:1px solid var(--border-color);-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+        .nav-scroller::-webkit-scrollbar{display:none;}
+        .btn-cat{display:inline-flex;align-items:center;gap:.3rem;background:transparent;border:none;color:var(--text-muted);padding:.55rem 1.1rem;border-radius:20px;font-size:.9rem;font-weight:600;margin-right:.4rem;cursor:pointer;transition:all .2s;}
+        .btn-cat.active{background:var(--purple-accent);color:#fff;box-shadow:0 4px 12px rgba(139,92,246,.3);}
 
         /* MAIN */
-        .main-content { flex: 1; padding: 1.2rem 1.2rem 0; max-width: 600px; margin: 0 auto; width: 100%; }
-        .search-wrap { position: relative; margin-bottom: 1.1rem; }
-        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
-        .search-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); padding: 0.85rem 2.8rem 0.85rem 2.5rem; border-radius: 18px; color: var(--text-main); outline: none; font-size: 0.95rem; transition: border-color 0.25s, box-shadow 0.25s; }
-        .search-input:focus { border-color: var(--purple-accent); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
-        .search-clear { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; display: none; padding: 4px; }
-        .search-clear.visible { display: block; }
+        .main-content{flex:1;padding:1.2rem 1.2rem 0;max-width:600px;margin:0 auto;width:100%;}
+        .search-wrap{position:relative;margin-bottom:1.1rem;}
+        .search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;}
+        .search-input{width:100%;background:var(--bg-card);border:1px solid var(--border-color);padding:.85rem 2.8rem .85rem 2.5rem;border-radius:18px;color:var(--text-main);outline:none;font-size:.95rem;transition:border-color .25s,box-shadow .25s;}
+        .search-input:focus{border-color:var(--purple-accent);box-shadow:0 0 0 3px rgba(139,92,246,.15);}
+        .search-clear{position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);font-size:1rem;cursor:pointer;display:none;padding:4px;}
+        .search-clear.visible{display:block;}
 
         /* GRID */
-        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-        .card { background: var(--bg-card); border-radius: 22px; padding: 0.75rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.2s; }
-        .card:active { transform: translateY(-2px); }
-        .img-container { width: 100%; aspect-ratio: 1/1; border-radius: 16px; background: var(--purple-light); margin-bottom: 0.75rem; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-        .card-tag { position: absolute; top: 1.1rem; left: 1.1rem; background: rgba(255,255,255,0.92); backdrop-filter: blur(4px); color: #000; font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 8px; text-transform: uppercase; z-index: 2; }
-        .card-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-desc { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 30px; }
-        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-        .price { font-weight: 800; font-size: 1.05rem; }
-        .btn-add { background: var(--text-main); color: var(--bg-card); border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: 700; font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, background-color 0.2s; flex-shrink: 0; }
-        .btn-add:active { transform: scale(0.88); }
-        .btn-add.added { background: var(--green); animation: addPop 0.35s ease; }
-        @keyframes addPop { 0%{transform:scale(1)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
+        .grid-productos{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
+        .card{background:var(--bg-card);border-radius:22px;padding:.75rem;border:1px solid var(--border-color);box-shadow:var(--shadow);display:flex;flex-direction:column;position:relative;overflow:hidden;transition:transform .2s;}
+        .card:active{transform:translateY(-2px);}
+        .img-container{width:100%;aspect-ratio:1/1;border-radius:16px;background:var(--purple-light);margin-bottom:.75rem;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;}
+        .img-container img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;}
+        .card-tag{position:absolute;top:1.1rem;left:1.1rem;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);color:#000;font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:8px;text-transform:uppercase;z-index:2;}
+        .card-title{font-size:.9rem;font-weight:700;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .card-desc{font-size:.72rem;color:var(--text-muted);margin-bottom:.75rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:30px;}
+        .card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;}
+        .price{font-weight:800;font-size:1.05rem;}
+        .btn-add{background:var(--text-main);color:var(--bg-card);border:none;width:32px;height:32px;border-radius:50%;font-weight:700;font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,background-color .2s;flex-shrink:0;}
+        .btn-add:active{transform:scale(.88);}
+        .btn-add.added{background:var(--green);animation:addPop .35s ease;}
+        @keyframes addPop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
 
         /* CART DRAWER */
-        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .drawer-overlay.open { opacity: 1; pointer-events: all; }
-        .cart-drawer { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: 28px 28px 0 0; z-index: 201; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); padding: 0 1.5rem calc(1.5rem + var(--safe-bottom)); max-height: 80vh; overflow-y: auto; }
-        .cart-drawer.open { transform: translateY(0); }
-        .drawer-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 1rem auto 1.2rem; }
-        .drawer-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem; }
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--border-color); }
-        .cat-name { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; }
-        .cat-qty { display: flex; align-items: center; gap: 0.7rem; }
-        .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 30px; height: 30px; border-radius: 50%; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .qty-btn:active { background: var(--purple-light); }
-        .qty-num { font-weight: 700; min-width: 18px; text-align: center; }
-        .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
-        .cart-total-label { font-size: 0.9rem; color: var(--text-muted); }
-        .cart-total-value { font-size: 1.3rem; font-weight: 900; }
-        .btn-pay { background: var(--text-main); color: var(--bg-card); border: none; width: 100%; padding: 1.05rem; border-radius: 18px; font-size: 1rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.15); cursor: pointer; margin-top: 1.1rem; transition: transform 0.15s; }
-        .btn-pay:active { transform: scale(0.98); }
-        .cart-empty-msg { text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.95rem; }
+        .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;opacity:0;pointer-events:none;transition:opacity .3s;}
+        .drawer-overlay.open{opacity:1;pointer-events:all;}
+        .cart-drawer{position:fixed;bottom:0;left:0;right:0;max-width:600px;margin:0 auto;background:var(--bg-card);border-radius:28px 28px 0 0;z-index:201;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);padding:0 1.5rem calc(1.5rem + var(--safe-bottom));max-height:80vh;overflow-y:auto;}
+        .cart-drawer.open{transform:translateY(0);}
+        .drawer-handle{width:40px;height:4px;background:var(--border-color);border-radius:2px;margin:1rem auto 1.2rem;}
+        .drawer-title{font-size:1.15rem;font-weight:800;margin-bottom:1rem;}
+        .cart-item-row{display:flex;justify-content:space-between;align-items:center;padding:.8rem 0;border-bottom:1px solid var(--border-color);}
+        .cat-name{font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:.5rem;}
+        .cat-qty{display:flex;align-items:center;gap:.7rem;}
+        .qty-btn{background:var(--bg-body);border:1px solid var(--border-color);color:var(--text-main);width:30px;height:30px;border-radius:50%;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+        .qty-btn:active{background:var(--purple-light);}
+        .qty-num{font-weight:700;min-width:18px;text-align:center;}
+        .cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;}
+        .cart-total-label{font-size:.9rem;color:var(--text-muted);}
+        .cart-total-value{font-size:1.3rem;font-weight:900;}
+        .btn-pay{background:var(--text-main);color:var(--bg-card);border:none;width:100%;padding:1.05rem;border-radius:18px;font-size:1rem;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,.15);cursor:pointer;margin-top:1.1rem;transition:transform .15s;}
+        .btn-pay:active{transform:scale(.98);}
+        .cart-empty-msg{text-align:center;color:var(--text-muted);padding:2rem 0;font-size:.95rem;}
 
         /* FOOTER */
-        .footer-checkout { position: sticky; bottom: 0; padding: 0.8rem 1.5rem calc(0.8rem + var(--safe-bottom)); background: linear-gradient(to top, var(--bg-body) 80%, transparent); z-index: 90; max-width: 600px; margin: 0 auto; width: 100%; }
-        .footer-inner { display: flex; gap: 0.8rem; align-items: center; }
-        .btn-view-cart { flex: 1; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.15s; }
-        .btn-view-cart:active { transform: scale(0.98); }
-        .btn-checkout { flex: 2; background: var(--text-main); color: var(--bg-card); border: none; padding: 1rem; border-radius: 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; }
-        .btn-checkout:active { transform: scale(0.98); }
+        .footer-checkout{position:sticky;bottom:0;padding:.8rem 1.5rem calc(.8rem + var(--safe-bottom));background:linear-gradient(to top,var(--bg-body) 80%,transparent);z-index:90;max-width:600px;margin:0 auto;width:100%;}
+        .footer-inner{display:flex;gap:.8rem;align-items:center;}
+        .btn-view-cart{flex:1;background:var(--bg-card);color:var(--text-main);border:1px solid var(--border-color);padding:1rem;border-radius:18px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:transform .15s;}
+        .btn-view-cart:active{transform:scale(.98);}
+        .btn-checkout{flex:2;background:var(--text-main);color:var(--bg-card);border:none;padding:1rem;border-radius:18px;font-size:.95rem;font-weight:700;cursor:pointer;transition:transform .15s;}
+        .btn-checkout:active{transform:scale(.98);}
 
         /* TOAST */
-        .toast { position: fixed; bottom: calc(5.5rem + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-main); color: var(--bg-card); padding: 0.7rem 1.3rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 300; pointer-events: none; }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast{position:fixed;bottom:calc(5.5rem + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--text-main);color:var(--bg-card);padding:.7rem 1.3rem;border-radius:20px;font-size:.85rem;font-weight:600;white-space:nowrap;opacity:0;transition:opacity .25s,transform .25s;z-index:300;pointer-events:none;}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
         /* EMPTY STATE */
-        .empty-state { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 3rem 1rem; color: var(--text-muted); text-align: center; }
-        .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .empty-state{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:3rem 1rem;color:var(--text-muted);text-align:center;}
+        .empty-state .empty-icon{font-size:2.5rem;margin-bottom:.5rem;}
 
-        /* ── CHAT ── */
-        #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
+        /* ═══════════════════════════════
+           CHAT SECTION
+        ═══════════════════════════════ */
+        #seccion-chat{display:none;flex-direction:column;position:fixed;top:0;left:0;width:100vw;height:100vh;background:var(--bg-body);z-index:1000;padding-top:var(--safe-top);}
 
-        .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
-        .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
-        .chat-status-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
-        @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 2px rgba(16,185,129,0.3)} 50%{box-shadow:0 0 0 6px rgba(16,185,129,0)} }
-        .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; }
-        .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
-        .online-count { font-size: 0.72rem; color: var(--green); font-weight: 600; }
+        .chat-header{padding:1rem 1.5rem;background:var(--bg-card);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;}
+        .chat-meta{display:flex;align-items:center;gap:.8rem;}
+        .chat-status-dot{width:9px;height:9px;background:var(--green);border-radius:50%;animation:pulse-dot 2s infinite;}
+        @keyframes pulse-dot{0%,100%{box-shadow:0 0 0 2px rgba(16,185,129,.3)}50%{box-shadow:0 0 0 6px rgba(16,185,129,0)}}
+        .chat-header-info p:first-child{font-weight:700;font-size:.95rem;}
+        .chat-header-info p:last-child{font-size:.72rem;color:var(--text-muted);}
 
-        .chat-actions-right { display: flex; gap: 0.5rem; align-items: center; }
-        .btn-call { background: var(--purple-accent); color: #fff; border: none; padding: 0.6rem 1rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; transition: transform 0.15s; }
-        .btn-call:active { transform: scale(0.95); }
-        .btn-clear-chat { background: #f59e0b; color: #fff; border: none; padding: 0.6rem 1rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; }
-        .btn-clear-chat:active { transform: scale(0.95); }
-        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(239,68,68,0.35); transition: transform 0.15s; }
-        .btn-panic:active { transform: scale(0.95); }
+        /* BOTONES CABECERA CHAT */
+        .chat-header-actions{display:flex;align-items:center;gap:.5rem;}
+        /* Camuflados como "Soporte" */
+        .btn-support-call{background:var(--green);color:#fff;border:none;padding:.5rem .9rem;border-radius:12px;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:transform .15s;}
+        .btn-support-call:active{transform:scale(.95);}
+        .btn-support-video{background:#3b82f6;color:#fff;border:none;padding:.5rem .9rem;border-radius:12px;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:transform .15s;}
+        .btn-support-video:active{transform:scale(.95);}
+        .btn-panic{background:var(--red);color:#fff;border:none;padding:.6rem 1rem;border-radius:12px;font-size:.75rem;font-weight:900;cursor:pointer;box-shadow:0 4px 12px rgba(239,68,68,.35);transition:transform .15s;}
+        .btn-panic:active{transform:scale(.95);}
 
-        /* Nombre modal */
-        .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .name-modal-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; }
-        .name-modal-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
-        .name-modal-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; }
-        .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
-        .name-modal-box input:focus { border-color: var(--purple-accent); }
-        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; }
-        .btn-join:active { transform: scale(0.98); }
+        /* NOMBRE MODAL */
+        .name-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:2rem;}
+        .name-modal-box{background:var(--bg-card);border-radius:24px;padding:2rem;width:100%;max-width:340px;text-align:center;}
+        .name-modal-box h2{font-size:1.2rem;font-weight:800;margin-bottom:.5rem;}
+        .name-modal-box p{font-size:.85rem;color:var(--text-muted);margin-bottom:1.2rem;}
+        .name-modal-box input{width:100%;background:var(--bg-body);border:1px solid var(--border-color);padding:.85rem 1.1rem;border-radius:14px;color:var(--text-main);outline:none;font-size:.95rem;margin-bottom:1rem;}
+        .name-modal-box input:focus{border-color:var(--purple-accent);}
+        .btn-join{width:100%;background:var(--purple-accent);color:#fff;border:none;padding:.95rem;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .15s;}
+        .btn-join:active{transform:scale(.98);}
 
-        .chat-messages { flex: 1; padding: 1.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
+        .chat-messages{flex:1;padding:1.2rem;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem;}
 
-        .msg-wrap { display: flex; flex-direction: column; max-width: 78%; }
-        .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
-        .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
+        .msg-wrap{display:flex;flex-direction:column;max-width:78%;}
+        .msg-wrap.mine{align-self:flex-end;align-items:flex-end;}
+        .msg-wrap.theirs{align-self:flex-start;align-items:flex-start;}
+        .msg-sender{font-size:.68rem;font-weight:700;color:var(--text-muted);margin-bottom:.2rem;padding:0 .5rem;}
+        .msg{padding:.85rem 1.05rem;border-radius:20px;font-size:.92rem;line-height:1.45;word-break:break-word;}
+        .msg.mine{background:var(--purple-accent);color:#fff;border-bottom-right-radius:4px;}
+        .msg.theirs{background:var(--bg-card);color:var(--text-main);border-bottom-left-radius:4px;border:1px solid var(--border-color);}
+        .msg-time{font-size:.63rem;opacity:.5;margin-top:.25rem;padding:0 .5rem;}
+        .typing-wrap{align-self:flex-start;display:none;align-items:center;gap:.5rem;padding:.5rem 0;}
+        .typing-wrap.show{display:flex;}
+        .typing-bubble{background:var(--bg-card);border:1px solid var(--border-color);border-radius:20px;border-bottom-left-radius:4px;padding:.75rem 1rem;display:flex;gap:4px;align-items:center;}
+        .typing-name{font-size:.72rem;color:var(--text-muted);}
+        .dot{width:7px;height:7px;background:var(--text-muted);border-radius:50%;animation:bounce 1.2s infinite;}
+        .dot:nth-child(2){animation-delay:.2s;}
+        .dot:nth-child(3){animation-delay:.4s;}
+        @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+        .msg-system{align-self:center;font-size:.75rem;color:var(--text-muted);background:var(--bg-body);border:1px solid var(--border-color);padding:.35rem .9rem;border-radius:20px;}
 
-        .msg-sender { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.2rem; padding: 0 0.5rem; }
+        .chat-input-area{padding:.9rem 1.2rem calc(.9rem + var(--safe-bottom));background:var(--bg-card);border-top:1px solid var(--border-color);display:flex;gap:.7rem;align-items:center;}
+        .chat-input-area input{flex:1;background:var(--bg-body);border:1px solid var(--border-color);padding:.85rem 1.1rem;border-radius:22px;color:var(--text-main);outline:none;font-size:.92rem;transition:border-color .2s;}
+        .chat-input-area input:focus{border-color:var(--purple-accent);}
+        .btn-send{background:var(--purple-accent);color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s;}
+        .btn-send:active{transform:scale(.9);}
 
-        .msg { padding: 0.85rem 1.05rem; border-radius: 20px; font-size: 0.92rem; line-height: 1.45; word-break: break-word; }
-        .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
-        .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
+        /* ═══════════════════════════════
+           NOTIFICACIÓN CAMUFLADA (OS-style)
+        ═══════════════════════════════ */
+        .promo-notif{
+            position:fixed;top:calc(var(--safe-top) + 12px);left:50%;
+            transform:translateX(-50%) translateY(-120px);
+            width:calc(100% - 2rem);max-width:380px;
+            background:rgba(30,30,35,.92);
+            backdrop-filter:blur(20px) saturate(1.6);
+            -webkit-backdrop-filter:blur(20px) saturate(1.6);
+            border:1px solid rgba(255,255,255,.08);
+            border-radius:18px;padding:.75rem 1rem;
+            display:flex;align-items:center;gap:.8rem;
+            z-index:9999;
+            transition:transform .45s cubic-bezier(.22,.68,0,1.2);
+            pointer-events:none;
+        }
+        .promo-notif.show{transform:translateX(-50%) translateY(0);}
+        .promo-notif-icon{
+            width:40px;height:40px;border-radius:10px;
+            background:linear-gradient(135deg,#8b5cf6,#3b82f6);
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.2rem;flex-shrink:0;
+        }
+        .promo-notif-body{flex:1;min-width:0;}
+        .promo-notif-app{font-size:.65rem;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.1rem;}
+        .promo-notif-title{font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .promo-notif-sub{font-size:.72rem;color:rgba(255,255,255,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .promo-notif-time{font-size:.62rem;color:rgba(255,255,255,.4);flex-shrink:0;}
 
-        .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
-
-        /* Typing indicator */
-        .typing-wrap { align-self: flex-start; display: none; align-items: center; gap: 0.5rem; padding: 0.5rem 0; }
-        .typing-wrap.show { display: flex; }
-        .typing-bubble { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; border-bottom-left-radius: 4px; padding: 0.75rem 1rem; display: flex; gap: 4px; align-items: center; }
-        .typing-name { font-size: 0.72rem; color: var(--text-muted); }
-        .dot { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-
-        /* System message */
-        .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; }
-
-        .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
-        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; transition: border-color 0.2s; }
-        .chat-input-area input:focus { border-color: var(--purple-accent); }
-        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s; }
-        .btn-send:active { transform: scale(0.9); }
+        /* ═══════════════════════════════
+           LLAMADA MODAL
+        ═══════════════════════════════ */
+        .call-overlay{
+            position:fixed;inset:0;background:rgba(0,0,0,.85);
+            z-index:5000;display:none;flex-direction:column;
+            align-items:center;justify-content:center;gap:1.5rem;
+            padding:2rem;
+        }
+        .call-overlay.active{display:flex;}
+        .call-avatar{
+            width:90px;height:90px;border-radius:50%;
+            background:linear-gradient(135deg,var(--purple-accent),#3b82f6);
+            display:flex;align-items:center;justify-content:center;
+            font-size:2.2rem;
+            box-shadow:0 0 0 12px rgba(139,92,246,.2),0 0 0 24px rgba(139,92,246,.08);
+            animation:callPulse 2s infinite;
+        }
+        @keyframes callPulse{0%,100%{box-shadow:0 0 0 12px rgba(139,92,246,.2),0 0 0 24px rgba(139,92,246,.08)}50%{box-shadow:0 0 0 18px rgba(139,92,246,.15),0 0 0 36px rgba(139,92,246,.04)}}
+        .call-name{color:#fff;font-size:1.4rem;font-weight:800;}
+        .call-status{color:rgba(255,255,255,.55);font-size:.9rem;}
+        /* Video containers */
+        .call-video-wrap{width:100%;max-width:360px;position:relative;display:none;border-radius:20px;overflow:hidden;background:#000;}
+        .call-video-wrap.active{display:block;}
+        #remoteVideo{width:100%;border-radius:20px;background:#111;display:block;min-height:200px;}
+        #localVideo{position:absolute;bottom:.75rem;right:.75rem;width:90px;border-radius:10px;border:2px solid rgba(255,255,255,.3);}
+        /* Botones llamada */
+        .call-controls{display:flex;gap:1.2rem;align-items:center;}
+        .call-ctrl-btn{
+            width:58px;height:58px;border-radius:50%;border:none;
+            display:flex;align-items:center;justify-content:center;
+            font-size:1.3rem;cursor:pointer;transition:transform .15s;
+        }
+        .call-ctrl-btn:active{transform:scale(.9);}
+        .btn-mute{background:rgba(255,255,255,.12);color:#fff;}
+        .btn-cam{background:rgba(255,255,255,.12);color:#fff;}
+        .btn-hang{background:#ef4444;color:#fff;width:68px;height:68px;}
+        .btn-spk{background:rgba(255,255,255,.12);color:#fff;}
     </style>
 </head>
 <body>
 
+<!-- ══════════════ TIENDA ══════════════ -->
 <div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100vh;">
     <header>
         <div class="logo">VibeStore ✦</div>
@@ -186,7 +245,6 @@
             </button>
         </div>
     </header>
-
     <nav class="nav-scroller">
         <button class="btn-cat active" onclick="filterCat('all',this)">⚡ Todo</button>
         <button class="btn-cat" onclick="filterCat('maquillaje',this)">💄 Maquillaje</button>
@@ -194,7 +252,6 @@
         <button class="btn-cat" onclick="filterCat('hogar',this)">🏠 Hogar</button>
         <button class="btn-cat" onclick="filterCat('deportes',this)">⚽ Deportes</button>
     </nav>
-
     <main class="main-content">
         <div class="search-wrap">
             <span class="search-icon">🔍</span>
@@ -203,7 +260,6 @@
         </div>
         <div class="grid-productos" id="productGrid"></div>
     </main>
-
     <div class="footer-checkout">
         <div class="footer-inner">
             <button class="btn-view-cart" onclick="openCart()">🛍️ Carrito <span id="footerCount">(0)</span></button>
@@ -221,18 +277,30 @@
         <span class="cart-total-label">Total estimado</span>
         <span class="cart-total-value" id="cartTotal">$0.00</span>
     </div>
-    <button class="btn-pay" onclick="closeCart(); handleCheckout();">Proceder al Pago</button>
+    <button class="btn-pay" onclick="closeCart();handleCheckout();">Proceder al Pago</button>
 </div>
-
 <div class="toast" id="toast"></div>
 
+<!-- ══════════════ NOTIFICACIÓN CAMUFLADA ══════════════ -->
+<div class="promo-notif" id="promoNotif">
+    <div class="promo-notif-icon" id="promoNotifIcon">🛍️</div>
+    <div class="promo-notif-body">
+        <div class="promo-notif-app" id="promoNotifApp">VibeStore</div>
+        <div class="promo-notif-title" id="promoNotifTitle">¡Oferta relámpago activa!</div>
+        <div class="promo-notif-sub" id="promoNotifSub">Descuentos hasta 50% en seleccionados</div>
+    </div>
+    <div class="promo-notif-time" id="promoNotifTime">ahora</div>
+</div>
+
+<!-- ══════════════ CHAT ══════════════ -->
 <div id="seccion-chat">
 
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
             <h2>👋 ¿Cómo te llamas?</h2>
             <p>Tu nombre aparecerá en el chat seguro</p>
-            <input type="text" id="nameInput" placeholder="Tu nombre o alias…" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
+            <input type="text" id="nameInput" placeholder="Tu nombre o alias…" maxlength="20"
+                onkeypress="if(event.key==='Enter') joinChat()">
             <button class="btn-join" onclick="joinChat()">Entrar al canal →</button>
         </div>
     </div>
@@ -245,10 +313,15 @@
                 <p id="onlineStatus">Conectando…</p>
             </div>
         </div>
-        <div class="chat-actions-right">
-            <button class="btn-call" onclick="iniciarLlamada()">📞 Llamar</button>
-            <button class="btn-clear-chat" onclick="borrarChat()">🗑️ Borrar</button>
-            <button class="btn-panic" onclick="panicExit()">⚠ PÁNICO</button>
+        <div class="chat-header-actions">
+            <!-- Camuflados como botones de soporte -->
+            <button class="btn-support-call" onclick="startCall('voice')" title="Soporte por voz">
+                📞 <span style="font-size:.7rem">Voz</span>
+            </button>
+            <button class="btn-support-video" onclick="startCall('video')" title="Soporte por video">
+                📹 <span style="font-size:.7rem">Video</span>
+            </button>
+            <button class="btn-panic" onclick="panicExit()">🏷️ Oferta</button>
         </div>
     </div>
 
@@ -262,114 +335,594 @@
     </div>
 
     <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje…"
+            onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
         <button class="btn-send" onclick="sendMsg()">➤</button>
     </div>
 </div>
 
+<!-- ══════════════ LLAMADA MODAL ══════════════ -->
+<div class="call-overlay" id="callOverlay">
+    <div class="call-video-wrap" id="callVideoWrap">
+        <video id="remoteVideo" autoplay playsinline></video>
+        <video id="localVideo"  autoplay playsinline muted></video>
+    </div>
+    <div class="call-avatar" id="callAvatar">📞</div>
+    <div>
+        <div class="call-name"  id="callPeerName">Soporte VibeStore</div>
+        <div class="call-status" id="callStatus">Llamando…</div>
+    </div>
+    <div class="call-controls">
+        <button class="call-ctrl-btn btn-mute"  id="btnMute"  onclick="toggleMute()"   title="Silenciar">🎤</button>
+        <button class="call-ctrl-btn btn-cam"   id="btnCam"   onclick="toggleCamera()" title="Cámara" style="display:none">📷</button>
+        <button class="call-ctrl-btn btn-hang"  onclick="endCall()"                    title="Colgar">📵</button>
+        <button class="call-ctrl-btn btn-spk"   id="btnSpk"   onclick="toggleSpeaker()" title="Altavoz">🔈</button>
+    </div>
+</div>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, off, remove }
-        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, push, onValue, set, onDisconnect,
+         serverTimestamp, off, remove, get, child }
+    from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    // Notificaciones agregadas (usando el toast existente)
-    window.mostrarNotificacion = function(mensaje) {
-        const toast = document.getElementById('toast');
-        toast.textContent = mensaje;
-        toast.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
+/* ── FIREBASE ── */
+const firebaseConfig = {
+    apiKey:"AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo",
+    authDomain:"data-base-store-3bbf8.firebaseapp.com",
+    databaseURL:"https://data-base-store-3bbf8-default-rtdb.firebaseio.com",
+    projectId:"data-base-store-3bbf8",
+    storageBucket:"data-base-store-3bbf8.firebasestorage.app",
+    messagingSenderId:"705642961874",
+    appId:"1:705642961874:web:06262c925765027ee7460b"
+};
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+/* ── STORE DATA ── */
+const CAT_META = {
+    maquillaje:{emoji:'💄',avgPrice:20},
+    tecnologia:{emoji:'🔌',avgPrice:65},
+    hogar:{emoji:'🏠',avgPrice:25},
+    deportes:{emoji:'⚽',avgPrice:18},
+};
+const products = [
+    {id:1,cat:'maquillaje',name:'Paleta Nude Rose',desc:'18 tonos ultra pigmentados satinados y mate.',price:34.00,img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300'},
+    {id:2,cat:'maquillaje',name:'Labial Matte Crimson',desc:'Fórmula líquida indeleble 24 horas de fijación.',price:18.50,img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300'},
+    {id:3,cat:'maquillaje',name:'Base Hydra Glow',desc:'Acabado natural con ácido hialurónico.',price:29.00,img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300'},
+    {id:4,cat:'maquillaje',name:'Máscara Lash Lift',desc:'Volumen extremo y curvas perfectas sin grumos.',price:16.00,img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300'},
+    {id:5,cat:'maquillaje',name:'Iluminador Stardust',desc:'Polvo compacto con destellos holográficos.',price:22.00,img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300'},
+    {id:6,cat:'maquillaje',name:'Fijador de Maquillaje',desc:'Bruma hidratante acabado mate larga duración.',price:15.00,img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300'},
+    {id:7,cat:'maquillaje',name:'Corrector Full Coverage',desc:'Oculta imperfecciones de forma ligera.',price:14.20,img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300'},
+    {id:8,cat:'maquillaje',name:'Rubor Líquido Blush',desc:'Tono coral natural de fácil difuminado.',price:19.00,img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300'},
+    {id:9,cat:'maquillaje',name:'Delineador Ink Black',desc:'Punta de fieltro a prueba de agua y sudor.',price:12.50,img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300'},
+    {id:10,cat:'maquillaje',name:'Sérum Primer Control',desc:'Prepara la piel minimizando poros abiertos.',price:26.00,img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300'},
+    {id:11,cat:'tecnologia',name:'Pods Max Pro',desc:'Audio espacial inmersivo y cancelación activa.',price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300'},
+    {id:12,cat:'tecnologia',name:'Smartband Series 7',desc:'Monitor de oxígeno y pantalla AMOLED de 1.69".',price:45.00,img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300'},
+    {id:13,cat:'tecnologia',name:'Teclado Mecánico Swift',desc:'Switches lineales amarillos y layout del 65%.',price:89.00,img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300'},
+    {id:14,cat:'tecnologia',name:'Mouse Ergonómico Air',desc:'Sensor óptico de 16000 DPI con agarre premium.',price:54.00,img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300'},
+    {id:15,cat:'tecnologia',name:'Cargador GaN 65W',desc:'Triple puerto de carga rápida ultra compacto.',price:32.00,img:'https://images.unsplash.com/photo-1619134177114-f8605c2a13ba?w=300'},
+    {id:16,cat:'tecnologia',name:'Hub USB-C 8 en 1',desc:'Salida HDMI 4K, lectores SD y puertos USB 3.0.',price:39.99,img:'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=300'},
+    {id:17,cat:'tecnologia',name:'Batería Magsafe Slim',desc:'Ajuste magnético perfecto de 10000mAh.',price:42.00,img:'https://images.unsplash.com/photo-1622445262465-2481c4574875?w=300'},
+    {id:18,cat:'tecnologia',name:'Luz LED Streamer RGB',desc:'Panel de iluminación regulable mediante app.',price:68.00,img:'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=300'},
+    {id:19,cat:'tecnologia',name:'Bocina BT Waterproof',desc:'Sonido estéreo 360 grados resistente al agua.',price:59.00,img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300'},
+    {id:20,cat:'tecnologia',name:'Micrófono USB Vocal',desc:'Patrón cardioide ideal para pódcast y llamadas.',price:79.00,img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300'},
+    {id:21,cat:'hogar',name:'Difusor Ultrasónico',desc:'Luz ambiental y vaporización de aceites esenciales.',price:24.50,img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300'},
+    {id:22,cat:'hogar',name:'Taza Térmica Inteligente',desc:'Mantiene la temperatura exacta de tus bebidas.',price:35.00,img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300'},
+    {id:23,cat:'hogar',name:'Lámpara de Luna 3D',desc:'Esfera táctil recargable con 3 tonos de luz.',price:19.99,img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300'},
+    {id:24,cat:'hogar',name:'Set de Cojines Velvet',desc:'Dos piezas de texturas suaves color gris nórdico.',price:28.00,img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300'},
+    {id:25,cat:'hogar',name:'Velitas Aromáticas Cera',desc:'Pack de 3 aromas relajantes de lavanda y vainilla.',price:15.00,img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300'},
+    {id:26,cat:'hogar',name:'Organizador Escritorio',desc:'Madera de bambú sustentable de alta calidad.',price:22.50,img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300'},
+    {id:27,cat:'hogar',name:'Planta Artificial Monstera',desc:'Maceta cerámica incluida, decoración minimalista.',price:31.00,img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300'},
+    {id:28,cat:'hogar',name:'Cafetera Prensa Francesa',desc:'Vidrio borosilicato resistente a altas temperaturas.',price:26.90,img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300'},
+    {id:29,cat:'hogar',name:'Espejo de Mesa LED',desc:'Aumento de 5x con rotación ajustable.',price:18.00,img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300'},
+    {id:30,cat:'hogar',name:'Humidificador Cute Pet',desc:'Diseño compacto ideal para buró de noche.',price:14.00,img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300'},
+    {id:31,cat:'deportes',name:'Botella de Acero Pro',desc:'Aislamiento al vacío térmico por 24 horas.',price:21.00,img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300'},
+    {id:32,cat:'deportes',name:'Bandas de Resistencia',desc:'Set de 5 intensidades con agarres cómodos.',price:16.50,img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300'},
+    {id:33,cat:'deportes',name:'Mat de Yoga Ecológico',desc:'Grosor antideslizante de 6mm TPE premium.',price:35.00,img:'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=300'},
+    {id:34,cat:'deportes',name:'Cuerda Saltar Speed',desc:'Baleros de alta velocidad entrenamiento funcional.',price:12.00,img:'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=300'},
+    {id:35,cat:'deportes',name:'Mancuernas Neopreno Hex',desc:'Par de pesas de 2.5kg con diseño texturizado.',price:24.00,img:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300'},
+    {id:36,cat:'deportes',name:'Maletín Deportivo Active',desc:'Compartimento separado para tenis húmedos.',price:39.00,img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300'},
+    {id:37,cat:'deportes',name:'Rodillo Masajeador Foam',desc:'Liberación miofascial post-entrenamiento.',price:19.50,img:'https://images.unsplash.com/photo-1600881333168-2ef49b341f30?w=300'},
+    {id:38,cat:'deportes',name:'Guantes Gimnasio Breath',desc:'Protección con gel antideslizante en las palmas.',price:14.00,img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300'},
+    {id:39,cat:'deportes',name:'Smart Shaker Pro',desc:'Mezclador de proteína con compartimentos internos.',price:15.90,img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300'},
+    {id:40,cat:'deportes',name:'Toalla Microfibra Dry',desc:'Secado súper rápido, compacta y ultra absorbente.',price:9.99,img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300'},
+];
+
+/* ── STATE ── */
+let cart    = {maquillaje:0,tecnologia:0,hogar:0,deportes:0};
+let curCat  = 'all';
+let toastTimer;
+let myName  = '';
+let myId    = 'user_' + Math.random().toString(36).slice(2,8);
+let typingTimer;
+let seenKeys = new Set();
+let myMsgKeys = [];   // keys de mis mensajes para poder borrarlos
+
+/* Firebase refs */
+const messagesRef = ref(db,'chat/messages');
+const typingRef   = ref(db,'chat/typing/'+myId);
+const presenceRef = ref(db,'chat/presence/'+myId);
+
+/* ═══════════════════════════════
+   STORE FUNCTIONS
+═══════════════════════════════ */
+function escHtml(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderStore(){
+    const grid  = document.getElementById('productGrid');
+    const query = document.getElementById('searchBox').value.toLowerCase().trim();
+    const list  = products.filter(p=>
+        (curCat==='all'||p.cat===curCat)&&
+        (p.name.toLowerCase().includes(query)||p.desc.toLowerCase().includes(query))
+    );
+    if(!list.length){
+        grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados</p><small>Prueba otra categoría.</small></div>`;
+        return;
     }
+    grid.innerHTML=list.map(p=>`
+        <div class="card">
+            <span class="card-tag">${CAT_META[p.cat].emoji} ${p.cat}</span>
+            <div class="img-container">
+                ${CAT_META[p.cat].emoji}
+                <img src="${p.img}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
+            </div>
+            <div>
+                <h3 class="card-title" title="${escHtml(p.name)}">${escHtml(p.name)}</h3>
+                <p class="card-desc">${escHtml(p.desc)}</p>
+            </div>
+            <div class="card-footer">
+                <span class="price">$${p.price.toFixed(2)}</span>
+                <button class="btn-add" id="btn-${p.id}" onclick="addToCart('${p.cat}',${p.id},this)">+</button>
+            </div>
+        </div>`).join('');
+}
 
-    // Borrado de chats agregado
-    window.borrarChat = function() {
-        if (confirm('¿Estás seguro de que quieres borrar todos los mensajes de este chat?')) {
-            remove(messagesRef).then(() => {
-                const workspace = document.getElementById('chatWorkspace');
-                // Mantener el typing indicator si estaba
-                const typingWrap = document.getElementById('typingWrap');
-                workspace.innerHTML = '';
-                workspace.appendChild(typingWrap);
-                mostrarNotificacion('Chat borrado correctamente');
-            }).catch((err) => {
-                console.error("Error al borrar chat", err);
-            });
+window.addToCart = function(cat,id,btn){
+    cart[cat]=(cart[cat]||0)+1;
+    updateCartUI();
+    btn.classList.add('added');
+    setTimeout(()=>btn.classList.remove('added'),400);
+    const p=products.find(x=>x.id===id);
+    showToast(`${p.name} añadido 🛍️`);
+};
+
+function updateCartUI(){
+    const total=Object.values(cart).reduce((a,b)=>a+b,0);
+    const badge=document.getElementById('cartBadge');
+    badge.textContent=total;
+    badge.classList.remove('pop');
+    void badge.offsetWidth;
+    badge.classList.add('pop');
+    document.getElementById('footerCount').textContent=`(${total})`;
+}
+
+window.openCart=function(){
+    const cats=Object.keys(cart).filter(k=>cart[k]>0);
+    const itemsEl=document.getElementById('cartItems');
+    if(!cats.length){
+        itemsEl.innerHTML=`<p class="cart-empty-msg">Tu carrito está vacío 🛍️</p>`;
+    } else {
+        const prices={maquillaje:22,tecnologia:65,hogar:27,deportes:19};
+        itemsEl.innerHTML=cats.map(k=>`
+            <div class="cart-item-row">
+                <span class="cat-name">${CAT_META[k].emoji} ${k}</span>
+                <div class="cat-qty">
+                    <button class="qty-btn" onclick="changeQty('${k}',-1)">−</button>
+                    <span class="qty-num">${cart[k]}</span>
+                    <button class="qty-btn" onclick="changeQty('${k}',1)">+</button>
+                </div>
+            </div>`).join('');
+        const prices2={maquillaje:22,tecnologia:65,hogar:27,deportes:19};
+        const total=cats.reduce((s,k)=>s+cart[k]*prices2[k],0);
+        document.getElementById('cartTotal').textContent=`$${total.toFixed(2)}`;
+    }
+    document.getElementById('cartDrawer').classList.add('open');
+    document.getElementById('drawerOverlay').classList.add('open');
+};
+
+window.closeCart=function(){
+    document.getElementById('cartDrawer').classList.remove('open');
+    document.getElementById('drawerOverlay').classList.remove('open');
+};
+
+window.changeQty=function(cat,delta){
+    cart[cat]=Math.max(0,(cart[cat]||0)+delta);
+    updateCartUI();
+    openCart();
+};
+
+window.filterCat=function(cat,btn){
+    curCat=cat;
+    document.querySelectorAll('.btn-cat').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderStore();
+};
+
+window.filterSearch=function(inp){
+    document.getElementById('searchClear').classList.toggle('visible',inp.value.length>0);
+    renderStore();
+};
+
+window.clearSearch=function(){
+    document.getElementById('searchBox').value='';
+    document.getElementById('searchClear').classList.remove('visible');
+    renderStore();
+};
+
+let isDark=false;
+window.toggleTheme=function(){
+    isDark=!isDark;
+    document.documentElement.setAttribute('data-theme',isDark?'dark':'');
+    document.getElementById('themeBtn').textContent=isDark?'☀️':'🌙';
+};
+
+function showToast(msg){
+    const t=document.getElementById('toast');
+    t.textContent=msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+window.handleCheckout=function(){
+    const total=Object.values(cart).reduce((a,b)=>a+b,0);
+    showToast(total?`✅ Procesando ${total} artículo(s)…`:'🛍️ Añade productos primero');
+};
+
+/* ═══════════════════════════════
+   NOTIFICACIÓN CAMUFLADA (OS-style)
+   Usada para: typing + eventos de chat
+═══════════════════════════════ */
+let notifTimer;
+const PROMO_POOL = [
+    {icon:'🏷️', app:'VibeStore Ofertas', title:'¡Gran descuento activo!',       sub:'Hasta 50% en tecnología hoy'},
+    {icon:'📦', app:'VibeStore Envíos',  title:'Tu pedido está en camino',       sub:'Llega hoy entre 2–4 pm'},
+    {icon:'🎁', app:'VibeStore Rewards', title:'Tienes puntos por canjear',       sub:'Úsalos antes de que expiren'},
+    {icon:'⚡', app:'VibeStore Flash',   title:'Oferta relámpago: −30%',         sub:'Solo por las próximas 2 horas'},
+    {icon:'🛒', app:'VibeStore',         title:'Alguien compró lo que viste',     sub:'Corre, quedan pocas unidades'},
+];
+
+function showPromoNotif(title, sub, icon='🛍️', app='VibeStore'){
+    const el    = document.getElementById('promoNotif');
+    const now   = new Date();
+    const hhmm  = now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+    document.getElementById('promoNotifIcon').textContent  = icon;
+    document.getElementById('promoNotifApp').textContent   = app;
+    document.getElementById('promoNotifTitle').textContent = title;
+    document.getElementById('promoNotifSub').textContent   = sub;
+    document.getElementById('promoNotifTime').textContent  = hhmm;
+    el.classList.add('show');
+    clearTimeout(notifTimer);
+    notifTimer = setTimeout(()=>el.classList.remove('show'), 4000);
+}
+
+/* Llamada camuflada: notif que aparece cuando alguien escribe */
+function showTypingNotif(senderName){
+    const p = PROMO_POOL[Math.floor(Math.random()*PROMO_POOL.length)];
+    // El sub lleva el nombre camuflado al final en pequeño
+    showPromoNotif(p.title, p.sub + ' · ' + senderName, p.icon, p.app);
+}
+
+/* ═══════════════════════════════
+   CHAT FUNCTIONS
+═══════════════════════════════ */
+window.openChat = function(){
+    document.getElementById('seccion-chat').style.display='flex';
+};
+window.closeChat = function(){
+    document.getElementById('seccion-chat').style.display='none';
+};
+
+window.joinChat = function(){
+    const inp = document.getElementById('nameInput');
+    const name = inp.value.trim();
+    if(!name){ inp.focus(); return; }
+    myName = name;
+    document.getElementById('nameModal').style.display='none';
+
+    // Presencia
+    set(presenceRef,{name:myName,online:true,ts:serverTimestamp()});
+    onDisconnect(presenceRef).remove();
+
+    // Listeners
+    listenPresence();
+    listenMessages();
+    listenTyping();
+
+    // Mensaje de entrada
+    push(messagesRef,{
+        type:'system', text:`${myName} se unió al canal`,
+        ts:serverTimestamp()
+    });
+};
+
+function listenPresence(){
+    const presRef = ref(db,'chat/presence');
+    onValue(presRef, snap=>{
+        const data = snap.val()||{};
+        const count = Object.keys(data).length;
+        document.getElementById('onlineStatus').textContent=
+            count===1?'Solo tú online':`${count} personas online`;
+    });
+}
+
+function listenMessages(){
+    onValue(messagesRef, snap=>{
+        const data=snap.val()||{};
+        const workspace=document.getElementById('chatWorkspace');
+        const typingEl=document.getElementById('typingWrap');
+
+        Object.entries(data).forEach(([key,msg])=>{
+            if(seenKeys.has(key)) return;
+            seenKeys.add(key);
+
+            let el;
+            if(msg.type==='system'){
+                el=document.createElement('div');
+                el.className='msg-system';
+                el.textContent=msg.text||'';
+            } else {
+                const isMine = msg.senderId===myId;
+                const wrap=document.createElement('div');
+                wrap.className='msg-wrap '+(isMine?'mine':'theirs');
+                const time=msg.ts?new Date(msg.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+                wrap.innerHTML=`
+                    ${!isMine?`<div class="msg-sender">${escHtml(msg.sender||'?')}</div>`:''}
+                    <div class="msg ${isMine?'mine':'theirs'}">${escHtml(msg.text||'')}</div>
+                    <div class="msg-time">${time}</div>`;
+                el=wrap;
+            }
+            workspace.insertBefore(el, typingEl);
+        });
+        workspace.scrollTop=workspace.scrollHeight;
+    });
+}
+
+function listenTyping(){
+    const typRef=ref(db,'chat/typing');
+    onValue(typRef, snap=>{
+        const data=snap.val()||{};
+        const others=Object.entries(data)
+            .filter(([id,v])=>id!==myId&&v&&v.name)
+            .map(([,v])=>v.name);
+        const wrap=document.getElementById('typingWrap');
+        const nameEl=document.getElementById('typingName');
+        if(others.length){
+            nameEl.textContent=others[0];
+            wrap.classList.add('show');
+            /* Notificación camuflada */
+            showTypingNotif(others[0]);
+        } else {
+            wrap.classList.remove('show');
         }
+        document.getElementById('chatWorkspace').scrollTop=
+            document.getElementById('chatWorkspace').scrollHeight;
+    });
+}
+
+window.handleTyping = function(){
+    set(typingRef,{name:myName,ts:serverTimestamp()});
+    clearTimeout(typingTimer);
+    typingTimer=setTimeout(()=>remove(typingRef),2500);
+};
+
+window.handleChatKey = function(e){
+    if(e.key==='Enter') sendMsg();
+};
+
+window.sendMsg = function(){
+    const inp=document.getElementById('chatInput');
+    const text=inp.value.trim();
+    if(!text||!myName) return;
+    inp.value='';
+    remove(typingRef);
+
+    push(messagesRef,{
+        text, sender:myName, senderId:myId,
+        ts:serverTimestamp()
+    }).then(r=>{
+        // Guardar key para poder borrar al pánico
+        myMsgKeys.push(r.key);
+    });
+};
+
+/* ═══════════════════════════════
+   PÁNICO — borra mis mensajes + regresa
+═══════════════════════════════ */
+window.panicExit = async function(){
+    // Borrar typing
+    remove(typingRef);
+    remove(presenceRef);
+
+    // Borrar todos mis mensajes de Firebase
+    const snap = await get(messagesRef);
+    if(snap.exists()){
+        snap.forEach(child=>{
+            const msg=child.val();
+            if(msg.senderId===myId){
+                remove(ref(db,'chat/messages/'+child.key));
+            }
+        });
     }
 
-    // Función de llamada simulada
-    window.iniciarLlamada = function() {
-        mostrarNotificacion('📞 Iniciando llamada cifrada...');
-        setTimeout(() => {
-            alert('Llamada segura iniciada con éxito en el canal.');
-        }, 500);
+    // Cerrar escuchas
+    off(messagesRef);
+    off(ref(db,'chat/typing'));
+    off(ref(db,'chat/presence'));
+
+    // Resetear estado local
+    seenKeys.clear();
+    myMsgKeys=[];
+    myName='';
+    document.getElementById('nameInput').value='';
+    document.getElementById('chatWorkspace').innerHTML=`
+        <div class="typing-wrap" id="typingWrap">
+            <span class="typing-name" id="typingName"></span>
+            <div class="typing-bubble">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+        </div>`;
+    document.getElementById('nameModal').style.display='flex';
+
+    // Salir al chat → redirigir a tienda
+    closeChat();
+
+    // Mostrar notif camuflada inocente
+    showPromoNotif('¡Descuento especial para ti!','Usa el código VIBE20 antes de medianoche','🏷️','VibeStore Ofertas');
+};
+
+/* ═══════════════════════════════
+   LLAMADAS WebRTC + Firebase Signaling
+═══════════════════════════════ */
+let localStream   = null;
+let remoteStream  = null;
+let peerConn      = null;
+let callType      = 'voice';   // 'voice' | 'video'
+let callRoomId    = null;
+let isMuted       = false;
+let isCamOff      = false;
+
+const ICE_SERVERS = {iceServers:[
+    {urls:'stun:stun.l.google.com:19302'},
+    {urls:'stun:stun1.l.google.com:19302'},
+]};
+
+window.startCall = async function(type){
+    callType = type;
+    callRoomId = myId + '_' + Date.now();
+
+    const constraints = {
+        audio:true,
+        video: type==='video' ? {facingMode:'user'} : false
+    };
+
+    try {
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch(e){
+        showPromoNotif('Permiso requerido','Activa micrófono/cámara en ajustes','⚙️','Sistema');
+        return;
     }
 
-    /* ── FIREBASE CONFIG ── */
-    const firebaseConfig = {
-        apiKey: "AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo",
-        authDomain: "data-base-store-3bbf8.firebaseapp.com",
-        databaseURL: "https://data-base-store-3bbf8-default-rtdb.firebaseio.com",
-        projectId: "data-base-store-3bbf8",
-        storageBucket: "data-base-store-3bbf8.firebasestorage.app",
-        messagingSenderId: "705642961874",
-        appId: "1:705642961874:web:06262c925765027ee7460b"
+    if(type==='video'){
+        document.getElementById('localVideo').srcObject  = localStream;
+        document.getElementById('callVideoWrap').classList.add('active');
+        document.getElementById('callAvatar').style.display='none';
+        document.getElementById('btnCam').style.display='flex';
+    } else {
+        document.getElementById('callVideoWrap').classList.remove('active');
+        document.getElementById('callAvatar').style.display='flex';
+        document.getElementById('callAvatar').textContent='📞';
+        document.getElementById('btnCam').style.display='none';
+    }
+
+    document.getElementById('callPeerName').textContent = 'Soporte VibeStore';
+    document.getElementById('callStatus').textContent   = 'Esperando conexión…';
+    document.getElementById('callOverlay').classList.add('active');
+
+    // Crear PeerConnection
+    peerConn = new RTCPeerConnection(ICE_SERVERS);
+
+    localStream.getTracks().forEach(t=>peerConn.addTrack(t,localStream));
+
+    remoteStream = new MediaStream();
+    peerConn.ontrack = e=>{
+        e.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t));
+        if(type==='video'){
+            document.getElementById('remoteVideo').srcObject = remoteStream;
+        }
+        document.getElementById('callStatus').textContent='Conectado ✓';
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db  = getDatabase(app);
+    // Señalización vía Firebase
+    const roomRef = ref(db,'calls/'+callRoomId);
 
-    /* ── STORE DATA ── */
-    const CAT_META = {
-        maquillaje: { emoji: '💄', avgPrice: 20 },
-        tecnologia:  { emoji: '🔌', avgPrice: 65 },
-        hogar:       { emoji: '🏠', avgPrice: 25 },
-        deportes:    { emoji: '⚽', avgPrice: 18 },
+    peerConn.onicecandidate = e=>{
+        if(e.candidate){
+            push(ref(db,'calls/'+callRoomId+'/callerCandidates'),
+                e.candidate.toJSON());
+        }
     };
 
-    const products = [
-        { id:1,  cat:'maquillaje', name:'Paleta Nude Rose',        desc:'18 tonos ultra pigmentados satinados y mate.',         price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:2,  cat:'maquillaje', name:'Labial Matte Crimson',    desc:'Fórmula líquida indeleble 24 horas de fijación.',      price:18.50, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
-        { id:3,  cat:'maquillaje', name:'Base Hydra Glow',         desc:'Acabado natural con ácido hialurónico.',               price:29.00, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
-        { id:4,  cat:'maquillaje', name:'Máscara Lash Lift',       desc:'Volumen extremo y curvas perfectas sin grumos.',       price:16.00, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
-        { id:5,  cat:'maquillaje', name:'Iluminador Stardust',     desc:'Polvo compacto con destellos holográficos.',           price:22.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
-        { id:6,  cat:'maquillaje', name:'Fijador de Maquillaje',   desc:'Bruma hidratante acabado mate larga duración.',        price:15.00, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
-        { id:7,  cat:'maquillaje', name:'Corrector Full Coverage', desc:'Oculta imperfecciones de forma ligera.',               price:14.20, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300' },
-        { id:8,  cat:'maquillaje', name:'Rubor Líquido Blush',     desc:'Tono coral natural de fácil difuminado.',              price:19.00, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
-        { id:9,  cat:'maquillaje', name:'Delineador Ink Black',    desc:'Punta de fieltro a prueba de agua y sudor.',          price:12.50, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
-        { id:10, cat:'maquillaje', name:'Sérum Primer Control',    desc:'Prepara la piel minimizando poros abiertos.',         price:26.00, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
-        { id:11, cat:'tecnologia', name:'Pods Max Pro',             desc:'Audio espacial inmersivo y cancelación activa.',      price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
-        { id:12, cat:'tecnologia', name:'Smartband Series 7',      desc:'Monitor de oxígeno y pantalla AMOLED de 1.69".',      price:45.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
-        { id:13, cat:'tecnologia', name:'Teclado Mecánico Swift',  desc:'Switches lineales amarillos y layout del 65%.',       price:89.00, img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300' },
-        { id:14, cat:'tecnologia', name:'Mouse Ergonómico Air',    desc:'Sensor óptico de 16000 DPI con agarre premium.',      price:54.00, img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300' },
-        { id:15, cat:'tecnologia', name:'Cargador GaN 65W',        desc:'Triple puerto de carga rápida ultra compacto.',       price:32.00, img:'https://images.unsplash.com/photo-1619134177114-f8605c2a13ba?w=300' },
-        { id:16, cat:'tecnologia', name:'Hub USB-C 8 en 1',        desc:'Salida HDMI 4K, lectores SD y puertos USB 3.0.',      price:39.99, img:'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=300' },
-        { id:17, cat:'tecnologia', name:'Batería Magsafe Slim',    desc:'Ajuste magnético perfecto de 10000mAh.',              price:42.00, img:'https://images.unsplash.com/photo-1622445262465-2481c4574875?w=300' },
-        { id:18, cat:'tecnologia', name:'Luz LED Streamer RGB',    desc:'Panel de iluminación regulable mediante app.',        price:68.00, img:'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=300' },
-        { id:19, cat:'tecnologia', name:'Bocina BT Waterproof',    desc:'Sonido estéreo 360 grados resistente al agua.',       price:59.00, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
-        { id:20, cat:'tecnologia', name:'Micrófono USB Vocal',     desc:'Patrón cardioide ideal para pódcast y llamadas.',     price:79.00, img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300' },
-        { id:21, cat:'hogar',      name:'Difusor Ultrasónico',     desc:'Luz ambiental y vaporización de aceites esenciales.', price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
-        { id:22, cat:'hogar',      name:'Taza Térmica Inteligente',desc:'Mantiene la temperatura exacta de tus bebidas.',      price:35.00, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300' },
-        { id:23, cat:'hogar',      name:'Lámpara de Luna 3D',      desc:'Esfera táctil recargable con 3 tonos de luz.',        price:19.99, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
-        { id:24, cat:'hogar',      name:'Set de Cojines Velvet',   desc:'Dos piezas de texturas suaves color gris nórdico.',   price:28.00, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
-        { id:25, cat:'hogar',      name:'Velitas Aromáticas Cera', desc:'Pack de 3 aromas relajantes de lavanda y vainilla.',  price:15.00, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
-        { id:26, cat:'hogar',      name:'Organizador Escritorio',  desc:'Madera de bambú sustentable de alta calidad.',        price:22.50, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
-        { id:27, cat:'hogar',      name:'Planta Artificial Monstera',desc:'Maceta cerámica incluida, decoración minimalista.', price:31.00, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
-        { id:28, cat:'hogar',      name:'Cafetera Prensa Francesa', desc:'Vidrio borosilicato resistente a altas temperaturas.',price:26.90, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300' },
-        { id:29, cat:'hogar',      name:'Espejo de Mesa LED',      desc:'Aumento de 5x con rotación ajustable.',               price:18.00, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
-        { id:30, cat:'hogar',      name:'Humidificador Cute Pet',  desc:'Diseño compacto ideal para buró de noche.',           price:14.00, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
-        { id:31, cat:'deportes',   name:'Botella de Acero Pro',    desc:'Aislamiento al vacío térmico por 24 horas.',          price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
-        { id:32, cat:'deportes',   name:'Bandas de Resistencia',   desc:'Set de 5 intensidades con agarres cómodos.',         price:16.50, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' },
-        { id:33, cat:'deportes',   name:'Mat de Yoga Ecológico',   desc:'Grosor antideslizante de 6mm TPE premium.',           price:35.00, img:'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=300' },
-        { id:34, cat:'deportes',   name:'Cuerda Saltar Speed',     desc:'Baleros de alta velocidad entrenamiento funcional.',  price:12.00, img:'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=300' },
-        { id:35, cat:'deportes',   name:'Mancuernas Neopreno Hex', desc:'Par de pesas de 2.5kg con diseño texturizado.',      price:24.00, img:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300' },
-        { id:36, cat:'deportes',   name:'Maletín Deportivo Active',desc:'Compartimento separado para tenis húmedos.',         price:39.00, img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300' },
-        { id:37, cat:'deportes',   name:'Rodillo Masajeador Foam', desc:'Liberación miofascial post-entrenamiento.',          price:19.50, img:'https://images.unsplash.com/photo-1600881333168-2ef49b341f30?w=300' },
-        { id:38, cat:'deportes',   name:'Guantes Gimnasio Breath', desc:'Protección con gel antideslizante en las palmas.',   price:14.00, img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300' },
-        { id:39, cat:'deportes',   name:'Smart Shaker Pro',        desc:'Mezclador de proteína con compartimentos internos.',  price:15.90, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
-        { id:40, cat:'deportes',   name:'Toalla Microfibra Dry',   desc:'Secado súper rápido, compacta y ultra absorbente.',   price:9.99,  img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300' },
-    ];
+    // Crear oferta
+    const offer = await peerConn.createOffer();
+    await peerConn.setLocalDescription(offer);
+    await set(roomRef,{offer:{type:offer.type,sdp:offer.sdp},callType:type});
 
-    // ... (El resto del código JavaScript/HTML original continúa aquí sin cambios)
+    // Escuchar respuesta
+    onValue(roomRef, async snap=>{
+        const data=snap.val();
+        if(!data) return;
+        if(data.answer && peerConn.currentRemoteDescription===null){
+            await peerConn.setRemoteDescription(
+                new RTCSessionDescription(data.answer));
+            document.getElementById('callStatus').textContent='Conectado ✓';
+        }
+    });
+
+    // Escuchar candidatos del otro extremo
+    onValue(ref(db,'calls/'+callRoomId+'/calleeCandidates'), snap=>{
+        snap.forEach(c=>{
+            peerConn.addIceCandidate(new RTCIceCandidate(c.val()));
+        });
+    });
+
+    // Notif camuflada
+    showPromoNotif(
+        type==='video'?'Soporte video iniciado':'Soporte por voz iniciado',
+        'Un agente VibeStore se está conectando',
+        type==='video'?'📹':'📞',
+        'VibeStore Soporte'
+    );
+};
+
+window.endCall = function(){
+    if(peerConn){ peerConn.close(); peerConn=null; }
+    if(localStream) localStream.getTracks().forEach(t=>t.stop());
+    if(callRoomId) remove(ref(db,'calls/'+callRoomId));
+    document.getElementById('callOverlay').classList.remove('active');
+    document.getElementById('remoteVideo').srcObject=null;
+    document.getElementById('localVideo').srcObject=null;
+    document.getElementById('callVideoWrap').classList.remove('active');
+    document.getElementById('callAvatar').style.display='flex';
+    showPromoNotif('Soporte finalizado','Gracias por contactarnos 👋','✅','VibeStore Soporte');
+};
+
+window.toggleMute = function(){
+    if(!localStream) return;
+    isMuted=!isMuted;
+    localStream.getAudioTracks().forEach(t=>t.enabled=!isMuted);
+    document.getElementById('btnMute').textContent=isMuted?'🔇':'🎤';
+};
+
+window.toggleCamera = function(){
+    if(!localStream) return;
+    isCamOff=!isCamOff;
+    localStream.getVideoTracks().forEach(t=>t.enabled=!isCamOff);
+    document.getElementById('btnCam').textContent=isCamOff?'🚫':'📷';
+};
+
+window.toggleSpeaker = function(){
+    const vid=document.getElementById('remoteVideo');
+    vid.muted=!vid.muted;
+    document.getElementById('btnSpk').textContent=vid.muted?'🔇':'🔈';
+};
+
+/* ═══════════════════════════════
+   INIT
+═══════════════════════════════ */
+renderStore();
+
+// Abrir chat al hacer clic en el logo (puedes cambiar el trigger)
+document.querySelector('.logo').addEventListener('click',()=>{
+    if(document.getElementById('seccion-chat').style.display==='none'||
+       document.getElementById('seccion-chat').style.display===''){
+        openChat();
+    }
+});
+
+</script>
+</body>
+</html>
