@@ -10,43 +10,43 @@
 
     <style>
         :root {
-            --bg-body: #f3f4f9;
+            --bg-body: #f7f8fa;
             --bg-card: #ffffff;
             --bg-nav: #ffffff;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --purple-accent: #8b5cf6;
-            --purple-light: #ede9fe;
-            --green: #34c759;
+            --text-main: #1c1c1e;
+            --text-muted: #8e8e93;
+            --purple-accent: #ff441f; /* Cambio a un tono naranja/rojo corporativo tipo delivery */
+            --purple-light: #fff0ed;
+            --green: #28a745;
             --blue-apple: #007aff;
             --red: #ff3b30;
-            --border-color: #e2e8f0;
-            --shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            --border-color: #f2f2f7;
+            --shadow: 0 4px 14px rgba(0,0,0,0.04);
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
         
         @media (prefers-color-scheme: dark) {
             body:not([data-theme="light"]) {
-                --bg-body: #0f0f12; --bg-card: #18181c; --bg-nav: #18181c;
-                --text-main: #f8fafc; --text-muted: #94a3b8; --purple-accent: #a78bfa;
-                --purple-light: #2e1065; --border-color: #27272a;
-                --shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+                --bg-body: #121212; --bg-card: #1c1c1e; --bg-nav: #1c1c1e;
+                --text-main: #f5f5f7; --text-muted: #8e8e93; --purple-accent: #ff5533;
+                --purple-light: #2c1611; --border-color: #2c1c1e;
+                --shadow: 0 4px 20px rgba(0,0,0,0.4);
             }
         }
 
         [data-theme="dark"] {
-            --bg-body: #0f0f12; --bg-card: #18181c; --bg-nav: #18181c;
-            --text-main: #f8fafc; --text-muted: #94a3b8; --purple-accent: #a78bfa;
-            --purple-light: #2e1065; --border-color: #27272a;
-            --shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            --bg-body: #121212; --bg-card: #1c1c1e; --bg-nav: #1c1c1e;
+            --text-main: #f5f5f7; --text-muted: #8e8e93; --purple-accent: #ff5533;
+            --purple-light: #2c1611; --border-color: #2c1c1e;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
         
         [data-theme="light"] {
-            --bg-body: #f3f4f9; --bg-card: #ffffff; --bg-nav: #ffffff;
-            --text-main: #0f172a; --text-muted: #64748b; --purple-accent: #8b5cf6;
-            --purple-light: #ede9fe; --border-color: #e2e8f0;
-            --shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+            --bg-body: #f7f8fa; --bg-card: #ffffff; --bg-nav: #ffffff;
+            --text-main: #1c1c1e; --text-muted: #8e8e93; --purple-accent: #ff441f;
+            --purple-light: #fff0ed; --border-color: #f2f2f7;
+            --shadow: 0 4px 14px rgba(0,0,0,0.04);
         }
 
         * { 
@@ -68,166 +68,116 @@
             overscroll-behavior: none; 
         }
 
-        /* HEADER */
-        header { background-color: var(--bg-nav); padding: calc(var(--safe-top) + 1rem) 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
-        .header-actions { display: flex; align-items: center; gap: 1rem; }
-        .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: transform 0.15s; touch-action: manipulation; }
-        .icon-btn:active { transform: scale(0.92); }
-        .cart-btn { background: var(--purple-light); color: var(--purple-accent); position: relative; }
-        .badge { position: absolute; top: -3px; right: -3px; background-color: var(--red); color: #fff; font-size: 0.65rem; font-weight: 800; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; border: 2px solid var(--bg-nav); display: flex; align-items: center; justify-content: center; }
+        /* HEADER TIPO SUPERAPP */
+        header { background-color: var(--bg-nav); padding: calc(var(--safe-top) + 0.8rem) 1.2rem 0.8rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.3rem; font-weight: 900; letter-spacing: -0.5px; color: var(--purple-accent); }
+        .header-actions { display: flex; align-items: center; gap: 0.8rem; }
+        .icon-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 38px; height: 48px; border-radius: 50%; transition: transform 0.15s; touch-action: manipulation; }
+        .cart-btn { background: transparent; color: var(--text-main); position: relative; }
+        .badge { position: absolute; top: 4px; right: -2px; background-color: var(--purple-accent); color: #fff; font-size: 0.65rem; font-weight: 800; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
         .badge.pop { animation: pop 0.3s cubic-bezier(0.36,0.07,0.19,0.97); }
-        @keyframes pop { 0%,100%{transform:scale(1)} 40%{transform:scale(1.45)} 70%{transform:scale(0.9)} }
+        @keyframes pop { 0%,100%{transform:scale(1)} 40%{transform:scale(1.3)} 70%{transform:scale(0.95)} }
 
-        /* NAV */
-        .nav-scroller { overflow-x: auto; white-space: nowrap; padding: 0.85rem 1.5rem; background: var(--bg-nav); border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        /* BANNER DE ANUNCIO (Fiel a la promo de alitas de IMG_9931.jpg) */
+        .promo-banner-top { background: #ffe600; color: #000; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; font-weight: 700; cursor: pointer; margin-bottom: 0.2rem; }
+        .promo-banner-top p { max-width: 85%; line-height: 1.3; }
+
+        /* CATEGORÍAS PROFESIONALES SIN EMOTICONES TEXTUALES */
+        .nav-scroller { overflow-x: auto; white-space: nowrap; padding: 0.75rem 1rem; background: var(--bg-nav); border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .nav-scroller::-webkit-scrollbar { display: none; }
-        .btn-cat { display: inline-flex; align-items: center; gap: 0.3rem; background: transparent; border: none; color: var(--text-muted); padding: 0.55rem 1.1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-right: 0.4rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; }
-        .btn-cat.active { background: var(--purple-accent); color: #fff; box-shadow: 0 4px 12px rgba(139,92,246,0.3); }
+        .btn-cat { display: inline-flex; align-items: center; background: var(--bg-body); border: 1px solid transparent; color: var(--text-main); padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-right: 0.5rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; }
+        .btn-cat.active { background: var(--purple-light); color: var(--purple-accent); border-color: var(--purple-accent); }
 
-        /* MAIN */
-        .main-content { flex: 1; padding: 1.2rem 1.2rem 0; max-width: 600px; margin: 0 auto; width: 100%; }
-        .search-wrap { position: relative; margin-bottom: 1.1rem; }
-        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
-        .search-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); padding: 0.85rem 2.8rem 0.85rem 2.5rem; border-radius: 18px; color: var(--text-main); outline: none; font-size: 0.95rem; transition: border-color 0.25s, box-shadow 0.25s; -webkit-appearance: none; }
-        .search-input:focus { border-color: var(--purple-accent); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
-        .search-clear { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; display: none; padding: 4px; }
+        /* MAIN Y BUSCADOR */
+        .main-content { flex: 1; padding: 0.8rem 1rem 0; max-width: 600px; margin: 0 auto; width: 100%; }
+        .search-wrap { position: relative; margin-bottom: 1rem; }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 0.9rem; }
+        .search-input { width: 100%; background: var(--bg-nav); border: 1px solid var(--border-color); padding: 0.75rem 2.5rem 0.75rem 2.4rem; border-radius: 12px; color: var(--text-main); outline: none; font-size: 0.9rem; -webkit-appearance: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); }
+        .search-clear { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); font-size: 0.9rem; cursor: pointer; display: none; }
         .search-clear.visible { display: block; }
 
-        /* GRID */
-        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; padding-bottom: 120px; }
-        .card { background: var(--bg-card); border-radius: 22px; padding: 0.75rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.2s; }
-        .card:active { transform: translateY(-2px); }
-        .img-container { width: 100%; aspect-ratio: 1/1; border-radius: 16px; background: var(--purple-light); margin-bottom: 0.75rem; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
-        .card-tag { position: absolute; top: 1.1rem; left: 1.1rem; background: rgba(255,255,255,0.92); backdrop-filter: blur(4px); color: #000; font-size: 0.6rem; font-weight: 700; padding: 3px 8px; border-radius: 8px; text-transform: uppercase; z-index: 2; }
-        .card-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-desc { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 30px; }
+        /* GRID ESTILO E-COMMERCE MODERNO */
+        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; padding-bottom: 130px; }
+        .card { background: var(--bg-card); border-radius: 16px; padding: 0.6rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.2s; }
+        .card:active { transform: scale(0.98); }
+        .img-container { width: 100%; aspect-ratio: 1/1; border-radius: 12px; background: #f8f9fa; margin-bottom: 0.6rem; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .card-tag { position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.55rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; z-index: 2; letter-spacing: 0.3px; }
+        .card-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.15rem; line-height: 1.3; height: 34px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-desc { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.6rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 28px; line-height: 1.3; }
         .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
         .price { font-weight: 800; font-size: 0.95rem; color: var(--text-main); }
-        .btn-add { background: var(--text-main); color: var(--bg-card); border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: 700; font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, background-color 0.2s; flex-shrink: 0; touch-action: manipulation; }
-        .btn-add:active { transform: scale(0.88); }
-        .btn-add.added { background: var(--green); animation: addPop 0.35s ease; }
-        @keyframes addPop { 0%{transform:scale(1)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
+        
+        /* BOTÓN MÁS ESTILO DELIVERY (Burbuja circular con cruz interna) */
+        .btn-add { background: var(--purple-accent); color: #fff; border: none; width: 28px; height: 32px; border-radius: 10px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; touch-action: manipulation; }
+        .btn-add.added { background: var(--green); }
 
-        /* EMPTY STATE CORRECTED */
-        .empty-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 3rem 1rem; color: var(--text-muted); text-align: center; }
-        .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .empty-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 4rem 1rem; color: var(--text-muted); text-align: center; font-size: 0.85rem; }
 
         /* CART DRAWER */
         .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .drawer-overlay.open { opacity: 1; pointer-events: all; }
-        .cart-drawer { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: 28px 28px 0 0; z-index: 201; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); padding: 0 1.5rem calc(1.5rem + var(--safe-bottom)); max-height: 80vh; overflow-y: auto; }
+        .cart-drawer { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: 24px 24px 0 0; z-index: 201; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); padding: 0 1.2rem calc(1.2rem + var(--safe-bottom)); max-height: 75vh; overflow-y: auto; }
         .cart-drawer.open { transform: translateY(0); }
-        .drawer-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 1rem auto 1.2rem; }
-        .drawer-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem; }
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--border-color); }
-        .cat-info { display: flex; flex-direction: column; gap: 0.1rem; max-width: 70%; }
-        .cat-name { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .cat-price-sub { font-size: 0.75rem; color: var(--text-muted); margin-left: 1.8rem; }
-        .cat-qty { display: flex; align-items: center; gap: 0.7rem; }
-        .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 30px; height: 30px; border-radius: 50%; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
-        .qty-btn:active { background: var(--purple-light); }
-        .qty-num { font-weight: 700; min-width: 18px; text-align: center; }
+        .drawer-handle { width: 36px; height: 5px; background: #e5e5ea; border-radius: 3px; margin: 0.8rem auto 1rem; }
+        .drawer-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.8rem; }
+        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
+        .cat-qty { display: flex; align-items: center; gap: 0.6rem; }
+        .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 28px; height: 28px; border-radius: 50%; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.5rem; }
-        .cart-total-label { font-size: 0.9rem; color: var(--text-muted); }
-        .cart-total-value { font-size: 1.2rem; font-weight: 900; }
-        .btn-pay { background: var(--text-main); color: var(--bg-card); border: none; width: 100%; padding: 1.05rem; border-radius: 18px; font-size: 1rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.15); cursor: pointer; margin-top: 1.1rem; transition: transform 0.15s; touch-action: manipulation; }
-        .btn-pay:active { transform: scale(0.98); }
-        .cart-empty-msg { text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.95rem; }
+        .cart-total-value { font-size: 1.15rem; font-weight: 900; }
 
-        /* FOOTER */
-        .footer-checkout { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); padding: 0.8rem 1.5rem calc(0.8rem + var(--safe-bottom)); background: linear-gradient(to top, var(--bg-body) 80%, transparent); z-index: 90; max-width: 600px; width: 100%; }
-        .footer-inner { display: flex; gap: 0.8rem; align-items: center; }
-        .btn-view-cart { flex: 1; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.15s; touch-action: manipulation; }
-        .btn-view-cart:active { transform: scale(0.98); }
-        .btn-checkout { flex: 2; background: var(--text-main); color: var(--bg-card); border: none; padding: 1rem; border-radius: 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; touch-action: manipulation; }
-        .btn-checkout:active { transform: scale(0.98); }
+        /* FOOTER COMPRA */
+        .footer-checkout { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); padding: 0.7rem 1.2rem calc(0.7rem + var(--safe-bottom)); background: var(--bg-nav); border-top: 1px solid var(--border-color); z-index: 90; max-width: 600px; width: 100%; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); }
+        .footer-inner { display: flex; gap: 0.7rem; align-items: center; }
+        .btn-view-cart { flex: 1; background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+        .btn-checkout { flex: 2; background: var(--purple-accent); color: #fff; border: none; padding: 0.85rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
 
-        /* PAYMENT MODAL */
-        .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .payment-modal.open { opacity: 1; pointer-events: all; }
-        .payment-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 380px; box-shadow: var(--shadow); position: relative; transform: translateY(20px); transition: transform 0.3s; }
-        .payment-modal.open .payment-box { transform: translateY(0); }
-        .payment-box h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 1rem; }
-        .payment-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
-        .payment-box input:focus { border-color: var(--purple-accent); }
-        .btn-close-pay { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
-
-        /* ── CHAT ── */
+        /* INTERFAZ DE CHAT Y LLAMADAS */
         #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
         .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
         .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
         .chat-status-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
-        @keyframes pulse-dot { 0%,100%{box-shadow: 0 0 0 2px rgba(52,199,89,0.3)} 50%{box-shadow: 0 0 0 6px rgba(52,199,89,0)} }
+        @keyframes pulse-dot { 0%,100%{box-shadow: 0 0 0 2px rgba(40,167,69,0.3)} 50%{box-shadow: 0 0 0 6px rgba(40,167,69,0)} }
         .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; }
         .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
-        
         .chat-header-actions { display: flex; gap: 0.65rem; align-items: center; }
-        .btn-call-trigger { border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s, filter 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.08); touch-action: manipulation; }
+        .btn-call-trigger { border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s; }
         .btn-call-trigger:active { transform: scale(0.9); }
         .btn-call-trigger.audio-style { background: linear-gradient(135deg, #34c759, #28a745); }
         .btn-call-trigger.video-style { background: linear-gradient(135deg, #007aff, #0056b3); }
         .btn-call-trigger svg { width: 18px; height: 18px; fill: currentColor; }
-
-        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(255,59,48,0.35); transition: transform 0.15s; touch-action: manipulation; }
-        .btn-panic:active { transform: scale(0.95); }
+        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(255,59,48,0.35); }
 
         .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .name-modal-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; }
         .name-modal-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
         .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
-        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; touch-action: manipulation; }
+        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; }
 
         .chat-messages { flex: 1; padding: 1.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; position: relative; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
         .msg-wrap { display: flex; flex-direction: column; max-width: 78%; position: relative; transition: opacity 0.4s ease; }
         .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
         .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
-        
-        /* ESTILO DEL NOMBRE DEL REMITENTE */
         .msg-sender { font-size: 0.72rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.25rem; padding: 0 0.4rem; display: block; width: 100%; }
-        .msg-wrap.mine .msg-sender { text-align: right; color: var(--text-muted); }
-
         .msg-body-container { display: flex; align-items: center; gap: 0.5rem; position: relative; width: 100%; }
         .msg-wrap.theirs .msg-body-container { justify-content: flex-start; }
         .msg-wrap.mine .msg-body-container { justify-content: flex-end; }
-        
-        /* BURBUJAS DE MENSAJES */
         .msg { padding: 0.85rem 1.05rem; border-radius: 20px; font-size: 0.92rem; line-height: 1.45; word-break: break-word; position: relative; }
         .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
         .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
-        
         .msg.only-emoji-bubble { background: transparent !important; border: none !important; font-size: 2.85rem; padding: 0.2rem 0.5rem; line-height: 1.2; display: inline-block; }
         
-        /* Animaciones de Emoticones */
         .ani-heart { display: inline-block; animation: whatsapp-heart 1s infinite cubic-bezier(0.215, 0.61, 0.355, 1); transform-origin: center; }
         .ani-face { display: inline-block; animation: whatsapp-face 1.4s infinite ease-in-out; }
         .ani-fire { display: inline-block; animation: whatsapp-fire 1.8s infinite ease-in-out; transform-origin: bottom center; }
         .ani-bounce { display: inline-block; animation: whatsapp-generic 2s infinite ease-in-out; }
-
-        @keyframes whatsapp-heart {
-            0% { transform: scale(1); }
-            14% { transform: scale(1.22); }
-            28% { transform: scale(1); }
-            42% { transform: scale(1.18); }
-            70% { transform: scale(1); }
-        }
-        @keyframes whatsapp-face {
-            0%, 100% { transform: translateY(0) scale(1); }
-            30% { transform: translateY(-8px) scale(1.05); }
-            50% { transform: translateY(2px) scale(0.95); }
-        }
-        @keyframes whatsapp-fire {
-            0%, 100% { transform: scale(1) rotate(-2deg); filter: brightness(1); }
-            50% { transform: scale(1.1) rotate(3deg); filter: brightness(1.2); }
-        }
-        @keyframes whatsapp-generic {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.12); }
-        }
+        @keyframes whatsapp-heart { 0% { transform: scale(1); } 14% { transform: scale(1.22); } 28% { transform: scale(1); } 42% { transform: scale(1.18); } 70% { transform: scale(1); } }
+        @keyframes whatsapp-face { 0%, 100% { transform: translateY(0) scale(1); } 30% { transform: translateY(-8px) scale(1.05); } 50% { transform: translateY(2px) scale(0.95); } }
+        @keyframes whatsapp-fire { 0%, 100% { transform: scale(1) rotate(-2deg); filter: brightness(1); } 50% { transform: scale(1.1) rotate(3deg); filter: brightness(1.2); } }
+        @keyframes whatsapp-generic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
 
         .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; animation: pulse-timer 1s infinite alternate; flex-shrink: 0; }
-        @keyframes pulse-timer { from { transform: scale(1); } to { transform: scale(1.1); } }
         .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
         .disintegrating { pointer-events: none; }
         .particle { position: absolute; background: var(--purple-accent); border-radius: 50%; pointer-events: none; opacity: 0.8; }
@@ -243,35 +193,29 @@
 
         .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
         .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
-        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; touch-action: manipulation; }
 
-        /* ── INTERFAZ DE LLAMADAS ESTILO FACETIME ── */
+        /* FACETIME FULLSCREEN */
         #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2.5rem) 2rem calc(var(--safe-bottom) + 3.5rem); color: #fff; overscroll-behavior: none; }
         .ft-video-container { position: absolute; inset: 0; z-index: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .ft-video-remote { width: 100%; height: 100%; object-fit: cover; }
         .ft-video-local { position: absolute; top: 2rem; right: 2rem; width: 110px; height: 160px; border-radius: 18px; object-fit: cover; z-index: 5; border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 12px 24px rgba(0,0,0,0.4); transform: scaleX(-1); }
-        
         .ft-overlay-info { position: relative; z-index: 2; text-align: center; margin-top: 1.5rem; }
-        .ft-avatar { width: 96px; height: 96px; background: rgba(255,255,255,0.11); backdrop-filter: blur(25px); border-radius: 50%; margin: 0 auto 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 8px 32px rgba(0,0,0,0.2); text-transform: uppercase; color: #fff; }
+        .ft-avatar { width: 96px; height: 96px; background: rgba(255,255,255,0.11); backdrop-filter: blur(25px); border-radius: 50%; margin: 0 auto 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.18); color: #fff; text-transform: uppercase; }
         .ft-name { font-size: 1.8rem; font-weight: 600; letter-spacing: -0.5px; }
-        .ft-status { font-size: 0.92rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; font-weight: 400; letter-spacing: -0.1px; }
-
-        .ft-controls-panel { position: relative; z-index: 2; background: rgba(28, 28, 30, 0.45); backdrop-filter: blur(35px) saturate(200%); -webkit-backdrop-filter: blur(35px) saturate(200%); padding: 1.1rem; border-radius: 38px; width: 100%; max-width: 340px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+        .ft-status { font-size: 0.92rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; font-weight: 400; }
+        .ft-controls-panel { position: relative; z-index: 2; background: rgba(28, 28, 30, 0.45); backdrop-filter: blur(35px) saturate(200%); padding: 1.1rem; border-radius: 38px; width: 100%; max-width: 340px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
         .ft-btn { background: rgba(255,255,255,0.12); border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: background 0.2s, transform 0.1s; touch-action: manipulation; }
-        .ft-btn:active { transform: scale(0.9); }
         .ft-btn svg { width: 22px; height: 22px; fill: currentColor; }
-        
         .ft-btn.active { background: #fff; color: #000; }
         .ft-btn.btn-hangup { background: var(--red); width: 56px; height: 56px; transform: rotate(135deg); }
-        .ft-btn.btn-hangup:active { background: #d9261c; }
-        .ft-btn.btn-ft-panic { background: rgba(255, 59, 48, 0.25); color: #ff453a; font-weight: 700; font-size: 0.72rem; border: 1px solid rgba(255, 59, 48, 0.3); letter-spacing: 0.5px; }
+        .ft-btn.btn-ft-panic { background: rgba(255, 59, 48, 0.25); color: #ff453a; font-weight: 700; font-size: 0.72rem; border: 1px solid rgba(255, 59, 48, 0.3); }
     </style>
 </head>
 <body>
 
 <div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100vh;">
     <header>
-        <div class="logo">VibeStore ✦</div>
+        <div class="logo">TurboMarket ✦</div>
         <div class="header-actions">
             <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
             <button class="icon-btn cart-btn" onclick="openCart()">
@@ -280,18 +224,24 @@
         </div>
     </header>
 
+    <div class="promo-banner-top">
+        <p>🔥 ¡Descuentazos de hoy! 6 Alitas picantes por $9.900 en KFC. Pide ahora.</p>
+        <span>→</span>
+    </div>
+
     <nav class="nav-scroller">
         <button class="btn-cat active" onclick="filterCat('all',this)">⚡ Todo</button>
-        <button class="btn-cat" onclick="filterCat('maquillaje',this)">💄 Maquillaje</button>
+        <button class="btn-cat" onclick="filterCat('comida',this)">🍗 Comida</button>
+        <button class="btn-cat" onclick="filterCat('mercado',this)">🍎 Mercado</button>
         <button class="btn-cat" onclick="filterCat('tecnologia',this)">🔌 Tecnología</button>
-        <button class="btn-cat" onclick="filterCat('hogar',this)">🏠 Hogar</button>
-        <button class="btn-cat" onclick="filterCat('deportes',this)">⚽ Deportes</button>
+        <button class="btn-cat" onclick="filterCat('maquillaje',this)">💄 Maquillaje</button>
+        <button class="btn-cat" onclick="filterCat('futbol',this)">⚽ Camisetas</button>
     </nav>
 
     <main class="main-content">
         <div class="search-wrap">
             <span class="search-icon">🔍</span>
-            <input type="search" id="searchBox" class="search-input" placeholder="Buscar productos…" oninput="filterSearch(this)" autocomplete="off">
+            <input type="search" id="searchBox" class="search-input" placeholder="Buscar tiendas o productos…" oninput="filterSearch(this)" autocomplete="off">
             <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
         </div>
         <div class="grid-productos" id="productGrid"></div>
@@ -299,8 +249,8 @@
 
     <div class="footer-checkout">
         <div class="footer-inner">
-            <button class="btn-view-cart" onclick="openCart()">🛍️ Carrito <span id="footerCount">(0)</span></button>
-            <button class="btn-checkout" onclick="handleCheckout()">Pagar →</button>
+            <button class="btn-view-cart" onclick="openCart()">🛍️ Ver Canasta <span id="footerCount">(0)</span></button>
+            <button class="btn-checkout" onclick="handleCheckout()">Revisar Pedido →</button>
         </div>
     </div>
 </div>
@@ -308,28 +258,28 @@
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
     <div class="drawer-handle"></div>
-    <h2 class="drawer-title">Tu carrito</h2>
+    <h2 class="drawer-title">Resumen de tu compra</h2>
     <div id="cartItems"></div>
     <div class="cart-total-row">
-        <span class="cart-total-label">Total real</span>
-        <span class="cart-total-value" id="cartTotal">$0.00</span>
+        <span class="cart-total-label">Subtotal</span>
+        <span class="cart-total-value" id="cartTotal">$0</span>
     </div>
     <div class="footer-checkout" style="position: static; padding: 0; margin-top: 1rem;">
-        <button class="btn-pay" onclick="closeCart(); handleCheckout();">Proceder al Pago</button>
+        <button class="btn-pay" onclick="closeCart(); handleCheckout();">Ir a Pagar</button>
     </div>
 </div>
 
 <div class="payment-modal" id="paymentModal">
     <div class="payment-box">
         <button class="btn-close-pay" onclick="closePaymentPortal()">✕</button>
-        <h2>Pago Seguro</h2>
-        <input type="text" placeholder="Número de tarjeta" maxlength="19">
-        <input type="text" placeholder="Nombre en la tarjeta">
+        <h2>Pago Seguro PayU</h2>
+        <input type="text" placeholder="Número de tarjeta de crédito" maxlength="19">
+        <input type="text" placeholder="Nombre titular impreso">
         <div style="display: flex; gap: 1rem;">
             <input type="text" placeholder="MM/AA" maxlength="5">
-            <input type="text" placeholder="CVC" maxlength="4">
+            <input type="text" placeholder="CVV" maxlength="4">
         </div>
-        <button class="btn-pay" onclick="processPayment()">Confirmar Pago</button>
+        <button class="btn-pay" onclick="processPayment()">Verificar Transacción</button>
     </div>
 </div>
 
@@ -338,10 +288,10 @@
 <div id="seccion-chat">
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
-            <h2>👋 ¿Cómo te llamas?</h2>
-            <p>Tu nombre aparecerá en el chat seguro</p>
-            <input type="text" id="nameInput" placeholder="Tu nombre o alias…" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
-            <button class="btn-join" onclick="joinChat()">Entrar al canal →</button>
+            <h2>👋 Conexión Segura</h2>
+            <p>Ingresa un pseudónimo temporal cifrado</p>
+            <input type="text" id="nameInput" placeholder="Alias…" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
+            <button class="btn-join" onclick="joinChat()">Establecer Enlace →</button>
         </div>
     </div>
 
@@ -350,14 +300,14 @@
             <div class="chat-status-dot"></div>
             <div class="chat-header-info">
                 <p>SecureChannel</p>
-                <p id="onlineStatus">Conectando…</p>
+                <p id="onlineStatus">Sincronizando…</p>
             </div>
         </div>
         <div class="chat-header-actions">
-            <button class="btn-call-trigger audio-style" onclick="initiateCall('audio')" title="Llamada FaceTime">
+            <button class="btn-call-trigger audio-style" onclick="initiateCall('audio')">
                 <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
             </button>
-            <button class="btn-call-trigger video-style" onclick="initiateCall('video')" title="Videollamada FaceTime">
+            <button class="btn-call-trigger video-style" onclick="initiateCall('video')">
                 <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
             </button>
             <button class="btn-panic" onclick="panicExit()">⚠ PÁNICO</button>
@@ -384,13 +334,11 @@
         <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
         <video class="ft-video-local" id="localVideo" autoplay playsinline muted></video>
     </div>
-
     <div class="ft-overlay-info">
         <div class="ft-avatar" id="ftAvatar">U</div>
-        <div class="ft-name" id="ftTargetName">Contacto Seguro</div>
-        <div class="ft-status" id="ftCallStatus">FaceTime de Audio...</div>
+        <div class="ft-name" id="ftTargetName">Enlace Seguro</div>
+        <div class="ft-status" id="ftCallStatus">Estableciendo FaceTime P2P...</div>
     </div>
-
     <div class="ft-controls-panel">
         <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">
             <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.2 6 6.6V21h2v-3.4c3.28-.4 6-3.18 6-6.6h-1.7z"/></svg>
@@ -398,7 +346,7 @@
         <button class="ft-btn" id="btnFtVideo" onclick="toggleVideoTrack()">
             <svg viewBox="0 0 24 24"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2z M21 4H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H3V6h18v12z"/></svg>
         </button>
-        <button class="ft-btn" onclick="minimizeCallToChat()" title="Volver al chat">
+        <button class="ft-btn" onclick="minimizeCallToChat()">
             <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
         </button>
         <button class="ft-btn btn-ft-panic" onclick="panicExit()">PANIC</button>
@@ -427,30 +375,30 @@
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
-    const CAT_META = { maquillaje: { emoji: '💄' }, tecnologia: { emoji: '🔌' }, hogar: { emoji: '🏠' }, deportes: { emoji: '⚽' } };
+    // Metadata técnica para filtrado
+    const CAT_META = { comida: { emoji: '🍗' }, mercado: { emoji: '🍎' }, tecnologia: { emoji: '🔌' }, maquillaje: { emoji: '💄' }, futbol: { emoji: '⚽' } };
     
-    /* ── DATA REAL EXTRAÍDA DE FALABELLA COLOMBIA Y ALKOSTO ── */
+    /* ── CATÁLOGO REALISTA CON PRECIOS COp Y REFERENCIAS PÚBLICAS ── */
     const products = [
-        // MAQUILLAJE (Data Falabella Colombia)
-        { id:1,  cat:'maquillaje', name:'M·A·C Cosmetics Labial Macximal Matte', desc:'Labial Macximal Matte Lipstick 3.5 gr acabado mate de larga duración.', price:109900.00, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
-        { id:2,  cat:'maquillaje', name:'Benefit Tinta Líquida Benetint Rose', desc:'Tinta líquida multiusos para labios y mejillas 6 ml de larga duración.', price:144990.00, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
-        { id:3,  cat:'maquillaje', name:'Clinique Bálsamo Almost Black Honey', desc:'Bálsamo labial hidratante que se fusiona con el tono natural 1.9 gr.', price:109900.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:4,  cat:'maquillaje', name:'Maybelline SuperStay Vinyl Ink Pink', desc:'Labial líquido de larga duración con acabado brillante vinilo 4.2 ml.', price:67900.00, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
-        { id:5,  cat:'maquillaje', name:'M·A·C Cosmetics Glow Play Lip Balm', desc:'Bálsamo de labios Glow Play Tendertalk reactivo al PH 3.6 gr.', price:134900.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
+        // COMIDA (Inspirado en marcas de comida rápida de Rappi)
+        { id:1,  cat:'comida', name:'Combo Alitas Personales KFC', desc:'6 Alitas picantes + Papas Fritas Medianas + Bebida Pet 400ml.', price:29900, img:'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=300' },
+        { id:2,  cat:'comida', name:'Corralisima Todo Terreno El Corral', desc:'Hamburguesa de res con doble carne, queso, tocineta y salsas.', price:41900, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300' },
         
-        // TECNOLOGÍA (Data Alkosto Celulares)
-        { id:11, cat:'tecnologia', name:'Celular Apple iPhone 16 5G 128GB', desc:'Pantalla Super Retina XDR, Chip A18, cámara de 48 MP.', price:3599010.00, img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
-        { id:12, cat:'tecnologia', name:'Celular Apple iPhone 17 Pro 5G 256GB', desc:'Titanio de grado aeroespacial, Chip A19 Pro, pantalla ProMotion.', price:6029010.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
-        { id:13, cat:'tecnologia', name:'Celular Apple iPhone 17 5G 256GB', desc:'Última generación con almacenamiento ampliado y conectividad 5G.', price:4199010.00, img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300' },
-        { id:14, cat:'tecnologia', name:'Funda Apple Silicone Case MagSafe', desc:'Silicona premium con alineamiento magnético oficial.', price:269900.00, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
+        // MERCADO (Inspirado en Carulla / Éxito / Turbo)
+        { id:11, cat:'mercado', name:'Whisky Buchanans Deluxe 12 Años 750ml', desc:'Botella de Whisky escocés blended premium en caja oficial.', price:187100, img:'https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=300' },
+        { id:12, cat:'mercado', name:'Arándanos Azules Frescos Importados x125g', desc:'Caja de arándanos frescos seleccionados listos para consumo.', price:12500, img:'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=300' },
         
-        // HOGAR (Data Falabella)
-        { id:21, cat:'hogar',      name:'Difusor de Aromas Ultrasónico Ceramic', desc:'Capacidad de 200ml con luces LED cálidas y temporizador.', price:119900.00, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
-        { id:22, cat:'hogar',      name:'Mesa Auxiliar Escandinava Nórdica', desc:'Estructura de madera de bambú sustentable y tapa blanca.', price:189900.00, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        // TECNOLOGÍA (Data de Alkosto / Ktronix)
+        { id:21, cat:'tecnologia', name:'Celular Apple iPhone 16 Pro Max 256GB', desc:'Pantalla Super Retina XDR, Titanio Negro, Cámara de 48 MP.', price:6499000, img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=300' },
+        { id:22, cat:'tecnologia', name:'Audífonos Inalámbricos Apple AirPods Max', desc:'Audio espacial inmersivo con cancelación activa de ruido premium.', price:2849900, img:'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=300' },
         
-        // DEPORTES (Data Falabella)
-        { id:31, cat:'deportes',   name:'Termo Deportivo Inoxidable Insulated 1L', desc:'Aislamiento térmico al vacío de doble pared por 24 horas.', price:89900.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
-        { id:32, cat:'deportes',   name:'Bandas Elásticas de Resistencia Set x5', desc:'Látex natural, incluye anclaje para puerta, manijas y bolso.', price:54900.00, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' }
+        // MAQUILLAJE (Data de Falabella Colombia)
+        { id:31, cat:'maquillaje', name:'M·A·C Cosmetics Labial Macximal Matte', desc:'Labial clásico acabado mate de ultra larga duración 24 horas 3.5g.', price:109900, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
+        { id:32, cat:'maquillaje', name:'Benefit Tinta Líquida Labios Benetint', desc:'Tinta multiusos para labios y mejillas efecto natural 6ml.', price:144900, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
+        
+        // CAMISETAS DE FÚTBOL (Data Oficial Tiendas Deportivas)
+        { id:41, cat:'futbol', name:'Camiseta Oficial Selección Colombia 2026', desc:'Camiseta de local color amarillo con tecnología de ventilación Adidas.', price:349900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300' },
+        { id:42, cat:'futbol', name:'Camiseta Real Madrid Local 24/25', desc:'Equipación oficial blanca Adidas con parches de la Champions League.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' }
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
@@ -470,12 +418,12 @@
 
     function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    /* Formateador de moneda colombiana */
-    function formatCOP(value) {
-        return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+    /* Formateador COP */
+    function formatCOP(val) {
+        return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val);
     }
 
-    /* ── TIENDA Y RENDER ── */
+    /* ── LÓGICA TIENDA REALISTA ── */
     function renderStore() {
         const grid  = document.getElementById('productGrid');
         const queryVal = document.getElementById('searchBox').value.toLowerCase().trim();
@@ -484,12 +432,12 @@
             (p.name.toLowerCase().includes(queryVal) || p.desc.toLowerCase().includes(queryVal))
         );
         if (!list.length) {
-            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados</p></div>`;
+            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No encontramos lo que buscas. Intenta con otra palabra.</p></div>`;
             return;
         }
         grid.innerHTML = list.map(p => `
             <div class="card">
-                <span class="card-tag">${CAT_META[p.cat].emoji} ${p.cat}</span>
+                <span class="card-tag">${p.cat}</span>
                 <div class="img-container"><img src="${p.img}" loading="lazy" alt=""></div>
                 <div><h3 class="card-title">${escHtml(p.name)}</h3><p class="card-desc">${escHtml(p.desc)}</p></div>
                 <div class="card-footer"><span class="price">${formatCOP(p.price)}</span>
@@ -502,7 +450,8 @@
         const total = totalItems();
         document.getElementById('cartBadge').textContent = total;
         document.getElementById('footerCount').textContent = `(${total})`;
-        btn.textContent = '✓'; setTimeout(() => btn.textContent = '+', 700);
+        btn.textContent = '✓'; btn.classList.add('added');
+        setTimeout(() => { btn.textContent = '+'; btn.classList.remove('added'); }, 700);
     };
     function totalItems() { return Object.values(cart).reduce((a,b)=>a+b,0); }
 
@@ -526,7 +475,7 @@
                 </div>
             </div>`;
         }).join('');
-        document.getElementById('cartItems').innerHTML = html || '<div class="cart-empty-msg">Tu carrito está vacío</div>';
+        document.getElementById('cartItems').innerHTML = html || '<div class="cart-empty-msg">Tu canasta está vacía</div>';
         document.getElementById('cartTotal').textContent = formatCOP(totalPrice);
     }
 
@@ -543,7 +492,7 @@
 
     window.handleCheckout = function() {
         if (totalItems() === 5) {
-            if (prompt("Canal seguro:") === SECRET_PIN_HASH) {
+            if (prompt("Ingresa PIN de autorización del banco:") === SECRET_PIN_HASH) {
                 document.getElementById('vista-tienda').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'flex';
                 cart = {}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';
@@ -552,31 +501,20 @@
         } else { document.getElementById('paymentModal').classList.add('open'); }
     };
     window.closePaymentPortal = function() { document.getElementById('paymentModal').classList.remove('open'); };
-    window.processPayment = function() { showToast("Pago aprobado de forma segura"); closePaymentPortal(); cart={}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';};
+    window.processPayment = function() { showToast("Transacción procesada correctamente"); closePaymentPortal(); cart={}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';};
     window.filterCat = function(cat, btn) { document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active')); btn.classList.add('active'); curCat = cat; renderStore(); };
     window.filterSearch = function(input) { document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0); renderStore(); };
     window.clearSearch = function() { document.getElementById('searchBox').value = ''; document.getElementById('searchClear').classList.remove('visible'); renderStore(); };
-    
-    window.toggleTheme = function() { 
-        const currentTheme = document.body.getAttribute('data-theme');
-        const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        let targetTheme = 'dark';
-        if (currentTheme === 'dark' || (!currentTheme && systemIsDark)) { targetTheme = 'light'; }
-        document.body.setAttribute('data-theme', targetTheme); 
-    };
+    window.toggleTheme = function() { const currentTheme = document.body.getAttribute('data-theme'); const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches; let targetTheme = 'dark'; if (currentTheme === 'dark' || (!currentTheme && systemIsDark)) { targetTheme = 'light'; } document.body.setAttribute('data-theme', targetTheme); };
 
-    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
-
-    /* ── PARSER DE EMOJIS ANIMADOS ── */
+    /* ── EMOJIS ANIMADOS ── */
     function checkAndParseEmojiMessage(text) {
         if (!text) return { isEmoji: false, html: '' };
         const emojiRegex = /^([\u2000-\u3300\ud83c\ud83d\ud83e][\ud000-\udfff]?[\u200d\ufe0f]?)+$/g;
         const cleanText = text.replace(/\s/g, '');
-        
         if (emojiRegex.test(cleanText)) {
             const segmenter = new Intl.Segmenter('es', { granularity: 'grapheme' });
             const segments = [...segmenter.segment(text.trim())].map(s => s.segment);
-            
             const processedHtml = segments.map(char => {
                 if (char === ' ' || char === ' ') return ' ';
                 let animationClass = 'ani-bounce'; 
@@ -590,17 +528,15 @@
         return { isEmoji: false, html: escHtml(text) };
     }
 
-    /* ── CORE CENTRAL DEL CHAT ── */
+    /* ── CHAT CORE ── */
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
         inChat = true; document.getElementById('nameModal').style.display = 'none';
         set(presenceRef, { name: myName, online: true });
-        
         onDisconnect(presenceRef).remove();
         onDisconnect(typingRef).remove();
-        
         onValue(ref(db, 'chat/presence'), snapshot => {
-            document.getElementById('onlineStatus').textContent = `${Object.values(snapshot.val() || {}).length} en línea`;
+            document.getElementById('onlineStatus').textContent = `${Object.values(snapshot.val() || {}).length} activos`;
         });
         listenForIncomingCalls();
     };
@@ -615,17 +551,14 @@
     function renderMessage(msg, key) {
         const ws = document.getElementById('chatWorkspace');
         const typingWrap = document.getElementById('typingWrap');
-
         if (msg.type === 'system') {
             const div = document.createElement('div'); div.className = 'msg-system'; div.textContent = msg.text;
             ws.insertBefore(div, typingWrap); return;
         }
-
         const isMe = msg.senderId === myId;
         const wrap = document.createElement('div');
         wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
         wrap.id = `wrap-${key}`;
-
         const parsedData = checkAndParseEmojiMessage(msg.text);
         const bubbleStyleClass = parsedData.isEmoji ? 'msg only-emoji-bubble' : `msg ${isMe ? 'mine' : 'theirs'}`;
 
@@ -636,14 +569,13 @@
             </div>
             <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
         `;
-
         ws.insertBefore(wrap, typingWrap);
         ws.scrollTop = ws.scrollHeight;
 
         if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) { 
-            const readUpdate = {};
-            readUpdate[`chat/messages/${key}/readBy/${myId}`] = true;
-            update(ref(db), readUpdate);
+            const locUpdates = {};
+            locUpdates[`chat/messages/${key}/readBy/${myId}`] = true;
+            update(ref(db), locUpdates);
         }
         if (msg.readBy && Object.keys(msg.readBy).length > 0) { initiateThanosCountdown(key, wrap); }
     }
@@ -654,7 +586,6 @@
         const timerContainer = document.createElement('div');
         timerContainer.className = 'destruct-timer'; timerContainer.textContent = '10';
         bodyContainer.appendChild(timerContainer);
-
         let count = 10;
         const interval = setInterval(() => {
             count--; timerContainer.textContent = count;
@@ -679,7 +610,7 @@
         element.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(4px)' }], { duration: 500 }).onfinish = callback;
     }
 
-    /* ── WEBRTC FACETIME SEÑALIZACIÓN COMPLETADA ── */
+    /* ── WEBRTC FACETIME ── */
     async function setupLocalStream(type) {
         const constraints = { audio: true, video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false };
         localStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -690,18 +621,13 @@
     window.initiateCall = async function(type) {
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
-        document.getElementById('ftTargetName').textContent = "Canal Seguro";
         document.getElementById('ftCallStatus').textContent = `FaceTime de ${type === 'video' ? 'Video' : 'Audio'}...`;
-        document.getElementById('ftAvatar').textContent = "C";
-        document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
-
         await setupLocalStream(type);
         activeCallRef = push(callsRef);
         await set(activeCallRef, { type: type, caller: myName, callerId: myId, status: 'calling' });
 
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-        
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
 
@@ -714,9 +640,7 @@
             if (data && data.status === 'accepted' && data.answer && !peerConnection.currentRemoteDescription) {
                 document.getElementById('ftCallStatus').textContent = "Conectado";
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                while (remoteIceQueue.length > 0) {
-                    await peerConnection.addIceCandidate(remoteIceQueue.shift());
-                }
+                while (remoteIceQueue.length > 0) { await peerConnection.addIceCandidate(remoteIceQueue.shift()); }
             }
             if (data && data.status === 'ended') cleanUpCallUI();
         });
@@ -725,11 +649,8 @@
             if (snapshot.exists()) {
                 Object.values(snapshot.val()).forEach(cand => {
                     const iceCandidate = new RTCIceCandidate(cand);
-                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
-                        peerConnection.addIceCandidate(iceCandidate);
-                    } else {
-                        remoteIceQueue.push(iceCandidate);
-                    }
+                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) { peerConnection.addIceCandidate(iceCandidate); }
+                    else { remoteIceQueue.push(iceCandidate); }
                 });
             }
         });
@@ -753,34 +674,23 @@
         document.getElementById('seccion-chat').style.display = 'none'; document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftTargetName').textContent = call.caller; document.getElementById('ftAvatar').textContent = call.caller.charAt(0);
         await setupLocalStream(call.type);
-
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-        
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
-
         await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
         const answer = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer);
         await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
-
-        while (remoteIceQueue.length > 0) {
-            await peerConnection.addIceCandidate(remoteIceQueue.shift());
-        }
-
+        while (remoteIceQueue.length > 0) { await peerConnection.addIceCandidate(remoteIceQueue.shift()); }
         onValue(ref(db, `chat/calls/${key}/callerCandidates`), snapshot => {
             if (snapshot.exists()) {
                 Object.values(snapshot.val()).forEach(cand => {
                     const iceCandidate = new RTCIceCandidate(cand);
-                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
-                        peerConnection.addIceCandidate(iceCandidate);
-                    } else {
-                        remoteIceQueue.push(iceCandidate);
-                    }
+                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) { peerConnection.addIceCandidate(iceCandidate); }
+                    else { remoteIceQueue.push(iceCandidate); }
                 });
             }
         });
-
         onValue(activeCallRef, snapshot => { if (snapshot.val() && snapshot.val().status === 'ended') cleanUpCallUI(); });
     }
 
@@ -798,11 +708,7 @@
     }
 
     window.panicExit = function() { 
-        window.hangUpCall(); 
-        off(messagesRef);
-        off(callsRef);
-        set(typingRef, null);
-        set(presenceRef, null);
+        window.hangUpCall(); off(messagesRef); off(callsRef); set(typingRef, null); set(presenceRef, null);
         remove(messagesRef).then(() => { location.reload(); }); 
     };
 
