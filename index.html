@@ -8,277 +8,671 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="VibeStore">
     <style>
+        /* ═══ iOS DESIGN TOKENS ═══ */
         :root {
-            --bg-body:#f3f4f9; --bg-card:#ffffff; --bg-nav:#ffffff;
-            --text-main:#0f172a; --text-muted:#64748b;
-            --purple-accent:#8b5cf6; --purple-light:#ede9fe;
-            --green:#10b981; --red:#ef4444; --border-color:#e2e8f0;
-            --shadow:0 10px 25px -5px rgba(0,0,0,0.05);
-            --safe-top:env(safe-area-inset-top,0px);
-            --safe-bottom:env(safe-area-inset-bottom,0px);
+            --bg-body:         #f2f2f7;
+            --bg-card:         #ffffff;
+            --bg-nav:          rgba(255,255,255,0.85);
+            --text-primary:    #000000;
+            --text-secondary:  #3c3c43;
+            --text-tertiary:   #8e8e93;
+            --separator:       rgba(60,60,67,.18);
+            --fill-3:          rgba(118,118,128,.12);
+            --fill-4:          rgba(118,118,128,.08);
+            --purple:          #7c3aed;
+            --purple-soft:     rgba(124,58,237,.12);
+            --green:           #34c759;
+            --green-soft:      rgba(52,199,89,.12);
+            --blue:            #007aff;
+            --blue-soft:       rgba(0,122,255,.12);
+            --red:             #ff3b30;
+            --sat: env(safe-area-inset-top,    47px);
+            --sab: env(safe-area-inset-bottom, 34px);
+            --header-h: 56px;
         }
-        [data-theme="dark"]{
-            --bg-body:#0f0f12; --bg-card:#18181c; --bg-nav:#18181c;
-            --text-main:#f8fafc; --text-muted:#94a3b8; --purple-accent:#a78bfa;
-            --purple-light:#2e1065; --border-color:#27272a;
-            --shadow:0 10px 25px -5px rgba(0,0,0,0.5);
+        [data-theme="dark"] {
+            --bg-body:        #000000;
+            --bg-card:        #1c1c1e;
+            --bg-nav:         rgba(28,28,30,0.88);
+            --text-primary:   #ffffff;
+            --text-secondary: #ebebf5;
+            --text-tertiary:  #8e8e93;
+            --separator:      rgba(84,84,88,.65);
+            --fill-3:         rgba(118,118,128,.24);
+            --fill-4:         rgba(118,118,128,.18);
+            --purple:         #a78bfa;
+            --purple-soft:    rgba(167,139,250,.15);
+            --green:          #30d158;
+            --green-soft:     rgba(48,209,88,.15);
+            --blue:           #0a84ff;
+            --blue-soft:      rgba(10,132,255,.15);
         }
-        *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-tap-highlight-color:transparent;}
-        body{background-color:var(--bg-body);color:var(--text-main);transition:background-color .3s,color .3s;min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden;}
+        *, *::before, *::after {
+            box-sizing: border-box; margin: 0; padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        html { -webkit-text-size-adjust: 100%; }
+        body {
+            background: var(--bg-body); color: var(--text-primary);
+            min-height: 100dvh; display: flex; flex-direction: column;
+            overflow-x: hidden; transition: background .25s, color .25s;
+        }
 
-        /* HEADER */
-        header{background-color:var(--bg-nav);padding:calc(var(--safe-top) + 1rem) 1.5rem 1rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border-color);position:sticky;top:0;z-index:100;}
-        .logo{font-size:1.4rem;font-weight:800;letter-spacing:-.5px;}
-        .header-actions{display:flex;align-items:center;gap:1rem;}
-        .icon-btn{background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-main);display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;transition:transform .15s;}
-        .icon-btn:active{transform:scale(.92);}
-        .cart-btn{background:var(--purple-light);color:var(--purple-accent);position:relative;}
-        .badge{position:absolute;top:-3px;right:-3px;background-color:var(--red);color:#fff;font-size:.65rem;font-weight:800;min-width:18px;height:18px;padding:0 4px;border-radius:9px;border:2px solid var(--bg-nav);display:flex;align-items:center;justify-content:center;}
-        .badge.pop{animation:pop .3s cubic-bezier(.36,.07,.19,.97);}
-        @keyframes pop{0%,100%{transform:scale(1)}40%{transform:scale(1.45)}70%{transform:scale(.9)}}
+        /* ── HEADER ── */
+        header {
+            position: sticky; top: 0; z-index: 200;
+            background: var(--bg-nav);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid var(--separator);
+            padding-top: var(--sat);
+        }
+        .header-inner {
+            height: var(--header-h); padding: 0 16px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .logo { font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
+        .logo span { color: var(--purple); }
+        .header-right { display: flex; align-items: center; gap: 6px; }
 
-        /* NAV */
-        .nav-scroller{overflow-x:auto;white-space:nowrap;padding:.85rem 1.5rem;background:var(--bg-nav);border-bottom:1px solid var(--border-color);-webkit-overflow-scrolling:touch;scrollbar-width:none;}
-        .nav-scroller::-webkit-scrollbar{display:none;}
-        .btn-cat{display:inline-flex;align-items:center;gap:.3rem;background:transparent;border:none;color:var(--text-muted);padding:.55rem 1.1rem;border-radius:20px;font-size:.9rem;font-weight:600;margin-right:.4rem;cursor:pointer;transition:all .2s;}
-        .btn-cat.active{background:var(--purple-accent);color:#fff;box-shadow:0 4px 12px rgba(139,92,246,.3);}
+        /* ── ICON BUTTONS ── */
+        .icon-btn {
+            width: 34px; height: 34px; border: none;
+            background: var(--fill-3); border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--text-primary); transition: opacity .15s;
+            -webkit-appearance: none;
+        }
+        .icon-btn:active { opacity: .5; }
+        .icon-btn svg { width: 17px; height: 17px; }
+        .icon-btn.cart-btn { background: var(--purple-soft); color: var(--purple); position: relative; }
+        .badge {
+            position: absolute; top: -2px; right: -2px;
+            background: var(--red); color: #fff;
+            font-size: 10px; font-weight: 700;
+            min-width: 16px; height: 16px; padding: 0 3px;
+            border-radius: 100px; border: 1.5px solid var(--bg-body);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .badge.pop { animation: badge-pop .26s cubic-bezier(.36,.07,.19,.97); }
+        @keyframes badge-pop { 0%,100%{transform:scale(1)} 45%{transform:scale(1.4)} 70%{transform:scale(.88)} }
 
-        /* MAIN */
-        .main-content{flex:1;padding:1.2rem 1.2rem 0;max-width:600px;margin:0 auto;width:100%;}
-        .search-wrap{position:relative;margin-bottom:1.1rem;}
-        .search-icon{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;}
-        .search-input{width:100%;background:var(--bg-card);border:1px solid var(--border-color);padding:.85rem 2.8rem .85rem 2.5rem;border-radius:18px;color:var(--text-main);outline:none;font-size:.95rem;transition:border-color .25s,box-shadow .25s;}
-        .search-input:focus{border-color:var(--purple-accent);box-shadow:0 0 0 3px rgba(139,92,246,.15);}
-        .search-clear{position:absolute;right:1rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);font-size:1rem;cursor:pointer;display:none;padding:4px;}
-        .search-clear.visible{display:block;}
+        /* ── CATEGORY NAV ── */
+        .cat-scroll {
+            overflow-x: auto; white-space: nowrap;
+            padding: 10px 16px;
+            background: var(--bg-nav);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid var(--separator);
+            -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        }
+        .cat-scroll::-webkit-scrollbar { display: none; }
+        .btn-cat {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--fill-4); border: none;
+            color: var(--text-secondary); padding: 7px 14px;
+            border-radius: 100px; font-size: 14px; font-weight: 500;
+            margin-right: 6px; cursor: pointer; transition: all .18s;
+            -webkit-appearance: none;
+        }
+        .btn-cat svg { width: 13px; height: 13px; flex-shrink: 0; }
+        .btn-cat.active {
+            background: var(--purple); color: #fff;
+            box-shadow: 0 2px 8px rgba(124,58,237,.3);
+        }
 
-        /* GRID */
-        .grid-productos{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;}
-        .card{background:var(--bg-card);border-radius:22px;padding:.75rem;border:1px solid var(--border-color);box-shadow:var(--shadow);display:flex;flex-direction:column;position:relative;overflow:hidden;transition:transform .2s;}
-        .card:active{transform:translateY(-2px);}
-        .img-container{width:100%;aspect-ratio:1/1;border-radius:16px;background:var(--purple-light);margin-bottom:.75rem;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;}
-        .img-container img{width:100%;height:100%;object-fit:cover;position:absolute;top:0;left:0;}
-        .card-tag{position:absolute;top:1.1rem;left:1.1rem;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);color:#000;font-size:.6rem;font-weight:700;padding:3px 8px;border-radius:8px;text-transform:uppercase;z-index:2;}
-        .card-title{font-size:.9rem;font-weight:700;margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .card-desc{font-size:.72rem;color:var(--text-muted);margin-bottom:.75rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;height:30px;}
-        .card-footer{display:flex;justify-content:space-between;align-items:center;margin-top:auto;}
-        .price{font-weight:800;font-size:1.05rem;}
-        .btn-add{background:var(--text-main);color:var(--bg-card);border:none;width:32px;height:32px;border-radius:50%;font-weight:700;font-size:1.15rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .15s,background-color .2s;flex-shrink:0;}
-        .btn-add:active{transform:scale(.88);}
-        .btn-add.added{background:var(--green);animation:addPop .35s ease;}
-        @keyframes addPop{0%{transform:scale(1)}50%{transform:scale(1.3)}100%{transform:scale(1)}}
+        /* ── MAIN ── */
+        .main-content {
+            flex: 1; padding: 14px 16px 0;
+            max-width: 430px; margin: 0 auto; width: 100%;
+        }
 
-        /* CART DRAWER */
-        .drawer-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;opacity:0;pointer-events:none;transition:opacity .3s;}
-        .drawer-overlay.open{opacity:1;pointer-events:all;}
-        .cart-drawer{position:fixed;bottom:0;left:0;right:0;max-width:600px;margin:0 auto;background:var(--bg-card);border-radius:28px 28px 0 0;z-index:201;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1);padding:0 1.5rem calc(1.5rem + var(--safe-bottom));max-height:85vh;overflow-y:auto;}
-        .cart-drawer.open{transform:translateY(0);}
-        .drawer-handle{width:40px;height:4px;background:var(--border-color);border-radius:2px;margin:1rem auto 1.2rem;}
-        .drawer-title{font-size:1.15rem;font-weight:800;margin-bottom:1rem;}
-        .cart-item-row{display:flex;justify-content:space-between;align-items:center;padding:.8rem 0;border-bottom:1px solid var(--border-color);}
-        .cat-name{font-weight:600;font-size:.95rem;display:flex;align-items:center;gap:.5rem;}
-        .cat-qty{display:flex;align-items:center;gap:.7rem;}
-        .qty-btn{background:var(--bg-body);border:1px solid var(--border-color);color:var(--text-main);width:30px;height:30px;border-radius:50%;font-size:1rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-        .qty-btn:active{background:var(--purple-light);}
-        .qty-num{font-weight:700;min-width:18px;text-align:center;}
-        .cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;}
-        .cart-total-label{font-size:.9rem;color:var(--text-muted);}
-        .cart-total-value{font-size:1.3rem;font-weight:900;}
-        .btn-pay{background:var(--text-main);color:var(--bg-card);border:none;width:100%;padding:1.05rem;border-radius:18px;font-size:1rem;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,.15);cursor:pointer;margin-top:1.1rem;transition:transform .15s;}
-        .btn-pay:active{transform:scale(.98);}
-        .cart-empty-msg{text-align:center;color:var(--text-muted);padding:2rem 0;font-size:.95rem;}
+        /* ── SEARCH ── */
+        .search-wrap { position: relative; margin-bottom: 14px; }
+        .search-icon {
+            position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+            color: var(--text-tertiary); pointer-events: none; display: flex;
+        }
+        .search-icon svg { width: 15px; height: 15px; }
+        .search-input {
+            width: 100%; background: var(--bg-card);
+            border: 0.5px solid var(--separator);
+            padding: 10px 34px 10px 32px;
+            border-radius: 12px; color: var(--text-primary);
+            outline: none; font-size: 15px;
+            transition: border-color .2s, box-shadow .2s;
+            -webkit-appearance: none;
+        }
+        .search-input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-soft); }
+        .search-input::placeholder { color: var(--text-tertiary); }
+        .search-clear {
+            position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+            background: var(--text-tertiary); border: none;
+            width: 17px; height: 17px; border-radius: 50%;
+            color: var(--bg-card); font-size: 10px; cursor: pointer;
+            display: none; align-items: center; justify-content: center;
+        }
+        .search-clear.visible { display: flex; }
 
-        /* FOOTER */
-        .footer-checkout{position:sticky;bottom:0;padding:.8rem 1.5rem calc(.8rem + var(--safe-bottom));background:linear-gradient(to top,var(--bg-body) 80%,transparent);z-index:90;max-width:600px;margin:0 auto;width:100%;}
-        .footer-inner{display:flex;gap:.8rem;align-items:center;}
-        .btn-view-cart{flex:1;background:var(--bg-card);color:var(--text-main);border:1px solid var(--border-color);padding:1rem;border-radius:18px;font-size:.95rem;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.5rem;transition:transform .15s;}
-        .btn-view-cart:active{transform:scale(.98);}
-        .btn-checkout{flex:2;background:var(--text-main);color:var(--bg-card);border:none;padding:1rem;border-radius:18px;font-size:.95rem;font-weight:700;cursor:pointer;transition:transform .15s;}
-        .btn-checkout:active{transform:scale(.98);}
+        /* ── GRID ── */
+        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .card {
+            background: var(--bg-card); border-radius: 20px;
+            border: 0.5px solid var(--separator);
+            box-shadow: 0 1px 3px rgba(0,0,0,.07);
+            overflow: hidden; display: flex; flex-direction: column;
+            position: relative; transition: transform .18s;
+        }
+        .card:active { transform: scale(.97); }
+        .img-container {
+            width: 100%; aspect-ratio: 1/1;
+            background: var(--fill-4); overflow: hidden;
+            position: relative; display: flex; align-items: center; justify-content: center;
+            font-size: 2rem;
+        }
+        .img-container img {
+            width: 100%; height: 100%; object-fit: cover;
+            position: absolute; top: 0; left: 0;
+        }
+        .card-tag {
+            position: absolute; top: 8px; left: 8px;
+            background: rgba(255,255,255,.92); backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #000; font-size: 9px; font-weight: 700;
+            padding: 3px 8px; border-radius: 8px;
+            text-transform: uppercase; letter-spacing: .04em; z-index: 2;
+        }
+        .card-body { padding: 10px 11px 12px; display: flex; flex-direction: column; flex: 1; }
+        .card-title {
+            font-size: 13px; font-weight: 600;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px;
+        }
+        .card-desc {
+            font-size: 11.5px; color: var(--text-tertiary);
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+            line-height: 1.4; margin-bottom: 10px; flex: 1;
+        }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .price { font-size: 15px; font-weight: 700; letter-spacing: -.3px; }
+        .btn-add {
+            background: var(--text-primary); color: var(--bg-card);
+            border: none; width: 30px; height: 30px; border-radius: 50%;
+            font-size: 1.1rem; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0; transition: transform .15s, background .2s;
+            -webkit-appearance: none;
+        }
+        .btn-add:active { transform: scale(.84); }
+        .btn-add.added { background: var(--green); animation: add-pop .3s ease; }
+        @keyframes add-pop { 0%{transform:scale(1)} 50%{transform:scale(1.28)} 100%{transform:scale(1)} }
 
-        /* TOAST */
-        .toast{position:fixed;bottom:calc(5.5rem + var(--safe-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--text-main);color:var(--bg-card);padding:.7rem 1.3rem;border-radius:20px;font-size:.85rem;font-weight:600;white-space:nowrap;opacity:0;transition:opacity .25s,transform .25s;z-index:300;pointer-events:none;}
-        .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+        /* ── FOOTER ── */
+        .footer-checkout {
+            position: sticky; bottom: 0; z-index: 100;
+            padding: 10px 16px calc(10px + var(--sab));
+            background: var(--bg-nav);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-top: 0.5px solid var(--separator);
+            max-width: 430px; margin: 0 auto; width: 100%;
+        }
+        .footer-inner { display: flex; gap: 10px; }
+        .btn-view-cart {
+            flex: 1; background: var(--fill-3); color: var(--text-primary);
+            border: none; padding: 14px 10px; border-radius: 14px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 6px;
+            transition: opacity .15s; -webkit-appearance: none;
+        }
+        .btn-view-cart svg { width: 16px; height: 16px; }
+        .btn-view-cart:active { opacity: .6; }
+        .btn-checkout {
+            flex: 2; background: var(--purple); color: #fff; border: none;
+            padding: 14px; border-radius: 14px; font-size: 15px; font-weight: 600;
+            cursor: pointer; box-shadow: 0 4px 14px rgba(124,58,237,.3);
+            transition: opacity .15s; -webkit-appearance: none;
+        }
+        .btn-checkout:active { opacity: .7; }
 
-        /* EMPTY STATE */
-        .empty-state{grid-column:1/-1;display:flex;flex-direction:column;align-items:center;gap:.5rem;padding:3rem 1rem;color:var(--text-muted);text-align:center;}
-        .empty-state .empty-icon{font-size:2.5rem;margin-bottom:.5rem;}
+        /* ── CART DRAWER ── */
+        .drawer-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.35);
+            z-index: 400; opacity: 0; pointer-events: none; transition: opacity .28s;
+        }
+        .drawer-overlay.open { opacity: 1; pointer-events: all; }
+        .cart-drawer {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            max-width: 430px; margin: 0 auto;
+            background: var(--bg-card); border-radius: 20px 20px 0 0;
+            z-index: 401; transform: translateY(100%);
+            transition: transform .34s cubic-bezier(.32,.72,0,1);
+            padding: 0 20px calc(20px + var(--sab));
+            max-height: 80vh; overflow-y: auto;
+        }
+        .cart-drawer.open { transform: translateY(0); }
+        .drawer-handle { width: 36px; height: 4px; background: var(--separator); border-radius: 2px; margin: 10px auto 16px; }
+        .drawer-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
+        .cart-item-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 0; border-bottom: 0.5px solid var(--separator);
+        }
+        .cat-name { font-weight: 600; font-size: 15px; display: flex; align-items: center; gap: 8px; }
+        .cat-qty { display: flex; align-items: center; gap: 12px; }
+        .qty-btn {
+            background: var(--fill-3); border: none; color: var(--text-primary);
+            width: 28px; height: 28px; border-radius: 50%;
+            font-size: 18px; font-weight: 300; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            -webkit-appearance: none;
+        }
+        .qty-btn:active { opacity: .5; }
+        .qty-num { font-weight: 700; min-width: 16px; text-align: center; font-size: 15px; }
+        .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+        .cart-total-label { font-size: 15px; color: var(--text-tertiary); }
+        .cart-total-value { font-size: 20px; font-weight: 800; letter-spacing: -.5px; }
+        .btn-pay {
+            background: var(--purple); color: #fff; border: none;
+            width: 100%; padding: 16px; border-radius: 14px;
+            font-size: 16px; font-weight: 700;
+            box-shadow: 0 4px 14px rgba(124,58,237,.3);
+            cursor: pointer; margin-top: 14px;
+            transition: opacity .15s; -webkit-appearance: none;
+        }
+        .btn-pay:active { opacity: .7; }
+        .cart-empty-msg { text-align: center; color: var(--text-tertiary); padding: 32px 0; font-size: 15px; }
 
-        /* ══════════════════════════════════
-           MODAL GENÉRICO (clave + pago)
-        ══════════════════════════════════ */
-        .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;display:none;align-items:flex-end;justify-content:center;padding-bottom:0;}
-        .modal-overlay.open{display:flex;}
-        .modal-box{background:var(--bg-card);border-radius:28px 28px 0 0;width:100%;max-width:600px;padding:1.5rem 1.5rem calc(1.5rem + var(--safe-bottom));max-height:92vh;overflow-y:auto;}
-        .modal-handle{width:40px;height:4px;background:var(--border-color);border-radius:2px;margin:0 auto 1.2rem;}
-        .modal-title{font-size:1.15rem;font-weight:800;margin-bottom:.35rem;}
-        .modal-sub{font-size:.85rem;color:var(--text-muted);margin-bottom:1.3rem;}
+        /* ── TOAST ── */
+        .toast {
+            position: fixed; bottom: calc(88px + var(--sab));
+            left: 50%; transform: translateX(-50%) translateY(14px);
+            background: rgba(28,28,30,.96); backdrop-filter: blur(16px);
+            color: #fff; padding: 10px 18px; border-radius: 20px;
+            font-size: 13.5px; font-weight: 500; white-space: nowrap;
+            opacity: 0; transition: opacity .2s, transform .2s;
+            z-index: 600; pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* PIN input */
-        .pin-wrap{display:flex;gap:.6rem;justify-content:center;margin-bottom:1.1rem;}
-        .pin-digit{width:52px;height:62px;border:2px solid var(--border-color);border-radius:16px;font-size:1.6rem;font-weight:800;text-align:center;background:var(--bg-body);color:var(--text-main);outline:none;transition:border-color .2s;}
-        .pin-digit:focus{border-color:var(--purple-accent);}
-        .pin-error{color:var(--red);font-size:.82rem;text-align:center;min-height:1.1rem;margin-bottom:.8rem;}
-        .btn-primary{background:var(--text-main);color:var(--bg-card);border:none;width:100%;padding:1.05rem;border-radius:18px;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .15s;}
-        .btn-primary:active{transform:scale(.98);}
-        .btn-secondary{background:transparent;color:var(--text-muted);border:1px solid var(--border-color);width:100%;padding:.9rem;border-radius:18px;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:.7rem;}
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            grid-column: 1/-1; display: flex; flex-direction: column;
+            align-items: center; gap: 6px; padding: 48px 16px;
+            color: var(--text-tertiary); text-align: center;
+        }
+        .empty-state svg { width: 34px; height: 34px; margin-bottom: 6px; opacity: .4; }
 
-        /* PAGO (falso) */
-        .pay-section{display:none;}
-        .pay-section.active{display:block;}
-        .form-label{font-size:.8rem;font-weight:700;color:var(--text-muted);margin-bottom:.35rem;display:block;}
-        .form-input{width:100%;background:var(--bg-body);border:1px solid var(--border-color);padding:.85rem 1rem;border-radius:14px;color:var(--text-main);outline:none;font-size:.95rem;margin-bottom:.9rem;transition:border-color .2s;}
-        .form-input:focus{border-color:var(--purple-accent);}
-        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
-        .card-brand-row{display:flex;gap:.5rem;margin-bottom:1rem;}
-        .brand-chip{background:var(--bg-body);border:1px solid var(--border-color);border-radius:10px;padding:.4rem .75rem;font-size:.75rem;font-weight:600;color:var(--text-muted);}
-        .order-summary{background:var(--bg-body);border-radius:16px;padding:1rem;margin-bottom:1rem;}
-        .order-row{display:flex;justify-content:space-between;font-size:.85rem;margin-bottom:.4rem;}
-        .order-row.total{font-weight:800;font-size:1rem;border-top:1px solid var(--border-color);padding-top:.7rem;margin-top:.4rem;}
-        .secure-badge{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-muted);justify-content:center;margin-top:.7rem;}
+        /* ── MODAL ── */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,.4);
+            z-index: 500; display: none; align-items: flex-end; justify-content: center;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal-box {
+            background: var(--bg-card); border-radius: 20px 20px 0 0;
+            width: 100%; max-width: 430px;
+            padding: 0 20px calc(20px + var(--sab));
+            max-height: 92dvh; overflow-y: auto;
+        }
+        .modal-handle { width: 36px; height: 4px; background: var(--separator); border-radius: 2px; margin: 10px auto 16px; }
+        .modal-title { font-size: 17px; font-weight: 700; margin-bottom: 4px; }
+        .modal-sub { font-size: 13px; color: var(--text-tertiary); margin-bottom: 20px; }
+        .pin-wrap { display: flex; gap: 8px; justify-content: center; margin-bottom: 14px; }
+        .pin-digit {
+            width: 36px; height: 46px; border: 1px solid var(--separator);
+            border-radius: 12px; font-size: 20px; font-weight: 700;
+            text-align: center; background: var(--fill-4);
+            color: var(--text-primary); outline: none;
+            transition: border-color .2s, box-shadow .2s; -webkit-appearance: none;
+        }
+        .pin-digit:focus { border-color: var(--purple); box-shadow: 0 0 0 3px var(--purple-soft); }
+        .pin-error { color: var(--red); font-size: 13px; text-align: center; min-height: 18px; margin-bottom: 10px; }
+        .btn-primary {
+            background: var(--purple); color: #fff; border: none;
+            width: 100%; padding: 16px; border-radius: 14px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            box-shadow: 0 4px 14px rgba(124,58,237,.3);
+            transition: opacity .15s; -webkit-appearance: none;
+        }
+        .btn-primary:active { opacity: .7; }
+        .btn-secondary {
+            background: var(--fill-4); color: var(--text-secondary); border: none;
+            width: 100%; padding: 15px; border-radius: 14px;
+            font-size: 15px; font-weight: 600; cursor: pointer;
+            margin-top: 10px; -webkit-appearance: none;
+        }
+        .btn-secondary:active { opacity: .6; }
+        .pay-section { display: none; }
+        .pay-section.active { display: block; }
+        .form-label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 5px; display: block; text-transform: uppercase; letter-spacing: .05em; }
+        .form-input {
+            width: 100%; background: var(--fill-4); border: 0.5px solid var(--separator);
+            padding: 12px 14px; border-radius: 12px;
+            color: var(--text-primary); outline: none;
+            font-size: 15px; margin-bottom: 12px;
+            transition: border-color .2s; -webkit-appearance: none;
+        }
+        .form-input:focus { border-color: var(--purple); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .card-brand-row { display: flex; gap: 6px; margin-bottom: 14px; }
+        .brand-chip { background: var(--fill-4); border: 0.5px solid var(--separator); border-radius: 8px; padding: 5px 10px; font-size: 12px; font-weight: 600; color: var(--text-tertiary); }
+        .order-summary { background: var(--fill-4); border-radius: 14px; padding: 14px; margin-bottom: 14px; }
+        .order-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 6px; color: var(--text-secondary); }
+        .order-row.total { font-weight: 800; font-size: 16px; color: var(--text-primary); border-top: 0.5px solid var(--separator); padding-top: 10px; margin-top: 4px; margin-bottom: 0; }
+        .secure-badge { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-tertiary); justify-content: center; margin-top: 10px; }
 
-        /* ══════════════════════════════════
-           CHAT
-        ══════════════════════════════════ */
-        #seccion-chat{display:none;flex-direction:column;position:fixed;top:0;left:0;width:100vw;height:100vh;background:var(--bg-body);z-index:1000;padding-top:var(--safe-top);}
-        .chat-header{padding:1rem 1.5rem;background:var(--bg-card);border-bottom:1px solid var(--border-color);display:flex;align-items:center;justify-content:space-between;}
-        .chat-meta{display:flex;align-items:center;gap:.8rem;}
-        .chat-status-dot{width:9px;height:9px;background:var(--green);border-radius:50%;animation:pulse-dot 2s infinite;}
-        @keyframes pulse-dot{0%,100%{box-shadow:0 0 0 2px rgba(16,185,129,.3)}50%{box-shadow:0 0 0 6px rgba(16,185,129,0)}}
-        .chat-header-info p:first-child{font-weight:700;font-size:.95rem;}
-        .chat-header-info p:last-child{font-size:.72rem;color:var(--text-muted);}
-        .chat-header-actions{display:flex;align-items:center;gap:.5rem;}
-        .btn-support-call{background:var(--green);color:#fff;border:none;padding:.5rem .9rem;border-radius:12px;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:transform .15s;}
-        .btn-support-call:active{transform:scale(.95);}
-        .btn-support-video{background:#3b82f6;color:#fff;border:none;padding:.5rem .9rem;border-radius:12px;font-size:.75rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.35rem;transition:transform .15s;}
-        .btn-support-video:active{transform:scale(.95);}
-        .btn-panic{background:var(--red);color:#fff;border:none;padding:.5rem .9rem;border-radius:12px;font-size:.75rem;font-weight:900;cursor:pointer;transition:transform .15s;}
-        .btn-panic:active{transform:scale(.95);}
+        /* ── NOTIF BANNER ── */
+        .promo-notif {
+            position: fixed; top: calc(var(--sat) + 10px);
+            left: 50%; transform: translateX(-50%) translateY(-110%);
+            width: calc(100% - 24px); max-width: 390px;
+            background: rgba(28,28,30,.96);
+            backdrop-filter: saturate(180%) blur(28px);
+            -webkit-backdrop-filter: saturate(180%) blur(28px);
+            border: 0.5px solid rgba(255,255,255,.1);
+            border-radius: 18px; padding: 12px 14px;
+            display: flex; align-items: center; gap: 12px;
+            z-index: 9999; pointer-events: none;
+            transition: transform .4s cubic-bezier(.22,.68,0,1.2);
+        }
+        .promo-notif.show { transform: translateX(-50%) translateY(0); }
+        .promo-notif-icon {
+            width: 38px; height: 38px; border-radius: 9px;
+            background: linear-gradient(135deg, var(--purple), var(--blue));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; flex-shrink: 0;
+        }
+        .promo-notif-body { flex: 1; min-width: 0; }
+        .promo-notif-app { font-size: 11px; font-weight: 700; color: rgba(255,255,255,.45); margin-bottom: 2px; }
+        .promo-notif-title { font-size: 13px; font-weight: 700; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .promo-notif-sub { font-size: 12px; color: rgba(255,255,255,.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .promo-notif-time { font-size: 11px; color: rgba(255,255,255,.3); flex-shrink: 0; }
 
-        /* NOMBRE MODAL */
-        .name-modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;display:flex;align-items:center;justify-content:center;padding:2rem;}
-        .name-modal-box{background:var(--bg-card);border-radius:24px;padding:2rem;width:100%;max-width:340px;text-align:center;}
-        .name-modal-box h2{font-size:1.2rem;font-weight:800;margin-bottom:.5rem;}
-        .name-modal-box p{font-size:.85rem;color:var(--text-muted);margin-bottom:1.2rem;}
-        .name-modal-box input{width:100%;background:var(--bg-body);border:1px solid var(--border-color);padding:.85rem 1.1rem;border-radius:14px;color:var(--text-main);outline:none;font-size:.95rem;margin-bottom:1rem;}
-        .name-modal-box input:focus{border-color:var(--purple-accent);}
-        .btn-join{width:100%;background:var(--purple-accent);color:#fff;border:none;padding:.95rem;border-radius:14px;font-size:1rem;font-weight:700;cursor:pointer;transition:transform .15s;}
-        .btn-join:active{transform:scale(.98);}
+        /* ══════════════ CHAT ══════════════ */
+        #seccion-chat {
+            display: none; flex-direction: column;
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100%; height: 100dvh;
+            background: var(--bg-body); z-index: 1000;
+        }
+        .chat-header {
+            padding-top: var(--sat);
+            background: var(--bg-nav);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 0.5px solid var(--separator);
+            flex-shrink: 0;
+        }
+        .chat-header-inner {
+            height: var(--header-h); padding: 0 14px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .chat-meta { display: flex; align-items: center; gap: 10px; }
+        .chat-status-dot {
+            width: 8px; height: 8px; background: var(--green);
+            border-radius: 50%; flex-shrink: 0;
+            box-shadow: 0 0 0 2.5px var(--green-soft);
+            animation: pulse-dot 2s infinite;
+        }
+        @keyframes pulse-dot {
+            0%,100%{box-shadow:0 0 0 2.5px var(--green-soft)}
+            50%{box-shadow:0 0 0 5px rgba(52,199,89,0)}
+        }
+        .ch-title { font-size: 15px; font-weight: 700; }
+        .ch-sub { font-size: 11.5px; color: var(--text-tertiary); }
+        .chat-header-actions { display: flex; align-items: center; gap: 8px; }
 
-        .chat-messages{flex:1;padding:1.2rem;overflow-y:auto;display:flex;flex-direction:column;gap:.75rem;}
-        .msg-wrap{display:flex;flex-direction:column;max-width:78%;}
-        .msg-wrap.mine{align-self:flex-end;align-items:flex-end;}
-        .msg-wrap.theirs{align-self:flex-start;align-items:flex-start;}
-        .msg-sender{font-size:.68rem;font-weight:700;color:var(--text-muted);margin-bottom:.2rem;padding:0 .5rem;}
-        .msg{padding:.85rem 1.05rem;border-radius:20px;font-size:.92rem;line-height:1.45;word-break:break-word;}
-        .msg.mine{background:var(--purple-accent);color:#fff;border-bottom-right-radius:4px;}
-        .msg.theirs{background:var(--bg-card);color:var(--text-main);border-bottom-left-radius:4px;border:1px solid var(--border-color);}
-        .msg-time{font-size:.63rem;opacity:.5;margin-top:.25rem;padding:0 .5rem;}
-        .typing-wrap{align-self:flex-start;display:none;align-items:center;gap:.5rem;padding:.5rem 0;}
-        .typing-wrap.show{display:flex;}
-        .typing-bubble{background:var(--bg-card);border:1px solid var(--border-color);border-radius:20px;border-bottom-left-radius:4px;padding:.75rem 1rem;display:flex;gap:4px;align-items:center;}
-        .typing-name{font-size:.72rem;color:var(--text-muted);}
-        .dot{width:7px;height:7px;background:var(--text-muted);border-radius:50%;animation:bounce 1.2s infinite;}
-        .dot:nth-child(2){animation-delay:.2s;}
-        .dot:nth-child(3){animation-delay:.4s;}
-        @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
-        .msg-system{align-self:center;font-size:.75rem;color:var(--text-muted);background:var(--bg-body);border:1px solid var(--border-color);padding:.35rem .9rem;border-radius:20px;}
-        .chat-input-area{padding:.9rem 1.2rem calc(.9rem + var(--safe-bottom));background:var(--bg-card);border-top:1px solid var(--border-color);display:flex;gap:.7rem;align-items:center;}
-        .chat-input-area input{flex:1;background:var(--bg-body);border:1px solid var(--border-color);padding:.85rem 1.1rem;border-radius:22px;color:var(--text-main);outline:none;font-size:.92rem;transition:border-color .2s;}
-        .chat-input-area input:focus{border-color:var(--purple-accent);}
-        .btn-send{background:var(--purple-accent);color:#fff;border:none;width:44px;height:44px;border-radius:50%;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s;}
-        .btn-send:active{transform:scale(.9);}
+        /* iOS-style call buttons */
+        .btn-call {
+            width: 34px; height: 34px; border-radius: 50%; border: none;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: opacity .15s; -webkit-appearance: none;
+        }
+        .btn-call:active { opacity: .5; }
+        .btn-call svg { width: 17px; height: 17px; }
+        .btn-call-voice { background: var(--green-soft); color: var(--green); }
+        .btn-call-video { background: var(--blue-soft); color: var(--blue); }
+        .btn-panic {
+            background: rgba(255,59,48,.12); color: var(--red);
+            border: none; padding: 6px 12px; border-radius: 100px;
+            font-size: 13px; font-weight: 700; cursor: pointer;
+            display: flex; align-items: center; gap: 5px;
+            transition: opacity .15s; -webkit-appearance: none;
+        }
+        .btn-panic svg { width: 12px; height: 12px; }
+        .btn-panic:active { opacity: .55; }
 
-        /* NOTIFICACIÓN CAMUFLADA */
-        .promo-notif{position:fixed;top:calc(var(--safe-top) + 12px);left:50%;transform:translateX(-50%) translateY(-120px);width:calc(100% - 2rem);max-width:380px;background:rgba(25,25,30,.93);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:.75rem 1rem;display:flex;align-items:center;gap:.8rem;z-index:9999;transition:transform .45s cubic-bezier(.22,.68,0,1.2);pointer-events:none;}
-        .promo-notif.show{transform:translateX(-50%) translateY(0);}
-        .promo-notif-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#8b5cf6,#3b82f6);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
-        .promo-notif-body{flex:1;min-width:0;}
-        .promo-notif-app{font-size:.65rem;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.1rem;}
-        .promo-notif-title{font-size:.85rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .promo-notif-sub{font-size:.72rem;color:rgba(255,255,255,.55);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .promo-notif-time{font-size:.62rem;color:rgba(255,255,255,.35);flex-shrink:0;}
+        /* Name modal */
+        .name-modal {
+            position: fixed; inset: 0; background: rgba(0,0,0,.55);
+            z-index: 2000; display: flex; align-items: flex-end; justify-content: center;
+        }
+        .name-modal-box {
+            background: var(--bg-card); border-radius: 20px 20px 0 0;
+            padding: 20px 20px calc(20px + var(--sab));
+            width: 100%; max-width: 430px; text-align: center;
+        }
+        .name-modal-box h2 { font-size: 19px; font-weight: 800; margin-bottom: 6px; }
+        .name-modal-box p { font-size: 14px; color: var(--text-tertiary); margin-bottom: 20px; }
+        .name-modal-box input {
+            width: 100%; background: var(--fill-4); border: 0.5px solid var(--separator);
+            padding: 13px 15px; border-radius: 13px;
+            color: var(--text-primary); outline: none;
+            font-size: 15px; margin-bottom: 14px; -webkit-appearance: none;
+        }
+        .name-modal-box input:focus { border-color: var(--purple); }
+        .btn-join {
+            width: 100%; background: var(--purple); color: #fff; border: none;
+            padding: 15px; border-radius: 14px; font-size: 16px; font-weight: 700;
+            cursor: pointer; box-shadow: 0 4px 14px rgba(124,58,237,.3);
+            -webkit-appearance: none;
+        }
+        .btn-join:active { opacity: .7; }
 
-        /* LLAMADA */
-        .call-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:5000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;padding:2rem;}
-        .call-overlay.active{display:flex;}
-        .call-avatar{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,var(--purple-accent),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:2.2rem;box-shadow:0 0 0 12px rgba(139,92,246,.2),0 0 0 24px rgba(139,92,246,.08);animation:callPulse 2s infinite;}
-        @keyframes callPulse{0%,100%{box-shadow:0 0 0 12px rgba(139,92,246,.2),0 0 0 24px rgba(139,92,246,.08)}50%{box-shadow:0 0 0 18px rgba(139,92,246,.15),0 0 0 36px rgba(139,92,246,.04)}}
-        .call-name{color:#fff;font-size:1.4rem;font-weight:800;}
-        .call-status{color:rgba(255,255,255,.55);font-size:.9rem;}
-        .call-video-wrap{width:100%;max-width:360px;position:relative;display:none;border-radius:20px;overflow:hidden;background:#000;}
-        .call-video-wrap.active{display:block;}
-        #remoteVideo{width:100%;border-radius:20px;background:#111;display:block;min-height:200px;}
-        #localVideo{position:absolute;bottom:.75rem;right:.75rem;width:90px;border-radius:10px;border:2px solid rgba(255,255,255,.3);}
-        .call-controls{display:flex;gap:1.2rem;align-items:center;}
-        .call-ctrl-btn{width:58px;height:58px;border-radius:50%;border:none;display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;transition:transform .15s;}
-        .call-ctrl-btn:active{transform:scale(.9);}
-        .btn-mute{background:rgba(255,255,255,.12);color:#fff;}
-        .btn-cam{background:rgba(255,255,255,.12);color:#fff;}
-        .btn-hang{background:#ef4444;color:#fff;width:68px;height:68px;}
-        .btn-spk{background:rgba(255,255,255,.12);color:#fff;}
+        /* Messages */
+        .chat-messages {
+            flex: 1; padding: 14px 16px; overflow-y: auto;
+            display: flex; flex-direction: column; gap: 8px;
+            overscroll-behavior: contain;
+        }
+        .msg-wrap { display: flex; flex-direction: column; max-width: 76%; }
+        .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
+        .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
+        .msg-sender { font-size: 11px; font-weight: 600; color: var(--text-tertiary); margin-bottom: 3px; padding: 0 6px; }
+        .msg {
+            padding: 10px 14px; border-radius: 18px;
+            font-size: 15px; line-height: 1.42; word-break: break-word;
+        }
+        .msg.mine { background: var(--purple); color: #fff; border-bottom-right-radius: 4px; }
+        .msg.theirs { background: var(--bg-card); color: var(--text-primary); border-bottom-left-radius: 4px; border: 0.5px solid var(--separator); }
+        .msg-time { font-size: 11px; color: var(--text-tertiary); margin-top: 3px; padding: 0 5px; }
+        .typing-wrap { align-self: flex-start; display: none; align-items: center; gap: 6px; padding: 4px 0; }
+        .typing-wrap.show { display: flex; }
+        .typing-bubble {
+            background: var(--bg-card); border: 0.5px solid var(--separator);
+            border-radius: 18px; border-bottom-left-radius: 4px;
+            padding: 10px 14px; display: flex; gap: 4px; align-items: center;
+        }
+        .typing-name { font-size: 11px; color: var(--text-tertiary); }
+        .dot { width: 6px; height: 6px; background: var(--text-tertiary); border-radius: 50%; animation: bounce 1.2s infinite; }
+        .dot:nth-child(2){animation-delay:.2s;} .dot:nth-child(3){animation-delay:.4s;}
+        @keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}
+        .msg-system {
+            align-self: center; font-size: 12px; color: var(--text-tertiary);
+            background: var(--fill-4); border: 0.5px solid var(--separator);
+            padding: 4px 12px; border-radius: 100px;
+        }
+        .chat-input-area {
+            padding: 10px 14px calc(10px + var(--sab));
+            background: var(--bg-nav);
+            backdrop-filter: saturate(180%) blur(20px);
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-top: 0.5px solid var(--separator);
+            display: flex; gap: 8px; align-items: center; flex-shrink: 0;
+        }
+        .chat-input-area input {
+            flex: 1; background: var(--fill-4); border: 0.5px solid var(--separator);
+            padding: 11px 15px; border-radius: 22px;
+            color: var(--text-primary); outline: none; font-size: 15px;
+            transition: border-color .2s; -webkit-appearance: none;
+        }
+        .chat-input-area input:focus { border-color: var(--purple); }
+        .btn-send {
+            background: var(--purple); color: #fff; border: none;
+            width: 38px; height: 38px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; flex-shrink: 0; transition: opacity .15s;
+            -webkit-appearance: none;
+        }
+        .btn-send svg { width: 16px; height: 16px; }
+        .btn-send:active { opacity: .6; }
+
+        /* ══════════════ LLAMADA (iOS full-screen) ══════════════ */
+        .call-overlay {
+            position: fixed; inset: 0;
+            background: radial-gradient(ellipse at 35% 25%, #2d1b69 0%, #0f0c1a 65%);
+            z-index: 5000; display: none; flex-direction: column;
+            align-items: center; justify-content: space-between;
+            padding: calc(var(--sat) + 40px) 30px calc(var(--sab) + 32px);
+        }
+        .call-overlay.active { display: flex; }
+        .call-top { text-align: center; width: 100%; }
+        .call-avatar {
+            width: 90px; height: 90px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--purple), var(--blue));
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 18px;
+            animation: call-pulse 2.2s infinite;
+        }
+        .call-avatar svg { width: 38px; height: 38px; }
+        @keyframes call-pulse {
+            0%,100%{box-shadow:0 0 0 10px rgba(124,58,237,.18),0 0 0 24px rgba(124,58,237,.08)}
+            50%{box-shadow:0 0 0 16px rgba(124,58,237,.12),0 0 0 36px rgba(124,58,237,.04)}
+        }
+        .call-name { color: #fff; font-size: 26px; font-weight: 700; letter-spacing: -.5px; margin-bottom: 6px; }
+        .call-status { color: rgba(255,255,255,.5); font-size: 15px; }
+        .call-video-wrap {
+            width: 100%; max-width: 340px; display: none;
+            border-radius: 20px; overflow: hidden; background: #000;
+            position: relative; margin-bottom: 12px;
+        }
+        .call-video-wrap.active { display: block; }
+        #remoteVideo { width: 100%; border-radius: 20px; background: #111; display: block; min-height: 220px; }
+        #localVideo { position: absolute; bottom: 10px; right: 10px; width: 82px; border-radius: 12px; border: 2px solid rgba(255,255,255,.2); }
+
+        /* iOS call control tray */
+        .call-controls { display: flex; gap: 16px; align-items: center; justify-content: center; width: 100%; }
+        .call-ctrl {
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            background: none; border: none; cursor: pointer;
+            transition: opacity .15s; -webkit-appearance: none;
+        }
+        .call-ctrl:active { opacity: .5; }
+        .call-ctrl-disc {
+            width: 62px; height: 62px; border-radius: 50%;
+            background: rgba(255,255,255,.14);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .call-ctrl-disc svg { width: 26px; height: 26px; }
+        .call-ctrl-disc.hangup { background: #ff3b30; }
+        .call-ctrl-disc.hangup svg { width: 30px; height: 30px; }
+        .call-ctrl-label { font-size: 11px; font-weight: 500; color: rgba(255,255,255,.55); }
+        .call-ctrl.toggled .call-ctrl-disc { background: rgba(255,255,255,.85); }
+        .call-ctrl.toggled .call-ctrl-disc svg { color: #000; }
     </style>
 </head>
 <body>
 
-<!-- ══════════ TIENDA ══════════ -->
-<div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100vh;">
+<!-- ══════ TIENDA ══════ -->
+<div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100dvh;">
     <header>
-        <div class="logo">VibeStore ✦</div>
-        <div class="header-actions">
-            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
-            <button class="icon-btn cart-btn" onclick="openCart()">
-                🛍️<span class="badge" id="cartBadge">0</span>
-            </button>
+        <div class="header-inner">
+            <div class="logo">Vibe<span>Store</span></div>
+            <div class="header-right">
+                <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Cambiar tema">
+                    <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                </button>
+                <button class="icon-btn cart-btn" onclick="openCart()" aria-label="Carrito">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                        <line x1="3" y1="6" x2="21" y2="6"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                    <span class="badge" id="cartBadge">0</span>
+                </button>
+            </div>
         </div>
     </header>
-    <nav class="nav-scroller">
-        <button class="btn-cat active" onclick="filterCat('all',this)">⚡ Todo</button>
-        <button class="btn-cat" onclick="filterCat('maquillaje',this)">💄 Maquillaje</button>
-        <button class="btn-cat" onclick="filterCat('tecnologia',this)">🔌 Tecnología</button>
-        <button class="btn-cat" onclick="filterCat('hogar',this)">🏠 Hogar</button>
-        <button class="btn-cat" onclick="filterCat('deportes',this)">⚽ Deportes</button>
+
+    <nav class="cat-scroll">
+        <button class="btn-cat active" onclick="filterCat('all',this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+            Todo
+        </button>
+        <button class="btn-cat" onclick="filterCat('maquillaje',this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Maquillaje
+        </button>
+        <button class="btn-cat" onclick="filterCat('tecnologia',this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Tecnología
+        </button>
+        <button class="btn-cat" onclick="filterCat('hogar',this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
+            Hogar
+        </button>
+        <button class="btn-cat" onclick="filterCat('deportes',this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l4.24 4.24m5.66 5.66 4.24 4.24M4.93 19.07l4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
+            Deportes
+        </button>
     </nav>
+
     <main class="main-content">
         <div class="search-wrap">
-            <span class="search-icon">🔍</span>
+            <span class="search-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </span>
             <input type="search" id="searchBox" class="search-input" placeholder="Buscar productos…" oninput="filterSearch(this)" autocomplete="off">
-            <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+            <button class="search-clear" id="searchClear" onclick="clearSearch()" aria-label="Limpiar">✕</button>
         </div>
         <div class="grid-productos" id="productGrid"></div>
     </main>
+
     <div class="footer-checkout">
         <div class="footer-inner">
-            <button class="btn-view-cart" onclick="openCart()">🛍️ Carrito <span id="footerCount">(0)</span></button>
+            <button class="btn-view-cart" onclick="openCart()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Carrito <span id="footerCount">(0)</span>
+            </button>
             <button class="btn-checkout" onclick="handleCheckout()">Pagar →</button>
         </div>
     </div>
 </div>
 
-<!-- ══════════ MODAL CLAVE / PAGO ══════════ -->
+<!-- ══════ MODAL PIN / PAGO ══════ -->
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal-box">
         <div class="modal-handle"></div>
-
-        <!-- SECCIÓN: CLAVE SECRETA (exactamente 5 artículos) -->
         <div id="seccionClave">
             <div class="modal-title">🔐 Verificación de cuenta</div>
-            <div class="modal-sub">Ingresa tu código de cliente para continuar con la compra</div>
+            <div class="modal-sub">Ingresa tu código de cliente para continuar</div>
             <div class="pin-wrap" id="pinWrap"></div>
             <div class="pin-error" id="pinError"></div>
             <button class="btn-primary" onclick="verificarClave()">Verificar →</button>
             <button class="btn-secondary" onclick="closeModal()">Cancelar</button>
         </div>
-
-        <!-- SECCIÓN: PAGO FALSO (más o menos de 5) -->
         <div id="seccionPago" class="pay-section">
             <div class="modal-title">💳 Finalizar compra</div>
-            <div class="modal-sub">Pago 100% seguro • Datos cifrados</div>
+            <div class="modal-sub">Pago 100% seguro · Datos cifrados</div>
             <div class="order-summary" id="orderSummary"></div>
             <div class="card-brand-row">
-                <span class="brand-chip">💳 Visa</span>
-                <span class="brand-chip">💳 Mastercard</span>
-                <span class="brand-chip">💳 Amex</span>
+                <span class="brand-chip">Visa</span>
+                <span class="brand-chip">Mastercard</span>
+                <span class="brand-chip">Amex</span>
             </div>
             <label class="form-label">Número de tarjeta</label>
             <input class="form-input" id="cardNum" placeholder="1234 5678 9012 3456" maxlength="19" oninput="fmtCard(this)">
@@ -315,18 +709,18 @@
 </div>
 <div class="toast" id="toast"></div>
 
-<!-- NOTIF CAMUFLADA -->
+<!-- NOTIF -->
 <div class="promo-notif" id="promoNotif">
     <div class="promo-notif-icon" id="promoNotifIcon">🛍️</div>
     <div class="promo-notif-body">
-        <div class="promo-notif-app"  id="promoNotifApp">VibeStore</div>
+        <div class="promo-notif-app" id="promoNotifApp">VibeStore</div>
         <div class="promo-notif-title" id="promoNotifTitle">¡Oferta relámpago!</div>
-        <div class="promo-notif-sub"  id="promoNotifSub">Descuentos hasta 50%</div>
+        <div class="promo-notif-sub" id="promoNotifSub">Descuentos hasta 50%</div>
     </div>
     <div class="promo-notif-time" id="promoNotifTime">ahora</div>
 </div>
 
-<!-- ══════════ CHAT ══════════ -->
+<!-- ══════ CHAT ══════ -->
 <div id="seccion-chat">
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
@@ -338,19 +732,36 @@
         </div>
     </div>
     <div class="chat-header">
-        <div class="chat-meta">
-            <div class="chat-status-dot"></div>
-            <div class="chat-header-info">
-                <p>SecureChannel</p>
-                <p id="onlineStatus">Conectando…</p>
+        <div class="chat-header-inner">
+            <div class="chat-meta">
+                <div class="chat-status-dot"></div>
+                <div>
+                    <p class="ch-title">SecureChannel</p>
+                    <p class="ch-sub" id="onlineStatus">Conectando…</p>
+                </div>
+            </div>
+            <div class="chat-header-actions">
+                <!-- Voice call — SF Phone icon -->
+                <button class="btn-call btn-call-voice" onclick="startCall('voice')" aria-label="Llamada de voz">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.61 21 3 13.39 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                    </svg>
+                </button>
+                <!-- Video call — SF Video icon -->
+                <button class="btn-call btn-call-video" onclick="startCall('video')" aria-label="Videollamada">
+                    <svg viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15 10l4.55-2.07A1 1 0 0 1 21 8.87v6.26a1 1 0 0 1-1.45.9L15 14v-4zM3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z"/>
+                    </svg>
+                </button>
+                <!-- Panic exit -->
+                <button class="btn-panic" onclick="panicExit()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Salir
+                </button>
             </div>
         </div>
-        <div class="chat-header-actions">
-            <button class="btn-support-call"  onclick="startCall('voice')">📞 Voz</button>
-            <button class="btn-support-video" onclick="startCall('video')">📹 Video</button>
-            <button class="btn-panic"         onclick="panicExit()">🏷️ Salir</button>
-        </div>
     </div>
+
     <div class="chat-messages" id="chatWorkspace">
         <div class="typing-wrap" id="typingWrap">
             <span class="typing-name" id="typingName"></span>
@@ -362,30 +773,77 @@
     <div class="chat-input-area">
         <input type="text" id="chatInput" placeholder="Escribe un mensaje…"
             onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
-        <button class="btn-send" onclick="sendMsg()">➤</button>
+        <button class="btn-send" onclick="sendMsg()" aria-label="Enviar">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2.01 21 23 12 2.01 3 2 10l15 2-15 2z"/>
+            </svg>
+        </button>
     </div>
 </div>
 
-<!-- LLAMADA -->
+<!-- ══════ LLAMADA iOS ══════ -->
 <div class="call-overlay" id="callOverlay">
-    <div class="call-video-wrap" id="callVideoWrap">
-        <video id="remoteVideo" autoplay playsinline></video>
-        <video id="localVideo"  autoplay playsinline muted></video>
-    </div>
-    <div class="call-avatar" id="callAvatar">📞</div>
-    <div>
-        <div class="call-name"   id="callPeerName">Canal Privado</div>
+    <div class="call-top">
+        <div class="call-video-wrap" id="callVideoWrap">
+            <video id="remoteVideo" autoplay playsinline></video>
+            <video id="localVideo" autoplay playsinline muted></video>
+        </div>
+        <div class="call-avatar" id="callAvatar">
+            <!-- Person silhouette -->
+            <svg viewBox="0 0 24 24" fill="white">
+                <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+            </svg>
+        </div>
+        <div class="call-name" id="callPeerName">Canal Privado</div>
         <div class="call-status" id="callStatus">Conectando…</div>
     </div>
+
+    <!-- iOS-style bottom tray -->
     <div class="call-controls">
-        <button class="call-ctrl-btn btn-mute" id="btnMute"  onclick="toggleMute()">🎤</button>
-        <button class="call-ctrl-btn btn-cam"  id="btnCam"   onclick="toggleCamera()" style="display:none">📷</button>
-        <button class="call-ctrl-btn btn-hang"               onclick="endCall()">📵</button>
-        <button class="call-ctrl-btn btn-spk"  id="btnSpk"   onclick="toggleSpeaker()">🔈</button>
+        <!-- Mute -->
+        <button class="call-ctrl" id="btnMute" onclick="toggleMute()">
+            <div class="call-ctrl-disc">
+                <!-- Mic icon -->
+                <svg viewBox="0 0 24 24" fill="white" id="muteIcon">
+                    <path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 17.93V21h2v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z"/>
+                </svg>
+            </div>
+            <span class="call-ctrl-label">Silenciar</span>
+        </button>
+
+        <!-- Hang up — rotated phone -->
+        <button class="call-ctrl" onclick="endCall()">
+            <div class="call-ctrl-disc hangup">
+                <svg viewBox="0 0 24 24" fill="white" style="transform:rotate(135deg)">
+                    <path d="M6.62 10.79a15.05 15.05 0 0 0 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1C10.61 21 3 13.39 3 4c0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
+                </svg>
+            </div>
+            <span class="call-ctrl-label">Colgar</span>
+        </button>
+
+        <!-- Speaker -->
+        <button class="call-ctrl" id="btnSpk" onclick="toggleSpeaker()">
+            <div class="call-ctrl-disc">
+                <svg viewBox="0 0 24 24" fill="white" id="spkIcon">
+                    <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                </svg>
+            </div>
+            <span class="call-ctrl-label">Altavoz</span>
+        </button>
+
+        <!-- Camera (video only) -->
+        <button class="call-ctrl" id="btnCam" onclick="toggleCamera()" style="display:none">
+            <div class="call-ctrl-disc">
+                <svg viewBox="0 0 24 24" fill="white" id="camIcon">
+                    <path d="M15 10l4.55-2.07A1 1 0 0 1 21 8.87v6.26a1 1 0 0 1-1.45.9L15 14v-4zM3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8z"/>
+                </svg>
+            </div>
+            <span class="call-ctrl-label">Cámara</span>
+        </button>
     </div>
 </div>
 
-<!-- ══════════ SCRIPTS ══════════ -->
+<!-- ══════ FIREBASE + LOGIC ══════ -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, push, onValue, set, onDisconnect,
@@ -404,12 +862,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-/* ── PRODUCTOS ── */
 const CAT_META = {
-    maquillaje:{emoji:'💄'},tecnologia:{emoji:'🔌'},
-    hogar:{emoji:'🏠'},deportes:{emoji:'⚽'}
+    maquillaje:{emoji:'💄'}, tecnologia:{emoji:'🔌'},
+    hogar:{emoji:'🏠'}, deportes:{emoji:'⚽'}
 };
-const PRICES = {maquillaje:22,tecnologia:65,hogar:27,deportes:19};
+const PRICES = {maquillaje:22, tecnologia:65, hogar:27, deportes:19};
 const products = [
     {id:1,cat:'maquillaje',name:'Paleta Nude Rose',desc:'18 tonos ultra pigmentados satinados y mate.',price:34.00,img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300'},
     {id:2,cat:'maquillaje',name:'Labial Matte Crimson',desc:'Fórmula líquida indeleble 24 horas de fijación.',price:18.50,img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300'},
@@ -453,36 +910,22 @@ const products = [
     {id:40,cat:'deportes',name:'Toalla Microfibra Dry',desc:'Secado súper rápido, compacta y ultra absorbente.',price:9.99,img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300'},
 ];
 
-/* ── ESTADO ── */
-let cart    = {maquillaje:0,tecnologia:0,hogar:0,deportes:0};
-let curCat  = 'all';
-let toastTimer;
-let myName  = '';
-let myId    = 'user_' + Math.random().toString(36).slice(2,8);
-let typingTimer;
-let seenKeys = new Set();
+let cart = {maquillaje:0,tecnologia:0,hogar:0,deportes:0};
+let curCat = 'all', toastTimer, myName='', typingTimer, seenKeys=new Set();
+let myId = 'user_' + Math.random().toString(36).slice(2,8);
 const SECRET = '10231018';
-
 const messagesRef = ref(db,'chat/messages');
 const typingRef   = ref(db,'chat/typing/'+myId);
 const presenceRef = ref(db,'chat/presence/'+myId);
 
-/* ══════════════════════════
-   TIENDA
-══════════════════════════ */
-function escHtml(s){
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function renderStore(){
-    const grid  = document.getElementById('productGrid');
+    const grid = document.getElementById('productGrid');
     const query = document.getElementById('searchBox').value.toLowerCase().trim();
-    const list  = products.filter(p=>
-        (curCat==='all'||p.cat===curCat)&&
-        (p.name.toLowerCase().includes(query)||p.desc.toLowerCase().includes(query))
-    );
+    const list = products.filter(p=>(curCat==='all'||p.cat===curCat)&&(p.name.toLowerCase().includes(query)||p.desc.toLowerCase().includes(query)));
     if(!list.length){
-        grid.innerHTML=`<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados</p><small>Prueba otra categoría.</small></div>`;
+        grid.innerHTML=`<div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>Sin resultados</p><small>Prueba otra categoría.</small></div>`;
         return;
     }
     grid.innerHTML=list.map(p=>`
@@ -492,360 +935,165 @@ function renderStore(){
                 ${CAT_META[p.cat].emoji}
                 <img src="${p.img}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
             </div>
-            <div>
+            <div class="card-body">
                 <h3 class="card-title" title="${escHtml(p.name)}">${escHtml(p.name)}</h3>
                 <p class="card-desc">${escHtml(p.desc)}</p>
-            </div>
-            <div class="card-footer">
-                <span class="price">$${p.price.toFixed(2)}</span>
-                <button class="btn-add" id="btn-${p.id}" onclick="addToCart('${p.cat}',${p.id},this)">+</button>
+                <div class="card-footer">
+                    <span class="price">$${p.price.toFixed(2)}</span>
+                    <button class="btn-add" id="btn-${p.id}" onclick="addToCart('${p.cat}',${p.id},this)">+</button>
+                </div>
             </div>
         </div>`).join('');
 }
 
 window.addToCart = function(cat,id,btn){
-    cart[cat]=(cart[cat]||0)+1;
-    updateCartUI();
-    btn.classList.add('added');
-    setTimeout(()=>btn.classList.remove('added'),400);
-    const p=products.find(x=>x.id===id);
-    showToast(`${p.name} añadido 🛍️`);
+    cart[cat]=(cart[cat]||0)+1; updateCartUI();
+    btn.classList.add('added'); setTimeout(()=>btn.classList.remove('added'),400);
+    showToast(products.find(x=>x.id===id).name+' añadido');
 };
-
-function totalItems(){
-    return Object.values(cart).reduce((a,b)=>a+b,0);
-}
-
+function totalItems(){ return Object.values(cart).reduce((a,b)=>a+b,0); }
 function updateCartUI(){
-    const total=totalItems();
-    const badge=document.getElementById('cartBadge');
-    badge.textContent=total;
-    badge.classList.remove('pop');
-    void badge.offsetWidth;
-    badge.classList.add('pop');
-    document.getElementById('footerCount').textContent=`(${total})`;
+    const n=totalItems(); const badge=document.getElementById('cartBadge');
+    badge.textContent=n; badge.classList.remove('pop'); void badge.offsetWidth; badge.classList.add('pop');
+    document.getElementById('footerCount').textContent=`(${n})`;
 }
-
 window.openCart=function(){
     const cats=Object.keys(cart).filter(k=>cart[k]>0);
-    const itemsEl=document.getElementById('cartItems');
-    if(!cats.length){
-        itemsEl.innerHTML=`<p class="cart-empty-msg">Tu carrito está vacío 🛍️</p>`;
-    } else {
-        itemsEl.innerHTML=cats.map(k=>`
-            <div class="cart-item-row">
-                <span class="cat-name">${CAT_META[k].emoji} ${k}</span>
-                <div class="cat-qty">
-                    <button class="qty-btn" onclick="changeQty('${k}',-1)">−</button>
-                    <span class="qty-num">${cart[k]}</span>
-                    <button class="qty-btn" onclick="changeQty('${k}',1)">+</button>
-                </div>
-            </div>`).join('');
-        const total=cats.reduce((s,k)=>s+cart[k]*PRICES[k],0);
-        document.getElementById('cartTotal').textContent=`$${total.toFixed(2)}`;
+    const el=document.getElementById('cartItems');
+    if(!cats.length){ el.innerHTML=`<p class="cart-empty-msg">Tu carrito está vacío 🛍️</p>`; }
+    else {
+        el.innerHTML=cats.map(k=>`<div class="cart-item-row"><span class="cat-name">${CAT_META[k].emoji} ${k}</span><div class="cat-qty"><button class="qty-btn" onclick="changeQty('${k}',-1)">−</button><span class="qty-num">${cart[k]}</span><button class="qty-btn" onclick="changeQty('${k}',1)">+</button></div></div>`).join('');
+        document.getElementById('cartTotal').textContent='$'+cats.reduce((s,k)=>s+cart[k]*PRICES[k],0).toFixed(2);
     }
     document.getElementById('cartDrawer').classList.add('open');
     document.getElementById('drawerOverlay').classList.add('open');
 };
-
-window.closeCart=function(){
-    document.getElementById('cartDrawer').classList.remove('open');
-    document.getElementById('drawerOverlay').classList.remove('open');
-};
-
-window.changeQty=function(cat,delta){
-    cart[cat]=Math.max(0,(cart[cat]||0)+delta);
-    updateCartUI();
-    openCart();
-};
-
-window.filterCat=function(cat,btn){
-    curCat=cat;
-    document.querySelectorAll('.btn-cat').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    renderStore();
-};
-window.filterSearch=function(inp){
-    document.getElementById('searchClear').classList.toggle('visible',inp.value.length>0);
-    renderStore();
-};
-window.clearSearch=function(){
-    document.getElementById('searchBox').value='';
-    document.getElementById('searchClear').classList.remove('visible');
-    renderStore();
-};
-
+window.closeCart=function(){ document.getElementById('cartDrawer').classList.remove('open'); document.getElementById('drawerOverlay').classList.remove('open'); };
+window.changeQty=function(cat,delta){ cart[cat]=Math.max(0,(cart[cat]||0)+delta); updateCartUI(); openCart(); };
+window.filterCat=function(cat,btn){ curCat=cat; document.querySelectorAll('.btn-cat').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); renderStore(); };
+window.filterSearch=function(inp){ document.getElementById('searchClear').classList.toggle('visible',inp.value.length>0); renderStore(); };
+window.clearSearch=function(){ document.getElementById('searchBox').value=''; document.getElementById('searchClear').classList.remove('visible'); renderStore(); };
 let isDark=false;
 window.toggleTheme=function(){
-    isDark=!isDark;
-    document.documentElement.setAttribute('data-theme',isDark?'dark':'');
-    document.getElementById('themeBtn').textContent=isDark?'☀️':'🌙';
+    isDark=!isDark; document.documentElement.setAttribute('data-theme',isDark?'dark':'');
+    document.getElementById('themeIcon').innerHTML = isDark
+        ? '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>'
+        : '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
 };
+function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),2500); }
 
-function showToast(msg){
-    const t=document.getElementById('toast');
-    t.textContent=msg; t.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
-}
-
-/* ══════════════════════════
-   CHECKOUT — lógica principal
-   Exactamente 5 → pide clave
-   Cualquier otro número → pago falso
-══════════════════════════ */
-window.handleCheckout = function(){
-    closeCart();
-    const n = totalItems();
-    if(n===0){ showToast('🛍️ Añade productos primero'); return; }
-
-    if(n===5){
-        // Mostrar modal de clave
-        buildPinInputs();
-        document.getElementById('seccionClave').style.display='block';
-        document.getElementById('seccionPago').classList.remove('active');
-        document.getElementById('modalOverlay').classList.add('open');
-    } else {
-        // Mostrar pago falso
-        buildOrderSummary(n);
-        document.getElementById('seccionClave').style.display='none';
-        document.getElementById('seccionPago').classList.add('active');
-        document.getElementById('modalOverlay').classList.add('open');
-    }
+window.handleCheckout=function(){
+    closeCart(); const n=totalItems();
+    if(n===0){ showToast('Añade productos primero'); return; }
+    if(n===5){ buildPinInputs(); document.getElementById('seccionClave').style.display='block'; document.getElementById('seccionPago').classList.remove('active'); document.getElementById('modalOverlay').classList.add('open'); }
+    else { buildOrderSummary(); document.getElementById('seccionClave').style.display='none'; document.getElementById('seccionPago').classList.add('active'); document.getElementById('modalOverlay').classList.add('open'); }
 };
-
-window.closeModal = function(){
-    document.getElementById('modalOverlay').classList.remove('open');
-    document.getElementById('pinError').textContent='';
-    // Limpiar inputs PIN
-    document.querySelectorAll('.pin-digit').forEach(d=>d.value='');
-};
-
-/* ── PIN inputs ── */
+window.closeModal=function(){ document.getElementById('modalOverlay').classList.remove('open'); document.getElementById('pinError').textContent=''; document.querySelectorAll('.pin-digit').forEach(d=>d.value=''); };
 function buildPinInputs(){
-    const wrap = document.getElementById('pinWrap');
-    wrap.innerHTML='';
+    const wrap=document.getElementById('pinWrap'); wrap.innerHTML='';
     for(let i=0;i<8;i++){
-        const inp = document.createElement('input');
-        inp.type='password';
-        inp.maxLength=1;
-        inp.className='pin-digit';
-        inp.inputMode='numeric';
-        inp.dataset.idx=i;
-        inp.addEventListener('input', e=>{
-            if(e.target.value && i<7) wrap.children[i+1].focus();
-        });
-        inp.addEventListener('keydown', e=>{
-            if(e.key==='Backspace'&&!e.target.value&&i>0) wrap.children[i-1].focus();
-        });
+        const inp=document.createElement('input'); inp.type='password'; inp.maxLength=1; inp.className='pin-digit'; inp.inputMode='numeric'; inp.dataset.idx=i;
+        inp.addEventListener('input',e=>{ if(e.target.value&&i<7) wrap.children[i+1].focus(); });
+        inp.addEventListener('keydown',e=>{ if(e.key==='Backspace'&&!e.target.value&&i>0) wrap.children[i-1].focus(); });
         wrap.appendChild(inp);
     }
     setTimeout(()=>wrap.children[0].focus(),100);
 }
-
-window.verificarClave = function(){
-    const digits = [...document.querySelectorAll('.pin-digit')].map(d=>d.value).join('');
-    const err = document.getElementById('pinError');
+window.verificarClave=function(){
+    const digits=[...document.querySelectorAll('.pin-digit')].map(d=>d.value).join('');
+    const err=document.getElementById('pinError');
     if(digits.length<8){ err.textContent='Ingresa los 8 dígitos'; return; }
-    if(digits === SECRET){
-        err.textContent='';
-        closeModal();
-        // Abrir chat
-        document.getElementById('seccion-chat').style.display='flex';
-    } else {
-        err.textContent='Código incorrecto. Intenta de nuevo.';
-        document.querySelectorAll('.pin-digit').forEach(d=>d.value='');
-        document.querySelector('.pin-digit').focus();
-    }
+    if(digits===SECRET){ err.textContent=''; closeModal(); document.getElementById('seccion-chat').style.display='flex'; }
+    else { err.textContent='Código incorrecto. Intenta de nuevo.'; document.querySelectorAll('.pin-digit').forEach(d=>d.value=''); document.querySelector('.pin-digit').focus(); }
 };
-
-/* ── Pago falso ── */
-function buildOrderSummary(n){
+function buildOrderSummary(){
     const cats=Object.keys(cart).filter(k=>cart[k]>0);
-    const subtotal=cats.reduce((s,k)=>s+cart[k]*PRICES[k],0);
-    const envio=subtotal>80?0:5.99;
-    const total=subtotal+envio;
-    document.getElementById('orderSummary').innerHTML=`
-        ${cats.map(k=>`
-        <div class="order-row">
-            <span>${CAT_META[k].emoji} ${k} × ${cart[k]}</span>
-            <span>$${(cart[k]*PRICES[k]).toFixed(2)}</span>
-        </div>`).join('')}
-        <div class="order-row"><span>Envío</span><span>${envio===0?'Gratis':'$'+envio.toFixed(2)}</span></div>
-        <div class="order-row total"><span>Total</span><span>$${total.toFixed(2)}</span></div>`;
+    const sub=cats.reduce((s,k)=>s+cart[k]*PRICES[k],0); const ship=sub>80?0:5.99;
+    document.getElementById('orderSummary').innerHTML=cats.map(k=>`<div class="order-row"><span>${CAT_META[k].emoji} ${k} × ${cart[k]}</span><span>$${(cart[k]*PRICES[k]).toFixed(2)}</span></div>`).join('')
+        +`<div class="order-row"><span>Envío</span><span>${ship===0?'Gratis':'$'+ship.toFixed(2)}</span></div><div class="order-row total"><span>Total</span><span>$${(sub+ship).toFixed(2)}</span></div>`;
 }
+window.fmtCard=function(inp){ inp.value=inp.value.replace(/\D/g,'').slice(0,16).replace(/(.{4})/g,'$1 ').trim(); };
+window.fmtExp=function(inp){ let v=inp.value.replace(/\D/g,'').slice(0,4); if(v.length>=3) v=v.slice(0,2)+' / '+v.slice(2); inp.value=v; };
+window.procesarPago=function(){ closeModal(); showToast('✅ Pago procesado con éxito'); cart={maquillaje:0,tecnologia:0,hogar:0,deportes:0}; updateCartUI(); };
 
-window.fmtCard = function(inp){
-    let v=inp.value.replace(/\D/g,'').slice(0,16);
-    inp.value=v.replace(/(.{4})/g,'$1 ').trim();
-};
-window.fmtExp = function(inp){
-    let v=inp.value.replace(/\D/g,'').slice(0,4);
-    if(v.length>=3) v=v.slice(0,2)+' / '+v.slice(2);
-    inp.value=v;
-};
-
-window.procesarPago = function(){
-    closeModal();
-    showToast('✅ Pago procesado con éxito');
-    cart={maquillaje:0,tecnologia:0,hogar:0,deportes:0};
-    updateCartUI();
-};
-
-/* ══════════════════════════
-   NOTIFICACIÓN CAMUFLADA
-══════════════════════════ */
+/* NOTIF */
 let notifTimer;
 const PROMO_POOL=[
     {icon:'🏷️',app:'VibeStore Ofertas',title:'¡Gran descuento activo!',sub:'Hasta 50% en tecnología hoy'},
-    {icon:'📦',app:'VibeStore Envíos', title:'Tu pedido está en camino',sub:'Llega hoy entre 2–4 pm'},
+    {icon:'📦',app:'VibeStore Envíos',title:'Tu pedido está en camino',sub:'Llega hoy entre 2–4 pm'},
     {icon:'🎁',app:'VibeStore Rewards',title:'Tienes puntos por canjear',sub:'Úsalos antes de que expiren'},
-    {icon:'⚡',app:'VibeStore Flash',  title:'Oferta relámpago: −30%', sub:'Solo por las próximas 2 horas'},
-    {icon:'🛒',app:'VibeStore',        title:'Alguien compró lo que viste',sub:'Quedan pocas unidades'},
+    {icon:'⚡',app:'VibeStore Flash',title:'Oferta relámpago: −30%',sub:'Solo por las próximas 2 horas'},
+    {icon:'🛒',app:'VibeStore',title:'Alguien compró lo que viste',sub:'Quedan pocas unidades'},
 ];
-
 function showPromoNotif(title,sub,icon='🛍️',app='VibeStore'){
-    const el=document.getElementById('promoNotif');
-    const now=new Date();
+    const el=document.getElementById('promoNotif'), now=new Date();
     const hhmm=now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
-    document.getElementById('promoNotifIcon').textContent =icon;
-    document.getElementById('promoNotifApp').textContent  =app;
+    document.getElementById('promoNotifIcon').textContent=icon;
+    document.getElementById('promoNotifApp').textContent=app;
     document.getElementById('promoNotifTitle').textContent=title;
-    document.getElementById('promoNotifSub').textContent  =sub;
-    document.getElementById('promoNotifTime').textContent =hhmm;
-    el.classList.add('show');
-    clearTimeout(notifTimer);
-    notifTimer=setTimeout(()=>el.classList.remove('show'),4200);
+    document.getElementById('promoNotifSub').textContent=sub;
+    document.getElementById('promoNotifTime').textContent=hhmm;
+    el.classList.add('show'); clearTimeout(notifTimer); notifTimer=setTimeout(()=>el.classList.remove('show'),4200);
 }
+function showTypingNotif(name){ const p=PROMO_POOL[Math.floor(Math.random()*PROMO_POOL.length)]; showPromoNotif(p.title,p.sub+' · '+name,p.icon,p.app); }
 
-function showTypingNotif(senderName){
-    const p=PROMO_POOL[Math.floor(Math.random()*PROMO_POOL.length)];
-    showPromoNotif(p.title, p.sub+' · '+senderName, p.icon, p.app);
-}
-
-/* ══════════════════════════
-   CHAT
-══════════════════════════ */
-window.joinChat = function(){
-    const inp=document.getElementById('nameInput');
-    const name=inp.value.trim();
-    if(!name){ inp.focus(); return; }
-    myName=name;
-    document.getElementById('nameModal').style.display='none';
-    set(presenceRef,{name:myName,online:true,ts:serverTimestamp()});
-    onDisconnect(presenceRef).remove();
-    listenPresence();
-    listenMessages();
-    listenTyping();
+/* CHAT */
+window.joinChat=function(){
+    const inp=document.getElementById('nameInput'); const name=inp.value.trim(); if(!name){ inp.focus(); return; }
+    myName=name; document.getElementById('nameModal').style.display='none';
+    set(presenceRef,{name:myName,online:true,ts:serverTimestamp()}); onDisconnect(presenceRef).remove();
+    listenPresence(); listenMessages(); listenTyping();
     push(messagesRef,{type:'system',text:`${myName} se unió al canal`,ts:serverTimestamp()});
 };
-
 function listenPresence(){
-    const presRef=ref(db,'chat/presence');
-    onValue(presRef,snap=>{
-        const count=Object.keys(snap.val()||{}).length;
-        document.getElementById('onlineStatus').textContent=
-            count===1?'Solo tú online':`${count} personas online`;
+    onValue(ref(db,'chat/presence'),snap=>{
+        const n=Object.keys(snap.val()||{}).length;
+        document.getElementById('onlineStatus').textContent=n===1?'Solo tú online':`${n} personas online`;
     });
 }
-
 function listenMessages(){
     onValue(messagesRef,snap=>{
-        const data=snap.val()||{};
-        const ws=document.getElementById('chatWorkspace');
-        const typingEl=document.getElementById('typingWrap');
+        const data=snap.val()||{}; const ws=document.getElementById('chatWorkspace'); const te=document.getElementById('typingWrap');
         Object.entries(data).forEach(([key,msg])=>{
-            if(seenKeys.has(key)) return;
-            seenKeys.add(key);
+            if(seenKeys.has(key)) return; seenKeys.add(key);
             let el;
-            if(msg.type==='system'){
-                el=document.createElement('div');
-                el.className='msg-system';
-                el.textContent=msg.text||'';
-            } else {
-                const isMine=msg.senderId===myId;
-                const wrap=document.createElement('div');
-                wrap.className='msg-wrap '+(isMine?'mine':'theirs');
+            if(msg.type==='system'){ el=document.createElement('div'); el.className='msg-system'; el.textContent=msg.text||''; }
+            else {
+                const mine=msg.senderId===myId; const wrap=document.createElement('div'); wrap.className='msg-wrap '+(mine?'mine':'theirs');
                 const time=msg.ts?new Date(msg.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
-                wrap.innerHTML=`
-                    ${!isMine?`<div class="msg-sender">${escHtml(msg.sender||'?')}</div>`:''}
-                    <div class="msg ${isMine?'mine':'theirs'}">${escHtml(msg.text||'')}</div>
-                    <div class="msg-time">${time}</div>`;
+                wrap.innerHTML=`${!mine?`<div class="msg-sender">${escHtml(msg.sender||'?')}</div>`:''}<div class="msg ${mine?'mine':'theirs'}">${escHtml(msg.text||'')}</div><div class="msg-time">${time}</div>`;
                 el=wrap;
             }
-            ws.insertBefore(el,typingEl);
+            ws.insertBefore(el,te);
         });
         ws.scrollTop=ws.scrollHeight;
     });
 }
-
 function listenTyping(){
     onValue(ref(db,'chat/typing'),snap=>{
-        const others=Object.entries(snap.val()||{})
-            .filter(([id,v])=>id!==myId&&v&&v.name).map(([,v])=>v.name);
+        const others=Object.entries(snap.val()||{}).filter(([id,v])=>id!==myId&&v&&v.name).map(([,v])=>v.name);
         const wrap=document.getElementById('typingWrap');
-        if(others.length){
-            document.getElementById('typingName').textContent=others[0];
-            wrap.classList.add('show');
-            showTypingNotif(others[0]);
-        } else {
-            wrap.classList.remove('show');
-        }
-        document.getElementById('chatWorkspace').scrollTop=
-            document.getElementById('chatWorkspace').scrollHeight;
+        if(others.length){ document.getElementById('typingName').textContent=others[0]; wrap.classList.add('show'); showTypingNotif(others[0]); }
+        else { wrap.classList.remove('show'); }
+        document.getElementById('chatWorkspace').scrollTop=document.getElementById('chatWorkspace').scrollHeight;
     });
 }
-
-window.handleTyping=function(){
-    set(typingRef,{name:myName,ts:serverTimestamp()});
-    clearTimeout(typingTimer);
-    typingTimer=setTimeout(()=>remove(typingRef),2500);
-};
-
+window.handleTyping=function(){ set(typingRef,{name:myName,ts:serverTimestamp()}); clearTimeout(typingTimer); typingTimer=setTimeout(()=>remove(typingRef),2500); };
 window.handleChatKey=function(e){ if(e.key==='Enter') sendMsg(); };
+window.sendMsg=function(){ const inp=document.getElementById('chatInput'); const text=inp.value.trim(); if(!text||!myName) return; inp.value=''; remove(typingRef); push(messagesRef,{text,sender:myName,senderId:myId,ts:serverTimestamp()}); };
 
-window.sendMsg=function(){
-    const inp=document.getElementById('chatInput');
-    const text=inp.value.trim();
-    if(!text||!myName) return;
-    inp.value='';
-    remove(typingRef);
-    push(messagesRef,{text,sender:myName,senderId:myId,ts:serverTimestamp()});
-};
-
-/* ══════════════════════════
-   PÁNICO
-══════════════════════════ */
-window.panicExit = async function(){
-    remove(typingRef);
-    remove(presenceRef);
-    const snap=await get(messagesRef);
-    if(snap.exists()){
-        snap.forEach(c=>{
-            if(c.val().senderId===myId) remove(ref(db,'chat/messages/'+c.key));
-        });
-    }
-    off(messagesRef);
-    off(ref(db,'chat/typing'));
-    off(ref(db,'chat/presence'));
-    seenKeys.clear();
-    myName='';
-    document.getElementById('nameInput').value='';
-    document.getElementById('chatWorkspace').innerHTML=`
-        <div class="typing-wrap" id="typingWrap">
-            <span class="typing-name" id="typingName"></span>
-            <div class="typing-bubble">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-            </div>
-        </div>`;
+window.panicExit=async function(){
+    remove(typingRef); remove(presenceRef);
+    const snap=await get(messagesRef); if(snap.exists()) snap.forEach(c=>{ if(c.val().senderId===myId) remove(ref(db,'chat/messages/'+c.key)); });
+    off(messagesRef); off(ref(db,'chat/typing')); off(ref(db,'chat/presence'));
+    seenKeys.clear(); myName=''; document.getElementById('nameInput').value='';
+    document.getElementById('chatWorkspace').innerHTML=`<div class="typing-wrap" id="typingWrap"><span class="typing-name" id="typingName"></span><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;
     document.getElementById('nameModal').style.display='flex';
     document.getElementById('seccion-chat').style.display='none';
     showPromoNotif('¡Descuento especial para ti!','Usa el código VIBE20 antes de medianoche','🏷️','VibeStore Ofertas');
 };
 
-/* ══════════════════════════
-   LLAMADAS WebRTC
-══════════════════════════ */
+/* LLAMADAS */
 let localStream=null,peerConn=null,callRoomId=null,isMuted=false,isCamOff=false;
 const ICE={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
 
@@ -854,70 +1102,54 @@ window.startCall=async function(type){
     try{ localStream=await navigator.mediaDevices.getUserMedia(constraints); }
     catch(e){ showPromoNotif('Permiso requerido','Activa micrófono/cámara en ajustes','⚙️','Sistema'); return; }
     callRoomId=myId+'_'+Date.now();
-    if(type==='video'){
-        document.getElementById('localVideo').srcObject=localStream;
-        document.getElementById('callVideoWrap').classList.add('active');
-        document.getElementById('callAvatar').style.display='none';
-        document.getElementById('btnCam').style.display='flex';
-    } else {
-        document.getElementById('callVideoWrap').classList.remove('active');
-        document.getElementById('callAvatar').style.display='flex';
-        document.getElementById('btnCam').style.display='none';
-    }
+    if(type==='video'){ document.getElementById('localVideo').srcObject=localStream; document.getElementById('callVideoWrap').classList.add('active'); document.getElementById('callAvatar').style.display='none'; document.getElementById('btnCam').style.display='flex'; }
+    else { document.getElementById('callVideoWrap').classList.remove('active'); document.getElementById('callAvatar').style.display='flex'; document.getElementById('btnCam').style.display='none'; }
     document.getElementById('callStatus').textContent='Esperando conexión…';
     document.getElementById('callOverlay').classList.add('active');
     peerConn=new RTCPeerConnection(ICE);
     localStream.getTracks().forEach(t=>peerConn.addTrack(t,localStream));
     const remoteStream=new MediaStream();
-    peerConn.ontrack=e=>{
-        e.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t));
-        if(type==='video') document.getElementById('remoteVideo').srcObject=remoteStream;
-        document.getElementById('callStatus').textContent='Conectado ✓';
-    };
+    peerConn.ontrack=e=>{ e.streams[0].getTracks().forEach(t=>remoteStream.addTrack(t)); if(type==='video') document.getElementById('remoteVideo').srcObject=remoteStream; document.getElementById('callStatus').textContent='Conectado ✓'; };
     const roomRef=ref(db,'calls/'+callRoomId);
     peerConn.onicecandidate=e=>{ if(e.candidate) push(ref(db,'calls/'+callRoomId+'/callerCandidates'),e.candidate.toJSON()); };
-    const offer=await peerConn.createOffer();
-    await peerConn.setLocalDescription(offer);
+    const offer=await peerConn.createOffer(); await peerConn.setLocalDescription(offer);
     await set(roomRef,{offer:{type:offer.type,sdp:offer.sdp},callType:type});
-    onValue(roomRef,async snap=>{
-        const data=snap.val();
-        if(data&&data.answer&&peerConn.currentRemoteDescription===null){
-            await peerConn.setRemoteDescription(new RTCSessionDescription(data.answer));
-        }
-    });
-    onValue(ref(db,'calls/'+callRoomId+'/calleeCandidates'),snap=>{
-        snap.forEach(c=>peerConn.addIceCandidate(new RTCIceCandidate(c.val())));
-    });
+    onValue(roomRef,async snap=>{ const d=snap.val(); if(d&&d.answer&&peerConn.currentRemoteDescription===null) await peerConn.setRemoteDescription(new RTCSessionDescription(d.answer)); });
+    onValue(ref(db,'calls/'+callRoomId+'/calleeCandidates'),snap=>{ snap.forEach(c=>peerConn.addIceCandidate(new RTCIceCandidate(c.val()))); });
     showPromoNotif(type==='video'?'Soporte video iniciado':'Soporte por voz','Un agente se está conectando',type==='video'?'📹':'📞','VibeStore Soporte');
 };
 
 window.endCall=function(){
-    if(peerConn){peerConn.close();peerConn=null;}
-    if(localStream) localStream.getTracks().forEach(t=>t.stop());
+    if(peerConn){peerConn.close();peerConn=null;} if(localStream) localStream.getTracks().forEach(t=>t.stop());
     if(callRoomId) remove(ref(db,'calls/'+callRoomId));
     document.getElementById('callOverlay').classList.remove('active');
-    document.getElementById('remoteVideo').srcObject=null;
-    document.getElementById('localVideo').srcObject=null;
-    document.getElementById('callVideoWrap').classList.remove('active');
-    document.getElementById('callAvatar').style.display='flex';
-};
-window.toggleMute=function(){
-    if(!localStream)return; isMuted=!isMuted;
-    localStream.getAudioTracks().forEach(t=>t.enabled=!isMuted);
-    document.getElementById('btnMute').textContent=isMuted?'🔇':'🎤';
-};
-window.toggleCamera=function(){
-    if(!localStream)return; isCamOff=!isCamOff;
-    localStream.getVideoTracks().forEach(t=>t.enabled=!isCamOff);
-    document.getElementById('btnCam').textContent=isCamOff?'🚫':'📷';
-};
-window.toggleSpeaker=function(){
-    const v=document.getElementById('remoteVideo');
-    v.muted=!v.muted;
-    document.getElementById('btnSpk').textContent=v.muted?'🔇':'🔈';
+    document.getElementById('remoteVideo').srcObject=null; document.getElementById('localVideo').srcObject=null;
+    document.getElementById('callVideoWrap').classList.remove('active'); document.getElementById('callAvatar').style.display='flex';
 };
 
-/* ── INIT ── */
+window.toggleMute=function(){
+    if(!localStream) return; isMuted=!isMuted;
+    localStream.getAudioTracks().forEach(t=>t.enabled=!isMuted);
+    const btn=document.getElementById('btnMute'); btn.classList.toggle('toggled',isMuted);
+    document.getElementById('muteIcon').innerHTML = isMuted
+        ? '<path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4z" opacity=".4"/><line x1="2" y1="2" x2="22" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>'
+        : '<path d="M12 1a4 4 0 0 1 4 4v7a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm-1 17.93V21h2v-2.07A8 8 0 0 0 20 11h-2a6 6 0 0 1-12 0H4a8 8 0 0 0 7 7.93z"/>';
+};
+
+window.toggleCamera=function(){
+    if(!localStream) return; isCamOff=!isCamOff;
+    localStream.getVideoTracks().forEach(t=>t.enabled=!isCamOff);
+    document.getElementById('btnCam').classList.toggle('toggled',isCamOff);
+};
+
+window.toggleSpeaker=function(){
+    const v=document.getElementById('remoteVideo'); v.muted=!v.muted;
+    document.getElementById('btnSpk').classList.toggle('toggled',v.muted);
+    document.getElementById('spkIcon').innerHTML = v.muted
+        ? '<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>'
+        : '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>';
+};
+
 renderStore();
 </script>
 </body>
