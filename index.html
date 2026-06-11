@@ -222,6 +222,23 @@
         .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
         .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
         .msg.only-emoji-bubble { background: transparent !important; border: none !important; font-size: 2.85rem; padding: 0.2rem 0.5rem; line-height: 1.2; display: inline-block; }
+
+        /* WhatsApp-style animated emojis */
+        .ani-emoji { display: inline-block; transform-origin: center; }
+        .ani-heart { animation: wa-heart 1s infinite cubic-bezier(0.215,0.61,0.355,1); }
+        .ani-face { animation: wa-face 1.4s infinite ease-in-out; }
+        .ani-fire { animation: wa-fire 1.8s infinite ease-in-out; transform-origin: bottom center; }
+        .ani-thumb { animation: wa-thumb 1.6s infinite ease-in-out; }
+        .ani-clap { animation: wa-clap 0.9s infinite ease-in-out; }
+        .ani-bounce { animation: wa-generic 2s infinite ease-in-out; }
+        @keyframes wa-heart { 0%{transform:scale(1)} 14%{transform:scale(1.25)} 28%{transform:scale(1)} 42%{transform:scale(1.18)} 70%{transform:scale(1)} }
+        @keyframes wa-face { 0%,100%{transform:translateY(0) scale(1)} 30%{transform:translateY(-8px) scale(1.05)} 50%{transform:translateY(2px) scale(0.95)} }
+        @keyframes wa-fire { 0%,100%{transform:scale(1) rotate(-2deg);filter:brightness(1)} 50%{transform:scale(1.12) rotate(3deg);filter:brightness(1.2)} }
+        @keyframes wa-thumb { 0%,100%{transform:rotate(0) scale(1)} 25%{transform:rotate(-12deg) scale(1.1)} 50%{transform:rotate(8deg) scale(1.05)} }
+        @keyframes wa-clap { 0%,100%{transform:scale(1) rotate(0)} 50%{transform:scale(1.15) rotate(-8deg)} }
+        @keyframes wa-generic { 0%,100%{transform:scale(1)} 50%{transform:scale(1.13)} }
+
+        .typing-name { font-size: 0.72rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.2rem; padding: 0 0.4rem; display: block; }
         
         .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
@@ -467,6 +484,7 @@
 
     <div class="chat-messages" id="chatWorkspace">
         <div class="typing-wrap" id="typingWrap">
+            <span class="typing-name" id="typingName"></span>
             <div class="typing-bubble">
                 <div class="dot"></div><div class="dot"></div><div class="dot"></div>
             </div>
@@ -474,7 +492,7 @@
     </div>
 
     <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" autocomplete="off">
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" oninput="handleTyping()" autocomplete="off">
         <button class="btn-send" onclick="sendMsg()">➤</button>
     </div>
 </div>
@@ -867,14 +885,83 @@
             document.getElementById('onlineStatus').textContent = `${Object.values(snap.val() || {}).length} en línea`;
         });
         listenForIncomingCalls();
+        listenForTyping();
     };
 
     window.sendMsg = function() {
         const input = document.getElementById('chatInput'); if (!input.value.trim()) return;
         push(messagesRef, { type: 'text', text: input.value.trim(), sender: myName, senderId: myId, ts: Date.now() });
         input.value = '';
+        // Clear my typing status as soon as I send
+        clearTimeout(typingTimer);
+        set(ref(db, 'chat/typing/' + myId), null);
     };
     window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
+
+    /* ── EMOJI PARSING & ANIMATION (WhatsApp style) ── */
+    // Detects messages that are ONLY emojis and wraps each in an animated span.
+    function checkAndParseEmojiMessage(text) {
+        const raw = (text || '').trim();
+        // Unicode emoji matcher
+        const emojiRegex = /(\p{Extended_Pictographic}(\u200d\p{Extended_Pictographic})*[\uFE0F\u20E3]?|[\u{1F3FB}-\u{1F3FF}])/gu;
+        const stripped = raw.replace(emojiRegex, '').replace(/\s/g, '');
+        const matches = raw.match(emojiRegex) || [];
+        // Only-emoji message with up to 6 emojis → animate them big
+        const isEmoji = stripped.length === 0 && matches.length > 0 && matches.length <= 6;
+
+        if (!isEmoji) {
+            return { isEmoji: false, html: escHtml(raw) };
+        }
+        const html = matches.map(e => {
+            const cls = pickEmojiAnimation(e);
+            return `<span class="ani-emoji ${cls}">${e}</span>`;
+        }).join('');
+        return { isEmoji: true, html };
+    }
+
+    function pickEmojiAnimation(emoji) {
+        const hearts = ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💖','💗','💓','💞','💕','💘','♥️'];
+        const fire = ['🔥'];
+        const faces = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😍','🥰','😘','😎','🤩','😜','😉','🙂','😇'];
+        const thumbs = ['👍','👎'];
+        const claps = ['👏','🙌'];
+        if (hearts.includes(emoji)) return 'ani-heart';
+        if (fire.includes(emoji)) return 'ani-fire';
+        if (faces.includes(emoji)) return 'ani-face';
+        if (thumbs.includes(emoji)) return 'ani-thumb';
+        if (claps.includes(emoji)) return 'ani-clap';
+        return 'ani-bounce';
+    }
+
+    /* ── TYPING INDICATOR ── */
+    let typingTimer;
+    window.handleTyping = function() {
+        if (!inChat) return;
+        set(ref(db, 'chat/typing/' + myId), { name: myName, ts: Date.now() });
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => { set(ref(db, 'chat/typing/' + myId), null); }, 2500);
+    };
+
+    function listenForTyping() {
+        onValue(ref(db, 'chat/typing'), snap => {
+            const data = snap.val() || {};
+            const now = Date.now();
+            // Find someone (not me) typing within the last 4 seconds
+            const other = Object.entries(data).find(([id, v]) =>
+                id !== myId && v && v.ts && (now - v.ts) < 4000
+            );
+            const typingWrap = document.getElementById('typingWrap');
+            const typingName = document.getElementById('typingName');
+            if (other) {
+                typingName.textContent = other[1].name || 'Alguien';
+                typingWrap.classList.add('show');
+                const ws = document.getElementById('chatWorkspace');
+                ws.scrollTop = ws.scrollHeight;
+            } else {
+                typingWrap.classList.remove('show');
+            }
+        });
+    }
 
     function renderMessage(msg, key) {
         if (msg.senderId !== myId && !inChat) { triggerCamouflageOfferBanner(); return; }
@@ -888,10 +975,12 @@
         const wrap = document.createElement('div');
         wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
         wrap.id = `wrap-${key}`;
+        const parsed = checkAndParseEmojiMessage(msg.text);
+        const bubbleClass = parsed.isEmoji ? 'msg only-emoji-bubble' : `msg ${isMe ? 'mine' : 'theirs'}`;
         wrap.innerHTML = `
             ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender || 'Anónimo')}</span>` : ''}
             <div class="msg-body-container">
-                <div class="msg ${isMe ? 'mine' : 'theirs'}">${escHtml(msg.text)}</div>
+                <div class="${bubbleClass}">${parsed.html}</div>
             </div>
             <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>`;
         ws.insertBefore(wrap, typingWrap);
