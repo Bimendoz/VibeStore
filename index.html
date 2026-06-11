@@ -110,6 +110,10 @@
         .toast { position: fixed; bottom: calc(5.5rem + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-main); color: var(--bg-card); padding: 0.7rem 1.3rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 300; pointer-events: none; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+        /* EMPTY STATE */
+        .empty-state { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 3rem 1rem; color: var(--text-muted); text-align: center; }
+        .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+
         /* PAYMENT MODAL & TOAST PROMO */
         .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         .payment-modal.open { opacity: 1; pointer-events: all; }
@@ -133,7 +137,6 @@
         .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; }
         .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
         
-        /* BOTONES DE LLAMADA MEJORADOS CON DISEÑO APPLE GLASS (DEGRADADO Y CONTROL SVG) */
         .chat-header-actions { display: flex; gap: 0.65rem; align-items: center; }
         .btn-call-trigger { border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s, filter 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
         .btn-call-trigger:active { transform: scale(0.9); }
@@ -199,7 +202,6 @@
         .ft-btn:active { transform: scale(0.9); }
         .ft-btn svg { width: 22px; height: 22px; fill: currentColor; }
         
-        /* Estados activos para Mute y Video Desactivado según iOS */
         .ft-btn.active { background: #fff; color: #000; }
         .ft-btn.btn-hangup { background: var(--red); width: 56px; height: 56px; transform: rotate(135deg); }
         .ft-btn.btn-hangup:active { background: #d9261c; }
@@ -292,7 +294,6 @@
             </div>
         </div>
         <div class="chat-header-actions">
-            <!-- ICONOS CAMBIADOS A BOTONES DE GRADIENTES CON SVG VECTORIALES DE APPLE (FOTO image.png ARREGLADA) -->
             <button class="btn-call-trigger audio-style" onclick="initiateCall('audio')" title="Llamada FaceTime">
                 <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
             </button>
@@ -318,7 +319,7 @@
     </div>
 </div>
 
-<!-- ── PANTALLA FACETIME FULLSCREEN (FOTO image_2.png ARREGLADA) ── -->
+<!-- ── PANTALLA FACETIME FULLSCREEN ── -->
 <div id="seccion-facetime">
     <div class="ft-video-container">
         <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
@@ -332,21 +333,16 @@
     </div>
 
     <div class="ft-controls-panel">
-        <!-- BOTÓN MICROFONO SF SYMBOLS STYLE -->
         <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">
             <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.2 6 6.6V21h2v-3.4c3.28-.4 6-3.18 6-6.6h-1.7z"/></svg>
         </button>
-        <!-- BOTÓN CÁMARA SF SYMBOLS STYLE -->
         <button class="ft-btn" id="btnFtVideo" onclick="toggleVideoTrack()">
-            <svg viewBox="0 0 24 24"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h4v-4z M21 4H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H3V6h18v12z"/></svg>
+            <svg viewBox="0 0 24 24"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h4v-2z M21 4H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H3V6h18v12z"/></svg>
         </button>
-        <!-- BOTÓN MINIMIZAR / CHAT -->
         <button class="ft-btn" onclick="minimizeCallToChat()" title="Volver al chat">
             <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
         </button>
-        <!-- BOTÓN PÁNICO FLOTANTE -->
         <button class="ft-btn btn-ft-panic" onclick="panicExit()">PANIC</button>
-        <!-- BOTÓN COLGAR TELÉFONO INVERTIDO APPLE -->
         <button class="ft-btn btn-hangup" onclick="hangUpCall()">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
         </button>
@@ -372,13 +368,55 @@
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
-    /* ── DATA ── */
-    const CAT_META = { maquillaje: { emoji: '💄' }, tecnologia: { emoji: '🔌' }, hogar: { emoji: '🏠' }, deportes: { emoji: '⚽' } };
+    /* ── CATS & TODOS LOS 40 PRODUCTOS ORIGINALES RESTAURADOS ── */
+    const CAT_META = {
+        maquillaje: { emoji: '💄' },
+        tecnologia:  { emoji: '🔌' },
+        hogar:       { emoji: '🏠' },
+        deportes:    { emoji: '⚽' },
+    };
+
     const products = [
-        { id:1,  cat:'maquillaje', name:'Paleta Nude Rose',        desc:'18 tonos ultra pigmentados.', price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:11, cat:'tecnologia', name:'Pods Max Pro',             desc:'Audio espacial inmersivo.',   price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
-        { id:21, cat:'hogar',      name:'Difusor Ultrasónico',     desc:'Luz ambiental relajante.',    price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
-        { id:31, cat:'deportes',   name:'Botella de Acero Pro',    desc:'Aislamiento térmico al vacío.',price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' }
+        { id:1,  cat:'maquillaje', name:'Paleta Nude Rose',        desc:'18 tonos ultra pigmentados satinados y mate.',         price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
+        { id:2,  cat:'maquillaje', name:'Labial Matte Crimson',    desc:'Fórmula líquida indeleble 24 horas de fijación.',      price:18.50, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
+        { id:3,  cat:'maquillaje', name:'Base Hydra Glow',         desc:'Acabado natural con ácido hialurónico.',               price:29.00, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
+        { id:4,  cat:'maquillaje', name:'Máscara Lash Lift',       desc:'Volumen extremo y curvas perfectas sin grumos.',       price:16.00, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
+        { id:5,  cat:'maquillaje', name:'Iluminador Stardust',     desc:'Polvo compacto con destellos holográficos.',           price:22.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
+        { id:6,  cat:'maquillaje', name:'Fijador de Maquillaje',   desc:'Bruma hidratante acabado mate larga duración.',        price:15.00, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
+        { id:7,  cat:'maquillaje', name:'Corrector Full Coverage', desc:'Oculta imperfecciones de forma ligera.',               price:14.20, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300' },
+        { id:8,  cat:'maquillaje', name:'Rubor Líquido Blush',     desc:'Tono coral natural de fácil difuminado.',              price:19.00, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
+        { id:9,  cat:'maquillaje', name:'Delineador Ink Black',    desc:'Punta de fieltro a prueba de agua y sudor.',          price:12.50, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
+        { id:10, cat:'maquillaje', name:'Sérum Primer Control',    desc:'Prepara la piel minimizando poros abiertos.',         price:26.00, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
+        { id:11, cat:'tecnologia', name:'Pods Max Pro',             desc:'Audio espacial inmersivo y cancelación activa.',      price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
+        { id:12, cat:'tecnologia', name:'Smartband Series 7',      desc:'Monitor de oxígeno y pantalla AMOLED de 1.69".',      price:45.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
+        { id:13, cat:'tecnologia', name:'Teclado Mecánico Swift',  desc:'Switches lineales amarillos y layout del 65%.',       price:89.00, img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300' },
+        { id:14, cat:'tecnologia', name:'Mouse Ergonómico Air',    desc:'Sensor óptico de 16000 DPI con agarre premium.',      price:54.00, img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300' },
+        { id:15, cat:'tecnologia', name:'Cargador GaN 65W',        desc:'Triple puerto de carga rápida ultra compacto.',       price:32.00, img:'https://images.unsplash.com/photo-1619134177114-f8605c2a13ba?w=300' },
+        { id:16, cat:'tecnologia', name:'Hub USB-C 8 en 1',        desc:'Salida HDMI 4K, lectores SD y puertos USB 3.0.',      price:39.99, img:'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=300' },
+        { id:17, cat:'tecnologia', name:'Batería Magsafe Slim',    desc:'Ajuste magnético perfecto de 10000mAh.',              price:42.00, img:'https://images.unsplash.com/photo-1622445262465-2481c4574875?w=300' },
+        { id:18, cat:'tecnologia', name:'Luz LED Streamer RGB',    desc:'Panel de iluminación regulable mediante app.',        price:68.00, img:'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=300' },
+        { id:19, cat:'tecnologia', name:'Bocina BT Waterproof',    desc:'Sonido estéreo 360 grados resistente al agua.',       price:59.00, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
+        { id:20, cat:'tecnologia', name:'Micrófono USB Vocal',     desc:'Patrón cardioide ideal para pódcast y llamadas.',     price:79.00, img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300' },
+        { id:21, cat:'hogar',      name:'Difusor Ultrasónico',     desc:'Luz ambiental y vaporización de aceites esenciales.', price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
+        { id:22, cat:'hogar',      name:'Taza Térmica Inteligente',desc:'Mantiene la temperatura exacta de tus bebidas.',      price:35.00, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300' },
+        { id:23, cat:'hogar',      name:'Lámpara de Luna 3D',      desc:'Esfera táctil recargable con 3 tonos de luz.',        price:19.99, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
+        { id:24, cat:'hogar',      name:'Set de Cojines Velvet',   desc:'Dos piezas de texturas suaves color gris nórdico.',   price:28.00, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
+        { id:25, cat:'hogar',      name:'Velitas Aromáticas Cera', desc:'Pack de 3 aromas relajantes de lavanda y vainilla.',  price:15.00, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
+        { id:26, cat:'hogar',      name:'Organizador Escritorio',  desc:'Madera de bambú sustentable de alta calidad.',        price:22.50, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        { id:27, cat:'hogar',      name:'Planta Artificial Monstera',desc:'Maceta cerámica incluida, decoración minimalista.', price:31.00, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
+        { id:28, cat:'hogar',      name:'Cafetera Prensa Francesa', desc:'Vidrio borosilicato resistente a altas temperaturas.',price:26.90, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300' },
+        { id:29, cat:'hogar',      name:'Espejo de Mesa LED',      desc:'Aumento de 5x con rotación ajustable.',               price:18.00, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
+        { id:30, cat:'hogar',      name:'Humidificador Cute Pet',  desc:'Diseño compacto ideal para buró de noche.',           price:14.00, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
+        { id:31, cat:'deportes',   name:'Botella de Acero Pro',    desc:'Aislamiento al vacío térmico por 24 horas.',          price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
+        { id:32, cat:'deportes',   name:'Bandas de Resistencia',   desc:'Set de 5 intensidades con agarres cómodos.',         price:16.50, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' },
+        { id:33, cat:'deportes',   name:'Mat de Yoga Ecológico',   desc:'Grosor antideslizante de 6mm TPE premium.',           price:35.00, img:'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=300' },
+        { id:34, cat:'deportes',   name:'Cuerda Saltar Speed',     desc:'Baleros de alta velocidad entrenamiento funcional.',  price:12.00, img:'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=300' },
+        { id:35, cat:'deportes',   name:'Mancuernas Neopreno Hex', desc:'Par de pesas de 2.5kg con diseño texturizado.',      price:24.00, img:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300' },
+        { id:36, cat:'deportes',   name:'Maletín Deportivo Active',desc:'Compartimento separado para tenis húmedos.',         price:39.00, img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300' },
+        { id:37, cat:'deportes',   name:'Rodillo Masajeador Foam', desc:'Liberación miofascial post-entrenamiento.',          price:19.50, img:'https://images.unsplash.com/photo-1600881333168-2ef49b341f30?w=300' },
+        { id:38, cat:'deportes',   name:'Guantes Gimnasio Breath', desc:'Protección con gel antideslizante en las palmas.',   price:14.00, img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300' },
+        { id:39, cat:'deportes',   name:'Smart Shaker Pro',        desc:'Mezclador de proteína con compartimentos internos.',  price:15.90, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
+        { id:40, cat:'deportes',   name:'Toalla Microfibra Dry',   desc:'Secado súper rápido, compacta y ultra absorbente.',   price:9.99,  img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300' },
     ];
 
     /* ── STATE ── */
@@ -400,56 +438,174 @@
 
     function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    /* ── STORE & CHECKOUT ── */
+    /* ── TIMELINE DE RENDERIZADO DE TIENDA Y BUSCADORES ── */
     function renderStore() {
-        const grid = document.getElementById('productGrid');
-        if (!grid) return;
-        grid.innerHTML = products.map(p => `
+        const grid  = document.getElementById('productGrid');
+        const queryVal = document.getElementById('searchBox').value.toLowerCase().trim();
+        const list  = products.filter(p =>
+            (curCat === 'all' || p.cat === curCat) &&
+            (p.name.toLowerCase().includes(queryVal) || p.desc.toLowerCase().includes(queryVal))
+        );
+        if (!list.length) {
+            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados</p><small>Prueba otra categoría o palabra clave.</small></div>`;
+            return;
+        }
+        grid.innerHTML = list.map(p => `
             <div class="card">
                 <span class="card-tag">${CAT_META[p.cat].emoji} ${p.cat}</span>
-                <div class="img-container"><img src="${p.img}" loading="lazy"></div>
-                <div><h3 class="card-title">${escHtml(p.name)}</h3><p class="card-desc">${escHtml(p.desc)}</p></div>
-                <div class="card-footer"><span class="price">$${p.price.toFixed(2)}</span>
-                <button class="btn-add" onclick="addToCart(${p.id}, this)">+</button></div>
+                <div class="img-container">
+                    ${CAT_META[p.cat].emoji}
+                    <img src="${p.img}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
+                </div>
+                <div>
+                    <h3 class="card-title" title="${escHtml(p.name)}">${escHtml(p.name)}</h3>
+                    <p class="card-desc">${escHtml(p.desc)}</p>
+                </div>
+                <div class="card-footer">
+                    <span class="price">$${p.price.toFixed(2)}</span>
+                    <button class="btn-add" id="btn-${p.id}" onclick="addToCart(${p.id}, this)">+</button>
+                </div>
             </div>`).join('');
     }
 
     window.addToCart = function(id, btn) {
         cart[id] = (cart[id] || 0) + 1;
         const total = totalItems();
+        const badge = document.getElementById('cartBadge');
+        badge.textContent = total;
+        badge.classList.remove('pop');
+        void badge.offsetWidth;
+        badge.classList.add('pop');
+        
+        btn.classList.add('added'); btn.textContent = '✓';
+        setTimeout(() => { btn.classList.remove('added'); btn.textContent = '+'; }, 700);
+        
+        document.getElementById('footerCount').textContent = `(${total})`;
+        const p = products.find(x => x.id === id);
+        showToast(`${p.name} añadido ✓`);
+    };
+
+    function changeQty(id, delta) {
+        if (!cart[id]) return;
+        cart[id] += delta;
+        if (cart[id] <= 0) delete cart[id];
+        
+        const total = totalItems();
         document.getElementById('cartBadge').textContent = total;
         document.getElementById('footerCount').textContent = `(${total})`;
-        showToast("Producto añadido");
-    };
+        renderCartDrawer();
+    }
+    window.changeQty = changeQty;
+
     function totalItems() { return Object.values(cart).reduce((a,b)=>a+b,0); }
 
     window.openCart = function() { renderCartDrawer(); document.getElementById('drawerOverlay').classList.add('open'); document.getElementById('cartDrawer').classList.add('open'); };
     window.closeCart = function() { document.getElementById('drawerOverlay').classList.remove('open'); document.getElementById('cartDrawer').classList.remove('open'); };
 
     function renderCartDrawer() {
+        const wrap = document.getElementById('cartItems');
+        const total = totalItems();
+        if (!total) {
+            wrap.innerHTML = `<div class="cart-empty-msg">🛒 Tu carrito está vacío.</div>`;
+            document.getElementById('cartTotal').textContent = '$0.00';
+            return;
+        }
+        
         let totalPrice = 0;
-        const html = Object.entries(cart).map(([idStr, qty]) => {
-            const p = products.find(x => x.id === parseInt(idStr));
+        let html = '';
+        
+        Object.entries(cart).forEach(([idStr, qty]) => {
+            const id = parseInt(idStr);
+            const p = products.find(x => x.id === id);
+            if (!p) return;
             totalPrice += p.price * qty;
-            return `<div class="cart-item-row"><div class="cat-info"><span class="cat-name">${p.name}</span></div><span>${qty} un.</span></div>`;
-        }).join('');
-        document.getElementById('cartItems').innerHTML = html || '<div class="cart-empty-msg">Vacío</div>';
+            
+            html += `
+            <div class="cart-item-row">
+                <div class="cat-info">
+                    <span class="cat-name">${CAT_META[p.cat].emoji} ${escHtml(p.name)}</span>
+                    <span class="cat-price-sub">$${p.price.toFixed(2)} x ${qty}</span>
+                </div>
+                <div class="cat-qty">
+                    <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+                    <span class="qty-num">${qty}</span>
+                    <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+                </div>
+            </div>`;
+        });
+        
+        wrap.innerHTML = html;
         document.getElementById('cartTotal').textContent = `$${totalPrice.toFixed(2)}`;
     }
 
+    window.filterCat = function(cat, btn) {
+        document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        curCat = cat;
+        renderStore();
+    };
+
+    window.filterSearch = function(input) {
+        document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0);
+        renderStore();
+    };
+
+    window.clearSearch = function() {
+        const box = document.getElementById('searchBox');
+        box.value = '';
+        document.getElementById('searchClear').classList.remove('visible');
+        renderStore();
+    };
+
+    /* ── CAMBIO DE TEMA CLARO A OSCURO COMPLETAMENTE FUNCIONAL ── */
+    window.toggleTheme = function() {
+        const dark = document.body.getAttribute('data-theme') === 'dark';
+        document.body.setAttribute('data-theme', dark ? '' : 'dark');
+        document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
+    };
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    /* ── LÓGICA DE PAGOS Y CHECKOUT SECRETO ── */
+    window.openPaymentPortal = function() { document.getElementById('paymentModal').classList.add('open'); }
+    window.closePaymentPortal = function() { document.getElementById('paymentModal').classList.remove('open'); }
+    window.processPayment = function() {
+        showToast('Procesando pago...');
+        setTimeout(() => {
+            showToast('Pago completado con éxito ✓');
+            closePaymentPortal();
+            cart = {};
+            document.getElementById('cartBadge').textContent = '0';
+            document.getElementById('footerCount').textContent = '(0)';
+        }, 1500);
+    }
+
     window.handleCheckout = function() {
-        if (totalItems() === 5) {
+        const total = totalItems();
+        if (total === 0) { showToast('Tu carrito está vacío 🛒'); return; }
+        
+        if (total === 5) {
             if (prompt("Canal seguro:") === SECRET_PIN_HASH) {
                 document.getElementById('vista-tienda').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'flex';
-                cart = {}; document.getElementById('nameModal').style.display = 'flex';
+                cart = {}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';
+                document.getElementById('nameModal').style.display = 'flex';
+            } else {
+                showToast('PIN incorrecto. Redirigiendo a pasarela normal.');
+                openPaymentPortal();
             }
-        } else { document.getElementById('paymentModal').classList.add('open'); }
+        } else {
+            openPaymentPortal();
+        }
     };
-    window.closePaymentPortal = function() { document.getElementById('paymentModal').classList.remove('open'); };
-    window.processPayment = function() { showToast("Pago completado"); closePaymentPortal(); cart={}; };
 
-    /* ── SECCIÓN CHAT & AUTODESTRUCCIÓN ── */
+    /* ── SECCIÓN CHAT, CONTADORES Y DESTRUCCIÓN PARTICULAS ── */
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim();
         if (!myName) return;
@@ -603,7 +759,7 @@
             if (data && data.status === 'ended') cleanUpCallUI();
         });
 
-        onValue(ref(db, `chat/calls/${activeCallRef.key}/receiverCandidates`), snapshot => {
+        onValue(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), snapshot => {
             if (snapshot.exists()) {
                 Object.values(snapshot.val()).forEach(cand => peerConnection.addIceCandidate(new RTCIcandidate(cand)));
             }
@@ -680,7 +836,6 @@
     window.minimizeCallToChat = function() {
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-chat').style.display = 'flex';
-        showToast("Llamada activa en segundo plano...");
     };
 
     window.hangUpCall = function() {
@@ -707,6 +862,7 @@
         });
     };
 
+    /* ── BOOT INIT ── */
     renderStore();
     onValue(query(messagesRef, limitToLast(50)), (snapshot) => {
         const data = snapshot.val(); if (!data) return;
