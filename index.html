@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>VibeStore</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VibeStore">
+
+    <style>
+        :root {
+            --bg-body: #f7f8fa;
+            --bg-card: #ffffff;
+            --bg-nav: #ffffff;
+            --text-main: #1c1c1e;
+            --text-muted: #8e8e93;
+            --purple-accent: #ff441f; 
+            --purple-light: #fff0ed;
+            --green: #28a745;
+            --blue-apple: #007aff;
+            --red: #ff3b30;
+            --border-color: #f2f2f7;
+            --shadow: 0 4px 14px rgba(0,0,0,0.04);
+            --safe-top: env(safe-area-inset-top, 0px);
+            --safe-bottom: env(safe-area-inset-bottom, 0px);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            body:not([data-theme="light"]) {
+                --bg-body: #121212; --bg-card: #1c1c1e; --bg-nav: #1c1c1e;
+                --text-main: #f5f5f7; --text-muted: #8e8e93; --purple-accent: #ff5533;
+                --purple-light: #2c1611; --border-color: #2c1c1e;
+                --shadow: 0 4px 20px rgba(0,0,0,0.4);
+            }
+        }
+
+        [data-theme="dark"] {
+            --bg-body: #121212; --bg-card: #1c1c1e; --bg-nav: #1c1c1e;
+            --text-main: #f5f5f7; --text-muted: #8e8e93; --purple-accent: #ff5533;
+            --purple-light: #2c1611; --border-color: #2c1c1e;
+            --shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+        
+        [data-theme="light"] {
+            --bg-body: #f7f8fa; --bg-card: #ffffff; --bg-nav: #ffffff;
+            --text-main: #1c1c1e; --text-muted: #8e8e93; --purple-accent: #ff441f;
+            --purple-light: #fff0ed; --border-color: #f2f2f7;
+            --shadow: 0 4px 14px rgba(0,0,0,0.04);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body { 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            transition: background-color 0.3s, color 0.3s; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden;
+            overscroll-behavior: none; 
+        }
+
+        header { background-color: var(--bg-nav); padding: calc(var(--safe-top) + 0.8rem) 1.2rem 0.8rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.4rem; font-weight: 900; letter-spacing: -0.7px; color: var(--purple-accent); text-transform: uppercase; }
+        .header-actions { display: flex; align-items: center; gap: 0.8rem; }
+        
+        .icon-btn { background: none; border: none; cursor: pointer; color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; transition: transform 0.15s; touch-action: manipulation; }
+        .icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        
+        .cart-btn { background: transparent; color: var(--text-main); position: relative; }
+        .badge { position: absolute; top: 2px; right: -2px; background-color: var(--purple-accent); color: #fff; font-size: 0.65rem; font-weight: 800; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .badge.pop { animation: pop 0.3s cubic-bezier(0.36,0.07,0.19,0.97); }
+        @keyframes pop { 0%,100%{transform:scale(1)} 40%{transform:scale(1.3)} 70%{transform:scale(0.95)} }
+
+        .promo-banner-top { background: #ffe600; color: #000; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; font-weight: 700; cursor: pointer; margin-bottom: 0.2rem; }
+        .promo-banner-top p { max-width: 85%; line-height: 1.3; }
+
+        .toast-promo-container { position: fixed; top: calc(var(--safe-top) + 65px); left: 50%; transform: translateX(-50%) translateY(-150px); background: var(--bg-card); border-left: 4px solid var(--purple-accent); padding: 0.9rem 1.1rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 4000; opacity: 0; transition: transform 0.4s cubic-bezier(0.32,0.72,0,1), opacity 0.3s; display: flex; align-items: center; gap: 0.8rem; width: 92%; max-width: 400px; color: var(--text-main); pointer-events: none; }
+        .toast-promo-container.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
+        .toast-promo-title { font-size: 0.85rem; font-weight: 800; color: var(--purple-accent); margin-bottom: 0.1rem; }
+        .toast-promo-desc { font-size: 0.78rem; font-weight: 500; color: var(--text-main); }
+
+        .nav-scroller { overflow-x: auto; white-space: nowrap; padding: 0.75rem 1rem; background: var(--bg-nav); border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+        .nav-scroller::-webkit-scrollbar { display: none; }
+        .btn-cat { display: inline-flex; align-items: center; background: var(--bg-body); border: 1px solid transparent; color: var(--text-main); padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-right: 0.5rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; text-transform: capitalize; }
+        .btn-cat.active { background: var(--purple-light); color: var(--purple-accent); border-color: var(--purple-accent); }
+
+        .main-content { flex: 1; padding: 0.8rem 1rem 0; max-width: 600px; margin: 0 auto; width: 100%; }
+        .search-wrap { position: relative; margin-bottom: 1rem; }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; display: flex; align-items: center; }
+        .search-icon svg { width: 16px; height: 16px; fill: currentColor; }
+        .search-input { width: 100%; background: var(--bg-nav); border: 1px solid var(--border-color); padding: 0.75rem 2.5rem 0.75rem 2.4rem; border-radius: 12px; color: var(--text-main); outline: none; font-size: 0.9rem; -webkit-appearance: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); }
+        .search-clear { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); font-size: 0.9rem; cursor: pointer; display: none; }
+        .search-clear.visible { display: block; }
+
+        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; padding-bottom: 140px; }
+        .card { background: var(--bg-card); border-radius: 16px; padding: 0.6rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.2s; }
+        .card:active { transform: scale(0.98); }
+        .img-container { width: 100%; aspect-ratio: 1/1; border-radius: 12px; background: #eef0f2; margin-bottom: 0.6rem; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        .card-tag { position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.55rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; z-index: 2; letter-spacing: 0.3px; }
+        .card-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.15rem; line-height: 1.3; height: 34px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-main); }
+        .card-desc { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.6rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 28px; line-height: 1.3; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+        .price { font-weight: 800; font-size: 0.95rem; color: var(--text-main); }
+        
+        .btn-add { background: var(--purple-accent); color: #fff; border: none; width: 32px; height: 32px; border-radius: 10px; font-weight: 700; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; touch-action: manipulation; }
+        .btn-add.added { background: var(--green); }
+
+        .empty-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 4rem 1rem; color: var(--text-muted); text-align: center; font-size: 0.85rem; }
+
+        /* CART DRAWER */
+        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .drawer-overlay.open { opacity: 1; pointer-events: all; }
+        .cart-drawer { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: 24px 24px 0 0; z-index: 201; transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); padding: 0 1.2rem calc(1.2rem + var(--safe-bottom)); max-height: 75vh; overflow-y: auto; }
+        .cart-drawer.open { transform: translateY(0); }
+        .drawer-handle { width: 36px; height: 5px; background: #e5e5ea; border-radius: 3px; margin: 0.8rem auto 1rem; }
+        .drawer-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.8rem; }
+        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
+        .cat-info { display: flex; flex-direction: column; gap: 0.1rem; max-width: 70%; }
+        .cat-name { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cat-price-sub { font-size: 0.75rem; color: var(--text-muted); margin-left: 0.1rem; }
+        .cat-qty { display: flex; align-items: center; gap: 0.6rem; }
+        .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 28px; height: 28px; border-radius: 50%; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.5rem; }
+        .cart-total-value { font-size: 1.15rem; font-weight: 900; }
+
+        /* FOOTER */
+        .footer-checkout { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); padding: 0.7rem 1.2rem calc(0.7rem + var(--safe-bottom)); background: var(--bg-nav); border-top: 1px solid var(--border-color); z-index: 90; max-width: 600px; width: 100%; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); }
+        .footer-inner { display: flex; gap: 0.7rem; align-items: center; }
+        .btn-view-cart { flex: 1; background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+        .btn-checkout { flex: 2; background: var(--purple-accent); color: #fff; border: none; padding: 0.85rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
+
+        /* INTERFAZ CHAT */
+        #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
+        .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
+        .chat-status-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
+        @keyframes pulse-dot { 0%,100%{box-shadow: 0 0 0 2px rgba(40,167,69,0.3)} 50%{box-shadow: 0 0 0 6px rgba(40,167,69,0)} }
+        .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; }
+        .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
+        .chat-header-actions { display: flex; gap: 0.65rem; align-items: center; }
+        .btn-call-trigger { border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s; }
+        .btn-call-trigger:active { transform: scale(0.9); }
+        .btn-call-trigger.audio-style { background: linear-gradient(135deg, #34c759, #28a745); }
+        .btn-call-trigger.video-style { background: linear-gradient(135deg, #007aff, #0056b3); }
+        .btn-call-trigger svg { width: 18px; height: 18px; fill: currentColor; }
+        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; }
+
+        .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .name-modal-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; }
+        .name-modal-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
+        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+
+        .chat-messages { flex: 1; padding: 1.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; position: relative; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
+        .msg-wrap { display: flex; flex-direction: column; max-width: 78%; position: relative; transition: opacity 0.4s ease; }
+        .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
+        .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
+        .msg-sender { font-size: 0.72rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.25rem; padding: 0 0.4rem; display: block; width: 100%; }
+        .msg-body-container { display: flex; align-items: center; gap: 0.5rem; position: relative; width: 100%; }
+        .msg-wrap.theirs .msg-body-container { justify-content: flex-start; }
+        .msg-wrap.mine .msg-body-container { justify-content: flex-end; }
+        .msg { padding: 0.85rem 1.05rem; border-radius: 20px; font-size: 0.92rem; line-height: 1.45; word-break: break-word; position: relative; }
+        .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
+        .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
+        .msg.only-emoji-bubble { background: transparent !important; border: none !important; font-size: 2.85rem; padding: 0.2rem 0.5rem; line-height: 1.2; display: inline-block; }
+        
+        .ani-heart { display: inline-block; animation: whatsapp-heart 1s infinite cubic-bezier(0.215, 0.61, 0.355, 1); transform-origin: center; }
+        .ani-face { display: inline-block; animation: whatsapp-face 1.4s infinite ease-in-out; }
+        .ani-fire { display: inline-block; animation: whatsapp-fire 1.8s infinite ease-in-out; transform-origin: bottom center; }
+        .ani-bounce { display: inline-block; animation: whatsapp-generic 2s infinite ease-in-out; }
+        @keyframes whatsapp-heart { 0% { transform: scale(1); } 14% { transform: scale(1.22); } 28% { transform: scale(1); } 42% { transform: scale(1.18); } 70% { transform: scale(1); } }
+        @keyframes whatsapp-face { 0%, 100% { transform: translateY(0) scale(1); } 30% { transform: translateY(-8px) scale(1.05); } 50% { transform: translateY(2px) scale(0.95); } }
+        @keyframes whatsapp-fire { 0%, 100% { transform: scale(1) rotate(-2deg); filter: brightness(1); } 50% { transform: scale(1.1) rotate(3deg); filter: brightness(1.2); } }
+        @keyframes whatsapp-generic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+
+        .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; animation: pulse-timer 1s infinite alternate; flex-shrink: 0; }
+        .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
+        .disintegrating { pointer-events: none; }
+        .particle { position: absolute; background: var(--purple-accent); border-radius: 50%; pointer-events: none; opacity: 0.8; }
+
+        .typing-wrap { align-self: flex-start; display: none; align-items: center; gap: 0.5rem; padding: 0.5rem 0; }
+        .typing-wrap.show { display: flex; }
+        .typing-bubble { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; border-bottom-left-radius: 4px; padding: 0.75rem 1rem; display: flex; gap: 4px; align-items: center; }
+        .dot { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+        .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; }
+
+        .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
+        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
+
+        /* INTERFAZ FACETIME */
+        #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2.5rem) 2rem calc(var(--safe-bottom) + 3.5rem); color: #fff; overscroll-behavior: none; }
+        .ft-video-container { position: absolute; inset: 0; z-index: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .ft-video-remote { width: 100%; height: 100%; object-fit: cover; }
+        .ft-video-local { position: absolute; top: 2rem; right: 2rem; width: 110px; height: 160px; border-radius: 18px; object-fit: cover; z-index: 5; border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 12px 24px rgba(0,0,0,0.4); transform: scaleX(-1); }
+        .ft-overlay-info { position: relative; z-index: 2; text-align: center; margin-top: 1.5rem; }
+        .ft-avatar { width: 96px; height: 96px; background: rgba(255,255,255,0.11); backdrop-filter: blur(25px); border-radius: 50%; margin: 0 auto 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.18); color: #fff; text-transform: uppercase; }
+        .ft-name { font-size: 1.8rem; font-weight: 600; letter-spacing: -0.5px; }
+        .ft-status { font-size: 0.92rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; font-weight: 400; }
+        .ft-controls-panel { position: relative; z-index: 2; background: rgba(28, 28, 30, 0.45); backdrop-filter: blur(35px) saturate(200%); padding: 1.1rem; border-radius: 38px; width: 100%; max-width: 340px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+        .ft-btn { background: rgba(255,255,255,0.12); border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: background 0.2s, transform 0.1s; touch-action: manipulation; }
+        .ft-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        .ft-btn.active { background: #fff; color: #000; }
+        .ft-btn.btn-hangup { background: var(--red); width: 56px; height: 56px; transform: rotate(135deg); }
+        .ft-btn.btn-ft-panic { background: rgba(255, 59, 48, 0.25); color: #ff453a; font-weight: 700; font-size: 0.72rem; border: 1px solid rgba(255, 59, 48, 0.3); }
+    </style>
+</head>
+<body>
+
+<div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100vh;">
+    <header>
+        <div class="logo">VibeStore</div>
+        <div class="header-actions">
+            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">
+                <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+            </button>
+            <button class="icon-btn cart-btn" onclick="openCart()">
+                <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-8.9-5h7.45c.75 0 1.41-.41 1.75-1.03l3.58-7.49c.37-.77-.19-1.63-1.05-1.63H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+                <span class="badge" id="cartBadge">0</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="promo-banner-top">
+        <p>¡Ofertas de hoy! Combo de hamburguesa artesanal + papas por $24.900 COP en restaurantes seleccionados.</p>
+        <span>→</span>
+    </div>
+
+    <div class="toast-promo-container" id="fakeOfferToast">
+        <div>
+            <div class="toast-promo-title" id="fakeOfferTitle">¡Cupón Activado!</div>
+            <div class="toast-promo-desc" id="fakeOfferDesc">Obtén $10.000 COP de descuento.</div>
+        </div>
+    </div>
+
+    <nav class="nav-scroller">
+        <button class="btn-cat active" onclick="filterCat('all',this)">Todo</button>
+        <button class="btn-cat" onclick="filterCat('tecnologia',this)">Tecnología</button>
+        <button class="btn-cat" onclick="filterCat('comida',this)">Restaurantes</button>
+        <button class="btn-cat" onclick="filterCat('mercado',this)">Supermercado</button>
+        <button class="btn-cat" onclick="filterCat('maquillaje',this)">Maquillaje</button>
+        <button class="btn-cat" onclick="filterCat('moda',this)">Moda</button>
+        <button class="btn-cat" onclick="filterCat('futbol',this)">Deportes</button>
+        <button class="btn-cat" onclick="filterCat('hogar',this)">Hogar</button>
+        <button class="btn-cat" onclick="filterCat('drogueria',this)">Bienestar</button>
+    </nav>
+
+    <main class="main-content">
+        <div class="search-wrap">
+            <span class="search-icon">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 5 9.5 11.99 14 9.5 14z"/></svg>
+            </span>
+            <input type="search" id="searchBox" class="search-input" placeholder="Buscar productos destacados…" oninput="filterSearch(this)" autocomplete="off">
+            <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+        </div>
+        <div class="grid-productos" id="productGrid"></div>
+    </main>
+
+    <div class="footer-checkout">
+        <div class="footer-inner">
+            <button class="btn-view-cart" onclick="openCart()">Canasta <span id="footerCount">(0)</span></button>
+            <button class="btn-checkout" onclick="handleCheckout()">Continuar pedido →</button>
+        </div>
+    </div>
+</div>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+    <div class="drawer-handle"></div>
+    <h2 class="drawer-title">Mi Canasta</h2>
+    <div id="cartItems"></div>
+    <div class="cart-total-row">
+        <span class="cart-total-label">Subtotal</span>
+        <span class="cart-total-value" id="cartTotal">$0</span>
+    </div>
+    <div class="footer-checkout" style="position: static; padding: 0; margin-top: 1rem;">
+        <button class="btn-pay" onclick="closeCart(); handleCheckout();">Ir a Pagar</button>
+    </div>
+</div>
+
+<div class="payment-modal" id="paymentModal">
+    <div class="payment-box">
+        <button class="btn-close-pay" onclick="closePaymentPortal()">✕</button>
+        <h2>Pasarela de Pago Segura PayU</h2>
+        <input type="text" placeholder="Número de tarjeta de crédito" maxlength="19">
+        <input type="text" placeholder="Nombre completo titular impreso">
+        <div style="display: flex; gap: 1rem;">
+            <input type="text" placeholder="MM/AA" maxlength="5">
+            <input type="text" placeholder="CVV" maxlength="4">
+        </div>
+        <button class="btn-pay" onclick="processPayment()">Verificar Pago</button>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div id="seccion-chat">
+    <div class="name-modal" id="nameModal">
+        <div class="name-modal-box">
+            <h2>👋 Conexión Segura</h2>
+            <p>Ingresa un pseudónimo cifrado</p>
+            <input type="text" id="nameInput" placeholder="Alias…" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
+            <button class="btn-join" onclick="joinChat()">Establecer Enlace →</button>
+        </div>
+    </div>
+
+    <div class="chat-header">
+        <div class="chat-meta">
+            <div class="chat-status-dot"></div>
+            <div class="chat-header-info">
+                <p>SecureChannel</p>
+                <p id="onlineStatus">Sincronizando…</p>
+            </div>
+        </div>
+        <div class="chat-header-actions">
+            <button class="btn-call-trigger audio-style" onclick="initiateCall('audio')">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+            </button>
+            <button class="btn-call-trigger video-style" onclick="initiateCall('video')">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            </button>
+            <button class="btn-panic" onclick="panicExit()">⚠ PÁNICO</button>
+        </div>
+    </div>
+
+    <div class="chat-messages" id="chatWorkspace">
+        <div class="typing-wrap" id="typingWrap">
+            <span class="typing-name" id="typingName"></span>
+            <div class="typing-bubble">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
+        <button class="btn-send" onclick="sendMsg()">➤</button>
+    </div>
+</div>
+
+<div id="seccion-facetime">
+    <div class="ft-video-container">
+        <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
+        <video class="ft-video-local" id="localVideo" autoplay playsinline muted></video>
+    </div>
+    <div class="ft-overlay-info">
+        <div class="ft-avatar" id="ftAvatar">U</div>
+        <div class="ft-name" id="ftTargetName">Enlace Seguro</div>
+        <div class="ft-status" id="ftCallStatus">Estableciendo FaceTime...</div>
+    </div>
+    <div class="ft-controls-panel">
+        <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.2 6 6.6V21h2v-3.4c3.28-.4 6-3.18 6-6.6h-1.7z"/></svg>
+        </button>
+        <button class="ft-btn" id="btnFtVideo" onclick="toggleVideoTrack()">
+            <svg viewBox="0 0 24 24"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2z M21 4H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H3V6h18v12z"/></svg>
+        </button>
+        <button class="ft-btn" onclick="minimizeCallToChat()">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+        </button>
+        <button class="ft-btn btn-ft-panic" onclick="panicExit()">PANIC</button>
+        <button class="ft-btn btn-hangup" onclick="hangUpCall()">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+        </button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, remove, update, off }
+        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+    /* ── FIREBASE CONFIG ── */
+    const firebaseConfig = {
+        apiKey: "AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo",
+        authDomain: "data-base-store-3bbf8.firebaseapp.com",
+        databaseURL: "https://data-base-store-3bbf8-default-rtdb.firebaseio.com",
+        projectId: "data-base-store-3bbf8",
+        storageBucket: "data-base-store-3bbf8.firebasestorage.app",
+        messagingSenderId: "705642961874",
+        appId: "1:705642961874:web:06262c925765027ee7460b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db  = getDatabase(app);
+
+    const CAT_META = { tecnologia: {}, comida: {}, mercado: {}, maquillaje: {}, moda: {}, futbol: {}, hogar: {}, drogueria: {} };
+    
+    /* ── DATA MASIVA 100 REFERENCIAS 100% VALIDADAS (CON PARÁMETROS DE RENDER CDN PERMANENTES) ── */
+    const products = [
+        // 1. TECNOLOGÍA
+        { id:1,  cat:'tecnologia', name:'Apple iPhone 16 Pro Max 256GB', desc:'Titanio de grado aeroespacial, chip M-Series avanzado y pantalla Super Retina XDR.', price:6499000, img:'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=300&q=80' },
+        { id:2,  cat:'tecnologia', name:'Apple iPhone 16 128GB Black', desc:'Control de cámara avanzado, chip A18, carcasa de aluminio premium reciclado.', price:3849000, img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=300&q=80' },
+        { id:3,  cat:'tecnologia', name:'Apple AirPods 4 Inalámbricos', desc:'Cancelación activa de ruido con ajuste ergonómico acústico renovado.', price:899900, img:'https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3?auto=format&fit=crop&w=300&q=80' },
+        { id:4,  cat:'tecnologia', name:'Apple Watch Series 10 GPS 46mm', desc:'Carcasa de aluminio, pantalla OLED Always-On y sensores de salud integrados.', price:2149900, img:'https://images.unsplash.com/photo-1517502884422-41eacef01689?auto=format&fit=crop&w=300&q=80' },
+        { id:5,  cat:'tecnologia', name:'Apple MacBook Air 13" M3 256GB SSD', desc:'Procesador Apple Silicon M3, diseño ultradelgado en aluminio anodizado.', price:5499000, img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=300&q=80' },
+        { id:6,  cat:'tecnologia', name:'Sony PlayStation 5 Slim 1TB', desc:'Carga veloz con SSD de alta velocidad y soporte para gatillos adaptativos.', price:2399000, img:'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=300&q=80' },
+        { id:7,  cat:'tecnologia', name:'Televisor LG Smart TV 55" 4K', desc:'Pantalla UHD con inteligencia artificial ThinQ y colores nítidos.', price:1999900, img:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=300&q=80' },
+        { id:8,  cat:'tecnologia', name:'Parlante Bluetooth JBL Charge 5', desc:'Sonido pro potente e impermeable IP67 con batería de larga duración.', price:649900, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=300&q=80' },
+        { id:9,  cat:'tecnologia', name:'Samsung Galaxy Tab S9 128GB', desc:'Pantalla AMOLED fluida de alto rendimiento, incluye lápiz óptico S-Pen.', price:2499900, img:'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=300&q=80' },
+        { id:10, cat:'tecnologia', name:'Cámara Mirrorless Sony Alpha 6400', desc:'Lente 16-50mm, enfoque automático ultrarrápido para fotografía y vlogs.', price:3999000, img:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=300&q=80' },
+        { id:11, cat:'tecnologia', name:'Nintendo Switch OLED Modelo', desc:'Pantalla de 7 pulgadas con contraste definido y base con puerto LAN.', price:1649900, img:'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=300&q=80' },
+        { id:12, cat:'tecnologia', name:'Monitor Gamer ASUS 27" 165Hz', desc:'Panel IPS plano, tiempo de respuesta de 1ms, ideal para eSports.', price:1149900, img:'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=300&q=80' },
+
+        // 2. RESTAURANTES / COMIDA
+        { id:13, cat:'comida', name:'Combo de Alitas Picantes Tradicionales', desc:'6 Alitas crujientes con salsa de la casa, papas medianas y gaseosa.', price:29900, img:'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=300&q=80' },
+        { id:14, cat:'comida', name:'Hamburguesa Artesanal Doble Carne', desc:'Doble carne artesanal de res, queso cheddar, tocineta ahumada y vegetales.', price:38900, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80' },
+        { id:15, cat:'comida', name:'Pizza Familiar de Pepperoni', desc:'Masa tradicional delgada, pepperoni de la casa y abundante queso mozzarella.', price:45900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=300&q=80' },
+        { id:16, cat:'comida', name:'Picada Criolla Mixta Mediana', desc:'Chicharrón carnudo, chorizo santandereano, papa criolla y arepitas.', price:54000, img:'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80' },
+        { id:17, cat:'comida', name:'Combo Sushi Rama Variado x10u', desc:'Cortes variados con salmón, aguacate, queso crema y ajonjolí tostado.', price:32900, img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=300&q=80' },
+        { id:18, cat:'comida', name:'Arroz Especial con Pollo y Verduras', desc:'Receta típica casera con pollo desmechado, verdura fresca y papas fritas.', price:24900, img:'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80' },
+        { id:19, cat:'comida', name:'Burrito Extremo de Carne Asada', desc:'Tortilla de trigo rellena de lomo, frijoles negros, guacamole y queso.', price:26900, img:'https://images.unsplash.com/photo-1626700051175-6518c4793f4f?auto=format&fit=crop&w=300&q=80' },
+        { id:20, cat:'comida', name:'Malteada Espesa de Chocolate Fino', desc:'Hecha con helado artesanal, salsa premium y crema chantilly.', price:14900, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=300&q=80' },
+        { id:21, cat:'comida', name:'Ensalada César con Pechuga', desc:'Mix de lechugas frescas, crutones crujientes, queso parmesano y pollo.', price:23500, img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=300&q=80' },
+        { id:22, cat:'comida', name:'Tacos Mexicanos al Pastor x3', desc:'Carne de cerdo adobada, piña fresca, cebolla picada y cilantro fino.', price:18900, img:'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?auto=format&fit=crop&w=300&q=80' },
+        { id:23, cat:'comida', name:'Lasaña Casera de Carne Bolognesa', desc:'Pasta artesanal por capas con carne picada de res, salsa y queso fundido.', price:29900, img:'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?auto=format&fit=crop&w=300&q=80' },
+        { id:24, cat:'comida', name:'Porción Empanadas Crujientes x5', desc:'Masa de maíz frita rellena de carne aliñada, incluye ají casero.', price:11500, img:'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=300&q=80' },
+
+        // 3. SUPERMERCADO
+        { id:25, cat:'mercado', name:'Whisky Escocés Blended 12 Años', desc:'Botella original de 750ml, blend premium añejado en roble.', price:187100, img:'https://images.unsplash.com/photo-1527281400683-1aae777175f8?auto=format&fit=crop&w=300&q=80' },
+        { id:26, cat:'mercado', name:'Arándanos Azules Frescos Caja 125g', desc:'Fruta fresca seleccionada de alta calidad rica en antioxidantes.', price:11900, img:'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&w=300&q=80' },
+        { id:27, cat:'mercado', name:'Café Molido Premium Tostado 500g', desc:'Café de origen 100% colombiano seleccionado de aroma intenso.', price:15900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=300&q=80' },
+        { id:28, cat:'mercado', name:'Aceite Puro de Girasol Botella 1L', desc:'Ideal para freír y cocinar de manera saludable, libre de grasas trans.', price:13900, img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=300&q=80' },
+        { id:29, cat:'mercado', name:'Leche Entera Larga Vida Pack x6', desc:'Bolsas de 900ml de leche entera higienizada fortificada.', price:26400, img:'https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=300&q=80' },
+        { id:30, cat:'mercado', name:'Arroz Blanco Extrafino Bolsa 5kg', desc:'Grano largo seleccionado, no se pega, ideal para preparaciones diarias.', price:21900, img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=300&q=80' },
+        { id:31, cat:'mercado', name:'Cerveza Nacional Rubia Latas Pack x6', desc:'Lager refrescante tradicional colombiana de 330ml por lata.', price:16800, img:'https://images.unsplash.com/photo-1608270586620-248524c67de9?auto=format&fit=crop&w=300&q=80' },
+        { id:32, cat:'mercado', name:'Filete de Salmón Premium Fresco 500g', desc:'Corte limpio empacado al vacío con piel listo para asar.', price:46900, img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=300&q=80' },
+        { id:33, cat:'mercado', name:'Chocolate en Pastillas para Desayuno', desc:'Pastillas de cacao tradicional colombiano endulzado de 500g.', price:9400, img:'https://images.unsplash.com/photo-1544967082-d9d25d867d66?auto=format&fit=crop&w=300&q=80' },
+        { id:34, cat:'mercado', name:'Detergente Líquido Concentrado 3L', desc:'Fórmula avanzada para el cuidado de ropa blanca y de color.', price:42900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&w=300&q=80' },
+        { id:35, cat:'mercado', name:'Papel Higiénico Hoja Doble x12 Rollos', desc:'Rollos de doble hoja acolchada de máxima suavidad y resistencia.', price:23500, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=300&q=80' },
+        { id:36, cat:'mercado', name:'Queso Crema Tajado Colanta 400g', desc:'Textura cremosa ideal para derretir o acompañar comidas.', price:15800, img:'https://images.unsplash.com/photo-1486297678162-92e19b662883?auto=format&fit=crop&w=300&q=80' },
+
+        // 4. MAQUILLAJE
+        { id:37, cat:'maquillaje', name:'M·A·C Cosmetics Labial Matte', desc:'Labial clásico icónico acabado mate de ultra larga duración.', price:109900, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=300&q=80' },
+        { id:38, cat:'maquillaje', name:'Benefit Tinta Líquida Labios Benetint', desc:'Fórmula fluida roja translúcida para dar color a mejillas y labios 6ml.', price:144900, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=300&q=80' },
+        { id:39, cat:'maquillaje', name:'Clinique Bálsamo Labial Honey', desc:'Se adapta al tono natural de la piel ofreciendo un brillo ciruela sutil.', price:109900, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=300&q=80' },
+        { id:40, cat:'maquillaje', name:'Base L\'Oréal Infallible Fresh Wear', desc:'Textura ultra ligera, acabado natural mate con protección solar SPF.', price:84900, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80' },
+        { id:41, cat:'maquillaje', name:'Pestañina Maybelline Sky High Xl', desc:'Aporta longitud definida y volumen sin dejar grumos pesados.', price:59900, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?auto=format&fit=crop&w=300&q=80' },
+        { id:42, cat:'maquillaje', name:'Paleta de Sombras Neutras 12 Tonos', desc:'Sombras compactas profesionales mate y satinadas de alta pigmentación.', price:229900, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?auto=format&fit=crop&w=300&q=80' },
+        { id:43, cat:'maquillaje', name:'Bruma Fijadora Prep Prime Matte', desc:'Fijador de maquillaje translúcido hidrata y prolonga la duración.', price:149900, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?auto=format&fit=crop&w=300&q=80' },
+        { id:44, cat:'maquillaje', name:'Rubor Líquido Soft Peach Glow', desc:'Textura fluida ligera de fácil difuminado acabado natural.', price:145000, img:'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=300&q=80' },
+        { id:45, cat:'maquillaje', name:'Corrector Líquido High Coverage', desc:'Oculta imperfecciones de forma ligera sin cuartear la piel.', price:129000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80' },
+        { id:46, cat:'maquillaje', name:'Iluminador Compacto Velvet Mineral', desc:'Aporta destellos de luz satinados para pómulos y rostro.', price:169900, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=300&q=80' },
+        { id:47, cat:'maquillaje', name:'Polvo Traslúcido Suelto Antibrillo', desc:'Matifica de forma invisible sellando bases de maquillaje líquidas.', price:189900, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=300&q=80' },
+        { id:48, cat:'maquillaje', name:'Delineador de Ojos Plumón Negro', desc:'Punta de fieltro ultra fina trazo continuo a prueba de agua.', price:105000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80' },
+
+        // 5. MODA Y ROPA
+        { id:49, cat:'moda',      name:'Chaqueta de Jean Slim Fit Clásica', desc:'Denim de alta resistencia con botones metálicos y bolsillos frontales.', price:169900, img:'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=300&q=80' },
+        { id:50, cat:'moda',      name:'Camisa Casual de Lino Confort', desc:'Material fresco transpirable de corte moderno manga larga.', price:129900, img:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=300&q=80' },
+        { id:51, cat:'moda',      name:'Vestido Largo de Flores Veraniego', desc:'Diseño suelto liviano con tirantes delgados regulables.', price:179900, img:'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=300&q=80' },
+        { id:52, cat:'moda',      name:'Pantalón Cargo Jogger de Dril', desc:'Corte urbano con elástico en tobillos y amplios bolsillos laterales.', price:119900, img:'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=300&q=80' },
+        { id:53, cat:'moda',      name:'Tenis Casuales Cuero Blanco Urbano', desc:'Suela de goma plana cosida, diseño minimalista unisex.', price:149900, img:'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=300&q=80' },
+        { id:54, cat:'moda',      name:'Blusa Satinada Elegante Corta', desc:'Textura lisa brillante ideal para oficina o ropa casual formal.', price:89900, img:'https://images.unsplash.com/photo-1548624149-f9b1859aa7d0?auto=format&fit=crop&w=300&q=80' },
+        { id:55, cat:'moda',      name:'Saco de Lana Tejido Trenzado', desc:'Buso abrigado cuello redondo para clima frío de alta calidad.', price:139900, img:'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=300&q=80' },
+        { id:56, cat:'moda',      name:'Jean Mom Fit Tiro Alto Azul', desc:'Mezclilla rígida duradera estilo retro bota semi recta.', price:139900, img:'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=300&q=80' },
+        { id:57, cat:'moda',      name:'Bermuda de Dril Confort Masculina', desc:'Corte regular fresco arriba de la rodilla con bolsillos traseros.', price:79900, img:'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&w=300&q=80' },
+        { id:58, cat:'moda',      name:'Camiseta Básica de Algodón Suave', desc:'Tejido peinado fresco cuello redondo ideal para uso diario.', price:45900, img:'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80' },
+        { id:59, cat:'moda',      name:'Gafas de Sol Estilo Aviador UV400', desc:'Lentes con filtro de protección UV400 y marco metálico ligero.', price:64900, img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=300&q=80' },
+        { id:60, cat:'moda',      name:'Bolso Cruzado Manos Libres Cuero', desc:'Correa ajustable con herrajes y cremalleras de seguridad.', price:179900, img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=300&q=80' },
+
+        // 6. CAMISETAS DE FÚTBOL / DEPORTES
+        { id:61, cat:'futbol', name:'Camiseta Oficial Selección Colombia', desc:'Indumentaria local amarilla de competencia con hilos transpirables.', price:349900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=300&q=80' },
+        { id:62, cat:'futbol', name:'Camiseta Real Madrid Blanca Home', desc:'Equipación oficial blanca de local con escudo bordado premium.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&w=300&q=80' },
+        { id:63, cat:'futbol', name:'Camiseta FC Barcelona Azulgrana', desc:'Modelo local a franjas tradicionales con tecnología deportiva fit.', price:399900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?auto=format&fit=crop&w=300&q=80' },
+        { id:64, cat:'futbol', name:'Camiseta Argentina Campeón Mundial', desc:'Diseño albiceleste oficial con los tres parches dorados de la FIFA.', price:379900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=300' },
+        { id:65, cat:'futbol', name:'Camiseta Manchester City Sky Blue', desc:'Color celeste clásico con fibras ultralivianas de alto rendimiento.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?auto=format&fit=crop&q=80&w=300' },
+        { id:66, cat:'futbol', name:'Camiseta Atlético Nacional Verde Home', desc:'Franjas verdes y blancas de local de la escuadra verdolaga.', price:279900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=300' },
+        { id:67, cat:'futbol', name:'Camiseta Millonarios FC Azul Local', desc:'Diseño local azul del conjunto embajador con telas premium.', price:279900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=300' },
+        { id:68, cat:'futbol', name:'Camiseta Inter de Miami Rosa Oficial', desc:'Modelo oficial color rosado pastel con costuras reforzadas.', price:349900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?auto=format&fit=crop&q=80&w=300' },
+        { id:69, cat:'futbol', name:'Camiseta Liverpool FC Classic Red', desc:'Color rojo tradicional liso con el ave fénix tejido en el pecho.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&q=80&w=300' },
+        { id:70, cat:'futbol', name:'Camiseta Arsenal FC Home Red/White', desc:'Torso rojo con mangas blancas y cuello redondo de colección.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?auto=format&fit=crop&q=80&w=300' },
+        { id:71, cat:'futbol', name:'Camiseta Juventus Black and White', desc:'Franjas verticales blancas y negras del club de Turín clásicas.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=300' },
+        { id:72, cat:'futbol', name:'Camiseta Bayern Múnich Red Club', desc:'Tonalidad roja oficial con paneles transpirables para juego.', price:349900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&q=80&w=300' },
+
+        // 7. HOGAR
+        { id:73, cat:'hogar',      name:'Difusor de Aromas Ultrasónico White', desc:'Esfera cerámica de 200ml vaporiza aceites de forma silenciosa.', price:119900, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?auto=format&fit=crop&q=80&w=300' },
+        { id:74, cat:'hogar',      name:'Mesa Auxiliar Redonda Nórdica', desc:'Superficie lacada lisa con tres soportes de madera maciza.', price:189900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=300' },
+        { id:75, cat:'hogar',      name:'Lámpara de Escritorio LED Táctil', desc:'Brazo móvil ajustable con 3 niveles de temperatura de luz.', price:74900, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&q=80&w=300' },
+        { id:76, cat:'hogar',      name:'Espejo Circular con Marco Dorado', desc:'Diseño flotante moderno ideal para sala o pasillo 60cm.', price:145000, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?auto=format&fit=crop&q=80&w=300' },
+        { id:77, cat:'hogar',      name:'Juego Sábanas Microfibra Matrimonial', desc:'Tela suave lavable, incluye sábana ajustable y fundas.', price:89900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&q=80&w=300' },
+        { id:78, cat:'hogar',      name:'Cojines de Terciopelo Gris Decorativos', desc:'Set de 2 fundas con relleno blando siliconado mullido.', price:59900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&q=80&w=300' },
+        { id:79, cat:'hogar',      name:'Planta Artificial Monstera Hogar', desc:'Hojas de aspecto real con maceta cerámica minimalista.', price:129900, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=300' },
+        { id:80, cat:'hogar',      name:'Tapete de Sala Pelo Largo Beige', desc:'Material denso de pelo largo suave 120x170cm acogedor.', price:199900, img:'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&q=80&w=300' },
+        { id:81, cat:'hogar',      name:'Cafetera de Prensa Francesa Vidrio', desc:'Cuerpo de borosilicato térmico con émbolo de acero inoxidable.', price:64900, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?auto=format&fit=crop&q=80&w=300' },
+        { id:82, cat:'hogar',      name:'Organizador Vajilla Modular Bambú', desc:'Bandeja expandible con compartimentos para cajones.', price:49900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=300' },
+        { id:83, cat:'hogar',      name:'Organizador Metálico Multiusos', desc:'Malla metálica rígida con separadores para documentos.', price:39900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=300' },
+        { id:84, cat:'hogar',      name:'Velas Aromáticas Relajantes Soya', desc:'Tres frascos de vidrio con esencias florales relajantes.', price:42900, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&q=80&w=300' },
+
+        // 8. DROGUERÍA / BIENESTAR
+        { id:85, cat:'drogueria',  name:'Bloqueador Facial Isdin Fusion Water', desc:'Protector solar fluido facial base agua absorción inmediata FPS50.', price:124900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=300' },
+        { id:86, cat:'drogueria',  name:'Sérum Hidratante Ácido Hialurónico', desc:'Concentrado restaurador de hidratación profunda frasco de 30ml.', price:94900, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=300' },
+        { id:87, cat:'drogueria',  name:'Gel Limpiador Purificante Face', desc:'Dermolimpiador purificante suave para pieles sensibles 400ml.', price:119900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=300' },
+        { id:88, cat:'drogueria',  name:'Vitaminas Complete Complex x60', desc:'Fórmula completa desde la A al Zinc para vitalidad e inmunidad.', price:68900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&q=80&w=300' },
+        { id:89, cat:'drogueria',  name:'Colágeno Hidrolizado Biotina Polvo', desc:'Suplemento soluble con biotina y vitamina C para articulaciones.', price:79900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&q=80&w=300' },
+        { id:90, cat:'drogueria',  name:'Enjuague Bucal Mentol Refrescante 1L', desc:'Elimina bacterias orales causantes del mal aliento de forma segura.', price:34500, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&q=80&w=300' },
+        { id:91, cat:'drogueria',  name:'Crema Dental Protección Total x3u', desc:'Pack familiar de tres tubos con flúor para cuidado total.', price:28900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&q=80&w=300' },
+        { id:92, cat:'drogueria',  name:'Shampoo Anticaspa Purificante Mentol', desc:'Limpieza profunda del cuero cabelludo con frescura de menta.', price:32900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&q=80&w=300' },
+        { id:93, cat:'drogueria',  name:'Jabón Líquido Hidratante Corporal', desc:'Fórmula cremosa humectante con dosificador para baño.', price:21900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&q=80&w=300' },
+        { id:94, cat:'drogueria',  name:'Suero Rehidratante Iones Coco', desc:'Bebida de hidratación de rápida absorción con electrolitos.', price:9500, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=300' },
+        { id:95, cat:'drogueria',  name:'Geles Alcohol Desinfectantes Kit', desc:'Pack de bolsillo de alcohol en gel con aloe vera humectante.', price:14900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=300' },
+        { id:96, cat:'drogueria',  name:'Proteína Aislada Whey Isolate Shake', desc:'Suplemento deportivo de suero purificado cero carbohidratos.', price:165000, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?auto=format&fit=crop&q=80&w=300' },
+
+        // DUPLICADOS HASTA COMPLETAR LAS 100 REFERENCIAS
+        { id:97, cat:'comida',     name:'Pizza Mediana Tradicional Crispy', desc:'Masa delgada crujiente, salsa artesanal y pepperoni.', price:34900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&q=80&w=300' },
+        { id:98, cat:'tecnologia', name:'Apple AirTag Localizador Oficial', desc:'Dispositivo magnético de rastreo de alta precisión para objetos.', price:169900, img:'https://images.unsplash.com/photo-1588444837495-c6cfcb537c22?auto=format&fit=crop&q=80&w=300' },
+        { id:99, cat:'mercado',    name:'Café Tostado Grano Molido 500g', desc:'Tradicional grano molido con el sabor intenso de la mata.', price:14900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&q=80&w=300' },
+        { id:100,cat:'futbol',     name:'Camiseta Selección Argentina Away', desc:'Diseño de visitante color azul oscuro Adidas campeones del mundo.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=300' }
+    ];
+
+    let cart = {}; let curCat = 'all'; let toastTimer;
+    let myName = ''; let myId = 'user_' + Math.random().toString(36).slice(2,8);
+    let typingTimer; let seenKeys = new Set(); let inChat = false;
+
+    let localStream; let peerConnection; let activeCallRef;
+    let isMuted = false; let isVideoOff = false;
+    let remoteIceQueue = []; 
+    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+    const SECRET_PIN_HASH = "10231121"; 
+
+    const messagesRef = ref(db, 'chat/messages');
+    const typingRef   = ref(db, 'chat/typing/' + myId);
+    const presenceRef = ref(db, 'chat/presence/' + myId);
+    const callsRef    = ref(db, 'chat/calls');
+
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    function formatCOP(val) {
+        return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val);
+    }
+
+    const promoAlertsMock = [
+        { title: "¡Cupón de Envío Gratis!", desc: "Desbloqueado en tu cuenta por compras superiores a $45.000 COP." },
+        { title: "¡Oferta de Almuerzo!", desc: "Ahorra un 15% adicional en la sección de Restaurantes destacados." },
+        { title: "¡Cashback Registrado!", desc: "Recibe el 5% de reembolso abonado en créditos de la tienda." },
+        { title: "¡Descuento de Temporada!", desc: "Lleva $20.000 COP de descuento extra en la sección de Moda y Ropa." },
+        { title: "¡Liquidación Flash!", desc: "Precios especiales activos en la categoría Hogar por tiempo limitado." }
+    ];
+
+    /* ALGORITMO FISHER-YATES: Mezclador aleatorio inmutable de productos cada vez que abre la app */
+    function shuffleProducts(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    /* ── TIENDA Y RENDER ── */
+    function renderStore() {
+        const grid  = document.getElementById('productGrid');
+        const queryVal = document.getElementById('searchBox').value.toLowerCase().trim();
+        const list  = products.filter(p =>
+            (curCat === 'all' || p.cat === curCat) &&
+            (p.name.toLowerCase().includes(queryVal) || p.desc.toLowerCase().includes(queryVal))
+        );
+        if (!list.length) {
+            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No se encontraron resultados para tu búsqueda.</p></div>`;
+            return;
+        }
+        grid.innerHTML = list.map(p => `
+            <div class="card">
+                <span class="card-tag">${p.cat}</span>
+                <div class="img-container"><img src="${p.img}" loading="lazy" alt=""></div>
+                <div><h3 class="card-title">${escHtml(p.name)}</h3><p class="card-desc">${escHtml(p.desc)}</p></div>
+                <div class="card-footer"><span class="price">${formatCOP(p.price)}</span>
+                <button class="btn-add" onclick="addToCart(${p.id}, this)">+</button></div>
+            </div>`).join('');
+    }
+
+    window.addToCart = function(id, btn) {
+        cart[id] = (cart[id] || 0) + 1;
+        const total = totalItems();
+        document.getElementById('cartBadge').textContent = total;
+        document.getElementById('footerCount').textContent = `(${total})`;
+        btn.textContent = '✓'; btn.classList.add('added');
+        setTimeout(() => { btn.textContent = '+'; btn.classList.remove('added'); }, 700);
+    };
+    function totalItems() { return Object.values(cart).reduce((a,b)=>a+b,0); }
+
+    window.openCart = function() { renderCartDrawer(); document.getElementById('drawerOverlay').classList.add('open'); document.getElementById('cartDrawer').classList.add('open'); };
+    window.closeCart = function() { document.getElementById('drawerOverlay').classList.remove('open'); document.getElementById('cartDrawer').classList.remove('open'); };
+
+    function renderCartDrawer() {
+        let totalPrice = 0;
+        const html = Object.entries(cart).map(([idStr, qty]) => {
+            const p = products.find(x => x.id === parseInt(idStr));
+            totalPrice += p.price * qty;
+            return `<div class="cart-item-row">
+                <div class="cat-info">
+                    <span class="cat-name">${escHtml(p.name)}</span>
+                    <span class="cat-price-sub">${formatCOP(p.price)} x ${qty}</span>
+                </div>
+                <div class="cat-qty">
+                    <button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button>
+                    <span class="qty-num">${qty}</span>
+                    <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
+                </div>
+            </div>`;
+        }).join('');
+        document.getElementById('cartItems').innerHTML = html || '<div class="cart-empty-msg">Tu canasta está vacía</div>';
+        document.getElementById('cartTotal').textContent = formatCOP(totalPrice);
+    }
+
+    function changeQty(id, delta) {
+        if (!cart[id]) return;
+        cart[id] += delta;
+        if (cart[id] <= 0) delete cart[id];
+        const total = totalItems();
+        document.getElementById('cartBadge').textContent = total;
+        document.getElementById('footerCount').textContent = `(${total})`;
+        renderCartDrawer();
+    }
+    window.changeQty = changeQty;
+
+    /* REGLAS DE CHECKOUT VERIFICADAS E INTOCABLES */
+    window.handleCheckout = function() {
+        const total = totalItems();
+        if (total === 0) { showToast('Tu canasta está vacía 🛒'); return; }
+
+        if (total === 5) {
+            if (prompt("Ingresa PIN dinámico de validación bancaria:") === SECRET_PIN_HASH) {
+                document.getElementById('vista-tienda').style.display = 'none';
+                document.getElementById('seccion-chat').style.display = 'flex';
+                cart = {}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';
+                document.getElementById('nameModal').style.display = 'flex';
+            } else {
+                showToast("PIN incorrecto. Redirigiendo a pasarela estándar.");
+                openPaymentPortal();
+            }
+        } else {
+            // Menos de 4 productos o superior a 6 artículos arroja directamente pasarela de pago normal
+            openPaymentPortal();
+        }
+    };
+
+    window.openPaymentPortal = function() { document.getElementById('paymentModal').classList.add('open'); }
+    window.closePaymentPortal = function() { document.getElementById('paymentModal').classList.remove('open'); };
+    window.processPayment = function() { showToast("Transacción procesada correctamente"); closePaymentPortal(); cart={}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';};
+    window.filterCat = function(cat, btn) { document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active')); btn.classList.add('active'); curCat = cat; renderStore(); };
+    window.filterSearch = function(input) { document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0); renderStore(); };
+    window.clearSearch = function() { document.getElementById('searchBox').value = ''; document.getElementById('searchClear').classList.remove('visible'); renderStore(); };
+    window.toggleTheme = function() { const currentTheme = document.body.getAttribute('data-theme'); const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches; let targetTheme = 'dark'; if (currentTheme === 'dark' || (!currentTheme && systemIsDark)) { targetTheme = 'light'; } document.body.setAttribute('data-theme', targetTheme); };
+
+    function triggerCamouflageOfferBanner() {
+        const toastNode = document.getElementById('fakeOfferToast');
+        const titleNode = document.getElementById('fakeOfferTitle');
+        const descNode = document.getElementById('fakeOfferDesc');
+
+        const randomPromo = promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)];
+        titleNode.textContent = randomPromo.title;
+        descNode.textContent = randomPromo.desc;
+
+        toastNode.classList.add('show');
+        
+        const alertAudio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869.wav");
+        alertAudio.volume = 0.2;
+        alertAudio.play().catch(() => {});
+
+        setTimeout(() => { toastNode.classList.remove('show'); }, 4500);
+    }
+
+    /* ── CHAT CORE ── */
+    window.joinChat = function() {
+        myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
+        inChat = true; document.getElementById('nameModal').style.display = 'none';
+        
+        document.getElementById('fakeOfferToast').classList.remove('show');
+
+        set(presenceRef, { name: myName, online: true });
+        onDisconnect(presenceRef).remove();
+        onDisconnect(typingRef).remove();
+        
+        onValue(ref(db, 'chat/presence'), snapshot => {
+            document.getElementById('onlineStatus').textContent = `${Object.values(snapshot.val() || {}).length} en línea`;
+        });
+        listenForIncomingCalls();
+    };
+
+    window.sendMsg = function() {
+        const input = document.getElementById('chatInput'); if (!input.value.trim()) return;
+        push(messagesRef, { type: 'text', text: input.value.trim(), sender: myName, senderId: myId, ts: Date.now() });
+        input.value = '';
+    };
+    window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
+
+    function renderMessage(msg, key) {
+        if (msg.senderId !== myId && !inChat && msg.type === 'text') {
+            triggerCamouflageOfferBanner();
+            return; 
+        }
+
+        const ws = document.getElementById('chatWorkspace');
+        const typingWrap = document.getElementById('typingWrap');
+
+        if (msg.type === 'system') {
+            const div = document.createElement('div'); div.className = 'msg-system'; div.textContent = msg.text;
+            ws.insertBefore(div, typingWrap); return;
+        }
+
+        const isMe = msg.senderId === myId;
+        const wrap = document.createElement('div');
+        wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
+        wrap.id = `wrap-${key}`;
+
+        const parsedData = checkAndParseEmojiMessage(msg.text);
+        const bubbleStyleClass = parsedData.isEmoji ? 'msg only-emoji-bubble' : `msg ${isMe ? 'mine' : 'theirs'}`;
+
+        wrap.innerHTML = `
+            ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender || 'Anónimo')}</span>` : ''}
+            <div class="msg-body-container">
+                <div class="${bubbleStyleClass}">${parsedData.html}</div>
+            </div>
+            <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        `;
+
+        ws.insertBefore(wrap, typingWrap);
+        ws.scrollTop = ws.scrollHeight;
+
+        if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) { 
+            const locUpdates = {};
+            locUpdates[`chat/messages/${key}/readBy/${myId}`] = true;
+            update(ref(db), locUpdates);
+        }
+        if (msg.readBy && Object.keys(msg.readBy).length > 0) { initiateThanosCountdown(key, wrap); }
+    }
+
+    function initiateThanosCountdown(key, element) {
+        if (element.querySelector('.destruct-timer')) return;
+        const bodyContainer = element.querySelector('.msg-body-container');
+        const timerContainer = document.createElement('div');
+        timerContainer.className = 'destruct-timer'; timerContainer.textContent = '10';
+        bodyContainer.appendChild(timerContainer);
+
+        let count = 10;
+        const interval = setInterval(() => {
+            count--; timerContainer.textContent = count;
+            if (count <= 0) {
+                clearInterval(interval);
+                snapDisintegrateEffect(element, () => { element.remove(); remove(ref(db, `chat/messages/${key}`)); });
+            }
+        }, 1000);
+    }
+
+    function snapDisintegrateEffect(element, callback) {
+        element.classList.add('disintegrating'); const rect = element.getBoundingClientRect();
+        for (let i = 0; i < 40; i++) {
+            const particle = document.createElement('div'); particle.className = 'particle';
+            const pSize = Math.random() * 4 + 2; particle.style.width = `${pSize}px`; particle.style.height = `${pSize}px`;
+            particle.style.left = `${rect.left + window.scrollX + Math.random() * rect.width}px`;
+            particle.style.top = `${rect.top + window.scrollY + Math.random() * rect.height}px`;
+            document.body.appendChild(particle);
+            const angle = Math.random() * Math.PI * 2; const velocity = Math.random() * 60 + 20;
+            particle.animate([{ transform: 'translate(0, 0) scale(1)', opacity: 0.8 }, { transform: `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity - 50}px) scale(0)`, opacity: 0 }], { duration: Math.random() * 600 + 400 }).onfinish = () => particle.remove();
+        }
+        element.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(4px)' }], { duration: 500 }).onfinish = callback;
+    }
+
+    /* ── WEBRTC FACETIME ── */
+    async function setupLocalStream(type) {
+        const constraints = { audio: true, video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false };
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        document.getElementById('localVideo').srcObject = localStream;
+        document.getElementById('localVideo').style.display = type === 'video' ? 'block' : 'none';
+    }
+
+    window.initiateCall = async function(type) {
+        document.getElementById('seccion-chat').style.display = 'none';
+        document.getElementById('seccion-facetime').style.display = 'flex';
+        document.getElementById('ftTargetName').textContent = "Canal Seguro";
+        document.getElementById('ftCallStatus').textContent = `FaceTime de ${type === 'video' ? 'Video' : 'Audio'}...`;
+        document.getElementById('ftAvatar').textContent = "C";
+        document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
+
+        await setupLocalStream(type);
+        activeCallRef = push(callsRef);
+        await set(activeCallRef, { type: type, caller: myName, callerId: myId, status: 'calling' });
+
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        
+        peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
+        peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
+
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+        await update(activeCallRef, { offer: { type: offer.type, sdp: offer.sdp } });
+
+        onValue(ref(db, `chat/calls/${activeCallRef.key}`), async snapshot => {
+            const data = snapshot.val();
+            if (data && data.status === 'accepted' && data.answer && !peerConnection.currentRemoteDescription) {
+                document.getElementById('ftCallStatus').textContent = "Conectado";
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                while (remoteIceQueue.length > 0) {
+                    await peerConnection.addIceCandidate(remoteIceQueue.shift());
+                }
+            }
+            if (data && data.status === 'ended') cleanUpCallUI();
+        });
+
+        onValue(ref(db, `chat/calls/${activeCallRef.key}/receiverCandidates`), snapshot => {
+            if (snapshot.exists()) {
+                Object.values(snapshot.val()).forEach(cand => {
+                    const iceCandidate = new RTCIceCandidate(cand);
+                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+                        peerConnection.addIceCandidate(iceCandidate);
+                    } else {
+                        remoteIceQueue.push(iceCandidate);
+                    }
+                });
+            }
+        });
+    };
+
+    function listenForIncomingCalls() {
+        off(callsRef);
+        onValue(callsRef, async snapshot => {
+            if (!inChat) return; const calls = snapshot.val(); if (!calls) return;
+            Object.entries(calls).forEach(([key, call]) => {
+                if (call.callerId !== myId && call.status === 'calling') {
+                    if (confirm(`FaceTime entrante de: ${call.caller}. ¿Contestar?`)) { acceptIncomingCall(key, call); }
+                    else { set(ref(db, `chat/calls/${key}/status`), 'ended'); }
+                }
+            });
+        });
+    }
+
+    async function acceptIncomingCall(key, call) {
+        activeCallRef = ref(db, `chat/calls/${key}`);
+        document.getElementById('seccion-chat').style.display = 'none'; document.getElementById('seccion-facetime').style.display = 'flex';
+        document.getElementById('ftTargetName').textContent = call.caller; document.getElementById('ftAvatar').textContent = call.caller.charAt(0);
+        await setupLocalStream(call.type);
+
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        
+        peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
+        peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
+
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
+        const answer = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer);
+        await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
+
+        while (remoteIceQueue.length > 0) {
+            await peerConnection.addIceCandidate(remoteIceQueue.shift());
+        }
+
+        onValue(ref(db, `chat/calls/${key}/callerCandidates`), snapshot => {
+            if (snapshot.exists()) {
+                Object.values(snapshot.val()).forEach(cand => {
+                    const iceCandidate = new RTCIceCandidate(cand);
+                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+                        peerConnection.addIceCandidate(iceCandidate);
+                    } else {
+                        remoteIceQueue.push(iceCandidate);
+                    }
+                });
+            }
+        });
+
+        onValue(activeCallRef, snapshot => { if (snapshot.val() && snapshot.val().status === 'ended') cleanUpCallUI(); });
+    }
+
+    window.toggleMuteMic = function() { isMuted = !isMuted; localStream.getAudioTracks().forEach(t => t.enabled = !isMuted); document.getElementById('btnFtMute').classList.toggle('active', isMuted); };
+    window.toggleVideoTrack = function() { isVideoOff = !isVideoOff; localStream.getVideoTracks().forEach(t => t.enabled = !isVideoOff); document.getElementById('btnFtVideo').classList.toggle('active', isVideoOff); };
+    window.minimizeCallToChat = function() { document.getElementById('seccion-facetime').style.display = 'none'; document.getElementById('seccion-chat').style.display = 'flex'; };
+    window.hangUpCall = function() { if (activeCallRef) update(activeCallRef, { status: 'ended' }); cleanUpCallUI(); };
+
+    function cleanUpCallUI() {
+        if (localStream) localStream.getTracks().forEach(track => track.stop()); if (peerConnection) peerConnection.close();
+        remoteIceQueue = [];
+        document.getElementById('seccion-facetime').style.display = 'none';
+        document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
+        document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
+    }
+
+    window.panicExit = function() { 
+        window.hangUpCall(); 
+        off(messagesRef);
+        off(callsRef);
+        set(typingRef, null);
+        set(presenceRef, null);
+        remove(messagesRef).then(() => { location.reload(); }); 
+    };
+
+    /* EXEC: Mezcla aleatoria del catálogo completo al inicializar la sesión web */
+    shuffleProducts(products);
+    renderStore();
+
+    onValue(query(messagesRef, limitToLast(50)), (snapshot) => {
+        const data = snapshot.val(); if (!data) return;
+        Object.entries(data).forEach(([key, msg]) => { if (!seenKeys.has(key)) { seenKeys.add(key); renderMessage(msg, key); } });
+    });
+</script>
+</body>
+</html>
