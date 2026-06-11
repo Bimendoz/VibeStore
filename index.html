@@ -17,8 +17,9 @@
             --text-muted: #64748b;
             --purple-accent: #8b5cf6;
             --purple-light: #ede9fe;
-            --green: #10b981;
-            --red: #ef4444;
+            --green: #34c759;
+            --blue-apple: #007aff;
+            --red: #ff3b30;
             --border-color: #e2e8f0;
             --shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
             --safe-top: env(safe-area-inset-top, 0px);
@@ -128,13 +129,19 @@
         .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
         .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
         .chat-status-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
-        @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 2px rgba(16,185,129,0.3)} 50%{box-shadow:0 0 0 6px rgba(16,185,129,0)} }
+        @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 2px rgba(52,199,89,0.3)} 50%{box-shadow:0 0 0 6px rgba(52,199,89,0)} }
         .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; }
         .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
-        .chat-header-actions { display: flex; gap: 0.5rem; align-items: center; }
-        .btn-call-trigger { background: none; border: none; font-size: 1.3rem; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--purple-accent); }
+        
+        /* BOTONES DE LLAMADA MEJORADOS CON DISEÑO APPLE GLASS (DEGRADADO Y CONTROL SVG) */
+        .chat-header-actions { display: flex; gap: 0.65rem; align-items: center; }
+        .btn-call-trigger { border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s, filter 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .btn-call-trigger:active { transform: scale(0.9); }
+        .btn-call-trigger.audio-style { background: linear-gradient(135deg, #34c759, #28a745); }
+        .btn-call-trigger.video-style { background: linear-gradient(135deg, #007aff, #0056b3); }
+        .btn-call-trigger svg { width: 18px; height: 18px; fill: currentColor; }
 
-        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(239,68,68,0.35); transition: transform 0.15s; }
+        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(255,59,48,0.35); transition: transform 0.15s; }
         .btn-panic:active { transform: scale(0.95); }
 
         .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
@@ -149,21 +156,18 @@
         .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
         .msg-sender { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.2rem; padding: 0 0.5rem; }
         
-        /* CÁPSULA DEL MENSAJE Y TIMER */
         .msg-body-container { display: flex; align-items: center; gap: 0.5rem; position: relative; }
         .msg { padding: 0.85rem 1.05rem; border-radius: 20px; font-size: 0.92rem; line-height: 1.45; word-break: break-word; position: relative; }
         .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
         .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
         
-        .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); color: var(--red); display: flex; align-items: center; justify-content: center; animation: pulse-timer 1s infinite alternate; }
+        .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; animation: pulse-timer 1s infinite alternate; }
         @keyframes pulse-timer { from { transform: scale(1); } to { transform: scale(1.1); } }
 
         .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
 
-        /* ANIMACIÓN DE DESINTEGRACIÓN (THANOS EFFECTS) */
         .disintegrating { pointer-events: none; }
         .particle { position: absolute; background: var(--purple-accent); border-radius: 50%; pointer-events: none; opacity: 0.8; }
-        [data-theme="dark"] .msg.theirs + .destruct-timer { color: #ff6b6b; }
 
         .typing-wrap { align-self: flex-start; display: none; align-items: center; gap: 0.5rem; padding: 0.5rem 0; }
         .typing-wrap.show { display: flex; }
@@ -178,25 +182,28 @@
         .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; }
         .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-        /* ── INTERFAZ DE LLAMADAS ESTILO FACETIME ── */
-        #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2rem) 2rem calc(var(--safe-bottom) + 3rem); color: #fff; }
+        /* ── INTERFAZ DE LLAMADAS ESTILO FACETIME CON DISEÑO GLASS REAL (FOTO image_2.png MEJORADA) ── */
+        #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2.5rem) 2rem calc(var(--safe-bottom) + 3.5rem); color: #fff; }
         .ft-video-container { position: absolute; inset: 0; z-index: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .ft-video-remote { width: 100%; height: 100%; object-fit: cover; }
-        .ft-video-local { position: absolute; top: 2rem; right: 2rem; width: 110px; height: 160px; border-radius: 16px; object-fit: cover; z-index: 5; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 10px 20px rgba(0,0,0,0.4); transform: scaleX(-1); }
+        .ft-video-local { position: absolute; top: 2rem; right: 2rem; width: 110px; height: 160px; border-radius: 18px; object-fit: cover; z-index: 5; border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 12px 24px rgba(0,0,0,0.4); transform: scaleX(-1); }
         
-        .ft-overlay-info { position: relative; z-index: 2; text-align: center; margin-top: 2rem; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
-        .ft-avatar { width: 90px; height: 90px; background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); }
-        .ft-name { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
-        .ft-status { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem; font-weight: 500; }
+        .ft-overlay-info { position: relative; z-index: 2; text-align: center; margin-top: 1.5rem; }
+        .ft-avatar { width: 96px; height: 96px; background: rgba(255,255,255,0.11); backdrop-filter: blur(25px); border-radius: 50%; margin: 0 auto 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 8px 32px rgba(0,0,0,0.2); text-transform: uppercase; color: #fff; }
+        .ft-name { font-size: 1.8rem; font-weight: 600; letter-spacing: -0.5px; }
+        .ft-status { font-size: 0.92rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; font-weight: 400; letter-spacing: -0.1px; }
 
-        /* CONTROLES ESTILO IOS 17-18 FLOTANTES */
-        .ft-controls-panel { position: relative; z-index: 2; background: rgba(30, 30, 35, 0.75); backdrop-filter: blur(30px) saturate(150%); padding: 1.2rem; border-radius: 35px; width: 100%; max-width: 350px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        .ft-btn { background: rgba(255,255,255,0.1); border: none; width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.3rem; color: #fff; transition: background 0.2s, transform 0.1s; }
+        /* CONTROLES FACETIME FIEL AL DE APPLE (MÁXIMO GLASSMORPHISM) */
+        .ft-controls-panel { position: relative; z-index: 2; background: rgba(28, 28, 30, 0.45); backdrop-filter: blur(35px) saturate(200%); -webkit-backdrop-filter: blur(35px) saturate(200%); padding: 1.1rem; border-radius: 38px; width: 100%; max-width: 340px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+        .ft-btn { background: rgba(255,255,255,0.12); border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: background 0.2s, transform 0.1s; }
         .ft-btn:active { transform: scale(0.9); }
+        .ft-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        
+        /* Estados activos para Mute y Video Desactivado según iOS */
         .ft-btn.active { background: #fff; color: #000; }
-        .ft-btn.btn-hangup { background: var(--red); font-size: 1.5rem; width: 60px; height: 60px; }
-        .ft-btn.btn-hangup:active { background: #cc3333; }
-        .ft-btn.btn-ft-panic { background: rgba(239, 68, 68, 0.2); color: var(--red); font-weight: 800; font-size: 0.8rem; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .ft-btn.btn-hangup { background: var(--red); width: 56px; height: 56px; transform: rotate(135deg); }
+        .ft-btn.btn-hangup:active { background: #d9261c; }
+        .ft-btn.btn-ft-panic { background: rgba(255, 59, 48, 0.25); color: #ff453a; font-weight: 700; font-size: 0.72rem; border: 1px solid rgba(255, 59, 48, 0.3); letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
@@ -265,6 +272,7 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ── SECCIÓN DE CHAT SEGURO ── -->
 <div id="seccion-chat">
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
@@ -284,8 +292,13 @@
             </div>
         </div>
         <div class="chat-header-actions">
-            <button class="btn-call-trigger" onclick="initiateCall('audio')" title="Llamada FaceTime">📞</button>
-            <button class="btn-call-trigger" onclick="initiateCall('video')" title="Videollamada FaceTime">📹</button>
+            <!-- ICONOS CAMBIADOS A BOTONES DE GRADIENTES CON SVG VECTORIALES DE APPLE (FOTO image.png ARREGLADA) -->
+            <button class="btn-call-trigger audio-style" onclick="initiateCall('audio')" title="Llamada FaceTime">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+            </button>
+            <button class="btn-call-trigger video-style" onclick="initiateCall('video')" title="Videollamada FaceTime">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            </button>
             <button class="btn-panic" onclick="panicExit()">⚠ PÁNICO</button>
         </div>
     </div>
@@ -305,6 +318,7 @@
     </div>
 </div>
 
+<!-- ── PANTALLA FACETIME FULLSCREEN (FOTO image_2.png ARREGLADA) ── -->
 <div id="seccion-facetime">
     <div class="ft-video-container">
         <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
@@ -318,11 +332,24 @@
     </div>
 
     <div class="ft-controls-panel">
-        <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">🎤</button>
-        <button class="ft-btn" id="btnFtVideo" onclick="toggleVideoTrack()">📷</button>
-        <button class="ft-btn" onclick="minimizeCallToChat()" title="Volver al chat">💬</button>
+        <!-- BOTÓN MICROFONO SF SYMBOLS STYLE -->
+        <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">
+            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.2 6 6.6V21h2v-3.4c3.28-.4 6-3.18 6-6.6h-1.7z"/></svg>
+        </button>
+        <!-- BOTÓN CÁMARA SF SYMBOLS STYLE -->
+        <button class="ft-btn" id="btnFtVideo" onclick="toggleVideoTrack()">
+            <svg viewBox="0 0 24 24"><path d="M13 7h-2v4H7v2h4v4h2v-4h4v-2h4v-4z M21 4H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H3V6h18v12z"/></svg>
+        </button>
+        <!-- BOTÓN MINIMIZAR / CHAT -->
+        <button class="ft-btn" onclick="minimizeCallToChat()" title="Volver al chat">
+            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+        </button>
+        <!-- BOTÓN PÁNICO FLOTANTE -->
         <button class="ft-btn btn-ft-panic" onclick="panicExit()">PANIC</button>
-        <button class="ft-btn btn-hangup" onclick="hangUpCall()">🤙</button>
+        <!-- BOTÓN COLGAR TELÉFONO INVERTIDO APPLE -->
+        <button class="ft-btn btn-hangup" onclick="hangUpCall()">
+            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+        </button>
     </div>
 </div>
 
@@ -359,7 +386,7 @@
     let myName = ''; let myId = 'user_' + Math.random().toString(36).slice(2,8);
     let typingTimer; let seenKeys = new Set(); let inChat = false;
 
-    // WebRTC Variables para FaceTime
+    // WebRTC Variables
     let localStream; let peerConnection; let activeCallRef;
     let isMuted = false; let isVideoOff = false;
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
@@ -422,7 +449,7 @@
     window.closePaymentPortal = function() { document.getElementById('paymentModal').classList.remove('open'); };
     window.processPayment = function() { showToast("Pago completado"); closePaymentPortal(); cart={}; };
 
-    /* ── SECCIÓN CHAT & SISTEMA SNAP AUTODESTRUCCIÓN ── */
+    /* ── SECCIÓN CHAT & AUTODESTRUCCIÓN ── */
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim();
         if (!myName) return;
@@ -431,13 +458,11 @@
         set(presenceRef, { name: myName, online: true });
         onDisconnect(presenceRef).remove();
 
-        // Escuchar Presencia Global
         onValue(ref(db, 'chat/presence'), (snapshot) => {
             const users = Object.values(snapshot.val() || {}).length;
             document.getElementById('onlineStatus').textContent = `${users} en línea`;
         });
 
-        // Escuchar Canal de llamadas entrantes FaceTime
         listenForIncomingCalls();
         pushSystemMsg(`${myName} se unió de forma segura.`);
     };
@@ -445,7 +470,6 @@
     window.sendMsg = function() {
         const input = document.getElementById('chatInput');
         if (!input.value.trim()) return;
-        // Agregamos estado 'readBy' inicial vacío
         push(messagesRef, { type: 'text', text: input.value.trim(), sender: myName, senderId: myId, ts: Date.now(), readBy: {} });
         input.value = '';
     };
@@ -476,20 +500,17 @@
         ws.insertBefore(wrap, typingWrap);
         ws.scrollTop = ws.scrollHeight;
 
-        // MARCAR COMO LEÍDO si el mensaje es de la otra persona y yo lo estoy viendo en pantalla
         if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) {
             set(ref(db, `chat/messages/${key}/readBy/${myId}`), true);
         }
 
-        // CONTROLAR EL TEMPORIZADOR DE DESTRUCCIÓN MUTUA
         if (msg.readBy && Object.keys(msg.readBy).length > 0) {
             initiateThanosCountdown(key, wrap);
         }
     }
 
-    // CUENTA REGRESIVA SUTIL DE 10 SEGUNDOS AL SER LEÍDO
     function initiateThanosCountdown(key, element) {
-        if (element.querySelector('.destruct-timer')) return; // Ya tiene contador ejecutándose
+        if (element.querySelector('.destruct-timer')) return;
 
         const bodyContainer = element.querySelector('.msg-body-container');
         const timerContainer = document.createElement('div');
@@ -505,57 +526,40 @@
                 clearInterval(interval);
                 snapDisintegrateEffect(element, () => {
                     element.remove();
-                    // Opcional: remover de la base de datos de manera limpia
                     remove(ref(db, `chat/messages/${key}`));
                 });
             }
         }, 1000);
     }
 
-    // EFECTO THANOS (END GAME PARTICLES) EN CANVAS O DIVS FLOTANTES
     function snapDisintegrateEffect(element, callback) {
         element.classList.add('disintegrating');
         const rect = element.getBoundingClientRect();
-        const parent = element.parentElement;
         
-        // Crear ráfaga de micropartículas desvanecientes
         for (let i = 0; i < 40; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
-            
-            // Distribución aleatoria sobre la caja del mensaje original
             const pSize = Math.random() * 4 + 2;
             particle.style.width = `${pSize}px`;
             particle.style.height = `${pSize}px`;
-            
             particle.style.left = `${rect.left + window.scrollX + Math.random() * rect.width}px`;
             particle.style.top = `${rect.top + window.scrollY + Math.random() * rect.height}px`;
-            
             document.body.appendChild(particle);
 
-            // Trayectoria volátil hacia arriba y hacia los lados
             const angle = Math.random() * Math.PI * 2;
             const velocity = Math.random() * 60 + 20;
             
             particle.animate([
                 { transform: 'translate(0, 0) scale(1)', opacity: 0.8 },
                 { transform: `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity - 50}px) scale(0)`, opacity: 0 }
-            ], {
-                duration: Math.random() * 600 + 400,
-                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
-            }).onfinish = () => particle.remove();
+            ], { duration: Math.random() * 600 + 400 }).onfinish = () => particle.remove();
         }
-
-        // Animación de desvanecimiento del contenedor original de forma paralela
         element.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(4px)' }], { duration: 500 }).onfinish = callback;
     }
 
-    /* ── SISTEMA DE LLAMADAS FACETIME (AUDIO / VIDEO WEBRTC) ── */
+    /* ── WEBRTC FACETIME LLAMADAS ── */
     async function setupLocalStream(type) {
-        const constraints = {
-            audio: true,
-            video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false
-        };
+        const constraints = { audio: true, video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false };
         localStream = await navigator.mediaDevices.getUserMedia(constraints);
         document.getElementById('localVideo').srcObject = localStream;
         document.getElementById('localVideo').style.display = type === 'video' ? 'block' : 'none';
@@ -563,33 +567,24 @@
 
     window.initiateCall = async function(type) {
         document.getElementById('seccion-chat').style.display = 'none';
-        const ftView = document.getElementById('seccion-facetime');
-        ftView.style.display = 'flex';
+        document.getElementById('seccion-facetime').style.display = 'flex';
         
         document.getElementById('ftTargetName').textContent = "Canal Seguro";
         document.getElementById('ftCallStatus').textContent = `FaceTime de ${type === 'video' ? 'Video' : 'Audio'}...`;
+        document.getElementById('ftAvatar').textContent = "C";
         document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
 
         await setupLocalStream(type);
 
-        // Crear registro de llamada en Firebase para señalización
         activeCallRef = push(callsRef);
-        await set(activeCallRef, {
-            type: type,
-            caller: myName,
-            callerId: myId,
-            status: 'calling'
-        });
+        await set(activeCallRef, { type: type, caller: myName, callerId: myId, status: 'calling' });
 
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
         peerConnection.onicecandidate = e => {
-            if (e.candidate) {
-                push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON());
-            }
+            if (e.candidate) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON());
         };
-
         peerConnection.ontrack = e => {
             document.getElementById('remoteVideo').srcObject = e.streams[0];
             document.getElementById('ftAvatar').style.display = 'none';
@@ -597,22 +592,17 @@
 
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
-
         await update(activeCallRef, { offer: { type: offer.type, sdp: offer.sdp } });
 
-        // Escuchar respuesta del receptor
         onValue(ref(db, `chat/calls/${activeCallRef.key}`), async (snapshot) => {
             const data = snapshot.val();
             if (data && data.status === 'accepted' && data.answer && !peerConnection.currentRemoteDescription) {
                 document.getElementById('ftCallStatus').textContent = "Conectado";
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
             }
-            if (data && data.status === 'ended') {
-                cleanUpCallUI();
-            }
+            if (data && data.status === 'ended') cleanUpCallUI();
         });
 
-        // Escuchar candidatos ICE del receptor
         onValue(ref(db, `chat/calls/${activeCallRef.key}/receiverCandidates`), snapshot => {
             if (snapshot.exists()) {
                 Object.values(snapshot.val()).forEach(cand => peerConnection.addIceCandidate(new RTCIcandidate(cand)));
@@ -623,9 +613,7 @@
     function listenForIncomingCalls() {
         onValue(callsRef, async (snapshot) => {
             if (!inChat) return;
-            const calls = snapshot.val();
-            if (!calls) return;
-
+            const calls = snapshot.val(); if (!calls) return;
             Object.entries(calls).forEach(([key, call]) => {
                 if (call.callerId !== myId && call.status === 'calling') {
                     if (confirm(`FaceTime entrante (${call.type}) de: ${call.caller}. ¿Contestar?`)) {
@@ -643,6 +631,7 @@
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftTargetName').textContent = call.caller;
+        document.getElementById('ftAvatar').textContent = call.caller.charAt(0);
         document.getElementById('ftCallStatus').textContent = "Conectando...";
         document.getElementById('btnFtVideo').style.display = call.type === 'video' ? 'flex' : 'none';
 
@@ -652,11 +641,8 @@
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
 
         peerConnection.onicecandidate = e => {
-            if (e.candidate) {
-                push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON());
-            }
+            if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON());
         };
-
         peerConnection.ontrack = e => {
             document.getElementById('remoteVideo').srcObject = e.streams[0];
             document.getElementById('ftAvatar').style.display = 'none';
@@ -665,20 +651,14 @@
         await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
+        await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
 
-        await update(activeCallRef, {
-            answer: { type: answer.type, sdp: answer.sdp },
-            status: 'accepted'
-        });
-
-        // Escuchar candidatos ICE del llamante
         onValue(ref(db, `chat/calls/${key}/callerCandidates`), snapshot => {
             if (snapshot.exists()) {
                 Object.values(snapshot.val()).forEach(cand => peerConnection.addIceCandidate(new RTCIcandidate(cand)));
             }
         });
 
-        // Escuchar si cuelgan
         onValue(activeCallRef, snapshot => {
             if (snapshot.val() && snapshot.val().status === 'ended') cleanUpCallUI();
         });
@@ -704,15 +684,13 @@
     };
 
     window.hangUpCall = function() {
-        if (activeCallRef) {
-            update(activeCallRef, { status: 'ended' });
-        }
+        if (activeCallRef) update(activeCallRef, { status: 'ended' });
         cleanUpCallUI();
     };
 
     function cleanUpCallUI() {
-        if (localStream) { localStream.getTracks().forEach(track => track.stop()); }
-        if (peerConnection) { peerConnection.close(); }
+        if (localStream) localStream.getTracks().forEach(track => track.stop());
+        if (peerConnection) peerConnection.close();
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
@@ -729,10 +707,8 @@
         });
     };
 
-    /* ── INICIALIZACIÓN GLOBAL ── */
     renderStore();
-    const initialMessagesQuery = query(messagesRef, limitToLast(50));
-    onValue(initialMessagesQuery, (snapshot) => {
+    onValue(query(messagesRef, limitToLast(50)), (snapshot) => {
         const data = snapshot.val(); if (!data) return;
         Object.entries(data).forEach(([key, msg]) => {
             if (!seenKeys.has(key)) { seenKeys.add(key); renderMessage(msg, key); }
