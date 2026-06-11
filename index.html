@@ -1,756 +1,1183 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>VibeStore</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="VibeStore">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>VibeStore — Tienda Online</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    <style>
-        :root {
-            /* Paleta inspirada en la imagen UI Premium */
-            --bg-body: #f8f9fb; 
-            --bg-card: #ffffff;
-            --bg-nav: rgba(248, 249, 251, 0.9); 
-            --text-main: #1d1d1f;
-            --text-muted: #a0a0ab;
-            --purple-accent: #9283e3; 
-            --purple-light: #e8e5fb;
-            --green: #10b981;
-            --red: #ef4444;
-            --border-color: #eaeaf1;
-            --shadow: 0 10px 30px rgba(0,0,0,0.04);
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-            
-            /* Colores pastel para las tarjetas */
-            --bg-pastel-1: #f8d5d5;
-            --bg-pastel-2: #a0d4e2;
-            --bg-pastel-3: #c1b8f4;
-            --bg-pastel-4: #f6e5c0;
-        }
-        [data-theme="dark"] {
-            --bg-body: #0a0a0c; 
-            --bg-card: #18181b; 
-            --bg-nav: rgba(10, 10, 12, 0.9);
-            --text-main: #f5f5f7; 
-            --text-muted: #71717a; 
-            --purple-accent: #a395e9;
-            --purple-light: #2d264f; 
-            --border-color: #27272a;
-            --shadow: 0 10px 30px rgba(0,0,0,0.4);
-            --bg-pastel-1: #4a2d2d;
-            --bg-pastel-2: #2d454a;
-            --bg-pastel-3: #3b3552;
-            --bg-pastel-4: #4a422d;
-        }
-        
-        /* Ajustes Quirúrgicos para iOS Nativo */
-        * { 
-            box-sizing: border-box; 
-            margin: 0; 
-            padding: 0; 
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
-            -webkit-tap-highlight-color: transparent; 
-            -webkit-touch-callout: none; 
-        }
-        
-        body { 
-            background-color: var(--bg-body); 
-            color: var(--text-main); 
-            transition: background-color 0.3s, color 0.3s; 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow-x: hidden; 
-            overscroll-behavior-y: none; 
-            -webkit-user-select: none; 
-            user-select: none;
-        }
+  :root {
+    --purple: #7C3AED;
+    --purple-light: #A78BFA;
+    --purple-dark: #5B21B6;
+    --pink: #F472B6;
+    --pink-light: #FDF2F8;
+    --bg: #F8F4FF;
+    --white: #FFFFFF;
+    --gray: #6B7280;
+    --gray-light: #F3F4F6;
+    --dark: #1F1035;
+    --card-radius: 20px;
+    --pill-radius: 50px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-        /* Reactivar selección solo donde se necesita */
-        input, textarea, [contenteditable] {
-            -webkit-user-select: auto;
-            user-select: auto;
-            -webkit-touch-callout: default;
-        }
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--dark);
+    min-height: 100vh;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overscroll-behavior-y: none; 
+    -webkit-user-select: none; 
+    user-select: none;
+  }
 
-        /* HEADER REDISEÑADO */
-        header { 
-            background: transparent; 
-            padding: calc(var(--safe-top) + 1.5rem) 1.5rem 1rem; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            z-index: 100; 
-        }
-        .header-menu { font-size: 1.5rem; color: var(--text-main); cursor: pointer; display: flex; flex-direction: column; gap: 4px;}
-        .header-menu span { display: block; width: 20px; height: 2px; background: var(--text-main); border-radius: 2px; }
-        .header-menu span:nth-child(2) { width: 14px; }
-        
-        .logo { font-size: 1.2rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-        
-        .header-actions { display: flex; align-items: center; gap: 1rem; }
-        .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-main); position: relative;}
-        .badge { position: absolute; top: -5px; right: -8px; background-color: var(--purple-accent); color: #fff; font-size: 0.65rem; font-weight: 800; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-body); }
+  input, textarea, [contenteditable] {
+    -webkit-user-select: auto;
+    user-select: auto;
+    -webkit-touch-callout: default;
+  }
 
-        /* BUSCADOR TIPO PILL */
-        .search-wrap { padding: 0 1.5rem; margin-bottom: 1.5rem; position: relative; }
-        .search-icon { position: absolute; left: 2.5rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.1rem; pointer-events: none;}
-        .search-input { width: 100%; background: var(--bg-card); border: none; padding: 1.2rem 1.2rem 1.2rem 3.5rem; border-radius: 100px; color: var(--text-main); outline: none; font-size: 0.95rem; box-shadow: var(--shadow); transition: box-shadow 0.2s;}
-        .search-input:focus { box-shadow: 0 0 0 2px var(--purple-accent); }
+  /* ── NAVBAR ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid #EDE9FE;
+    padding: var(--safe-top) 32px 0;
+    display: flex; align-items: center; gap: 24px;
+    height: calc(68px + var(--safe-top));
+    box-shadow: 0 2px 16px rgba(124,58,237,.07);
+  }
+  .nav-logo {
+    font-size: 1.5rem; font-weight: 800; letter-spacing: -1px;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    flex-shrink: 0;
+  }
+  .nav-search {
+    flex: 1; max-width: 480px; margin-left: 16px;
+    position: relative;
+  }
+  .nav-search input {
+    width: 100%; padding: 10px 20px 10px 44px;
+    border: 2px solid #EDE9FE; border-radius: var(--pill-radius);
+    font-family: inherit; font-size: .9rem; outline: none;
+    transition: border-color .2s;
+    background: var(--bg);
+  }
+  .nav-search input:focus { border-color: var(--purple); }
+  .nav-search svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gray); }
+  .nav-links { display: flex; gap: 24px; margin-left: auto; align-items: center; }
+  .nav-links a { text-decoration: none; color: var(--gray); font-size: .92rem; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--purple); }
+  .nav-icon-btn {
+    position: relative; background: none; border: none; cursor: pointer;
+    color: var(--dark); font-size: 1.2rem; padding: 6px;
+  }
+  .cart-badge {
+    position: absolute; top: 0; right: 0;
+    background: var(--pink); color: white;
+    font-size: .6rem; font-weight: 700;
+    border-radius: 50%; width: 16px; height: 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
 
-        /* NAVEGACIÓN CATEGORÍAS */
-        .nav-scroller { overflow-x: auto; white-space: nowrap; padding: 0.5rem 1.5rem 1.5rem; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-        .nav-scroller::-webkit-scrollbar { display: none; }
-        .btn-cat { display: inline-flex; align-items: center; gap: 0.4rem; background: transparent; border: none; color: var(--text-muted); padding: 0.6rem 0; font-size: 1rem; font-weight: 600; margin-right: 1.5rem; cursor: pointer; transition: color 0.2s; }
-        .btn-cat.active { color: var(--text-main); font-weight: 800; border-bottom: 2px solid var(--text-main); border-radius: 0;}
+  /* ── HERO ── */
+  .hero {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 20px; padding: 32px 32px 24px;
+    max-width: 1400px; margin: 0 auto;
+  }
+  .hero-main {
+    background: linear-gradient(135deg, var(--purple) 0%, #B45FBB 60%, var(--pink) 100%);
+    border-radius: var(--card-radius);
+    padding: 48px 40px;
+    color: white;
+    min-height: 340px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    position: relative; overflow: hidden;
+  }
+  .hero-main::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.12);
+  }
+  .hero-badge {
+    background: rgba(255,255,255,.25); backdrop-filter: blur(8px);
+    border-radius: var(--pill-radius);
+    padding: 4px 14px; font-size: .78rem; font-weight: 600;
+    width: fit-content; margin-bottom: 16px;
+  }
+  .hero-main h1 { font-size: 2.4rem; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
+  .hero-main p { font-size: .95rem; opacity: .85; margin-bottom: 28px; }
+  .btn-hero {
+    background: white; color: var(--purple);
+    border: none; border-radius: var(--pill-radius);
+    padding: 12px 28px; font-family: inherit; font-size: .9rem; font-weight: 700;
+    cursor: pointer; width: fit-content;
+    display: flex; align-items: center; gap: 8px;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
+  .hero-side { display: flex; flex-direction: column; gap: 20px; }
+  .hero-card {
+    border-radius: var(--card-radius);
+    padding: 28px 28px;
+    flex: 1;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    position: relative; overflow: hidden; color: white; min-height: 150px;
+  }
+  .hero-card.pink { background: linear-gradient(135deg, #F472B6, #EC4899); }
+  .hero-card.soft { background: linear-gradient(135deg, #8B5CF6, #6D28D9); }
+  .hero-card h3 { font-size: 1.2rem; font-weight: 700; }
+  .hero-card span { font-size: .8rem; opacity: .8; }
+  .hero-card img {
+    position: absolute; right: -10px; bottom: -10px;
+    height: 120px; width: 120px; object-fit: cover;
+    border-radius: 12px; opacity: .55;
+  }
 
-        /* MAIN Y GRID */
-        .main-content { flex: 1; padding: 0 1.5rem 1.5rem; max-width: 600px; margin: 0 auto; width: 100%; }
-        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.2rem; }
-        
-        /* TARJETAS PREMIUM */
-        .card { background: transparent; display: flex; flex-direction: column; position: relative; transition: transform 0.2s; }
-        .card:active { transform: scale(0.97); }
-        .img-container { width: 100%; aspect-ratio: 3/4; border-radius: 24px; margin-bottom: 0.8rem; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
-        .img-container img { width: 100%; height: 100%; object-fit: cover; position: absolute; mix-blend-mode: multiply; }
-        [data-theme="dark"] .img-container img { mix-blend-mode: normal; }
-        
-        .card-tag { position: absolute; top: 1rem; left: 1rem; background: rgba(255,255,255,0.9); color: #000; font-size: 0.7rem; font-weight: 700; padding: 6px 12px; border-radius: 100px; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 4px;}
-        
-        .card-info { padding: 0 0.2rem; position: relative;}
-        .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.3rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .price { font-weight: 600; font-size: 1rem; color: var(--text-muted);}
-        
-        .btn-add { position: absolute; right: 0; bottom: 0; background: var(--text-main); color: var(--bg-card); border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: 600; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        .btn-add:active { transform: scale(0.85); background: var(--purple-accent); }
+  /* ── CATEGORIES STRIP ── */
+  .section-wrapper { max-width: 1400px; margin: 0 auto; padding: 0 32px; }
+  .section-title {
+    font-size: 1.4rem; font-weight: 700; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 2px;
+    background: linear-gradient(90deg, var(--purple-light), transparent);
+    border-radius: 2px;
+  }
+  .section-title a { font-size: .82rem; font-weight: 500; color: var(--purple); text-decoration: none; margin-left: auto; white-space: nowrap; }
 
-        /* FOOTER NEGRO ESTILO APP */
-        .footer-checkout { position: sticky; bottom: 0; padding: 1rem 1.5rem calc(1rem + var(--safe-bottom)); background: var(--bg-body); z-index: 90; max-width: 600px; margin: 0 auto; width: 100%; }
-        .btn-checkout { width: 100%; background: var(--text-main); color: var(--bg-card); border: none; padding: 1.2rem; border-radius: 100px; font-size: 1.05rem; font-weight: 700; cursor: pointer; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.15);}
-        .btn-checkout span.total-label { opacity: 0.8; font-size: 0.95rem; font-weight: 500;}
+  .cats-scroll {
+    display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+  .cats-scroll::-webkit-scrollbar { display: none; }
+  .cat-chip {
+    flex-shrink: 0;
+    background: var(--white);
+    border: 2px solid #EDE9FE;
+    border-radius: var(--card-radius);
+    padding: 18px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    min-width: 110px;
+  }
+  .cat-chip:hover, .cat-chip.active {
+    background: var(--purple); border-color: var(--purple); color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(124,58,237,.25);
+  }
+  .cat-chip:hover .cat-emoji, .cat-chip.active .cat-emoji { filter: none; }
+  .cat-emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
+  .cat-label { font-size: .78rem; font-weight: 600; white-space: nowrap; }
 
-        /* CAJÓN DEL CARRITO */
-        .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.3); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .drawer-overlay.open { opacity: 1; pointer-events: all; }
-        .cart-drawer { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: 32px 32px 0 0; z-index: 201; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32,0.72,0,1); padding: 0 1.5rem calc(2rem + var(--safe-bottom)); max-height: 85vh; overflow-y: auto; box-shadow: 0 -10px 40px rgba(0,0,0,0.1); }
-        .cart-drawer.open { transform: translateY(0); }
-        .drawer-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 1.2rem auto 1.5rem; }
-        .drawer-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 1.5rem; }
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--border-color); }
-        .cat-name { font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 0.8rem; }
-        .cat-qty { display: flex; align-items: center; gap: 0.8rem; background: var(--bg-body); border-radius: 100px; padding: 6px; }
-        .qty-btn { background: var(--bg-card); border: none; color: var(--text-main); width: 28px; height: 28px; border-radius: 50%; font-size: 1rem; font-weight: 600; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .qty-num { font-weight: 700; min-width: 20px; text-align: center; }
-        .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
-        .cart-total-label { font-size: 1.1rem; color: var(--text-muted); font-weight: 600; }
-        .cart-total-value { font-size: 1.6rem; font-weight: 800; }
-        .btn-pay { background: var(--text-main); color: var(--bg-card); border: none; width: 100%; padding: 1.2rem; border-radius: 100px; font-size: 1.1rem; font-weight: 700; margin-top: 1.5rem; box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+  /* ── FILTER TABS ── */
+  .filter-tabs { display: flex; gap: 10px; margin: 28px 0 20px; flex-wrap: wrap; }
+  .ftab {
+    padding: 8px 20px; border-radius: var(--pill-radius);
+    font-family: inherit; font-size: .83rem; font-weight: 600;
+    border: 2px solid #EDE9FE; background: white; cursor: pointer;
+    transition: all .2s; color: var(--gray);
+  }
+  .ftab:hover { border-color: var(--purple); color: var(--purple); }
+  .ftab.active { background: var(--purple); border-color: var(--purple); color: white; }
 
-        /* MODAL PAGOS */
-        .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-        .payment-modal.open { opacity: 1; pointer-events: all; }
-        .payment-box { background: var(--bg-card); border-radius: 32px; padding: 2rem; width: 100%; max-width: 400px; position: relative; transform: translateY(30px); transition: transform 0.4s; }
-        .payment-modal.open .payment-box { transform: translateY(0); }
-        .payment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .card-graphic { height: 160px; background: linear-gradient(135deg, var(--purple-accent), #4a3b8c); border-radius: 20px; margin-bottom: 1.5rem; padding: 1.5rem; color: white; display: flex; flex-direction: column; justify-content: flex-end; position: relative; }
-        .pay-input-group { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; margin-bottom: 1.5rem; }
-        .pay-input { width: 100%; background: transparent; border: none; padding: 1.2rem; color: var(--text-main); font-size: 1rem; outline: none; border-bottom: 1px solid var(--border-color); }
-        .pay-row { display: flex; } .pay-row .pay-input { border-bottom: none; border-right: 1px solid var(--border-color); }
+  /* ── PRODUCT GRID ── */
+  .prod-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+  .prod-card {
+    background: var(--white);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    transition: transform .25s, box-shadow .25s;
+    cursor: pointer;
+    position: relative;
+  }
+  .prod-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 40px rgba(124,58,237,.14);
+  }
+  .prod-img-wrap {
+    height: 220px; background: var(--gray-light);
+    position: relative; overflow: hidden;
+  }
+  .prod-img-wrap img {
+    width: 100%; height: 100%; object-fit: cover;
+    transition: transform .4s;
+  }
+  .prod-card:hover .prod-img-wrap img { transform: scale(1.07); }
+  .prod-badge {
+    position: absolute; top: 12px; left: 12px;
+    background: var(--purple); color: white;
+    font-size: .7rem; font-weight: 700;
+    padding: 4px 10px; border-radius: var(--pill-radius);
+  }
+  .prod-badge.sale { background: #EF4444; }
+  .prod-badge.new-badge { background: #10B981; }
+  .wish-btn {
+    position: absolute; top: 12px; right: 12px;
+    background: white; border: none; border-radius: 50%;
+    width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    transition: transform .2s;
+  }
+  .wish-btn:hover { transform: scale(1.15); }
+  .prod-info { padding: 16px; }
+  .prod-cat { font-size: .72rem; color: var(--purple); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  .prod-name { font-size: .95rem; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
+  .prod-stars { color: #F59E0B; font-size: .8rem; }
+  .prod-stars span { color: var(--gray); font-size: .75rem; margin-left: 4px; }
+  .prod-price-row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .prod-price { font-size: 1.1rem; font-weight: 700; color: var(--purple); }
+  .prod-old { font-size: .8rem; color: var(--gray); text-decoration: line-through; margin-left: 6px; }
+  .add-btn {
+    background: var(--purple); color: white;
+    border: none; border-radius: var(--pill-radius);
+    padding: 8px 16px; font-family: inherit; font-size: .8rem; font-weight: 600;
+    cursor: pointer; transition: background .2s, transform .15s;
+  }
+  .add-btn:hover { background: var(--purple-dark); transform: scale(1.04); }
 
-        /* TOASTS PROFESIONALES Y CHAT (Lógica original conservada) */
-        .toast-promo { position: fixed; top: calc(var(--safe-top) + 15px); left: 50%; transform: translateX(-50%) translateY(-100%); background: var(--bg-card); border: 1px solid var(--border-color); padding: 1rem 1.2rem; border-radius: 100px; box-shadow: var(--shadow); z-index: 4000; opacity: 0; transition: transform 0.4s, opacity 0.3s; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; font-size: 0.95rem; width: max-content; max-width: 90%; color: var(--text-main); }
-        .toast-promo.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast-promo.glitch-promo { border: 2px solid var(--red); background: rgba(255,255,255,0.95); animation: pulse-glitch 2s infinite; }
-        @keyframes pulse-glitch { 0%,100%{box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);} 50%{box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);} }
+  /* ── PROMO BANNER ── */
+  .promo-banner {
+    background: linear-gradient(135deg, #1F1035 0%, var(--purple-dark) 100%);
+    border-radius: var(--card-radius);
+    padding: 40px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 32px;
+    margin: 40px 0;
+    color: white; overflow: hidden; position: relative;
+  }
+  .promo-banner::before {
+    content: '';
+    position: absolute; right: -60px; top: -60px;
+    width: 280px; height: 280px; border-radius: 50%;
+    background: rgba(167,139,250,.2);
+  }
+  .promo-banner h2 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
+  .promo-banner p { opacity: .8; font-size: .95rem; }
+  .promo-discount {
+    background: linear-gradient(135deg, var(--pink), var(--purple-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    font-size: 4rem; font-weight: 900; line-height: 1;
+  }
+  .btn-white {
+    background: white; color: var(--purple-dark);
+    border: none; border-radius: var(--pill-radius);
+    padding: 14px 32px; font-family: inherit; font-size: .95rem; font-weight: 700;
+    cursor: pointer; transition: transform .2s; white-space: nowrap;
+  }
+  .btn-white:hover { transform: translateY(-2px); }
 
-        .toast { position: fixed; bottom: calc(6rem + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); color: #fff; padding: 0.8rem 1.5rem; border-radius: 100px; font-size: 0.9rem; font-weight: 600; opacity: 0; transition: opacity 0.3s, transform 0.3s; z-index: 300; pointer-events: none; }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark); color: rgba(255,255,255,.7);
+    padding: 56px 32px calc(32px + var(--safe-bottom));
+    margin-top: 40px;
+  }
+  .footer-inner {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px;
+    margin-bottom: 40px;
+  }
+  .footer-brand p { font-size: .88rem; line-height: 1.7; margin: 12px 0 20px; }
+  .footer-logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, var(--purple-light), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .footer-col h4 { color: white; font-size: .95rem; font-weight: 600; margin-bottom: 16px; }
+  .footer-col a { display: block; text-decoration: none; color: rgba(255,255,255,.6); font-size: .85rem; margin-bottom: 10px; transition: color .2s; }
+  .footer-col a:hover { color: var(--purple-light); }
+  .footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 24px; text-align: center; font-size: .82rem; }
 
-        /* CHAT SECRETO - SE MANTIENE INTACTO */
-        #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
-        .chat-header { padding: 1rem 1.5rem; background: var(--bg-nav); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
-        .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
-        .chat-status-dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; }
-        .chat-header-info p:first-child { font-weight: 800; font-size: 1rem; }
-        .chat-header-info p:last-child { font-size: 0.75rem; color: var(--text-muted); font-weight: 600;}
-        .btn-call, .btn-video, .btn-panic { color: #fff; border: none; padding: 0.55rem 0.9rem; border-radius: 100px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; }
-        .btn-call { background: var(--green); } .btn-video { background: var(--purple-accent); } .btn-panic { background: var(--red); }
-        
-        .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .name-modal-box { background: var(--bg-card); border-radius: 32px; padding: 2.5rem 2rem; width: 100%; max-width: 340px; text-align: center; }
-        .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 100px; outline: none; font-size: 1rem; margin-bottom: 1.5rem; text-align: center; font-weight: 600;}
-        .btn-join { width: 100%; background: var(--text-main); color: var(--bg-card); border: none; padding: 1.2rem; border-radius: 100px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+  /* ── SECTION SPACING ── */
+  .section { padding: 40px 0 8px; }
 
-        .chat-messages { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
-        .msg-wrap { display: flex; flex-direction: column; max-width: 80%; }
-        .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
-        .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
-        .msg-sender { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem; padding: 0 0.5rem; }
-        .msg { padding: 1rem 1.2rem; border-radius: 20px; font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
-        .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
-        .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; box-shadow: var(--shadow); }
-        .msg-time { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.3rem; padding: 0 0.5rem; font-weight: 600;}
-        
-        .chat-input-area { padding: 1rem 1.5rem calc(1rem + var(--safe-bottom)); background: var(--bg-nav); backdrop-filter: blur(12px); border-top: 1px solid var(--border-color); display: flex; gap: 0.8rem; align-items: center; }
-        .chat-input-area input { flex: 1; background: var(--bg-body); border: none; padding: 1rem 1.2rem; border-radius: 100px; outline: none; font-size: 1rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        
-        /* FACETIME VIDEO UI */
-        #video-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 5000; display: none; flex-direction: column; overflow: hidden; }
-        .remote-video { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1; background: #000; }
-        .local-video { width: 110px; height: 160px; object-fit: cover; position: absolute; bottom: 120px; right: 20px; z-index: 2; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.15); transition: transform 0.3s; }
-        .video-controls { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 3; display: flex; gap: 1.5rem; background: rgba(255,255,255,0.15); padding: 1rem 2rem; border-radius: 40px; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); box-shadow: 0 4px 20px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); }
-        .btn-hangup { background: var(--red); color: white; border: none; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; cursor: pointer; box-shadow: 0 4px 15px rgba(239,68,68,0.4); }
-        .btn-panic-video { background: #000; color: var(--red); border: 2px solid var(--red); width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: 900; cursor: pointer; }
-        .call-overlay { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); }
-        .timer-circle { font-size: 4rem; font-weight: 800; margin-bottom: 1rem; font-variant-numeric: tabular-nums; }
-        .call-status-text { font-size: 1.1rem; font-weight: 600; opacity: 0.8; letter-spacing: 1px; text-transform: uppercase; }
-        
-        .empty-state { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 4rem 1rem; color: var(--text-muted); text-align: center; }
-    </style>
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-side { flex-direction: row; }
+    .footer-inner { grid-template-columns: 1fr 1fr; }
+    .nav-links { display: none; }
+  }
+  @media (max-width: 600px) {
+    nav { padding: var(--safe-top) 16px 0; }
+    .hero { padding: 16px; }
+    .section-wrapper { padding: 0 16px; }
+    .footer-inner { grid-template-columns: 1fr; }
+    .promo-banner { flex-direction: column; text-align: center; padding: 32px 24px; }
+    .hero-main h1 { font-size: 1.7rem; }
+    .promo-discount { font-size: 3rem; }
+  }
+
+  /* ── HIDDEN SYSTEM STYLES (PORTAL, CHAT & TOASTS) ── */
+  .payment-modal { position: fixed; inset: 0; background: rgba(31,16,53,0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .payment-modal.open { opacity: 1; pointer-events: all; }
+  .payment-box { background: var(--white); border-radius: var(--card-radius); padding: 2rem; width: 100%; max-width: 400px; position: relative; transform: translateY(30px); transition: transform 0.4s; }
+  .payment-modal.open .payment-box { transform: translateY(0); }
+  .payment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-weight: 700; font-size: 1.2rem;}
+  .btn-close-pay { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray); }
+  .card-graphic { height: 160px; background: linear-gradient(135deg, var(--purple), var(--pink)); border-radius: 16px; margin-bottom: 1.5rem; padding: 1.5rem; color: white; display: flex; flex-direction: column; justify-content: flex-end; }
+  .pay-input { width: 100%; background: var(--gray-light); border: 2px solid transparent; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
+  .pay-input:focus { border-color: var(--purple); }
+  .pay-row { display: flex; gap: 10px; }
+  .btn-pay { background: var(--dark); color: white; border: none; width: 100%; padding: 1rem; border-radius: var(--pill-radius); font-weight: 700; font-family: inherit; font-size: 1rem; cursor: pointer; }
+
+  .toast-promo { position: fixed; top: calc(var(--safe-top) + 20px); left: 50%; transform: translateX(-50%) translateY(-150%); background: var(--white); border: 1px solid #EDE9FE; padding: 1rem 1.5rem; border-radius: var(--pill-radius); box-shadow: 0 10px 25px rgba(124,58,237,0.15); z-index: 4000; opacity: 0; transition: transform 0.4s, opacity 0.3s; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: .9rem; width: max-content; max-width: 90%; color: var(--dark); cursor: grab; }
+  .toast-promo.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  #seccion-chat { display: none; flex-direction: column; position: fixed; inset: 0; background: var(--bg); z-index: 9999; padding-top: var(--safe-top); }
+  .chat-header { padding: 1rem 2rem; background: var(--white); border-bottom: 1px solid #EDE9FE; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+  .chat-meta { display: flex; align-items: center; gap: 10px; }
+  .chat-status-dot { width: 10px; height: 10px; background: #10B981; border-radius: 50%; }
+  .chat-header-info p:first-child { font-weight: 700; font-size: 1rem; }
+  .chat-header-info p:last-child { font-size: 0.75rem; color: var(--gray); font-weight: 500;}
+  .btn-panic { background: #EF4444; color: white; border: none; padding: 8px 16px; border-radius: var(--pill-radius); font-weight: 700; cursor: pointer; font-family: inherit; box-shadow: 0 4px 12px rgba(239,68,68,.3); }
+  
+  .name-modal { position: fixed; inset: 0; background: rgba(31,16,53,0.8); backdrop-filter: blur(5px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+  .name-modal-box { background: var(--white); padding: 2.5rem; border-radius: var(--card-radius); text-align: center; width: 100%; max-width: 360px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+  .name-modal-box h2 { font-weight: 700; margin-bottom: 8px; }
+  .name-modal-box p { color: var(--gray); font-size: 0.85rem; }
+  .name-modal-box input { width: 100%; border: 2px solid #EDE9FE; padding: 12px; border-radius: 12px; margin: 1.5rem 0; outline: none; text-align: center; font-family: inherit; font-weight: 600; font-size: 1rem; }
+  .btn-join { background: var(--purple); color: white; border: none; padding: 12px 24px; border-radius: var(--pill-radius); width: 100%; font-weight: 700; cursor: pointer; font-size: 1rem; }
+
+  .chat-messages { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+  .msg-wrap { display: flex; flex-direction: column; max-width: 80%; }
+  .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
+  .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
+  .msg-sender { font-size: 0.7rem; color: var(--gray); margin-bottom: 4px; padding: 0 10px; font-weight: 600; }
+  .msg { padding: 12px 16px; border-radius: 20px; font-size: .95rem; line-height: 1.4; word-break: break-word; }
+  .msg.mine { background: var(--purple); color: white; border-bottom-right-radius: 4px; }
+  .msg.theirs { background: var(--white); color: var(--dark); border-bottom-left-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .msg-time { font-size: 0.65rem; color: var(--gray); margin-top: 4px; padding: 0 10px; font-weight: 500;}
+
+  .chat-input-area { padding: 1rem 2rem calc(1rem + var(--safe-bottom)); background: var(--white); border-top: 1px solid #EDE9FE; display: flex; gap: 1rem; align-items: center; }
+  .chat-input-area input { flex: 1; border: 2px solid #EDE9FE; padding: 12px 20px; border-radius: var(--pill-radius); outline: none; font-family: inherit; font-size: .95rem; }
+  .btn-send { background: var(--purple); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .15s; }
+  .btn-send:active { transform: scale(0.9); }
+</style>
 </head>
 <body>
 
-<div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100vh;">
-    <header>
-        <div class="header-menu">
-            <span></span><span></span>
+<div id="vista-tienda">
+  <nav>
+    <div class="nav-logo">VibeStore</div>
+    <div class="nav-search">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" placeholder="Buscar productos, marcas...">
+    </div>
+    <div class="nav-links">
+      <a href="#">Inicio</a>
+      <a href="#">Ofertas</a>
+      <a href="#">Marcas</a>
+      <a href="#">Nuevos</a>
+    </div>
+    <button class="nav-icon-btn" style="margin-left:8px">❤️</button>
+    <button class="nav-icon-btn" id="cartBtn" style="position:relative" onclick="handleCheckout()">
+      🛒
+      <span class="cart-badge" id="cartBadge">0</span>
+    </button>
+    <button class="nav-icon-btn">👤</button>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-main">
+      <div class="hero-badge">✨ Colección 2025</div>
+      <h1>Todo lo que necesitas,<br>en un solo lugar</h1>
+      <p>Moda, tecnología, belleza y más — envío gratis en pedidos +$49.990</p>
+      <button class="btn-hero">Explorar ahora →</button>
+    </div>
+    <div class="hero-side">
+      <div class="hero-card pink">
+        <span>Hasta 50% off</span>
+        <h3>Maquillaje &amp; Belleza</h3>
+      </div>
+      <div class="hero-card soft">
+        <span>Lo más nuevo</span>
+        <h3>Smartphones 2025</h3>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-wrapper">
+    <div class="section">
+      <div class="section-title">Categorías <a href="#">Ver todas →</a></div>
+      <div class="cats-scroll">
+        <div class="cat-chip active" onclick="filterCat(this,'all')"><span class="cat-emoji">🛍️</span><span class="cat-label">Todo</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'tech')"><span class="cat-emoji">📱</span><span class="cat-label">Tecnología</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'moda')"><span class="cat-emoji">👗</span><span class="cat-label">Moda Mujer</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'hombre')"><span class="cat-emoji">👔</span><span class="cat-label">Moda Hombre</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'belleza')"><span class="cat-emoji">💄</span><span class="cat-label">Belleza</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'hogar')"><span class="cat-emoji">🏠</span><span class="cat-label">Hogar</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'deporte')"><span class="cat-emoji">⚽</span><span class="cat-label">Deportes</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'juguetes')"><span class="cat-emoji">🧸</span><span class="cat-label">Juguetes</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'mascotas')"><span class="cat-emoji">🐾</span><span class="cat-label">Mascotas</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'libros')"><span class="cat-emoji">📚</span><span class="cat-label">Libros</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'auto')"><span class="cat-emoji">🚗</span><span class="cat-label">Autos</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'salud')"><span class="cat-emoji">💊</span><span class="cat-label">Salud</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'zapatillas')"><span class="cat-emoji">👟</span><span class="cat-label">Zapatillas</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'accesorios')"><span class="cat-emoji">💍</span><span class="cat-label">Accesorios</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'gaming')"><span class="cat-emoji">🎮</span><span class="cat-label">Gaming</span></div>
+        <div class="cat-chip" onclick="filterCat(this,'supermercado')"><span class="cat-emoji">🛒</span><span class="cat-label">Supermercado</span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">Productos destacados <a href="#">Ver todos →</a></div>
+      <div class="filter-tabs">
+        <button class="ftab active">Todos</button>
+        <button class="ftab">Nuevos</button>
+        <button class="ftab">Ofertas</button>
+        <button class="ftab">Más vendidos</button>
+        <button class="ftab">Mejor calificados</button>
+      </div>
+
+      <div class="prod-grid" id="prodGrid">
+
+        <div class="prod-card" data-cat="tech">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80" alt="iPhone 15 Pro">
+            <span class="prod-badge new-badge">NUEVO</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Tecnología</div>
+            <div class="prod-name">iPhone 15 Pro Max 256GB</div>
+            <div class="prod-stars">★★★★★ <span>(4.9 · 2.3k reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$799.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
         </div>
-        <div class="logo">Fashion</div>
-        <div class="header-actions">
-            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
-            <button class="icon-btn" onclick="openCart()">🛍️<span class="badge" id="cartBadge">0</span></button>
+
+        <div class="prod-card" data-cat="tech">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80" alt="Samsung Galaxy">
+            <span class="prod-badge sale">-20%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Tecnología</div>
+            <div class="prod-name">Samsung Galaxy S25 Ultra</div>
+            <div class="prod-stars">★★★★★ <span>(4.8 · 1.8k reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$699.990</span> <span class="prod-old">$874.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
         </div>
-    </header>
 
-    <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input type="search" id="searchBox" class="search-input" placeholder="Try search..." oninput="filterSearch(this)">
+        <div class="prod-card" data-cat="tech">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=400&q=80" alt="MacBook Air">
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Tecnología</div>
+            <div class="prod-name">MacBook Air M3 13"</div>
+            <div class="prod-stars">★★★★★ <span>(4.9 · 987 reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$1.099.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="gaming">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1486401899868-0e435ed85128?w=400&q=80" alt="PS5">
+            <span class="prod-badge sale">-15%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Gaming</div>
+            <div class="prod-name">PlayStation 5 Slim + 2 Controles</div>
+            <div class="prod-stars">★★★★★ <span>(5.0 · 3.1k reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$449.990</span> <span class="prod-old">$529.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="belleza">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&q=80" alt="Maquillaje">
+            <span class="prod-badge new-badge">NUEVO</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Maquillaje</div>
+            <div class="prod-name">Set Paleta Sombras 24 Tonos HD</div>
+            <div class="prod-stars">★★★★☆ <span>(4.7 · 1.2k reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$29.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="belleza">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80" alt="Skincare">
+            <span class="prod-badge sale">-30%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Skincare</div>
+            <div class="prod-name">Set Rutina Skincare 5 pasos K-Beauty</div>
+            <div class="prod-stars">★★★★★ <span>(4.9 · 854 reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$49.990</span> <span class="prod-old">$71.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="moda">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80" alt="Vestido">
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Moda Mujer</div>
+            <div class="prod-name">Vestido Midi Floral Verano</div>
+            <div class="prod-stars">★★★★☆ <span>(4.5 · 620 reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$34.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="moda">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80" alt="Chaqueta">
+            <span class="prod-badge sale">-25%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Moda Mujer</div>
+            <div class="prod-name">Chaqueta Oversize Premium</div>
+            <div class="prod-stars">★★★★★ <span>(4.8 · 430 reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$54.990</span> <span class="prod-old">$73.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="hombre">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1507680434567-5739c80be1ac?w=400&q=80" alt="Camisa hombre">
+            <span class="prod-badge new-badge">NUEVO</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Moda Hombre</div>
+            <div class="prod-name">Camisa Lino Premium Slim Fit</div>
+            <div class="prod-stars">★★★★☆ <span>(4.6 · 318 reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$39.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="zapatillas">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" alt="Nike">
+            <span class="prod-badge sale">-18%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Zapatillas</div>
+            <div class="prod-name">Nike Air Max 270 React</div>
+            <div class="prod-stars">★★★★★ <span>(4.9 · 2.7k reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$79.990</span> <span class="prod-old">$97.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="zapatillas">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&q=80" alt="Adidas">
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Zapatillas</div>
+            <div class="prod-name">Adidas Ultraboost 24</div>
+            <div class="prod-stars">★★★★★ <span>(4.8 · 1.4k reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$89.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="hogar">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" alt="Cocina">
+            <span class="prod-badge sale">-40%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Hogar &amp; Cocina</div>
+            <div class="prod-name">Set Ollas Antiadherentes 5 piezas</div>
+            <div class="prod-stars">★★★★☆ <span>(4.6 · 910 reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$44.990</span> <span class="prod-old">$74.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="deporte">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&q=80" alt="Deporte">
+            <span class="prod-badge new-badge">NUEVO</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Deportes</div>
+            <div class="prod-name">Kit Yoga Premium — Mat + Bloques</div>
+            <div class="prod-stars">★★★★★ <span>(4.9 · 720 reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$36.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="accesorios">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80" alt="Reloj">
+            <span class="prod-badge">PREMIUM</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Accesorios</div>
+            <div class="prod-name">Reloj Automático Acero Inoxidable</div>
+            <div class="prod-stars">★★★★★ <span>(4.8 · 540 reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$129.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="mascotas">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&q=80" alt="Mascotas">
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Mascotas</div>
+            <div class="prod-name">Dispensador Automático Croquetas 3L</div>
+            <div class="prod-stars">★★★★☆ <span>(4.5 · 380 reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$41.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card" data-cat="salud">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80" alt="Salud">
+            <span class="prod-badge sale">-20%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Salud &amp; Farmacia</div>
+            <div class="prod-name">Tensiómetro Digital de Muñeca</div>
+            <div class="prod-stars">★★★★★ <span>(4.7 · 1.1k reseñas)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$27.990</span> <span class="prod-old">$34.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+      </div></div>
+
+    <div class="promo-banner">
+      <div>
+        <h2>Semana de Ofertas VibeStore</h2>
+        <p>Solo por tiempo limitado — no te quedes sin los tuyo</p>
+      </div>
+      <div class="promo-discount">HASTA<br>70%</div>
+      <button class="btn-white">Ver todas las ofertas →</button>
     </div>
 
-    <nav class="nav-scroller">
-        <button class="btn-cat active" onclick="filterCat('all',this)">New In</button>
-        <button class="btn-cat" onclick="filterCat('maquillaje',this)">Collection</button>
-        <button class="btn-cat" onclick="filterCat('tecnologia',this)">Tech</button>
-        <button class="btn-cat" onclick="filterCat('hogar',this)">Home</button>
-        <button class="btn-cat" onclick="filterCat('deportes',this)">Sports</button>
-    </nav>
+    <div class="section">
+      <div class="section-title">📱 Lo mejor en Tecnología <a href="#">Ver todo →</a></div>
+      <div class="prod-grid">
 
-    <main class="main-content">
-        <div class="grid-productos" id="productGrid"></div>
-    </main>
+        <div class="prod-card">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80" alt="Airpods">
+            <span class="prod-badge new-badge">NUEVO</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Audio</div>
+            <div class="prod-name">AirPods Pro 3 — Cancelación Activa</div>
+            <div class="prod-stars">★★★★★ <span>(5.0 · 3.4k)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$229.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
 
-    <div class="footer-checkout">
-        <button class="btn-checkout" onclick="handleCheckout()">
-            <span class="total-label">Total: <strong id="footerCount">(0)</strong></span>
-            <span>Add Cart</span>
-        </button>
+        <div class="prod-card">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400&q=80" alt="Tablet">
+            <span class="prod-badge sale">-12%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Tablets</div>
+            <div class="prod-name">iPad Pro 11" M4 WiFi 256GB</div>
+            <div class="prod-stars">★★★★★ <span>(4.9 · 1.6k)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$879.990</span> <span class="prod-old">$999.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80" alt="Smartwatch">
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Wearables</div>
+            <div class="prod-name">Apple Watch Series 10 GPS 46mm</div>
+            <div class="prod-stars">★★★★★ <span>(4.8 · 2.1k)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$349.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Xiaomi">
+            <span class="prod-badge sale">-22%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Tecnología</div>
+            <div class="prod-name">Xiaomi 14 Pro 5G 512GB</div>
+            <div class="prod-stars">★★★★☆ <span>(4.6 · 789)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$499.990</span> <span class="prod-old">$639.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
-</div>
 
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeCart()"></div>
-<div class="cart-drawer" id="cartDrawer">
-    <div class="drawer-handle"></div>
-    <h2 class="drawer-title">Tu Carrito</h2>
-    <div id="cartItems"></div>
-    <div class="cart-total-row">
-        <span class="cart-total-label">Subtotal</span>
-        <span class="cart-total-value" id="cartTotal">$0.00</span>
+    <div class="section">
+      <div class="section-title">💄 Belleza &amp; Maquillaje <a href="#">Ver todo →</a></div>
+      <div class="prod-grid">
+
+        <div class="prod-card">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1631214524020-3c69b4b72b7f?w=400&q=80" alt="Labial">
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Labiales</div>
+            <div class="prod-name">Set Labiales Mate Larga Duración x6</div>
+            <div class="prod-stars">★★★★★ <span>(4.8 · 1.9k)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$22.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1487412947147-5cebf100d2c3?w=400&q=80" alt="Perfume">
+            <span class="prod-badge">EXCLUSIVO</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Perfumería</div>
+            <div class="prod-name">Perfume Chanel Nº5 EDP 100ml</div>
+            <div class="prod-stars">★★★★★ <span>(4.9 · 2.4k)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$149.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400&q=80" alt="Crema">
+            <span class="prod-badge sale">-35%</span>
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Cuidado Facial</div>
+            <div class="prod-name">Sérum Vitamina C Anti-edad 30ml</div>
+            <div class="prod-stars">★★★★★ <span>(4.7 · 870)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$32.990</span> <span class="prod-old">$50.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="prod-card">
+          <div class="prod-img-wrap">
+            <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80" alt="Mascarilla">
+            <button class="wish-btn">🤍</button>
+          </div>
+          <div class="prod-info">
+            <div class="prod-cat">Cabello</div>
+            <div class="prod-name">Mascarilla Hidratante Argan + Keratina</div>
+            <div class="prod-stars">★★★★☆ <span>(4.5 · 640)</span></div>
+            <div class="prod-price-row">
+              <span><span class="prod-price">$18.990</span></span>
+              <button class="add-btn">+ Agregar</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
-    <button class="btn-pay" onclick="closeCart(); handleCheckout();">Completar Pedido</button>
+
+  </div><footer>
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <div class="footer-logo">VibeStore</div>
+        <p>Tu tienda favorita con todo lo que necesitas. Moda, tecnología, belleza y mucho más. Entrega rápida en todo el país.</p>
+        <div style="display:flex;gap:12px;font-size:1.3rem">
+          <span style="cursor:pointer">📘</span>
+          <span style="cursor:pointer">📸</span>
+          <span style="cursor:pointer">🐦</span>
+          <span style="cursor:pointer">▶️</span>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Categorías</h4>
+        <a href="#">Tecnología</a>
+        <a href="#">Moda Mujer</a>
+        <a href="#">Moda Hombre</a>
+        <a href="#">Belleza</a>
+        <a href="#">Hogar</a>
+        <a href="#">Deportes</a>
+      </div>
+      <div class="footer-col">
+        <h4>Ayuda</h4>
+        <a href="#">Centro de ayuda</a>
+        <a href="#">Seguir mi pedido</a>
+        <a href="#">Devoluciones</a>
+        <a href="#">Garantías</a>
+        <a href="#">Contacto</a>
+      </div>
+      <div class="footer-col">
+        <h4>VibeStore</h4>
+        <a href="#">Sobre nosotros</a>
+        <a href="#">Términos y condiciones</a>
+        <a href="#">Privacidad</a>
+        <a href="#">Vende con nosotros</a>
+        <a href="#">Blog</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 VibeStore — Todos los derechos reservados &nbsp;·&nbsp; 💳 Visa · Mastercard · Webpay · Transferencia
+    </div>
+  </footer>
 </div>
 
 <div class="payment-modal" id="paymentModal">
-    <div class="payment-box">
-        <div class="payment-header">
-            <h2>Pago Seguro</h2>
-            <button class="icon-btn" onclick="closePaymentPortal()">✕</button>
-        </div>
-        <div class="card-graphic">
-            <div style="width:40px;height:25px;background:rgba(255,255,255,0.4);border-radius:4px;margin-bottom:10px;"></div>
-            <div style="font-family:monospace; font-size:1.2rem; letter-spacing:2px;">•••• •••• •••• ••••</div>
-        </div>
-        <div class="pay-input-group">
-            <input type="tel" class="pay-input" placeholder="Número de tarjeta" maxlength="19">
-            <input type="text" class="pay-input" placeholder="Nombre en la tarjeta">
-            <div class="pay-row">
-                <input type="tel" class="pay-input" placeholder="MM/AA" maxlength="5">
-                <input type="tel" class="pay-input" placeholder="CVC" maxlength="4">
-            </div>
-        </div>
-        <button class="btn-pay" onclick="processPayment()">Pagar Ahora</button>
-    </div>
+  <div class="payment-box">
+      <div class="payment-header">
+          <span>Pago Seguro</span>
+          <button class="btn-close-pay" onclick="closePaymentPortal()">✕</button>
+      </div>
+      <div class="card-graphic">
+          <div style="width:40px;height:25px;background:rgba(255,255,255,0.4);border-radius:4px;margin-bottom:10px;"></div>
+          <div style="font-family:monospace; font-size:1.2rem; letter-spacing:2px;">•••• •••• •••• ••••</div>
+      </div>
+      <input type="tel" class="pay-input" placeholder="Número de tarjeta" maxlength="19">
+      <input type="text" class="pay-input" placeholder="Nombre en la tarjeta">
+      <div class="pay-row">
+          <input type="tel" class="pay-input" placeholder="MM/AA" maxlength="5">
+          <input type="tel" class="pay-input" placeholder="CVC" maxlength="4">
+      </div>
+      <button class="btn-pay" onclick="processPayment()">Pagar Ahora</button>
+  </div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <div id="seccion-chat">
-    <div class="name-modal" id="nameModal">
-        <div class="name-modal-box">
-            <h2>Ingresa al Canal</h2>
-            <p style="color:var(--text-muted); margin-top:8px; margin-bottom:20px;">Conexión cifrada de extremo a extremo</p>
-            <input type="text" id="nameInput" placeholder="Tu Alias" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
-            <button class="btn-join" onclick="joinChat()">Conectar</button>
-        </div>
-    </div>
+  <div class="name-modal" id="nameModal">
+      <div class="name-modal-box">
+          <h2>Ingresa al Canal</h2>
+          <p>Conexión cifrada de extremo a extremo</p>
+          <input type="text" id="nameInput" placeholder="Tu Alias" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
+          <button class="btn-join" onclick="joinChat()">Conectar</button>
+      </div>
+  </div>
 
-    <div class="chat-header">
-        <div class="chat-meta">
-            <div class="chat-status-dot"></div>
-            <div class="chat-header-info">
-                <p>SecureNet</p>
-                <p id="onlineStatus">Conectando…</p>
-            </div>
-        </div>
-        
-        <div style="display:flex; gap: 0.6rem; align-items:center;">
-            <button class="btn-call" onclick="startCall(false)" title="Llamada de audio">📞</button>
-            <button class="btn-video" onclick="startCall(true)" title="Videollamada">📹</button>
-            <button class="btn-panic" onclick="panicExit()" title="Pánico">⚠</button>
-        </div>
-    </div>
+  <div class="chat-header">
+      <div class="chat-meta">
+          <div class="chat-status-dot"></div>
+          <div class="chat-header-info">
+              <p>SecureNet</p>
+              <p id="onlineStatus">Conectando…</p>
+          </div>
+      </div>
+      <button class="btn-panic" onclick="panicExit()" title="Pánico Total">PÁNICO ⚠</button>
+  </div>
 
-    <div class="chat-messages" id="chatWorkspace">
-        <div class="typing-wrap" id="typingWrap" style="display:none; color:var(--text-muted); font-size:0.8rem; padding: 0 1rem;"><span id="typingName"></span> escribe...</div>
-    </div>
+  <div class="chat-messages" id="chatWorkspace">
+      <div id="typingWrap" style="display:none; color:var(--gray); font-size:0.8rem; padding: 0 1rem; font-style:italic;"><span id="typingName"></span> escribe...</div>
+  </div>
 
-    <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Mensaje..." onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
-        <button class="btn-send" onclick="sendMsg()">↑</button>
-    </div>
-</div>
-
-<div id="video-modal">
-    <video id="remote-video" class="remote-video" autoplay playsinline></video>
-    <video id="local-video" class="local-video" autoplay playsinline muted></video>
-    
-    <div id="call-overlay" class="call-overlay" style="display:none;">
-        <div id="call-timer" class="timer-circle">60</div>
-        <p class="call-status-text">Validando pasarela segura...</p>
-    </div>
-
-    <div class="video-controls">
-        <button class="btn-panic-video" onclick="panicExit()" title="Pánico">⚠</button>
-        <button class="btn-hangup" onclick="hangUp(false, true)" title="Colgar">☎</button>
-    </div>
+  <div class="chat-input-area">
+      <input type="text" id="chatInput" placeholder="Mensaje seguro..." onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
+      <button class="btn-send" onclick="sendMsg()">↑</button>
+  </div>
 </div>
 
 <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, remove }
-        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, set, onDisconnect, remove }
+      from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    /* ── FIREBASE CONFIG ── */
-    const firebaseConfig = {
-        apiKey: "AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo",
-        authDomain: "data-base-store-3bbf8.firebaseapp.com",
-        databaseURL: "https://data-base-store-3bbf8-default-rtdb.firebaseio.com",
-        projectId: "data-base-store-3bbf8",
-        storageBucket: "data-base-store-3bbf8.firebasestorage.app",
-        messagingSenderId: "705642961874",
-        appId: "1:705642961874:web:06262c925765027ee7460b"
-    };
+  /* ── FIREBASE CONFIG ── */
+  const firebaseConfig = {
+      apiKey: "AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo",
+      authDomain: "data-base-store-3bbf8.firebaseapp.com",
+      databaseURL: "https://data-base-store-3bbf8-default-rtdb.firebaseio.com",
+      projectId: "data-base-store-3bbf8",
+      storageBucket: "data-base-store-3bbf8.firebasestorage.app",
+      messagingSenderId: "705642961874",
+      appId: "1:705642961874:web:06262c925765027ee7460b"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db  = getDatabase(app);
+  const app = initializeApp(firebaseConfig);
+  const db  = getDatabase(app);
 
-    const CAT_META = { maquillaje: { emoji: '💄', avgPrice: 20 }, tecnologia: { emoji: '🔌', avgPrice: 65 }, hogar: { emoji: '🏠', avgPrice: 25 }, deportes: { emoji: '⚽', avgPrice: 18 } };
-    
-    // 100 PRODUCTOS COMPLETOS PARA LA BIBLIA
-    const products = [
-        { id:1, cat:'maquillaje', name:'Paleta Nude Rose', price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:2, cat:'maquillaje', name:'Labial Matte Crimson', price:18.50, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
-        { id:3, cat:'maquillaje', name:'Base Hydra Glow', price:29.00, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
-        { id:4, cat:'maquillaje', name:'Máscara Lash Lift', price:16.00, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
-        { id:5, cat:'maquillaje', name:'Iluminador Stardust', price:22.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
-        { id:6, cat:'maquillaje', name:'Fijador de Maquillaje', price:15.00, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
-        { id:7, cat:'maquillaje', name:'Corrector Full Coverage', price:14.20, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300' },
-        { id:8, cat:'maquillaje', name:'Rubor Líquido Blush', price:19.00, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
-        { id:9, cat:'maquillaje', name:'Delineador Ink Black', price:12.50, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
-        { id:10, cat:'maquillaje', name:'Sérum Primer Control', price:26.00, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
-        { id:11, cat:'maquillaje', name:'Esponja Blender Pro', price:8.50, img:'https://picsum.photos/300/300?random=11' },
-        { id:12, cat:'maquillaje', name:'Gel Fijo Cejas', price:12.00, img:'https://picsum.photos/300/300?random=12' },
-        { id:13, cat:'maquillaje', name:'Tónico Facial Rosas', price:15.50, img:'https://picsum.photos/300/300?random=13' },
-        { id:14, cat:'maquillaje', name:'Brocha Kabuki Premium', price:14.00, img:'https://picsum.photos/300/300?random=14' },
-        { id:15, cat:'maquillaje', name:'Polvo Traslúcido HD', price:21.00, img:'https://picsum.photos/300/300?random=15' },
-        { id:16, cat:'maquillaje', name:'Sombra Líquida Metal', price:16.50, img:'https://picsum.photos/300/300?random=16' },
-        { id:17, cat:'maquillaje', name:'Delineador de Labios', price:9.00, img:'https://picsum.photos/300/300?random=17' },
-        { id:18, cat:'maquillaje', name:'Crema Hidratante Día', price:28.00, img:'https://picsum.photos/300/300?random=18' },
-        { id:19, cat:'maquillaje', name:'Exfoliante Labial Fresa', price:11.00, img:'https://picsum.photos/300/300?random=19' },
-        { id:20, cat:'maquillaje', name:'Mascarilla Arcilla Pura', price:19.50, img:'https://picsum.photos/300/300?random=20' },
-        { id:21, cat:'maquillaje', name:'Primer Ojos Larga Duración', price:13.00, img:'https://picsum.photos/300/300?random=21' },
-        { id:22, cat:'maquillaje', name:'Pestañas Postizas 3D', price:7.50, img:'https://picsum.photos/300/300?random=22' },
-        { id:23, cat:'maquillaje', name:'Pegamento Pestañas Clear', price:6.00, img:'https://picsum.photos/300/300?random=23' },
-        { id:24, cat:'maquillaje', name:'Limpiador de Brochas Spray', price:12.50, img:'https://picsum.photos/300/300?random=24' },
-        { id:25, cat:'maquillaje', name:'Neceser Cosmético Cuero', price:24.00, img:'https://picsum.photos/300/300?random=25' },
-        { id:26, cat:'tecnologia', name:'Pods Max Pro', price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
-        { id:27, cat:'tecnologia', name:'Smartband Series 7', price:45.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
-        { id:28, cat:'tecnologia', name:'Teclado Mecánico Swift', price:89.00, img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300' },
-        { id:29, cat:'tecnologia', name:'Mouse Ergonómico Air', price:54.00, img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300' },
-        { id:30, cat:'tecnologia', name:'Cargador GaN 65W', price:32.00, img:'https://images.unsplash.com/photo-1619134177114-f8605c2a13ba?w=300' },
-        { id:31, cat:'tecnologia', name:'Hub USB-C 8 en 1', price:39.99, img:'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=300' },
-        { id:32, cat:'tecnologia', name:'Batería Magsafe Slim', price:42.00, img:'https://images.unsplash.com/photo-1622445262465-2481c4574875?w=300' },
-        { id:33, cat:'tecnologia', name:'Luz LED Streamer RGB', price:68.00, img:'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=300' },
-        { id:34, cat:'tecnologia', name:'Bocina BT Waterproof', price:59.00, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
-        { id:35, cat:'tecnologia', name:'Micrófono USB Vocal', price:79.00, img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300' },
-        { id:36, cat:'tecnologia', name:'Soporte Laptop Aluminio', price:25.00, img:'https://picsum.photos/300/300?random=36' },
-        { id:37, cat:'tecnologia', name:'Webcam 1080p Autoenfoque', price:45.00, img:'https://picsum.photos/300/300?random=37' },
-        { id:38, cat:'tecnologia', name:'Lector de Tarjetas SD', price:15.00, img:'https://picsum.photos/300/300?random=38' },
-        { id:39, cat:'tecnologia', name:'Funda Protectora AirPods', price:12.00, img:'https://picsum.photos/300/300?random=39' },
-        { id:40, cat:'tecnologia', name:'Batería Externa 20000mAh', price:38.00, img:'https://picsum.photos/300/300?random=40' },
-        { id:41, cat:'tecnologia', name:'Cable USB-C a C 2 Metros', price:14.50, img:'https://picsum.photos/300/300?random=41' },
-        { id:42, cat:'tecnologia', name:'Protector Pantalla Cristal', price:9.00, img:'https://picsum.photos/300/300?random=42' },
-        { id:43, cat:'tecnologia', name:'Soporte Escritorio Celular', price:18.00, img:'https://picsum.photos/300/300?random=43' },
-        { id:44, cat:'tecnologia', name:'Lámpara Colgante Monitor', price:35.00, img:'https://picsum.photos/300/300?random=44' },
-        { id:45, cat:'tecnologia', name:'Disco Duro Externo 1TB', price:65.00, img:'https://picsum.photos/300/300?random=45' },
-        { id:46, cat:'tecnologia', name:'Memoria Flash USB 64GB', price:16.00, img:'https://picsum.photos/300/300?random=46' },
-        { id:47, cat:'tecnologia', name:'Adaptador HDMI a VGA', price:11.50, img:'https://picsum.photos/300/300?random=47' },
-        { id:48, cat:'tecnologia', name:'Auriculares In-Ear Bass', price:22.00, img:'https://picsum.photos/300/300?random=48' },
-        { id:49, cat:'tecnologia', name:'Rastreador Smart Tag', price:29.00, img:'https://picsum.photos/300/300?random=49' },
-        { id:50, cat:'tecnologia', name:'Kit Limpiador Pantallas', price:8.00, img:'https://picsum.photos/300/300?random=50' },
-        { id:51, cat:'hogar', name:'Difusor Ultrasónico', price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
-        { id:52, cat:'hogar', name:'Taza Térmica Inteligente', price:35.00, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300' },
-        { id:53, cat:'hogar', name:'Lámpara de Luna 3D', price:19.99, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
-        { id:54, cat:'hogar', name:'Set de Cojines Velvet', price:28.00, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
-        { id:55, cat:'hogar', name:'Velitas Aromáticas Cera', price:15.00, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
-        { id:56, cat:'hogar', name:'Organizador Escritorio', price:22.50, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
-        { id:57, cat:'hogar', name:'Planta Artificial Monstera', price:31.00, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
-        { id:58, cat:'hogar', name:'Cafetera Prensa Francesa', price:26.90, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300' },
-        { id:59, cat:'hogar', name:'Espejo de Mesa LED', price:18.00, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
-        { id:60, cat:'hogar', name:'Humidificador Cute Pet', price:14.00, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
-        { id:61, cat:'hogar', name:'Reloj Digital Madera', price:19.50, img:'https://picsum.photos/300/300?random=61' },
-        { id:62, cat:'hogar', name:'Florero Cerámica Minimalista', price:21.00, img:'https://picsum.photos/300/300?random=62' },
-        { id:63, cat:'hogar', name:'Set Portavasos de Mármol', price:16.00, img:'https://picsum.photos/300/300?random=63' },
-        { id:64, cat:'hogar', name:'Manta Decorativa para Sofá', price:32.00, img:'https://picsum.photos/300/300?random=64' },
-        { id:65, cat:'hogar', name:'Alfombra de Baño Absorbente', price:18.50, img:'https://picsum.photos/300/300?random=65' },
-        { id:66, cat:'hogar', name:'Cesta Tejida Almacenaje', price:25.00, img:'https://picsum.photos/300/300?random=66' },
-        { id:67, cat:'hogar', name:'Dispensador de Jabón Vidrio', price:14.50, img:'https://picsum.photos/300/300?random=67' },
-        { id:68, cat:'hogar', name:'Perchero de Pared Nórdico', price:22.00, img:'https://picsum.photos/300/300?random=68' },
-        { id:69, cat:'hogar', name:'Estante Flotante Blanco', price:29.00, img:'https://picsum.photos/300/300?random=69' },
-        { id:70, cat:'hogar', name:'Marco de Fotos 5x7', price:12.00, img:'https://picsum.photos/300/300?random=70' },
-        { id:71, cat:'hogar', name:'Bandeja de Servicio Madera', price:26.50, img:'https://picsum.photos/300/300?random=71' },
-        { id:72, cat:'hogar', name:'Tazón Ensalada de Vidrio', price:15.00, img:'https://picsum.photos/300/300?random=72' },
-        { id:73, cat:'hogar', name:'Set de Cubiertos Negros', price:34.00, img:'https://picsum.photos/300/300?random=73' },
-        { id:74, cat:'hogar', name:'Individuales de Mesa Set', price:17.50, img:'https://picsum.photos/300/300?random=74' },
-        { id:75, cat:'hogar', name:'Servilletero Acero Inox', price:11.00, img:'https://picsum.photos/300/300?random=75' },
-        { id:76, cat:'deportes', name:'Botella de Acero Pro', price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
-        { id:77, cat:'deportes', name:'Bandas de Resistencia', price:16.50, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' },
-        { id:78, cat:'deportes', name:'Mat de Yoga Ecológico', price:35.00, img:'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=300' },
-        { id:79, cat:'deportes', name:'Cuerda Saltar Speed', price:12.00, img:'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=300' },
-        { id:80, cat:'deportes', name:'Mancuernas Neopreno Hex', price:24.00, img:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300' },
-        { id:81, cat:'deportes', name:'Maletín Deportivo Active', price:39.00, img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300' },
-        { id:82, cat:'deportes', name:'Rodillo Masajeador Foam', price:19.50, img:'https://images.unsplash.com/photo-1600881333168-2ef49b341f30?w=300' },
-        { id:83, cat:'deportes', name:'Guantes Gimnasio Breath', price:14.00, img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300' },
-        { id:84, cat:'deportes', name:'Smart Shaker Pro', price:15.90, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
-        { id:85, cat:'deportes', name:'Toalla Microfibra Dry', price:9.99,  img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300' },
-        { id:86, cat:'deportes', name:'Gorra de Running Ligera', price:18.00, img:'https://picsum.photos/300/300?random=86' },
-        { id:87, cat:'deportes', name:'Muñequeras con Peso 1kg', price:22.50, img:'https://picsum.photos/300/300?random=87' },
-        { id:88, cat:'deportes', name:'Tobilleras Ajustables', price:24.00, img:'https://picsum.photos/300/300?random=88' },
-        { id:89, cat:'deportes', name:'Banda Absorbe Sudor', price:8.50, img:'https://picsum.photos/300/300?random=89' },
-        { id:90, cat:'deportes', name:'Lentes de Ciclismo UV400', price:35.00, img:'https://picsum.photos/300/300?random=90' },
-        { id:91, cat:'deportes', name:'Cangurera Deportiva Neopreno', price:16.00, img:'https://picsum.photos/300/300?random=91' },
-        { id:92, cat:'deportes', name:'Cronómetro Digital Pro', price:14.50, img:'https://picsum.photos/300/300?random=92' },
-        { id:93, cat:'deportes', name:'Silbato de Árbitro Metal', price:6.50, img:'https://picsum.photos/300/300?random=93' },
-        { id:94, cat:'deportes', name:'Tiza Líquida Escalada', price:11.00, img:'https://picsum.photos/300/300?random=94' },
-        { id:95, cat:'deportes', name:'Agarres para Flexiones', price:19.00, img:'https://picsum.photos/300/300?random=95' },
-        { id:96, cat:'deportes', name:'Rueda Abdominal Texturizada', price:26.00, img:'https://picsum.photos/300/300?random=96' },
-        { id:97, cat:'deportes', name:'Chaleco Reflectante Nocturno', price:15.50, img:'https://picsum.photos/300/300?random=97' },
-        { id:98, cat:'deportes', name:'Luces LED para Bicicleta', price:21.00, img:'https://picsum.photos/300/300?random=98' },
-        { id:99, cat:'deportes', name:'Candado U-Lock Bici', price:29.50, img:'https://picsum.photos/300/300?random=99' },
-        { id:100, cat:'deportes', name:'Bomba de Aire Portátil', price:13.00, img:'https://picsum.photos/300/300?random=100' }
-    ];
+  // ── ESTADO Y VARIABLES GLOBALES ──
+  window.cartCount = 0; // Inicio en 0 para poder llegar a 5 exactos
+  const SECRET_PIN = "10231121";
+  
+  let myName = '';
+  let myId = 'user_' + Math.random().toString(36).slice(2,8);
+  let inChat = false; 
+  let typingTimer;
+  let seenKeys = new Set();
 
-    let cart = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 };
-    let curCat = 'all';
-    let toastTimer;
-    let myName = '';
-    let myId = 'user_' + Math.random().toString(36).slice(2,8);
-    let typingTimer;
-    let seenKeys = new Set();
-    let inChat = false; 
+  const messagesRef = ref(db, 'chat/messages');
+  const typingRef = ref(db, 'chat/typing/' + myId);
+  const presenceRef = ref(db, 'chat/presence/' + myId);
 
-    // CLAVE ESTRICTA DEL CHAT SECRETO
-    const SECRET_PIN = "10231121";
-
-    const messagesRef = ref(db, 'chat/messages');
-    const typingRef = ref(db, 'chat/typing/' + myId);
-    const presenceRef = ref(db, 'chat/presence/' + myId);
-    
-    const callOfferRef = ref(db, 'chat/call/offer');
-    const callAnswerRef = ref(db, 'chat/call/answer');
-    const callOfferCandRef = ref(db, 'chat/call/offerCandidates');
-    const callAnswerCandRef = ref(db, 'chat/call/answerCandidates');
-
-    function escHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
-
-    function renderStore() {
-        const grid = document.getElementById('productGrid');
-        const q = document.getElementById('searchBox').value.toLowerCase().trim();
-        const list = products.filter(p => (curCat==='all' || p.cat===curCat) && p.name.toLowerCase().includes(q));
-        if(!list.length) { grid.innerHTML = `<div class="empty-state">🔍<p>Sin resultados</p></div>`; return; }
-        
-        const pastels = ['var(--bg-pastel-1)', 'var(--bg-pastel-2)', 'var(--bg-pastel-3)', 'var(--bg-pastel-4)'];
-        
-        grid.innerHTML = list.map((p, index) => `
-            <div class="card">
-                <div class="img-container" style="background-color: ${pastels[index % 4]}">
-                    <span class="card-tag">${CAT_META[p.cat].emoji}</span>
-                    <img src="${p.img}" loading="lazy">
-                </div>
-                <div class="card-info">
-                    <h3 class="card-title">${escHtml(p.name)}</h3>
-                    <span class="price">$${p.price.toFixed(2)}</span>
-                    <button class="btn-add" onclick="addToCart('${p.cat}',${p.id},this)">+</button>
-                </div>
-            </div>`).join('');
-    }
-
-    window.addToCart = function(cat, id, btn) {
-        cart[cat]++;
-        const t = Object.values(cart).reduce((a,b)=>a+b,0);
-        document.getElementById('cartBadge').textContent = t;
-        document.getElementById('footerCount').textContent = `(${t})`;
-    };
-    window.changeQty = function(cat, d) { cart[cat] = Math.max(0, cart[cat]+d); document.getElementById('cartBadge').textContent = Object.values(cart).reduce((a,b)=>a+b,0); renderCartDrawer(); };
-    window.openCart = () => { renderCartDrawer(); document.getElementById('drawerOverlay').classList.add('open'); document.getElementById('cartDrawer').classList.add('open'); };
-    window.closeCart = () => { document.getElementById('drawerOverlay').classList.remove('open'); document.getElementById('cartDrawer').classList.remove('open'); };
-    
-    function renderCartDrawer() {
-        const w = document.getElementById('cartItems');
-        if(!Object.values(cart).reduce((a,b)=>a+b,0)) { w.innerHTML = `<div class="cart-empty-msg" style="text-align:center; padding: 2rem 0; color:var(--text-muted);">Tu carrito está vacío</div>`; document.getElementById('cartTotal').textContent='$0.00'; return; }
-        w.innerHTML = Object.entries(cart).filter(([,v])=>v>0).map(([c,q])=>`
-            <div class="cart-item-row"><span class="cat-name">${CAT_META[c].emoji} ${c}</span>
-            <div class="cat-qty"><button class="qty-btn" onclick="changeQty('${c}',-1)">-</button><span class="qty-num">${q}</span><button class="qty-btn" onclick="changeQty('${c}',1)">+</button></div></div>`).join('');
-    }
-
-    window.filterCat = (cat, btn) => { document.querySelectorAll('.btn-cat').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); curCat = cat; renderStore(); };
-    window.filterSearch = () => renderStore();
-    window.clearSearch = () => { document.getElementById('searchBox').value=''; renderStore(); };
-    window.toggleTheme = () => document.body.setAttribute('data-theme', document.body.getAttribute('data-theme')==='dark'?'':'dark');
-
-    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2000); }
-
-    window.openPaymentPortal = () => document.getElementById('paymentModal').classList.add('open');
-    window.closePaymentPortal = () => document.getElementById('paymentModal').classList.remove('open');
-    window.processPayment = () => { showToast('Procesando...'); setTimeout(()=>{showToast('Pago completado ✓'); closePaymentPortal(); resetCart();}, 1500); };
-
-    window.handleCheckout = function() {
-        const total = Object.values(cart).reduce((a,b)=>a+b,0);
-        if (total === 5) {
-            const pin = prompt("Canal seguro detectado. Ingresa el PIN:");
-            if (pin === SECRET_PIN) {
-                document.getElementById('vista-tienda').style.display = 'none';
-                document.getElementById('seccion-chat').style.display = 'flex';
-                resetCart();
-                document.getElementById('nameModal').style.display = 'flex';
-            } else if (pin !== null) showToast('Autenticación fallida');
-        } else if (total > 0) openPaymentPortal();
-        else showToast('Carrito vacío');
-    };
-
-    function resetCart() { cart = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 }; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)'; window.closeCart(); }
-
-    const storePromos = ["🔥 ¡Oferta exclusiva 20% OFF!", "✨ Nueva colección disponible", "📦 ¡Envío gratis hoy!", "💎 Descubre los más vendidos"];
-    function showPromoToast() {
-        const div = document.createElement('div'); div.className = 'toast-promo';
-        div.innerHTML = `<div class="toast-icon">✨</div> <div>${storePromos[Math.floor(Math.random() * storePromos.length)]}</div>`;
-        document.body.appendChild(div); requestAnimationFrame(()=>div.classList.add('show'));
-        let startX=0; div.addEventListener('touchstart', e=>startX=e.touches[0].clientX, {passive:true});
-        div.addEventListener('touchmove', e=>{ if(Math.abs(e.touches[0].clientX-startX)>40){ div.classList.add('swiped'); setTimeout(()=>div.remove(),300);}}, {passive:true});
-        setTimeout(()=> { if(div.parentElement){ div.classList.remove('show'); setTimeout(()=>div.remove(),300); }}, 4000);
-    }
-
-    function showGlitchPromo() {
-        const div = document.createElement('div'); div.className = 'toast-promo glitch-promo';
-        div.innerHTML = `<div class="toast-icon" style="background:var(--red); border-radius:50%; width:24px; height:24px; display:flex; align-items:center; justify-content:center; color:#fff;">🚨</div> 
-                         <div style="display:flex;flex-direction:column;gap:2px;"><strong>¡GLITCH DEL SISTEMA!</strong><span style="font-size:0.8rem">Todo a $0.99 (Expira pronto)</span></div>`;
-        div.onclick = () => { alert("Este cupón ya fue canjeado o expiró."); div.remove(); };
-        document.body.appendChild(div); requestAnimationFrame(()=>div.classList.add('show'));
-        setTimeout(()=> { if(div.parentElement){ div.classList.remove('show'); setTimeout(()=>div.remove(),300); }}, 60000);
-    }
-
-    window.joinChat = function() {
-        const name = document.getElementById('nameInput').value.trim();
-        if (!name) return;
-        myName = name; inChat = true;
-        document.getElementById('nameModal').style.display = 'none';
-
-        set(presenceRef, { name: myName, online: true });
-        onDisconnect(presenceRef).remove(); onDisconnect(typingRef).remove();
-
-        onValue(ref(db, 'chat/presence'), snap => {
-            const data = snap.val() || {}; const c = Object.values(data).filter(u=>u.online).length;
-            document.getElementById('onlineStatus').textContent = c===1 ? '1 agente' : `${c} agentes`;
-        });
-
-        onValue(ref(db, 'chat/typing'), snap => {
-            const data = snap.val() || {}; const others = Object.entries(data).filter(([id,v])=>id!==myId && v&&v.name).map(([,v])=>v.name);
-            const w = document.getElementById('typingWrap'); 
-            if(others.length) { document.getElementById('typingName').textContent = others[0]; w.style.display = 'block'; scrollChat(); } 
-            else w.style.display = 'none';
-        });
-
-        getPendingOffer();
-    };
-
-    function renderMessage(msg) {
-        const ws = document.getElementById('chatWorkspace');
-        const isMe = msg.senderId === myId;
-        const wrap = document.createElement('div');
-        
-        if (msg.type === 'system-bot') {
-            wrap.className = 'msg-wrap bot';
-            wrap.style.alignSelf = 'center';
-            wrap.innerHTML = `<div class="msg" style="background:var(--bg-card); color:var(--text-muted); font-style:italic; font-size:0.85rem;">🤖 ${escHtml(msg.text)}</div>`;
-        } else {
-            wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
-            wrap.innerHTML = `${!isMe ? `<span class="msg-sender">${escHtml(msg.sender)}</span>` : ''}
-                <div class="msg ${isMe ? 'mine' : 'theirs'}">${escHtml(msg.text)}</div>
-                <span class="msg-time">${new Date(msg.ts).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</span>`;
-        }
-        ws.insertBefore(wrap, document.getElementById('typingWrap'));
-        scrollChat();
-    }
-    
-    function scrollChat() { document.getElementById('chatWorkspace').scrollTop = 9999; }
-
-    window.sendMsg = function() {
-        const i = document.getElementById('chatInput'); if(!i.value.trim() || !myName) return;
-        push(messagesRef, { type: 'text', text: i.value, sender: myName, senderId: myId, ts: Date.now() });
-        set(typingRef, null); i.value = '';
-    };
-    window.handleChatKey = e => { if(e.key==='Enter') window.sendMsg(); };
-    window.handleTyping = () => { if(!myName) return; set(typingRef, {name:myName}); clearTimeout(typingTimer); typingTimer = setTimeout(()=>set(typingRef,null), 2000); };
-
-    const rtcConfig = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
-    let pc, localStream, remoteStream, callTimeout;
-    let iceProcOff = new Set(), iceProcAns = new Set();
-
-    async function initMedia(videoEnabled = true) {
-        localStream = await navigator.mediaDevices.getUserMedia({ video: videoEnabled, audio: true });
-        
-        const localVidEl = document.getElementById('local-video');
-        localVidEl.srcObject = localStream;
-        localVidEl.style.display = videoEnabled ? 'block' : 'none';
-
-        remoteStream = new MediaStream();
-        document.getElementById('remote-video').srcObject = remoteStream;
-        
-        pc = new RTCPeerConnection(rtcConfig);
-        localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
-        pc.ontrack = e => e.streams[0].getTracks().forEach(t => remoteStream.addTrack(t));
-    }
-
-    window.startCall = async function(videoEnabled = true) {
-        document.getElementById('video-modal').style.display = 'flex';
-        document.getElementById('call-overlay').style.display = 'flex';
-        await initMedia(videoEnabled);
-
-        pc.onicecandidate = e => { if(e.candidate) push(callOfferCandRef, e.candidate.toJSON()); };
-
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        set(callOfferRef, { sdp: offer.sdp, type: offer.type, callerId: myId, video: videoEnabled });
-
-        let tl = 60; document.getElementById('call-timer').innerText = tl;
-        callTimeout = setInterval(() => {
-            tl--; document.getElementById('call-timer').innerText = tl;
-            if(tl <= 0) hangUp(true, false); 
-        }, 1000);
-
-        onValue(callAnswerRef, snap => {
-            const ans = snap.val();
-            if(ans && !pc.currentRemoteDescription) {
-                pc.setRemoteDescription(new RTCSessionDescription(ans));
-                clearInterval(callTimeout);
-                document.getElementById('call-overlay').style.display = 'none';
-            }
-        });
-
-        onValue(callAnswerCandRef, snap => {
-            const data = snap.val();
-            if(data) Object.entries(data).forEach(([k, c]) => {
-                if(!iceProcAns.has(k)) { iceProcAns.add(k); pc.addIceCandidate(new RTCIceCandidate(c)); }
-            });
-        });
-    };
-
-    async function getPendingOffer() {
-        onValue(callOfferRef, async snap => {
-            const offer = snap.val();
-            if (offer && offer.callerId !== myId) {
-                if (!inChat) {
-                    showGlitchPromo(); 
-                } else if (!pc) {
-                    document.getElementById('video-modal').style.display = 'flex';
-                    document.getElementById('call-overlay').style.display = 'none';
-                    await initMedia(offer.video);
-
-                    pc.onicecandidate = e => { if(e.candidate) push(callAnswerCandRef, e.candidate.toJSON()); };
-                    
-                    await pc.setRemoteDescription(new RTCSessionDescription(offer));
-                    const ans = await pc.createAnswer();
-                    await pc.setLocalDescription(ans);
-                    set(callAnswerRef, { type: ans.type, sdp: ans.sdp });
-
-                    onValue(callOfferCandRef, snapCand => {
-                        const data = snapCand.val();
-                        if(data) Object.entries(data).forEach(([k, c]) => {
-                            if(!iceProcOff.has(k)) { iceProcOff.add(k); pc.addIceCandidate(new RTCIceCandidate(c)); }
-                        });
-                    });
-                }
-            } else if (!offer && pc) {
-                hangUp(false, false);
-            }
-        });
-    }
-
-    window.hangUp = function(isMissed = false, sendMissedMessage = false) {
-        if(callTimeout) clearInterval(callTimeout);
-        if(localStream) localStream.getTracks().forEach(t => t.stop());
-        if(pc) { pc.close(); pc = null; }
-        
-        document.getElementById('video-modal').style.display = 'none';
-        remove(ref(db, 'chat/call'));
-        iceProcOff.clear(); iceProcAns.clear();
-
-        if(isMissed && sendMissedMessage) {
-            push(messagesRef, { type: 'system-bot', text: 'El agente dejó escapar el descuento del 99%. Oferta caducada.', ts: Date.now() });
-        }
-    };
-
-    window.panicExit = function() {
-        if (confirm('¿Pánico Total? Se destruirá hardware, señal y base de datos.')) {
-            hangUp(false, false); 
-            remove(messagesRef).then(() => {
-                set(presenceRef, null);
-                set(typingRef, null);
-                location.reload();
-            });
-        }
-    };
-
-    renderStore();
-
-    onValue(messagesRef, snap => {
-        const data = snap.val(); if(!data) return;
-        Object.entries(data).forEach(([k, msg]) => {
-            if(!seenKeys.has(k)) {
-                seenKeys.add(k);
-                renderMessage(msg);
-                if(msg.senderId !== myId && msg.type === 'text' && !inChat) {
-                    showPromoToast();
-                }
-            }
-        });
+  // ── UI FUNCIONES DE TIENDA ──
+  window.filterCat = function(el, cat) {
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    const cards = document.querySelectorAll('#prodGrid .prod-card');
+    cards.forEach(card => {
+      if (cat === 'all' || card.dataset.cat === cat) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
     });
+  }
+
+  document.querySelectorAll('.ftab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('.wish-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      this.textContent = this.textContent === '🤍' ? '❤️' : '🤍';
+    });
+  });
+
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      window.cartCount++;
+      document.getElementById('cartBadge').textContent = window.cartCount;
+      this.textContent = '✓ Agregado';
+      this.style.background = '#10B981';
+      setTimeout(() => {
+        this.textContent = '+ Agregar';
+        this.style.background = '';
+      }, 1600);
+    });
+  });
+
+  // ── LÓGICA DE CHECKOUT CONDICIONAL ──
+  window.handleCheckout = function() {
+      if (window.cartCount === 5) {
+          const pin = prompt("Ingresa el PIN de seguridad:");
+          if (pin === SECRET_PIN) {
+              document.getElementById('vista-tienda').style.display = 'none';
+              document.getElementById('seccion-chat').style.display = 'flex';
+              document.getElementById('nameModal').style.display = 'flex';
+              window.cartCount = 0;
+              document.getElementById('cartBadge').textContent = '0';
+          } else if (pin !== null) {
+              alert('Autenticación fallida');
+          }
+      } else if (window.cartCount > 0) {
+          document.getElementById('paymentModal').classList.add('open');
+      } else {
+          alert('Tu carrito está vacío');
+      }
+  };
+
+  window.closePaymentPortal = () => document.getElementById('paymentModal').classList.remove('open');
+  window.processPayment = () => { 
+      alert('Procesando pago...'); 
+      setTimeout(()=>{ 
+          alert('Pago completado ✓'); 
+          window.closePaymentPortal(); 
+          window.cartCount = 0; 
+          document.getElementById('cartBadge').textContent = '0';
+      }, 1500); 
+  };
+
+  // ── NOTIFICACIONES CAMUFLADAS (TOASTS) ──
+  const storePromos = ["🔥 ¡Oferta exclusiva 20% OFF!", "✨ Nueva colección disponible", "📦 ¡Envío gratis hoy!", "💎 Descubre los más vendidos", "🏷️ Cupón aplicado automáticamente"];
+  
+  function showPromoToast() {
+      const div = document.createElement('div'); div.className = 'toast-promo';
+      div.innerHTML = `<div style="font-size:1.5rem">✨</div> <div>${storePromos[Math.floor(Math.random() * storePromos.length)]}</div>`;
+      document.body.appendChild(div);
+      
+      requestAnimationFrame(()=>div.classList.add('show'));
+      
+      // Lógica Swipeable
+      let startX = 0;
+      div.addEventListener('touchstart', e => startX = e.touches[0].clientX, {passive:true});
+      div.addEventListener('touchmove', e => {
+          if (Math.abs(e.touches[0].clientX - startX) > 40) {
+              div.style.transform = `translateX(-50%) translateY(-150%)`;
+              div.style.opacity = '0';
+              setTimeout(()=>div.remove(), 300);
+          }
+      }, {passive:true});
+
+      setTimeout(()=> { 
+          if(div.parentElement) { 
+              div.classList.remove('show'); 
+              setTimeout(()=>div.remove(), 300); 
+          }
+      }, 4000);
+  }
+
+  // ── CHAT SEGURO FIREBASE ──
+  function escHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+  window.joinChat = function() {
+      const name = document.getElementById('nameInput').value.trim();
+      if (!name) return;
+      myName = name; inChat = true;
+      document.getElementById('nameModal').style.display = 'none';
+
+      set(presenceRef, { name: myName, online: true });
+      onDisconnect(presenceRef).remove(); onDisconnect(typingRef).remove();
+
+      onValue(ref(db, 'chat/presence'), snap => {
+          const data = snap.val() || {}; const c = Object.values(data).filter(u=>u.online).length;
+          document.getElementById('onlineStatus').textContent = c===1 ? '1 agente' : `${c} agentes`;
+      });
+
+      onValue(ref(db, 'chat/typing'), snap => {
+          const data = snap.val() || {}; const others = Object.entries(data).filter(([id,v])=>id!==myId && v&&v.name).map(([,v])=>v.name);
+          const w = document.getElementById('typingWrap'); 
+          if(others.length) { document.getElementById('typingName').textContent = others[0]; w.style.display = 'block'; scrollChat(); } 
+          else w.style.display = 'none';
+      });
+  };
+
+  function renderMessage(msg) {
+      const ws = document.getElementById('chatWorkspace');
+      const isMe = msg.senderId === myId;
+      const wrap = document.createElement('div');
+      
+      wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
+      wrap.innerHTML = `${!isMe ? `<span class="msg-sender">${escHtml(msg.sender)}</span>` : ''}
+          <div class="msg ${isMe ? 'mine' : 'theirs'}">${escHtml(msg.text)}</div>
+          <span class="msg-time">${new Date(msg.ts).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</span>`;
+      
+      ws.insertBefore(wrap, document.getElementById('typingWrap'));
+      scrollChat();
+  }
+  
+  function scrollChat() { document.getElementById('chatWorkspace').scrollTop = 9999; }
+
+  window.sendMsg = function() {
+      const i = document.getElementById('chatInput'); if(!i.value.trim() || !myName) return;
+      push(messagesRef, { type: 'text', text: i.value, sender: myName, senderId: myId, ts: Date.now() });
+      set(typingRef, null); i.value = '';
+  };
+  
+  window.handleChatKey = e => { if(e.key==='Enter') window.sendMsg(); };
+  window.handleTyping = () => { if(!myName) return; set(typingRef, {name:myName}); clearTimeout(typingTimer); typingTimer = setTimeout(()=>set(typingRef,null), 2000); };
+
+  // ── PÁNICO ──
+  window.panicExit = function() {
+      if (confirm('¿Pánico Total? Se destruirá el historial y se cerrará la conexión.')) {
+          remove(messagesRef).then(() => {
+              set(presenceRef, null);
+              set(typingRef, null);
+              location.reload();
+          });
+      }
+  };
+
+  // ── ESCUCHA DE MENSAJES ──
+  onValue(messagesRef, snap => {
+      const data = snap.val(); if(!data) return;
+      Object.entries(data).forEach(([k, msg]) => {
+          if(!seenKeys.has(k)) {
+              seenKeys.add(k);
+              if (inChat) {
+                  renderMessage(msg); // Solo si está en chat se ve el real
+              } else if (msg.senderId !== myId) {
+                  showPromoToast(); // Camuflaje de notificaciones fuera del chat
+              }
+          }
+      });
+  });
 
 </script>
 </body>
