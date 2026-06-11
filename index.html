@@ -83,6 +83,12 @@
         .promo-banner-top { background: #ffe600; color: #000; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; font-weight: 700; cursor: pointer; margin-bottom: 0.2rem; }
         .promo-banner-top p { max-width: 85%; line-height: 1.3; }
 
+        /* BANNER DINÁMICO DE CAMUFLAJE DE MENSAJES (OFERTAS FALSAS INTERCEPTADAS) */
+        .toast-promo-container { position: fixed; top: calc(var(--safe-top) + 65px); left: 50%; transform: translateX(-50%) translateY(-150px); background: var(--bg-card); border-left: 4px solid var(--purple-accent); padding: 0.9rem 1.1rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 4000; opacity: 0; transition: transform 0.4s cubic-bezier(0.32,0.72,0,1), opacity 0.3s; display: flex; align-items: center; gap: 0.8rem; width: 92%; max-width: 400px; color: var(--text-main); pointer-events: none; }
+        .toast-promo-container.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
+        .toast-promo-title { font-size: 0.85rem; font-weight: 800; color: var(--purple-accent); margin-bottom: 0.1rem; }
+        .toast-promo-desc { font-size: 0.78rem; font-weight: 500; color: var(--text-main); }
+
         .nav-scroller { overflow-x: auto; white-space: nowrap; padding: 0.75rem 1rem; background: var(--bg-nav); border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .nav-scroller::-webkit-scrollbar { display: none; }
         .btn-cat { display: inline-flex; align-items: center; background: var(--bg-body); border: 1px solid transparent; color: var(--text-main); padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-right: 0.5rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; text-transform: capitalize; }
@@ -99,7 +105,7 @@
         .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; padding-bottom: 140px; }
         .card { background: var(--bg-card); border-radius: 16px; padding: 0.6rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.2s; }
         .card:active { transform: scale(0.98); }
-        .img-container { width: 100%; aspect-ratio: 1/1; border-radius: 12px; background: #f8f9fa; margin-bottom: 0.6rem; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+        .img-container { width: 100%; aspect-ratio: 1/1; border-radius: 12px; background: #eef0f2; margin-bottom: 0.6rem; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
         .card-tag { position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.55rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; z-index: 2; letter-spacing: 0.3px; }
         .card-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.15rem; line-height: 1.3; height: 34px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-main); }
@@ -134,7 +140,7 @@
         .btn-view-cart { flex: 1; background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
         .btn-checkout { flex: 2; background: var(--purple-accent); color: #fff; border: none; padding: 0.85rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
 
-        /* CHAT & FACETIME */
+        /* INTERFAZ CHAT */
         #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
         .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
         .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
@@ -194,7 +200,6 @@
 
         .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
         .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
-        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; touch-action: manipulation; }
 
         /* INTERFAZ FACETIME */
         #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2.5rem) 2rem calc(var(--safe-bottom) + 3.5rem); color: #fff; overscroll-behavior: none; }
@@ -230,8 +235,15 @@
     </header>
 
     <div class="promo-banner-top">
-        <p>¡Ofertas de hoy! 6 Alitas picantes por $9.900 en marcas seleccionadas. Pide rápido.</p>
+        <p>¡Ofertas de hoy! Combo 6 piezas de pollo crujiente por solo $19.900 COP en restaurantes seleccionados.</p>
         <span>→</span>
+    </div>
+
+    <div class="toast-promo-container" id="fakeOfferToast">
+        <div>
+            <div class="toast-promo-title" id="fakeOfferTitle">¡Cupón Activado!</div>
+            <div class="toast-promo-desc" id="fakeOfferDesc">Obtén $10.000 COP de descuento.</div>
+        </div>
     </div>
 
     <nav class="nav-scroller">
@@ -385,125 +397,125 @@
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
-    // ── DATA MASIVA 100 PRODUCTOS E-COMMERCE REAL COLOMBIA ──
+    // ── DATA MASIVA 100 PRODUCTOS E-COMMERCE REAL CON IMÁGENES ESTABLES EN ALTA DEFINICIÓN ──
     const products = [
         // 1. TECNOLOGÍA (Alkosto / Ktronix)
-        { id:1,  cat:'tecnologia', name:'Celular Apple iPhone 16 Pro Max 256GB', desc:'Titanio de grado aeroespacial, chip A18 Pro, pantalla Super Retina XDR.', price:6499000, img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=300' },
-        { id:2,  cat:'tecnologia', name:'Celular Apple iPhone 16 128GB Black', desc:'Control de cámara avanzado, chip A18, carcasa de aluminio premium.', price:3849000, img:'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=300' },
-        { id:3,  cat:'tecnologia', name:'Audífonos Inalámbricos Apple AirPods 4', desc:'Cancelación activa de ruido con ajuste ergonómico acústico renovado.', price:899900, img:'https://images.unsplash.com/photo-1588444837495-c6cfcb537c22?w=300' },
-        { id:4,  cat:'tecnologia', name:'Apple Watch Series 10 GPS 46mm', desc:'Carcasa de aluminio, pantalla OLED Always-On, monitoreo de salud avanzado.', price:2149900, img:'https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=300' },
-        { id:5,  cat:'tecnologia', name:'Portátil Apple MacBook Air 13" M3 8GB', desc:'Almacenamiento SSD 256GB, ultra liviano, batería de hasta 18 horas.', price:5499000, img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300' },
-        { id:6,  cat:'tecnologia', name:'Consola Sony PlayStation 5 Slim 1TB', desc:'Edición estándar con lector de discos físicos y juego digital de obsequio.', price:2399000, img:'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=300' },
+        { id:1,  cat:'tecnologia', name:'Apple iPhone 16 Pro Max 256GB', desc:'Titanio de grado aeroespacial, chip A18 Pro, pantalla Super Retina XDR.', price:6499000, img:'https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=300' },
+        { id:2,  cat:'tecnologia', name:'Apple iPhone 16 128GB Black', desc:'Control de cámara avanzado, chip A18, carcasa de aluminio premium.', price:3849000, img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=300' },
+        { id:3,  cat:'tecnologia', name:'Apple AirPods 4 Inalámbricos', desc:'Cancelación activa de ruido con ajuste ergonómico acústico renovado.', price:899900, img:'https://images.unsplash.com/photo-1588444837495-c6cfcb537c22?w=300' },
+        { id:4,  cat:'tecnologia', name:'Apple Watch Series 10 GPS 46mm', desc:'Carcasa de aluminio, pantalla OLED Always-On, monitoreo de salud avanzado.', price:2149900, img:'https://images.unsplash.com/photo-1517502884422-41eacef01689?w=300' },
+        { id:5,  cat:'tecnologia', name:'Apple MacBook Air 13" M3 8GB', desc:'Almacenamiento SSD 256GB, ultra liviano, batería de hasta 18 horas.', price:5499000, img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300' },
+        { id:6,  cat:'tecnologia', name:'Sony PlayStation 5 Slim 1TB', desc:'Edición estándar con lector de discos físicos y carga ultrarrápida.', price:2399000, img:'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=300' },
         { id:7,  cat:'tecnologia', name:'Televisor LG OLED EVO 55" 4K Smart', desc:'Procesador AI Alpha 9, tasa de refresco a 120Hz ideal para gaming.', price:4799900, img:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=300' },
         { id:8,  cat:'tecnologia', name:'Parlante Bluetooth JBL Charge 5', desc:'Sonido Pro potente con powerbank integrado a prueba de agua IP67.', price:649900, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
-        { id:9,  cat:'tecnologia', name:'Tablet Samsung Galaxy Tab S9 FE 128GB', desc:'Incluye S Pen, pantalla fluida de 90Hz, resistencia al agua y polvo.', price:1999900, img:'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=300' },
+        { id:9,  cat:'tecnologia', name:'Samsung Galaxy Tab S9 FE 128GB', desc:'Incluye S Pen, pantalla fluida de 90Hz, resistencia al agua y polvo.', price:1999900, img:'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?w=300' },
         { id:10, cat:'tecnologia', name:'Cámara Mirrorless Sony Alpha ZV-E10', desc:'Lente 16-50mm, ideal para creadores de contenido, video 4K profesional.', price:3399000, img:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300' },
-        { id:11, cat:'tecnologia', name:'Consola Nintendo Switch OLED Edition', desc:'Pantalla de 7 pulgadas con colores intensos y contrastes definidos.', price:1649900, img:'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=300' },
+        { id:11, cat:'tecnologia', name:'Nintendo Switch OLED Edition', desc:'Pantalla de 7 pulgadas con colores intensos y contrastes definidos.', price:1649900, img:'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=300' },
         { id:12, cat:'tecnologia', name:'Monitor Gamer ASUS TUF 27" Curvo', desc:'Resolución QHD, 165Hz de tasa de refresco, tiempo de respuesta 1ms.', price:1299900, img:'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=300' },
 
-        // 2. RESTAURANTES / COMIDA (Rappi)
-        { id:13, cat:'comida', name:'Combo Alitas Personales KFC', desc:'6 Alitas picantes + Papas medianas + Bebida fría 400ml.', price:29900, img:'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=300' },
-        { id:14, cat:'comida', name:'Hamburguesa Todo Terreno El Corral', desc:'Doble carne premium de res, queso derretido, tocineta crujiente y verduras.', price:41900, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300' },
-        { id:15, cat:'comida', name:'Pizza Grande Pepperoni Papa Johns', desc:'Masa tradicional hecha a mano, pepperoni americano y queso 100% mozzarella.', price:49900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=300' },
-        { id:16, cat:'comida', name:'Picada Tradicional Colombiana Mediana', desc:'Chicharrón, morcilla, papa criolla, plátano maduro y arepitas calientes.', price:56000, img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=300' },
+        // 2. RESTAURANTES / COMIDA
+        { id:13, cat:'comida', name:'Combo Alitas Personales', desc:'6 Alitas picantes + Papas medianas + Bebida fría 400ml.', price:29900, img:'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=300' },
+        { id:14, cat:'comida', name:'Hamburguesa Doble Carne Lomo', desc:'Doble carne premium de res, queso derretido, tocineta crujiente y verduras.', price:41900, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300' },
+        { id:15, cat:'comida', name:'Pizza Grande Pepperoni Americana', desc:'Masa tradicional hecha a mano, pepperoni americano y queso 100% mozzarella.', price:49900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=300' },
+        { id:16, cat:'comida', name:'Picada Tradicional Colombiana', desc:'Chicharrón, morcilla, papa criolla, plátano maduro y arepitas calientes.', price:56000, img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=300' },
         { id:17, cat:'comida', name:'Combo Sushi Roll Filadelfia x10u', desc:'Salmón fresco, queso crema, aguacate, cobertura de sésamo tostado.', price:34900, img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300' },
-        { id:18, cat:'comida', name:'Arroz con Pollo Especial Paisa', desc:'Porción grande acompañado de papas a la francesa y salsa de tomate.', price:26900, img:'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=300' },
-        { id:19, cat:'comida', name:'Burrito de Carne Asada Tex-Mex', desc:'Tortilla gigante rellena de lomo, frijol refrito, guacamole y pico de gallo.', price:28900, img:'https://images.unsplash.com/photo-1626700051175-6518c4793f4f?w=300' },
-        { id:20, cat:'comida', name:'Malteada Premium de Chocolate El Corral', desc:'Crema batida, salsa de chocolate espesa y barquillo crujiente.', price:15900, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' },
-        { id:21, cat:'comida', name:'Bowl de Ensalada Fit con Pollo Asado', desc:'Mix de lechugas, pechuga a la plancha, tomates cherry, maíz y aderezo césar.', price:24900, img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300' },
-        { id:22, cat:'comida', name:'Tacos al Pastor x3unidades', desc:'Tortilla de maíz, carne de cerdo marinada, piña, cebolla y cilantro.', price:19900, img:'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=300' },
+        { id:18, cat:'comida', name:'Arroz con Pollo Especial Gourmet', desc:'Porción grande acompañado de papas a la francesa y salsa de la casa.', price:26900, img:'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=300' },
+        { id:19, cat:'comida', name:'Burrito Extremo de Carne Asada', desc:'Tortilla gigante rellena de lomo, frijol refrito, guacamole y pico de gallo.', price:28900, img:'https://images.unsplash.com/photo-1626700051175-6518c4793f4f?w=300' },
+        { id:20, cat:'comida', name:'Malteada Premium de Chocolate Belga', desc:'Crema batida, salsa de chocolate espesa y barquillo crujiente.', price:15900, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' },
+        { id:21, cat:'comida', name:'Bowl de Ensalada Fit con Pechuga', desc:'Mix de lechugas, pechuga a la plancha, tomates cherry, maíz y aderezo césar.', price:24900, img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300' },
+        { id:22, cat:'comida', name:'Tacos Mexicanos al Pastor x3u', desc:'Tortilla de maíz, carne de cerdo marinada, piña, cebolla y cilantro.', price:19900, img:'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=300' },
         { id:23, cat:'comida', name:'Lasaña de Carne Bolognesa', desc:'Capas de pasta artesanal rellenas de carne, salsa bechamel y queso gratinado.', price:31500, img:'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=300' },
-        { id:24, cat:'comida', name:'Porción Empanadas de Carne x5un', desc:'Empanaditas fritas de maíz crujiente rellenas acompañadas de ají casero.', price:12000, img:'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300' },
+        { id:24, cat:'comida', name:'Porción Empanadas de Carne x5u', desc:'Empanaditas fritas de maíz crujiente rellenas acompañadas de ají casero.', price:12000, img:'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300' },
 
-        // 3. SUPERMERCADO (Éxito / Carulla)
-        { id:25, cat:'mercado', name:'Whisky Buchanan\'s Deluxe 12 Años 750ml', desc:'Botella de licor blended scotch whisky importado original en caja.', price:187100, img:'https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=300' },
-        { id:26, cat:'mercado', name:'Arándanos Frescos Importados x125g', desc:'Caja plástica de frutos rojos seleccionados premium.', price:12500, img:'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=300' },
-        { id:27, cat:'mercado', name:'Café Sello Rojo Molienda Fina 500g', desc:'Café puro tostado y molido tradicional colombiano de alta pureza.', price:16900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300' },
-        { id:28, cat:'mercado', name:'Aceite de Girasol Premier 1000ml', desc:'Aceite vegetal ideal para todo tipo de preparaciones de cocina.', price:14500, img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300' },
-        { id:29, cat:'mercado', name:'Leche Entera Alquería Pack x6 unidades', desc:'Bolsas de leche entera ultrapasteurizada de 900ml cada una.', price:27900, img:'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300' },
-        { id:30, cat:'mercado', name:'Arroz Diana Premium Bolsa de 5kg', desc:'Granos seleccionados blancos de alta calidad para rendimiento superior.', price:22500, img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300' },
-        { id:31, cat:'mercado', name:'Pack Cerveza Club Colombia Dorada x6', desc:'Latas de cerveza nacional tipo lager premium de 330ml.', price:17400, img:'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=300' },
-        { id:32, cat:'mercado', name:'Salmón Premium Filete Congelado 500g', desc:'Corte de pescado fresco empacado al vacío con piel.', price:48900, img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=300' },
-        { id:33, cat:'mercado', name:'Chocolate Corona Tradicional x500g', desc:'Pastillas de chocolate para preparar en mesa, endulzado con azúcar.', price:9800, img:'https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=300' },
-        { id:34, cat:'mercado', name:' Detergente Líquido Ariel Toque Downy 3L', desc:'Limpieza profunda y remoción de manchas con aroma prolongado.', price:45900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
-        { id:35, cat:'mercado', name:'Papel Higiénico Familia Expert x12u', desc:'Rollos de doble hoja acolchada de máxima suavidad y resistencia.', price:24900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300' },
-        { id:36, cat:'mercado', name:'Queso Doble Crema Colanta Tajado 400g', desc:'Ideal para sándwiches y preparaciones calientes derretidas.', price:16200, img:'https://images.unsplash.com/photo-1486297678162-92e19b662883?w=300' },
+        // 3. SUPERMERCADO
+        { id:25, cat:'mercado', name:'Whisky Escocés 12 Años 750ml', desc:'Botella de licor blended scotch whisky importado original en caja.', price:187100, img:'https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=300' },
+        { id:26, cat:'mercado', name:'Arándanos Frescos Azules x125g', desc:'Caja plástica de frutos rojos seleccionados premium cosechados.', price:12500, img:'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=300' },
+        { id:27, cat:'mercado', name:'Café Molido Selección Especial 500g', desc:'Café puro de origen excelso tostado y molido tradicional de alta pureza.', price:16900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300' },
+        { id:28, cat:'mercado', name:'Aceite Puro de Girasol 1000ml', desc:'Aceite vegetal ideal para todo tipo de preparaciones de cocina.', price:14500, img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300' },
+        { id:29, cat:'mercado', name:'Leche Entera Pasteurizada Pack x6', desc:'Bolsas de leche entera ultrapasteurizada de 900ml cada una.', price:27900, img:'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300' },
+        { id:30, cat:'mercado', name:'Arroz Blanco Premium Bolsa 5kg', desc:'Granos seleccionados blancos de alta calidad para rendimiento superior.', price:22500, img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300' },
+        { id:31, cat:'mercado', name:'Pack Cerveza Rubia Premium Latas x6', desc:'Latas de cerveza nacional tipo lager de selección 330ml.', price:17400, img:'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=300' },
+        { id:32, cat:'mercado', name:'Salmón Filete Fresco Noruego 500g', desc:'Corte de pescado fresco empacado al vacío con piel nutritivo.', price:48900, img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=300' },
+        { id:33, cat:'mercado', name:'Chocolate en Pastillas para Mesa 500g', desc:'Pastillas de cacao puro para preparar bebida caliente en el desayuno.', price:9800, img:'https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=300' },
+        { id:34, cat:'mercado', name:'Detergente Concentrado Líquido 3L', desc:'Limpieza profunda y remoción de manchas con aroma prolongado.', price:45900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:35, cat:'mercado', name:'Papel Higiénico Hoja Doble x12u', desc:'Rollos de doble hoja acolchada de máxima suavidad y resistencia.', price:24900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300' },
+        { id:36, cat:'mercado', name:'Queso Crema Tajado Especial 400g', desc:'Ideal para sándwiches y preparaciones calientes derretidas.', price:16200, img:'https://images.unsplash.com/photo-1486297678162-92e19b662883?w=300' },
 
-        // 4. MAQUILLAJE / BELLEZA (Falabella Colombia)
-        { id:37, cat:'maquillaje', name:'M·A·C Cosmetics Labial Macximal Matte', desc:'Labial con acabado de alta definición, fijación extrema por 24h 3.5g.', price:109900, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
-        { id:38, cat:'maquillaje', name:'Benefit Tinta Líquida Labios Benetint', desc:'Fórmula fluida roja translúcida para dar color a mejillas y labios 6ml.', price:144900, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
-        { id:39, cat:'maquillaje', name:'Clinique Bálsamo Labial Almost Black Honey', desc:'Se adapta al tono natural de la piel ofreciendo un brillo ciruela sutil.', price:109900, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:40, cat:'maquillaje', name:'Base L\'Oréal Infallible Fresh Wear 24H', desc:'Textura ultra ligera, acabado natural mate con protección solar SPF.', price:84900, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
-        { id:41, cat:'maquillaje', name:'Pestañina Maybelline Sky High Waterproof', desc:'Largo y volumen extremo sin dejar grumos, a prueba de agua.', price:59900, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
-        { id:42, cat:'maquillaje', name:'Paleta de Sombras Urban Decay Naked3', desc:'12 tonos neutros rosados mate y satinados de calidad profesional.', price:249900, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300' },
-        { id:43, cat:'maquillaje', name:'Fijador de Maquillaje MAC Prep + Prime', desc:'Bruma de agua ligera con vitaminas y minerales que hidrata y refresca.', price:149900, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
-        { id:44, cat:'maquillaje', name:'Rubor Líquido Rare Beauty Soft Pinch', desc:'Fórmula de larga duración con pigmentos ligeros de fácil difuminado.', price:155000, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
-        { id:45, cat:'maquillaje', name:'Corrector Tarte Tape Shape Concealer', desc:'Fórmula de cobertura total que disimula líneas de expresión y ojeras.', price:139000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
-        { id:46, cat:'maquillaje', name:'Iluminador Polvo MAC Mineralize', desc:'Polvo lujoso con minerales que aporta un acabado aterciopelado radiante.', price:179900, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
-        { id:47, cat:'maquillaje', name:'Polvo Traslúcido Laura Mercier', desc:'Fija el maquillaje de forma invisible controlando el brillo graso.', price:199000, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:48, cat:'maquillaje', name:'Delineador de Ojos Stila Stay All Day', desc:'Punta fina tipo plumón de secado rápido, color negro intenso impermeable.', price:115000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
+        // 4. MAQUILLAJE
+        { id:37, cat:'maquillaje', name:'M·A·C Cosmetics Labial Macximal', desc:'Labial con acabado de alta definición, fijación extrema por 24h 3.5g.', price:109900, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
+        { id:38, cat:'maquillaje', name:'Benefit Tinta Líquida Labios Benetint', desc:'Fórmula fluida roja translúcida para dar color a mejillas y labios 6ml.', price:144900, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
+        { id:39, cat:'maquillaje', name:'Clinique Bálsamo Black Honey', desc:'Se adapta al tono natural de la piel ofreciendo un brillo ciruela sutil.', price:109900, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
+        { id:40, cat:'maquillaje', name:'Base L\'Oréal Infallible Fresh Wear', desc:'Textura ultra ligera, acabado natural mate con protección solar SPF.', price:84900, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
+        { id:41, cat:'maquillaje', name:'Pestañina Maybelline Sky High', desc:'Largo y volumen extremo sin dejar grumos, a prueba de agua.', price:59900, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
+        { id:42, cat:'maquillaje', name:'Paleta de Sombras Naked Nude 12t', desc:'12 tonos neutros rosados mate y satinados de calidad profesional.', price:249900, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300' },
+        { id:43, cat:'maquillaje', name:'Fijador de Maquillaje Prep Prime Matte', desc:'Bruma de agua ligera con vitaminas y minerales que hidrata y refresca.', price:149900, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
+        { id:44, cat:'maquillaje', name:'Rubor Líquido Soft Touch Rare', desc:'Fórmula de larga duración con pigmentos ligeros de fácil difuminado.', price:155000, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
+        { id:45, cat:'maquillaje', name:'Corrector Facial High Coverage Liquid', desc:'Fórmula de cobertura total que disimula líneas de expresión y ojeras.', price:139000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
+        { id:46, cat:'maquillaje', name:'Iluminador Polvo Mineral Glow', desc:'Polvo lujoso con minerales que aporta un acabado aterciopelado radiante.', price:179900, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
+        { id:47, cat:'maquillaje', name:'Polvo Compacto Traslúcido Mate', desc:'Fija el maquillaje de forma invisible controlando el brillo graso.', price:199000, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
+        { id:48, cat:'maquillaje', name:'Delineador de Ojos Liquid Waterproof', desc:'Punta fina tipo plumón de secado rápido, color negro intenso.', price:115000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
 
-        // 5. MODA Y ROPA (Zara / H&M)
+        // 5. MODA Y ROPA
         { id:49, cat:'moda',      name:'Chaqueta de Jean Slim Fit Hombre', desc:'Denim clásico prelavado con botones metálicos y bolsillos frontales.', price:169900, img:'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=300' },
         { id:50, cat:'moda',      name:'Camisa Casual de Lino Manga Larga', desc:'Prenda fresca y ligera de corte moderno ideal para clima cálido.', price:129900, img:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300' },
         { id:51, cat:'moda',      name:'Vestido Largo de Flores Veraniego', desc:'Diseño suelto con tirantes ajustables y estampado floral de temporada.', price:189900, img:'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=300' },
-        { id:52, cat:'moda',      name:'Pantalón Cargo Jogger Hombre', desc:'Tela de dril elástica, resorte en tobillos y amplios bolsillos laterales.', price:119900, img:'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=300' },
-        { id:53, cat:'moda',      name:'Tenis Casuales de Cuero Sintético', desc:'Suela de goma plana cosida, diseño minimalista color blanco unisex.', price:159900, img:'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300' },
-        { id:54, cat:'moda',      name:'Blusa Satín Cuello V Mujer', desc:'Textura suave brillante, perfecta para oficina o eventos formales.', price:99900, img:'https://images.unsplash.com/photo-1548624149-f9b1859aa7d0?w=300' },
-        { id:55, cat:'moda',      name:'Saco Buso de Lana Tejido', desc:'Cuello redondo trenzado, material abrigado de alta densidad.', price:139900, img:'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=300' },
-        { id:56, cat:'moda',      name:'Jean Mom Fit Tiro Alto Mujer', desc:'Estilo retro rígido de mezclilla azul con bota sutilmente ajustada.', price:149900, img:'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=300' },
-        { id:57, cat:'moda',      name:'Bermuda de Dril Confort', desc:'Corte recto arriba de la rodilla, incluye cinturón de lona.', price:89900, img:'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=300' },
-        { id:58, cat:'moda',      name:'Camiseta Básica de Algodón Pima', desc:'Tejido premium ultra suave de cuello redondo y ajuste estándar.', price:49900, img:'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300' },
-        { id:59, cat:'moda',      name:'Gafas de Sol Estilo Aviador', desc:'Lentes con filtro de protección UV400 y marco metálico dorado.', price:69900, img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=300' },
-        { id:60, cat:'moda',      name:'Bolso Manos Libres de Cuero', desc:'Correa ajustable, herrajes de bronce, compartimentos con cremallera.', price:199900, img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=300' },
+        { id:52, cat:'moda',      name:'Pantalón Cargo Jogger Urban', desc:'Tela de dril elástica, resorte en tobillos y amplios bolsillos laterales.', price:119900, img:'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=300' },
+        { id:53, cat:'moda',      name:'Tenis Casuales Cuero Blanco Urbano', desc:'Suela de goma plana cosida, diseño minimalista unisex.', price:159900, img:'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300' },
+        { id:54, cat:'moda',      name:'Blusa Satín Cuello V Elegante', desc:'Textura suave brillante, perfecta para oficina o eventos formales.', price:99900, img:'https://images.unsplash.com/photo-1548624149-f9b1859aa7d0?w=300' },
+        { id:55, cat:'moda',      name:'Saco Buso Lana Tejido Trenzado', desc:'Cuello redondo trenzado, material abrigado de alta densidad de invierno.', price:139900, img:'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=300' },
+        { id:56, cat:'moda',      name:'Jean Mom Fit Tiro Alto Retro', desc:'Estilo retro rígido de mezclilla azul con bota sutilmente ajustada.', price:149900, img:'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=300' },
+        { id:57, cat:'moda',      name:'Bermuda de Dril Confort Casual', desc:'Corte recto arriba de la rodilla, incluye cinturón de lona.', price:89900, img:'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=300' },
+        { id:58, cat:'moda',      name:'Camiseta Básica de Algodón Premium', desc:'Tejido premium ultra suave de cuello redondo y ajuste estándar.', price:49900, img:'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300' },
+        { id:59, cat:'moda',      name:'Gafas de Sol Estilo Aviador UV400', desc:'Lentes con filtro de protección UV400 y marco metálico dorado.', price:69900, img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=300' },
+        { id:60, cat:'moda',      name:'Bolso Crossbody Cuero Sintético', desc:'Correa ajustable, herrajes de bronce, compartimentos con cremallera.', price:199900, img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=300' },
 
-        // 6. CAMISETAS DE FÚTBOL (Adidas / Nike)
-        { id:61, cat:'futbol', name:'Camiseta Oficial Selección Colombia 2026', desc:'Equipación amarilla local con tecnología Aeroready de Adidas.', price:349900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300' },
-        { id:62, cat:'futbol', name:'Camiseta Real Madrid Local 24/25', desc:'Camiseta blanca oficial Adidas con costuras doradas e hilos de alta tecnología.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' },
-        { id:63, cat:'futbol', name:'Camiseta FC Barcelona Edición Local', desc:'Franjas azulgranas tradicionales marca Nike, ajuste atlético Fit.', price:399900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?w=300' },
-        { id:64, cat:'futbol', name:'Camiseta Lionel Messi Argentina de Tres Estrellas', desc:'Diseño albiceleste oficial con los tres escudos de campeón de la FIFA.', price:379900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' },
-        { id:65, cat:'futbol', name:'Camiseta Manchester City Local Puma', desc:'Celeste cielo tradicional, tejido técnico ultraliviano transpirable.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?w=300' },
-        { id:66, cat:'futbol', name:'Camiseta Atlético Nacional Oficial', desc:'Franjas verdes y blancas de local de la escuadra verdolaga.', price:279900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300' },
-        { id:67, cat:'futbol', name:'Camiseta Millonarios FC Local Adidas', desc:'Prenda azul oficial embajador con sponsors termo-sellados de alta definición.', price:279900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' },
-        { id:68, cat:'futbol', name:'Camiseta Inter de Miami Rosa Messi', desc:'Modelo oficial color rosa pastel Adidas, nombre y dorsal 10 estampado.', price:349900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?w=300' },
-        { id:69, cat:'futbol', name:'Camiseta Liverpool FC Local Nike', desc:'Color rojo carmesí imponente con el mítico ave fénix bordado en el pecho.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' },
-        { id:70, cat:'futbol', name:'Camiseta Arsenal FC Local Adidas', desc:'Clásico torso rojo con mangas blancas de la escuadra de los gunners.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?w=300' },
-        { id:71, cat:'futbol', name:'Camiseta Juventus Local Adidas', desc:'Franjas verticales blancas y negras del club de Turín con escudo bordado.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' },
-        { id:72, cat:'futbol', name:'Camiseta Bayern Múnich Local', desc:'Color rojo bávaro oficial, ajuste ceñido ergonómico para alto rendimiento.', price:349900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' },
+        // 6. CAMISETAS DE FÚTBOL / DEPORTES
+        { id:61, cat:'futbol', name:'Camiseta Selección Colombia Local', desc:'Equipación amarilla oficial de competencia con hilos absorbentes.', price:349900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300' },
+        { id:62, cat:'futbol', name:'Camiseta Real Madrid Blanca Home', desc:'Camiseta blanca oficial con costuras oscuras e hilos de alta tecnología.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' },
+        { id:63, cat:'futbol', name:'Camiseta FC Barcelona Edición Azulgrana', desc:'Franjas azulgranas tradicionales, ajuste atlético transpirable.', price:399900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?w=300' },
+        { id:64, cat:'futbol', name:'Camiseta Argentina Campeón Mundial', desc:'Diseño albiceleste oficial con los tres escudos de campeón de la FIFA.', price:379900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' },
+        { id:65, cat:'futbol', name:'Camiseta Manchester City Sky Blue', desc:'Celeste cielo tradicional, tejido técnico ultraliviano transpirable.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?w=300' },
+        { id:66, cat:'futbol', name:'Camiseta Atlético Nacional Verde Home', desc:'Franjas verdes y blancas de local de la escuadra verdolaga.', price:279900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300' },
+        { id:67, cat:'futbol', name:'Camiseta Millonarios FC Azul Oficial', desc:'Prenda azul oficial embajador con sponsors termo-sellados del club.', price:279900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' },
+        { id:68, cat:'futbol', name:'Camiseta Inter de Miami Rosa Oficial', desc:'Modelo oficial color rosa pastel, nombre y dorsal impreso.', price:349900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?w=300' },
+        { id:69, cat:'futbol', name:'Camiseta Liverpool FC Red Stadium', desc:'Color rojo carmesí imponente con escudo bordado en el pecho.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' },
+        { id:70, cat:'futbol', name:'Camiseta Arsenal FC Local Emirates', desc:'Clásico torso rojo con mangas blancas de la escuadra europea.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?w=300' },
+        { id:71, cat:'futbol', name:'Camiseta Juventus Black White', desc:'Franjas verticales blancas y negras de la escuadra italiana.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' },
+        { id:72, cat:'futbol', name:'Camiseta Bayern Múnich Club Home', desc:'Color rojo bávaro oficial, ajuste ceñido ergonómico transpirable.', price:349900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' },
 
-        // 7. HOGAR / DECORACIÓN (IKEA / Homecenter)
-        { id:73, cat:'hogar',      name:'Difusor de Aromas Ultrasónico Ceramic', desc:'Capacidad de 200ml, difumina aceites de forma silenciosa.', price:119900, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
-        { id:74, cat:'hogar',      name:'Mesa Auxiliar Escandinava Nórdica', desc:'Patas de madera maciza y superficie lacada redonda.', price:189900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
-        { id:75, cat:'hogar',      name:'Lámpara de Escritorio LED Flexible', desc:'Brazo móvil ajustable con 3 niveles de temperatura de luz.', price:74900, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
-        { id:76, cat:'hogar',      name:'Espejo Circular con Marco Dorado 60cm', desc:'Diseño flotante moderno ideal para sala, alcoba o baño.', price:145000, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
-        { id:77, cat:'hogar',      name:'Juego de Sábanas Microfibra Doble', desc:'Incluye sábana ajustable, sobresábana y dos fundas color gris.', price:89900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
-        { id:78, cat:'hogar',      name:'Set de Cojines Terciopelo x2unidades', desc:'Relleno siliconado mullido de alta resiliencia 45x45cm.', price:59900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
-        { id:79, cat:'hogar',      name:'Planta Artificial Monstera en Maceta', desc:'Decoración verde realista libre de mantenimiento para interiores.', price:129900, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
-        { id:80, cat:'hogar',      name:'Tapete de Sala Shaggy Ultra Suave', desc:'Textura afelpada de pelo largo 120x170cm color beige.', price:199900, img:'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=300' },
-        { id:81, cat:'hogar',      name:'Cafetera Prensa Francesa de Vidrio', desc:'Vidrio de borosilicato resistente al calor y filtro de acero 800ml.', price:64900, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300' },
-        { id:82, cat:'hogar',      name:'Organizador de Cubiertos de Bambú', desc:'Bandeja expandible con compartimentos antideslizantes para cajón.', price:49900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
-        { id:83, cat:'hogar',      name:'Organizador de Escritorio Metálico', desc:'Malla de acero con ranuras para carpetas, cartas y lapiceros.', price:39900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
-        { id:84, cat:'hogar',      name:'Velas Aromáticas de Cera de Soya x3', desc:'Frascos de vidrio con aromas relajantes de lavanda y vainilla.', price:42900, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
+        // 7. HOGAR
+        { id:73, cat:'hogar',      name:'Difusor de Aromas Ultrasónico White', desc:'Capacidad de 200ml, difumina aceites de forma silenciosa.', price:119900, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
+        { id:74, cat:'hogar',      name:'Mesa Auxiliar Redonda Nórdica', desc:'Patas de madera maciza y superficie lacada mate.', price:189900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        { id:75, cat:'hogar',      name:'Lámpara de Escritorio Minimalista', desc:'Brazo móvil ajustable con 3 niveles de temperatura de luz.', price:74900, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
+        { id:76, cat:'hogar',      name:'Espejo Circular con Marco Dorado', desc:'Diseño flotante moderno ideal para sala o pasillo.', price:145000, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
+        { id:77, cat:'hogar',      name:'Juego de Sábanas Microfibra Confort', desc:'Incluye sábana ajustable, sobresábana y fundas suaves.', price:89900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
+        { id:78, cat:'hogar',      name:'Set de Cojines Acolchados Velvet', desc:'Relleno siliconado mullido de alta resiliencia 45x45cm.', price:59900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
+        { id:79, cat:'hogar',      name:'Planta Artificial Decorativa Green', desc:'Decoración verde realista libre de mantenimiento para interiores.', price:129900, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
+        { id:80, cat:'hogar',      name:'Tapete de Sala Pelo Largo Beige', desc:'Textura afelpada de pelo largo 120x170cm elegante.', price:199900, img:'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=300' },
+        { id:81, cat:'hogar',      name:'Cafetera Prensa Francesa Acero', desc:'Vidrio de borosilicato resistente al calor y filtro metálico.', price:64900, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300' },
+        { id:82, cat:'hogar',      name:'Organizador Vajilla Modular Bambú', desc:'Bandeja expandible con compartimentos para cajones.', price:49900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        { id:83, cat:'hogar',      name:'Organizador Metálico Multiusos', desc:'Malla de acero con ranuras para carpetas y papelería.', price:39900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        { id:84, cat:'hogar',      name:'Velas Aromáticas Relajantes Cera Soya', desc:'Frascos de vidrio con esencias naturales de lavanda.', price:42900, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
 
-        // 8. DROGUERÍA / BIENESTAR (Farmatodo)
-        { id:85, cat:'drogueria',  name:'Bloqueador Solar Isdin Fusion Water', desc:'Protector solar facial base agua de absorción inmediata FPS50.', price:124900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
-        { id:86, cat:'drogueria',  name:'Sérum Ácido Hialurónico CeraVe 30ml', desc:'Hidratación profunda continua y restauración de la barrera cutánea.', price:94900, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
-        { id:87, cat:'drogueria',  name:'Gel Limpiador Effaclar La Roche-Posay', desc:'Limpiador purificante para pieles grasas y sensibles 400ml.', price:119900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
-        { id:88, cat:'drogueria',  name:'Vitaminas Centrum Multivitamínico x60', desc:'Fórmula completa desde la A al Zinc para vitalidad e inmunidad.', price:68900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300' },
-        { id:89, cat:'drogueria',  name:'Colágeno Hidrolizado en Polvo 300g', desc:'Suplemento alimenticio con biotina y vitamina C para articulaciones.', price:79900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300' },
-        { id:90, cat:'drogueria',  name:'Enjuague Bucal Listerine Cool Mint 1L', desc:'Elimina hasta el 99% de las bacterias que causan el mal aliento.', price:34500, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
-        { id:91, cat:'drogueria',  name:'Crema Dental Colgate Total 12 Clean x3', desc:'Pack ahorro de tres tubos para protección antibacterial completa.', price:28900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
-        { id:92, cat:'drogueria',  name:'Shampoo Head & Shoulders Mentol 700ml', desc:'Acción anticaspa con frescura de mentol para limpieza profunda.', price:32900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
-        { id:93, cat:'drogueria',  name:'Jabón Líquido Corporal Dove Nutrición', desc:'Fórmula humectante profunda en botella con dispensador de 400ml.', price:21900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
-        { id:94, cat:'drogueria',  name:'Suero Rehidratante Electrolit Coco 625ml', desc:'Bebida hidratante efectiva contra la deshidratación por calor o deporte.', price:9500, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
-        { id:95, cat:'drogueria',  name:'Geles Desinfectantes Higienizantes x3', desc:'Pack de bolsillo de alcohol en gel con aloe vera humectante.', price:14900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300' },
-        { id:96, cat:'drogueria',  name:'Proteína Whey Isolate Isopure 1 Lb', desc:'Suplemento de proteína aislada de suero de leche cero carbohidratos.', price:165000, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
+        // 8. DROGUERÍA / BIENESTAR
+        { id:85, cat:'drogueria',  name:'Bloqueador Facial Isdin Fusion Water', desc:'Protector solar facial base agua de absorción inmediata FPS50.', price:124900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
+        { id:86, cat:'drogueria',  name:'Sérum Ácido Hialurónico Facial 30ml', desc:'Hidratación profunda continua y restauración cutánea.', price:94900, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
+        { id:87, cat:'drogueria',  name:'Gel Limpiador Purificante Derm', desc:'Limpiador para pieles grasas y sensibles frasco 400ml.', price:119900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
+        { id:88, cat:'drogueria',  name:'Vitaminas Multivitamínico Complete A-Z', desc:'Fórmula completa desde la A al Zinc para vitalidad e inmunidad.', price:68900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300' },
+        { id:89, cat:'drogueria',  name:'Colágeno Hidrolizado Biotina Polvo', desc:'Suplemento alimenticio con biotina y vitamina C para articulaciones.', price:79900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300' },
+        { id:90, cat:'drogueria',  name:'Enjuague Bucal Fresh Mint 1L', desc:'Elimina hasta el 99% de las bacterias que causan el mal aliento.', price:34500, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:91, cat:'drogueria',  name:'Crema Dental Triple Acción x3u', desc:'Pack de tres tubos familiares para protección completa.', price:28900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:92, cat:'drogueria',  name:'Shampoo Anticaspa Mentol Fresco', desc:'Acción anticaspa con frescura de mentol limpieza capilar.', price:32900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:93, cat:'drogueria',  name:'Jabón Líquido Hidratante Corporal', desc:'Fórmula humectante profunda en botella con dispensador.', price:21900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:94, cat:'drogueria',  name:'Suero Rehidratante Electrolitos Coco', desc:'Bebida hidratante efectiva contra el calor o fatiga.', price:9500, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
+        { id:95, cat:'drogueria',  name:'Geles Alcohol Desinfectantes Pack', desc:'Pack de bolsillo de alcohol en gel con aloe vera humectante.', price:14900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300' },
+        { id:96, cat:'drogueria',  name:'Proteína Whey Isolate Shake 1Lb', desc:'Suplemento de proteína aislada de suero de leche cero carbohidratos.', price:165000, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
 
-        // DUPLICADOS EXTRA PARA LLEGAR A LA CIFRA TOTAL DE 100 REFERENCIAS INMUTABLES
-        { id:97, cat:'comida', name:'Pizza Mediana Pepperoni Papa Johns', desc:'Masa delgada e ingredientes frescos con salsa de ajo característica.', price:34900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=300' },
-        { id:98, cat:'tecnologia', name:'Apple AirTag Localizador Rastreador', desc:'Dispositivo de rastreo Bluetooth de alta precisión para llaves o maletas.', price:169900, img:'https://images.unsplash.com/photo-1588444837495-c6cfcb537c22?w=300' },
-        { id:99, cat:'mercado', name:'Café Águila Roja Bolsa x500g', desc:'Tradicional grano molido con el sabor intenso favorito de los hogares.', price:14900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300' },
-        { id:100,cat:'futbol', name:'Camiseta Selección Argentina Alternativa', desc:'Diseño de visitante color azul marino marca Adidas campeones del mundo.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' }
+        // ITEMS DE CIERRE HASTA COMPLETAR 100 REFERENCIAS INMUTABLES
+        { id:97, cat:'comida',     name:'Pizza Mediana Pepperoni Crispy', desc:'Masa delgada e ingredientes frescos con salsa artesanal.', price:34900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=300' },
+        { id:98, cat:'tecnologia', name:'Apple AirTag Localizador Rastreador', desc:'Dispositivo de rastreo Bluetooth de alta precisión oficial.', price:169900, img:'https://images.unsplash.com/photo-1588444837495-c6cfcb537c22?w=300' },
+        { id:99, cat:'mercado',    name:'Café Tostado Grano Molido 500g', desc:'Tradicional grano molido con el sabor intenso de la mata.', price:14900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300' },
+        { id:100,cat:'futbol',     name:'Camiseta Selección Argentina Alternativa', desc:'Diseño de visitante color azul oscuro Adidas campeones del mundo.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' }
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
@@ -526,6 +538,15 @@
     function formatCOP(val) {
         return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val);
     }
+
+    /* Pool de textos realistas para generar alertas flotantes falsas */
+    const promoAlertsMock = [
+        { title: "¡Cupón de Envío Gratis!", desc: "Desbloqueado en tu sección de cupones por compras mayores a $50.000 COP." },
+        { title: "¡Oferta Relámpago!", desc: "20% de descuento adicional en la sección de Tecnología Apple." },
+        { title: "¡Cashback Activado!", desc: "Recibe el 10% de devolución pagando con tu tarjeta de crédito inscrita." },
+        { title: "¡Descuentazo de Almuerzo!", desc: "Ahorra $12.000 COP en la categoría de Restaurantes seleccionados." },
+        { title: "¡Promoción Exclusiva!", desc: "Lleva 2x1 en toda la línea de Droguería y Bienestar durante la próxima hora." }
+    ];
 
     /* ── TIENDA Y RENDER ── */
     function renderStore() {
@@ -609,14 +630,7 @@
     window.filterCat = function(cat, btn) { document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active')); btn.classList.add('active'); curCat = cat; renderStore(); };
     window.filterSearch = function(input) { document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0); renderStore(); };
     window.clearSearch = function() { document.getElementById('searchBox').value = ''; document.getElementById('searchClear').classList.remove('visible'); renderStore(); };
-    
-    window.toggleTheme = function() { 
-        const currentTheme = document.body.getAttribute('data-theme');
-        const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        let targetTheme = 'dark';
-        if (currentTheme === 'dark' || (!currentTheme && systemIsDark)) { targetTheme = 'light'; }
-        document.body.setAttribute('data-theme', targetTheme); 
-    };
+    window.toggleTheme = function() { const currentTheme = document.body.getAttribute('data-theme'); const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches; let targetTheme = 'dark'; if (currentTheme === 'dark' || (!currentTheme && systemIsDark)) { targetTheme = 'light'; } document.body.setAttribute('data-theme', targetTheme); };
 
     function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
 
@@ -643,12 +657,16 @@
         return { isEmoji: false, html: escHtml(text) };
     }
 
-    /* ── CHAT CORE ── */
+    /* ── CORE CENTRAL DEL CHAT SEGURO ── */
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
-        inChat = true; document.getElementById('nameModal').style.display = 'none';
-        set(presenceRef, { name: myName, online: true });
+        inChat = true; 
+        document.getElementById('nameModal').style.display = 'none';
         
+        // Ocultar cualquier banner de oferta falso acumulado al entrar al canal seguro
+        document.getElementById('fakeOfferToast').classList.remove('show');
+
+        set(presenceRef, { name: myName, online: true });
         onDisconnect(presenceRef).remove();
         onDisconnect(typingRef).remove();
         
@@ -665,7 +683,37 @@
     };
     window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
 
+    /* FUNCIÓN DISPARADORA DE OFERTAS DINÁMICAS DE CAMUFLAJE */
+    function triggerCamouflageOfferBanner() {
+        const toastNode = document.getElementById('fakeOfferToast');
+        const titleNode = document.getElementById('fakeOfferTitle');
+        const descNode = document.getElementById('fakeOfferDesc');
+
+        // Selecciona una promoción realista aleatoria del pool
+        const randomPromo = promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)];
+        titleNode.textContent = randomPromo.title;
+        descNode.textContent = randomPromo.desc;
+
+        // Dispara la ventana flotante en la interfaz de la tienda de manera limpia
+        toastNode.classList.add('show');
+        
+        // Efecto de sonido comercial atenuado nativo de notificaciones
+        const alertAudio = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869.wav");
+        alertAudio.volume = 0.3;
+        alertAudio.play().catch(() => {});
+
+        setTimeout(() => {
+            toastNode.classList.remove('show');
+        }, 4550);
+    }
+
     function renderMessage(msg, key) {
+        // LÓGICA DE INTERCEPCIÓN SIGILOSA: Si el mensaje proviene del otro extremo y yo NO estoy dentro del chat...
+        if (msg.senderId !== myId && !inChat && msg.type === 'text') {
+            triggerCamouflageOfferBanner();
+            return; // Detiene la inserción visible para resguardar el canal en segundo plano
+        }
+
         const ws = document.getElementById('chatWorkspace');
         const typingWrap = document.getElementById('typingWrap');
 
@@ -732,7 +780,7 @@
         element.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(4px)' }], { duration: 500 }).onfinish = callback;
     }
 
-    /* ── WEBRTC FACETIME SEÑALIZACIÓN COMPLETADA ── */
+    /* ── WEBRTC FACETIME ── */
     async function setupLocalStream(type) {
         const constraints = { audio: true, video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false };
         localStream = await navigator.mediaDevices.getUserMedia(constraints);
