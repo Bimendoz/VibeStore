@@ -256,7 +256,14 @@
 
         .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
         .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
-        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.2s, transform 0.1s; }
+        .btn-send:active:not(:disabled) { transform: scale(0.9); }
+        .btn-send:disabled { opacity: 0.4; cursor: default; }
+
+        /* RETURN TO CALL BAR (shown when a call is minimized) */
+        .return-call-bar { display: none; align-items: center; justify-content: center; gap: 0.5rem; background: #34c759; color: #fff; padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
+        .return-call-bar.show { display: flex; }
+        .return-call-dot { width: 9px; height: 9px; border-radius: 50%; background: #fff; animation: pulse-dot 1.5s infinite; }
 
         /* FACETIME */
         #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2.5rem) 2rem calc(var(--safe-bottom) + 3.5rem); color: #fff; overscroll-behavior: none; }
@@ -520,9 +527,14 @@
         </div>
     </div>
 
+    <div class="return-call-bar" id="returnCallBar" onclick="returnToCall()">
+        <span class="return-call-dot"></span>
+        <span>Llamada en curso · Toca para volver</span>
+    </div>
+
     <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" oninput="handleTyping()" maxlength="500" autocomplete="off">
-        <button class="btn-send" onclick="sendMsg()">➤</button>
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" oninput="onChatInput()" maxlength="500" autocomplete="off">
+        <button class="btn-send" id="btnSend" onclick="sendMsg()" disabled>➤</button>
     </div>
 </div>
 
@@ -579,7 +591,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, remove, update, off }
+    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -979,6 +991,8 @@
         const input = document.getElementById('chatInput'); if (!input.value.trim()) return;
         push(messagesRef, { type: 'text', text: input.value.trim(), sender: myName, senderId: myId, ts: Date.now() });
         input.value = '';
+        document.getElementById('btnSend').disabled = true;
+        input.focus(); // keep keyboard open for quick replies
         // Clear my typing status as soon as I send
         clearTimeout(typingTimer);
         set(ref(db, 'chat/typing/' + myId), null);
@@ -989,6 +1003,13 @@
         }
     };
     window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
+
+    // Combined input handler: typing indicator + enable/disable send button
+    window.onChatInput = function() {
+        handleTyping();
+        const input = document.getElementById('chatInput');
+        document.getElementById('btnSend').disabled = input.value.trim().length === 0;
+    };
 
     /* ── EMOJI PARSING & ANIMATION (WhatsApp style) ── */
     // Detects messages that are ONLY emojis and wraps each in an animated span.
@@ -1079,8 +1100,10 @@
                 <div class="${bubbleClass}">${parsed.html}</div>
             </div>
             <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}${receiptHtml}</span>`;
+        // Smart scroll: measure BEFORE inserting; only jump to bottom if near it, or own message
+        const nearBottom = (ws.scrollHeight - ws.scrollTop - ws.clientHeight) < 120;
         ws.insertBefore(wrap, typingWrap);
-        ws.scrollTop = ws.scrollHeight;
+        if (isMe || nearBottom) { ws.scrollTop = ws.scrollHeight; }
 
         // Sound + vibration when a NEW message arrives from the other person (after initial load)
         if (!isMe && inChat && initialLoadDone) { playMessageSound(); vibrate(60); }
@@ -1121,7 +1144,20 @@
 
     /* ── WEBRTC ── */
     async function setupLocalStream(type) {
-        localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false });
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false });
+        } catch (err) {
+            // Permission denied, no device, or in use by another app
+            let msg = 'No se pudo acceder a la cámara o el micrófono.';
+            if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+                msg = 'Permiso denegado. Activa cámara y micrófono para llamar.';
+            } else if (err && (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError')) {
+                msg = 'No se encontró cámara o micrófono en este dispositivo.';
+            } else if (err && err.name === 'NotReadableError') {
+                msg = 'La cámara o el micrófono ya están en uso por otra app.';
+            }
+            throw new Error(msg);
+        }
         document.getElementById('localVideo').srcObject = localStream;
         document.getElementById('localVideo').style.display = type === 'video' ? 'block' : 'none';
     }
@@ -1132,20 +1168,28 @@
         document.getElementById('ftTargetName').textContent = "Canal Seguro";
         document.getElementById('ftCallStatus').textContent = `FaceTime de ${type === 'video' ? 'Video' : 'Audio'}...`;
         document.getElementById('ftAvatar').textContent = "C";
+        document.getElementById('ftAvatar').style.display = 'flex';
         document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
-        await setupLocalStream(type);
+        try {
+            await setupLocalStream(type);
+        } catch (err) {
+            // Could not get media → return to chat cleanly and inform user
+            cleanUpCallUI();
+            showToast(err.message);
+            return;
+        }
         activeCallRef = push(callsRef);
         await set(activeCallRef, { type, caller: myName, callerId: myId, status: 'calling', ts: Date.now() });
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-        peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
+        peerConnection.onicecandidate = e => { if (e.candidate && activeCallRef) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
         await update(activeCallRef, { offer: { type: offer.type, sdp: offer.sdp } });
         onValue(ref(db, `chat/calls/${activeCallRef.key}`), async snap => {
             const d = snap.val();
-            if (d && d.status === 'accepted' && d.answer && !peerConnection.currentRemoteDescription) {
+            if (d && d.status === 'accepted' && d.answer && peerConnection && !peerConnection.currentRemoteDescription) {
                 document.getElementById('ftCallStatus').textContent = "Conectado";
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(d.answer));
                 while (remoteIceQueue.length) await peerConnection.addIceCandidate(remoteIceQueue.shift());
@@ -1153,7 +1197,7 @@
             if (d && d.status === 'ended') cleanUpCallUI();
         });
         onValue(ref(db, `chat/calls/${activeCallRef.key}/receiverCandidates`), snap => {
-            if (snap.exists()) Object.values(snap.val()).forEach(c => {
+            if (snap.exists() && peerConnection) Object.values(snap.val()).forEach(c => {
                 const ice = new RTCIceCandidate(c);
                 peerConnection.remoteDescription ? peerConnection.addIceCandidate(ice) : remoteIceQueue.push(ice);
             });
@@ -1217,8 +1261,18 @@
         activeCallRef = ref(db, `chat/calls/${key}`);
         document.getElementById('seccion-chat').style.display = 'none'; document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftTargetName').textContent = call.caller; document.getElementById('ftAvatar').textContent = call.caller.charAt(0);
+        document.getElementById('ftAvatar').style.display = 'flex';
+        document.getElementById('ftCallStatus').textContent = 'Conectando…';
         document.getElementById('btnFtVideo').style.display = call.type === 'video' ? 'flex' : 'none';
-        await setupLocalStream(call.type);
+        try {
+            await setupLocalStream(call.type);
+        } catch (err) {
+            // Could not get media → decline the call and inform user
+            update(activeCallRef, { status: 'ended' });
+            cleanUpCallUI();
+            showToast(err.message);
+            return;
+        }
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
@@ -1228,7 +1282,7 @@
         await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
         while (remoteIceQueue.length) await peerConnection.addIceCandidate(remoteIceQueue.shift());
         onValue(ref(db, `chat/calls/${key}/callerCandidates`), snap => {
-            if (snap.exists()) Object.values(snap.val()).forEach(c => {
+            if (snap.exists() && peerConnection) Object.values(snap.val()).forEach(c => {
                 const ice = new RTCIceCandidate(c);
                 peerConnection.remoteDescription ? peerConnection.addIceCandidate(ice) : remoteIceQueue.push(ice);
             });
@@ -1236,9 +1290,18 @@
         onValue(activeCallRef, snap => { if (snap.val() && snap.val().status === 'ended') cleanUpCallUI(); });
     }
 
-    window.toggleMuteMic = function() { isMuted = !isMuted; localStream.getAudioTracks().forEach(t => t.enabled = !isMuted); document.getElementById('btnFtMute').classList.toggle('active', isMuted); };
-    window.toggleVideoTrack = function() { isVideoOff = !isVideoOff; localStream.getVideoTracks().forEach(t => t.enabled = !isVideoOff); document.getElementById('btnFtVideo').classList.toggle('active', isVideoOff); };
-    window.minimizeCallToChat = function() { document.getElementById('seccion-facetime').style.display = 'none'; document.getElementById('seccion-chat').style.display = 'flex'; };
+    window.toggleMuteMic = function() { if (!localStream) return; isMuted = !isMuted; localStream.getAudioTracks().forEach(t => t.enabled = !isMuted); document.getElementById('btnFtMute').classList.toggle('active', isMuted); };
+    window.toggleVideoTrack = function() { if (!localStream) return; isVideoOff = !isVideoOff; localStream.getVideoTracks().forEach(t => t.enabled = !isVideoOff); document.getElementById('btnFtVideo').classList.toggle('active', isVideoOff); };
+    window.minimizeCallToChat = function() {
+        document.getElementById('seccion-facetime').style.display = 'none';
+        document.getElementById('seccion-chat').style.display = 'flex';
+        document.getElementById('returnCallBar').classList.add('show');
+    };
+    window.returnToCall = function() {
+        document.getElementById('seccion-chat').style.display = 'none';
+        document.getElementById('seccion-facetime').style.display = 'flex';
+        document.getElementById('returnCallBar').classList.remove('show');
+    };
     window.hangUpCall = function() {
         if (activeCallRef) {
             const refToEnd = activeCallRef;
@@ -1252,10 +1315,12 @@
     function cleanUpCallUI() {
         if (localStream) localStream.getTracks().forEach(t => t.stop());
         if (peerConnection) peerConnection.close();
+        peerConnection = null;
         remoteIceQueue = [];
         activeCallRef = null;
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-incoming').classList.remove('show');
+        document.getElementById('returnCallBar').classList.remove('show');
         document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
     }
@@ -1270,9 +1335,11 @@
     shuffleProducts(products);
     renderStore();
 
-    onValue(query(messagesRef, limitToLast(50)), snap => {
-        const data = snap.val() || {};
-        Object.entries(data).forEach(([key, msg]) => {
+    onValue(query(messagesRef, orderByChild('ts'), limitToLast(50)), snap => {
+        // snap.forEach() respects the orderByChild('ts') ordering
+        snap.forEach(child => {
+            const key = child.key;
+            const msg = child.val();
             if (!seenKeys.has(key)) {
                 seenKeys.add(key);
                 renderMessage(msg, key);
