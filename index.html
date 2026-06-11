@@ -273,6 +273,34 @@
         .ft-btn.active { background: #fff; color: #000; }
         .ft-btn.btn-hangup { background: var(--red); width: 56px; height: 56px; transform: rotate(135deg); }
         .ft-btn.btn-ft-panic { background: rgba(255, 59, 48, 0.25); color: #ff453a; font-weight: 700; font-size: 0.72rem; border: 1px solid rgba(255, 59, 48, 0.3); }
+
+        /* INCOMING CALL SCREEN */
+        #seccion-incoming { display: none; position: fixed; inset: 0; z-index: 5500; flex-direction: column; justify-content: space-between; align-items: center; padding: calc(var(--safe-top) + 5rem) 2rem calc(var(--safe-bottom) + 4rem); color: #fff; background: linear-gradient(160deg, #1c1c2e 0%, #0d0d18 100%); }
+        #seccion-incoming.show { display: flex; }
+        .incoming-info { text-align: center; margin-top: 2rem; }
+        .incoming-avatar { width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,0.12); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; font-weight: 500; margin: 0 auto 1.5rem; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.15); animation: incoming-pulse 1.8s infinite; }
+        @keyframes incoming-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.15); } 50% { box-shadow: 0 0 0 18px rgba(255,255,255,0); } }
+        .incoming-name { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.5px; }
+        .incoming-type { font-size: 0.95rem; color: rgba(255,255,255,0.55); margin-top: 0.5rem; }
+        .incoming-actions { display: flex; justify-content: space-between; width: 100%; max-width: 320px; }
+        .incoming-action-group { display: flex; flex-direction: column; align-items: center; gap: 0.6rem; }
+        .incoming-btn { width: 68px; height: 68px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; touch-action: manipulation; }
+        .incoming-btn svg { width: 28px; height: 28px; fill: currentColor; }
+        .incoming-btn.accept { background: #34c759; animation: jiggle 1.2s infinite; }
+        .incoming-btn.decline { background: var(--red); transform: rotate(135deg); }
+        .incoming-btn.decline svg { transform: rotate(-135deg); }
+        @keyframes jiggle { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+        .incoming-label { font-size: 0.85rem; color: rgba(255,255,255,0.8); font-weight: 500; }
+
+        /* READ RECEIPTS (double check) */
+        .msg-receipt { display: inline-flex; align-items: center; margin-left: 0.3rem; vertical-align: middle; }
+        .msg-receipt svg { width: 15px; height: 15px; }
+        .msg-receipt.read svg { fill: #34b7f1; }
+        .msg-receipt.sent svg { fill: var(--text-muted); }
+
+        /* OFFLINE NOTICE */
+        .chat-offline-banner { display: none; align-self: center; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; margin: 0.3rem auto; }
+        .chat-offline-banner.show { display: block; }
     </style>
 </head>
 <body>
@@ -483,6 +511,7 @@
     </div>
 
     <div class="chat-messages" id="chatWorkspace">
+        <div class="chat-offline-banner" id="chatOfflineBanner">La otra persona no está conectada todavía. Verá tu mensaje al entrar.</div>
         <div class="typing-wrap" id="typingWrap">
             <span class="typing-name" id="typingName"></span>
             <div class="typing-bubble">
@@ -492,7 +521,7 @@
     </div>
 
     <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" oninput="handleTyping()" autocomplete="off">
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" oninput="handleTyping()" maxlength="500" autocomplete="off">
         <button class="btn-send" onclick="sendMsg()">➤</button>
     </div>
 </div>
@@ -522,6 +551,29 @@
         <button class="ft-btn btn-hangup" onclick="hangUpCall()">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
         </button>
+    </div>
+</div>
+
+<!-- INCOMING CALL SCREEN -->
+<div id="seccion-incoming">
+    <div class="incoming-info">
+        <div class="incoming-avatar" id="incomingAvatar">U</div>
+        <div class="incoming-name" id="incomingName">Llamada entrante</div>
+        <div class="incoming-type" id="incomingType">FaceTime…</div>
+    </div>
+    <div class="incoming-actions">
+        <div class="incoming-action-group">
+            <button class="incoming-btn decline" onclick="declineIncomingCall()">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+            </button>
+            <span class="incoming-label">Rechazar</span>
+        </div>
+        <div class="incoming-action-group">
+            <button class="incoming-btn accept" onclick="answerIncomingCall()">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+            </button>
+            <span class="incoming-label">Aceptar</span>
+        </div>
     </div>
 </div>
 
@@ -659,6 +711,36 @@
     const typingRef   = ref(db, 'chat/typing/' + myId);
     const presenceRef = ref(db, 'chat/presence/' + myId);
     const callsRef    = ref(db, 'chat/calls');
+
+    /* ── SOUND & HAPTICS (WebAudio, no external files) ── */
+    let audioCtx = null;
+    let ringtoneInterval = null;
+    let othersOnline = 0;
+    let initialLoadDone = false;
+    function getAudioCtx() {
+        if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
+        return audioCtx;
+    }
+    function beep(freq, duration, type = 'sine', vol = 0.15) {
+        const ctx = getAudioCtx(); if (!ctx) return;
+        try {
+            const osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.type = type; osc.frequency.value = freq;
+            gain.gain.setValueAtTime(vol, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.start(); osc.stop(ctx.currentTime + duration);
+        } catch(e) {}
+    }
+    function playMessageSound() { beep(660, 0.12, 'sine', 0.12); setTimeout(() => beep(880, 0.1, 'sine', 0.1), 90); }
+    function vibrate(ms) { if (navigator.vibrate) try { navigator.vibrate(ms); } catch(e) {} }
+    function startRingtone() {
+        stopRingtone();
+        const ring = () => { beep(480, 0.4, 'sine', 0.18); setTimeout(() => beep(620, 0.4, 'sine', 0.18), 450); vibrate([300,150,300]); };
+        ring();
+        ringtoneInterval = setInterval(ring, 2000);
+    }
+    function stopRingtone() { if (ringtoneInterval) { clearInterval(ringtoneInterval); ringtoneInterval = null; } }
 
     function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
     function formatCOP(val) { return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val); }
@@ -878,11 +960,16 @@
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
         inChat = true; document.getElementById('nameModal').style.display = 'none';
+        // Unlock audio on this user gesture so sounds/ringtone work later
+        const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
         set(presenceRef, { name: myName, online: true });
         onDisconnect(presenceRef).remove();
         onDisconnect(typingRef).remove();
         onValue(ref(db, 'chat/presence'), snap => {
-            document.getElementById('onlineStatus').textContent = `${Object.values(snap.val() || {}).length} en línea`;
+            const people = Object.values(snap.val() || {});
+            const total = people.length;
+            othersOnline = Math.max(0, total - 1);
+            document.getElementById('onlineStatus').textContent = othersOnline > 0 ? 'En línea' : 'Esperando a la otra persona…';
         });
         listenForIncomingCalls();
         listenForTyping();
@@ -895,6 +982,11 @@
         // Clear my typing status as soon as I send
         clearTimeout(typingTimer);
         set(ref(db, 'chat/typing/' + myId), null);
+        // Gentle notice if nobody else is connected yet
+        if (othersOnline === 0) {
+            const banner = document.getElementById('chatOfflineBanner');
+            if (banner) { banner.classList.add('show'); setTimeout(() => banner.classList.remove('show'), 3500); }
+        }
     };
     window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
 
@@ -977,18 +1069,27 @@
         wrap.id = `wrap-${key}`;
         const parsed = checkAndParseEmojiMessage(msg.text);
         const bubbleClass = parsed.isEmoji ? 'msg only-emoji-bubble' : `msg ${isMe ? 'mine' : 'theirs'}`;
+        // Read receipt: read (blue ✓✓) if the other person already saw it, otherwise sent (grey ✓✓)
+        const wasRead = msg.readBy && Object.keys(msg.readBy).some(id => id !== msg.senderId);
+        const receiptHtml = isMe ? `<span class="msg-receipt ${wasRead ? 'read' : 'sent'}">
+            <svg viewBox="0 0 24 24"><path d="M18 7l-8 8-2-2-1.4 1.4L10 17.8 19.4 8.4z M13 7l-1.4-1.4L6 11.2l-1.6-1.6L3 11l3 3z"/></svg></span>` : '';
         wrap.innerHTML = `
             ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender || 'Anónimo')}</span>` : ''}
             <div class="msg-body-container">
                 <div class="${bubbleClass}">${parsed.html}</div>
             </div>
-            <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span>`;
+            <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}${receiptHtml}</span>`;
         ws.insertBefore(wrap, typingWrap);
         ws.scrollTop = ws.scrollHeight;
+
+        // Sound + vibration when a NEW message arrives from the other person (after initial load)
+        if (!isMe && inChat && initialLoadDone) { playMessageSound(); vibrate(60); }
+
         if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) {
             const u = {}; u[`chat/messages/${key}/readBy/${myId}`] = true; update(ref(db), u);
         }
-        if (msg.readBy && Object.keys(msg.readBy).length > 0) { initiateThanosCountdown(key, wrap); }
+        // Start self-destruct only once the OTHER person has read it
+        if (wasRead) { initiateThanosCountdown(key, wrap); }
     }
 
     function initiateThanosCountdown(key, element) {
@@ -1034,7 +1135,7 @@
         document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
         await setupLocalStream(type);
         activeCallRef = push(callsRef);
-        await set(activeCallRef, { type, caller: myName, callerId: myId, status: 'calling' });
+        await set(activeCallRef, { type, caller: myName, callerId: myId, status: 'calling', ts: Date.now() });
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
@@ -1059,28 +1160,69 @@
         });
     };
 
+    let pendingIncoming = null; // {key, call} waiting for user to accept/decline
+
     function listenForIncomingCalls() {
         off(callsRef);
         onValue(callsRef, async snap => {
-            if (!inChat) return; const calls = snap.val(); if (!calls) return;
-            Object.entries(calls).forEach(([key, call]) => {
-                if (call.callerId !== myId && call.status === 'calling') {
-                    if (confirm(`FaceTime entrante de: ${call.caller}. ¿Contestar?`)) acceptIncomingCall(key, call);
-                    else set(ref(db, `chat/calls/${key}/status`), 'ended');
-                }
-            });
+            if (!inChat) return;
+            const calls = snap.val();
+            if (!calls) { hideIncomingScreen(); return; }
+            const now = Date.now();
+            // 1-to-1: find the single relevant ringing call from the other person, recent only
+            const entry = Object.entries(calls).find(([key, call]) =>
+                call.callerId !== myId &&
+                call.status === 'calling' &&
+                (!call.ts || (now - call.ts) < 30000) // ignore stale calls (>30s old)
+            );
+            if (entry && (!pendingIncoming || pendingIncoming.key !== entry[0])) {
+                pendingIncoming = { key: entry[0], call: entry[1] };
+                showIncomingScreen(entry[1]);
+            } else if (!entry && pendingIncoming) {
+                // Caller cancelled or call no longer ringing
+                pendingIncoming = null;
+                hideIncomingScreen();
+            }
         });
     }
+
+    function showIncomingScreen(call) {
+        document.getElementById('incomingName').textContent = call.caller || 'Llamada entrante';
+        document.getElementById('incomingType').textContent = `FaceTime de ${call.type === 'video' ? 'video' : 'audio'}…`;
+        document.getElementById('incomingAvatar').textContent = (call.caller || 'U').charAt(0);
+        document.getElementById('seccion-incoming').classList.add('show');
+        startRingtone();
+    }
+    function hideIncomingScreen() {
+        document.getElementById('seccion-incoming').classList.remove('show');
+        stopRingtone();
+    }
+
+    window.answerIncomingCall = function() {
+        if (!pendingIncoming) return;
+        const { key, call } = pendingIncoming;
+        pendingIncoming = null;
+        hideIncomingScreen();
+        acceptIncomingCall(key, call);
+    };
+    window.declineIncomingCall = function() {
+        if (!pendingIncoming) return;
+        const { key } = pendingIncoming;
+        pendingIncoming = null;
+        hideIncomingScreen();
+        update(ref(db, `chat/calls/${key}`), { status: 'ended' });
+    };
 
     async function acceptIncomingCall(key, call) {
         activeCallRef = ref(db, `chat/calls/${key}`);
         document.getElementById('seccion-chat').style.display = 'none'; document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftTargetName').textContent = call.caller; document.getElementById('ftAvatar').textContent = call.caller.charAt(0);
+        document.getElementById('btnFtVideo').style.display = call.type === 'video' ? 'flex' : 'none';
         await setupLocalStream(call.type);
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
-        peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
+        peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; document.getElementById('ftCallStatus').textContent = 'Conectado'; };
         await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
         const answer = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer);
         await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
@@ -1097,18 +1239,29 @@
     window.toggleMuteMic = function() { isMuted = !isMuted; localStream.getAudioTracks().forEach(t => t.enabled = !isMuted); document.getElementById('btnFtMute').classList.toggle('active', isMuted); };
     window.toggleVideoTrack = function() { isVideoOff = !isVideoOff; localStream.getVideoTracks().forEach(t => t.enabled = !isVideoOff); document.getElementById('btnFtVideo').classList.toggle('active', isVideoOff); };
     window.minimizeCallToChat = function() { document.getElementById('seccion-facetime').style.display = 'none'; document.getElementById('seccion-chat').style.display = 'flex'; };
-    window.hangUpCall = function() { if (activeCallRef) update(activeCallRef, { status: 'ended' }); cleanUpCallUI(); };
+    window.hangUpCall = function() {
+        if (activeCallRef) {
+            const refToEnd = activeCallRef;
+            update(refToEnd, { status: 'ended' });
+            // Clean up the call node from DB shortly after so they don't accumulate (1-to-1)
+            setTimeout(() => remove(refToEnd).catch(() => {}), 1500);
+        }
+        cleanUpCallUI();
+    };
 
     function cleanUpCallUI() {
         if (localStream) localStream.getTracks().forEach(t => t.stop());
         if (peerConnection) peerConnection.close();
         remoteIceQueue = [];
+        activeCallRef = null;
         document.getElementById('seccion-facetime').style.display = 'none';
+        document.getElementById('seccion-incoming').classList.remove('show');
         document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
     }
 
     window.panicExit = function() {
+        stopRingtone();
         window.hangUpCall(); off(messagesRef); off(callsRef);
         set(typingRef, null); set(presenceRef, null);
         remove(messagesRef).then(() => location.reload());
@@ -1118,8 +1271,28 @@
     renderStore();
 
     onValue(query(messagesRef, limitToLast(50)), snap => {
-        const data = snap.val(); if (!data) return;
-        Object.entries(data).forEach(([key, msg]) => { if (!seenKeys.has(key)) { seenKeys.add(key); renderMessage(msg, key); } });
+        const data = snap.val() || {};
+        Object.entries(data).forEach(([key, msg]) => {
+            if (!seenKeys.has(key)) {
+                seenKeys.add(key);
+                renderMessage(msg, key);
+            } else {
+                // Already rendered: react to readBy changes (update ✓✓ and trigger destruct)
+                const wrap = document.getElementById(`wrap-${key}`);
+                if (!wrap) return;
+                const isMe = msg.senderId === myId;
+                const wasRead = msg.readBy && Object.keys(msg.readBy).some(id => id !== msg.senderId);
+                if (isMe && wasRead) {
+                    const receipt = wrap.querySelector('.msg-receipt');
+                    if (receipt && !receipt.classList.contains('read')) {
+                        receipt.classList.remove('sent'); receipt.classList.add('read');
+                    }
+                }
+                if (wasRead) { initiateThanosCountdown(key, wrap); }
+            }
+        });
+        // After the first batch, future messages count as "new arrivals" for sound
+        if (!initialLoadDone) { setTimeout(() => { initialLoadDone = true; }, 600); }
     });
 </script>
 </body>
