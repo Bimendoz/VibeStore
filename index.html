@@ -15,7 +15,7 @@
             --bg-nav: #ffffff;
             --text-main: #1c1c1e;
             --text-muted: #8e8e93;
-            --purple-accent: #ff441f; /* Cambio a un tono naranja/rojo corporativo tipo delivery */
+            --purple-accent: #ff441f; 
             --purple-light: #fff0ed;
             --green: #28a745;
             --blue-apple: #007aff;
@@ -68,48 +68,46 @@
             overscroll-behavior: none; 
         }
 
-        /* HEADER TIPO SUPERAPP */
         header { background-color: var(--bg-nav); padding: calc(var(--safe-top) + 0.8rem) 1.2rem 0.8rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
-        .logo { font-size: 1.3rem; font-weight: 900; letter-spacing: -0.5px; color: var(--purple-accent); }
+        .logo { font-size: 1.4rem; font-weight: 900; letter-spacing: -0.7px; color: var(--purple-accent); text-transform: uppercase; }
         .header-actions { display: flex; align-items: center; gap: 0.8rem; }
-        .icon-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 38px; height: 48px; border-radius: 50%; transition: transform 0.15s; touch-action: manipulation; }
+        
+        .icon-btn { background: none; border: none; cursor: pointer; color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 50%; transition: transform 0.15s; touch-action: manipulation; }
+        .icon-btn svg { width: 22px; height: 22px; fill: currentColor; }
+        
         .cart-btn { background: transparent; color: var(--text-main); position: relative; }
-        .badge { position: absolute; top: 4px; right: -2px; background-color: var(--purple-accent); color: #fff; font-size: 0.65rem; font-weight: 800; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .badge { position: absolute; top: 2px; right: -2px; background-color: var(--purple-accent); color: #fff; font-size: 0.65rem; font-weight: 800; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
         .badge.pop { animation: pop 0.3s cubic-bezier(0.36,0.07,0.19,0.97); }
         @keyframes pop { 0%,100%{transform:scale(1)} 40%{transform:scale(1.3)} 70%{transform:scale(0.95)} }
 
-        /* BANNER DE ANUNCIO (Fiel a la promo de alitas de IMG_9931.jpg) */
         .promo-banner-top { background: #ffe600; color: #000; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; font-weight: 700; cursor: pointer; margin-bottom: 0.2rem; }
         .promo-banner-top p { max-width: 85%; line-height: 1.3; }
 
-        /* CATEGORÍAS PROFESIONALES SIN EMOTICONES TEXTUALES */
         .nav-scroller { overflow-x: auto; white-space: nowrap; padding: 0.75rem 1rem; background: var(--bg-nav); border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .nav-scroller::-webkit-scrollbar { display: none; }
-        .btn-cat { display: inline-flex; align-items: center; background: var(--bg-body); border: 1px solid transparent; color: var(--text-main); padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-right: 0.5rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; }
+        .btn-cat { display: inline-flex; align-items: center; background: var(--bg-body); border: 1px solid transparent; color: var(--text-main); padding: 0.5rem 1rem; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin-right: 0.5rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; text-transform: capitalize; }
         .btn-cat.active { background: var(--purple-light); color: var(--purple-accent); border-color: var(--purple-accent); }
 
-        /* MAIN Y BUSCADOR */
         .main-content { flex: 1; padding: 0.8rem 1rem 0; max-width: 600px; margin: 0 auto; width: 100%; }
         .search-wrap { position: relative; margin-bottom: 1rem; }
-        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; font-size: 0.9rem; }
+        .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; display: flex; align-items: center; }
+        .search-icon svg { width: 16px; height: 16px; fill: currentColor; }
         .search-input { width: 100%; background: var(--bg-nav); border: 1px solid var(--border-color); padding: 0.75rem 2.5rem 0.75rem 2.4rem; border-radius: 12px; color: var(--text-main); outline: none; font-size: 0.9rem; -webkit-appearance: none; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); }
         .search-clear { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); font-size: 0.9rem; cursor: pointer; display: none; }
         .search-clear.visible { display: block; }
 
-        /* GRID ESTILO E-COMMERCE MODERNO */
-        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; padding-bottom: 130px; }
+        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; padding-bottom: 140px; }
         .card { background: var(--bg-card); border-radius: 16px; padding: 0.6rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.2s; }
         .card:active { transform: scale(0.98); }
         .img-container { width: 100%; aspect-ratio: 1/1; border-radius: 12px; background: #f8f9fa; margin-bottom: 0.6rem; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
         .card-tag { position: absolute; top: 0.5rem; left: 0.5rem; background: rgba(0,0,0,0.75); color: #fff; font-size: 0.55rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; text-transform: uppercase; z-index: 2; letter-spacing: 0.3px; }
-        .card-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.15rem; line-height: 1.3; height: 34px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .card-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.15rem; line-height: 1.3; height: 34px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; color: var(--text-main); }
         .card-desc { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.6rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 28px; line-height: 1.3; }
         .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
         .price { font-weight: 800; font-size: 0.95rem; color: var(--text-main); }
         
-        /* BOTÓN MÁS ESTILO DELIVERY (Burbuja circular con cruz interna) */
-        .btn-add { background: var(--purple-accent); color: #fff; border: none; width: 28px; height: 32px; border-radius: 10px; font-weight: 700; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; touch-action: manipulation; }
+        .btn-add { background: var(--purple-accent); color: #fff; border: none; width: 32px; height: 32px; border-radius: 10px; font-weight: 700; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; touch-action: manipulation; }
         .btn-add.added { background: var(--green); }
 
         .empty-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 4rem 1rem; color: var(--text-muted); text-align: center; font-size: 0.85rem; }
@@ -122,18 +120,21 @@
         .drawer-handle { width: 36px; height: 5px; background: #e5e5ea; border-radius: 3px; margin: 0.8rem auto 1rem; }
         .drawer-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 0.8rem; }
         .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
+        .cat-info { display: flex; flex-direction: column; gap: 0.1rem; max-width: 70%; }
+        .cat-name { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .cat-price-sub { font-size: 0.75rem; color: var(--text-muted); margin-left: 0.1rem; }
         .cat-qty { display: flex; align-items: center; gap: 0.6rem; }
         .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 28px; height: 28px; border-radius: 50%; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.5rem; }
         .cart-total-value { font-size: 1.15rem; font-weight: 900; }
 
-        /* FOOTER COMPRA */
+        /* FOOTER */
         .footer-checkout { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); padding: 0.7rem 1.2rem calc(0.7rem + var(--safe-bottom)); background: var(--bg-nav); border-top: 1px solid var(--border-color); z-index: 90; max-width: 600px; width: 100%; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); }
         .footer-inner { display: flex; gap: 0.7rem; align-items: center; }
         .btn-view-cart { flex: 1; background: var(--bg-body); color: var(--text-main); border: 1px solid var(--border-color); padding: 0.85rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
         .btn-checkout { flex: 2; background: var(--purple-accent); color: #fff; border: none; padding: 0.85rem; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
 
-        /* INTERFAZ DE CHAT Y LLAMADAS */
+        /* CHAT & FACETIME */
         #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
         .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
         .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
@@ -147,7 +148,7 @@
         .btn-call-trigger.audio-style { background: linear-gradient(135deg, #34c759, #28a745); }
         .btn-call-trigger.video-style { background: linear-gradient(135deg, #007aff, #0056b3); }
         .btn-call-trigger svg { width: 18px; height: 18px; fill: currentColor; }
-        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(255,59,48,0.35); }
+        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; }
 
         .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .name-modal-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; }
@@ -193,8 +194,9 @@
 
         .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
         .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
+        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; touch-action: manipulation; }
 
-        /* FACETIME FULLSCREEN */
+        /* INTERFAZ FACETIME */
         #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2.5rem) 2rem calc(var(--safe-bottom) + 3.5rem); color: #fff; overscroll-behavior: none; }
         .ft-video-container { position: absolute; inset: 0; z-index: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .ft-video-remote { width: 100%; height: 100%; object-fit: cover; }
@@ -215,33 +217,41 @@
 
 <div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100vh;">
     <header>
-        <div class="logo">TurboMarket ✦</div>
+        <div class="logo">VibeStore</div>
         <div class="header-actions">
-            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">
+                <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
+            </button>
             <button class="icon-btn cart-btn" onclick="openCart()">
-                🛍️<span class="badge" id="cartBadge">0</span>
+                <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zm-8.9-5h7.45c.75 0 1.41-.41 1.75-1.03l3.58-7.49c.37-.77-.19-1.63-1.05-1.63H5.21l-.94-2H1v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/></svg>
+                <span class="badge" id="cartBadge">0</span>
             </button>
         </div>
     </header>
 
     <div class="promo-banner-top">
-        <p>🔥 ¡Descuentazos de hoy! 6 Alitas picantes por $9.900 en KFC. Pide ahora.</p>
+        <p>¡Ofertas de hoy! 6 Alitas picantes por $9.900 en marcas seleccionadas. Pide rápido.</p>
         <span>→</span>
     </div>
 
     <nav class="nav-scroller">
-        <button class="btn-cat active" onclick="filterCat('all',this)">⚡ Todo</button>
-        <button class="btn-cat" onclick="filterCat('comida',this)">🍗 Comida</button>
-        <button class="btn-cat" onclick="filterCat('mercado',this)">🍎 Mercado</button>
-        <button class="btn-cat" onclick="filterCat('tecnologia',this)">🔌 Tecnología</button>
-        <button class="btn-cat" onclick="filterCat('maquillaje',this)">💄 Maquillaje</button>
-        <button class="btn-cat" onclick="filterCat('futbol',this)">⚽ Camisetas</button>
+        <button class="btn-cat active" onclick="filterCat('all',this)">Todo</button>
+        <button class="btn-cat" onclick="filterCat('tecnologia',this)">Tecnología</button>
+        <button class="btn-cat" onclick="filterCat('comida',this)">Restaurantes</button>
+        <button class="btn-cat" onclick="filterCat('mercado',this)">Supermercado</button>
+        <button class="btn-cat" onclick="filterCat('maquillaje',this)">Maquillaje</button>
+        <button class="btn-cat" onclick="filterCat('moda',this)">Moda</button>
+        <button class="btn-cat" onclick="filterCat('futbol',this)">Deportes</button>
+        <button class="btn-cat" onclick="filterCat('hogar',this)">Hogar</button>
+        <button class="btn-cat" onclick="filterCat('drogueria',this)">Bienestar</button>
     </nav>
 
     <main class="main-content">
         <div class="search-wrap">
-            <span class="search-icon">🔍</span>
-            <input type="search" id="searchBox" class="search-input" placeholder="Buscar tiendas o productos…" oninput="filterSearch(this)" autocomplete="off">
+            <span class="search-icon">
+                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 5 9.5 11.99 14 9.5 14z"/></svg>
+            </span>
+            <input type="search" id="searchBox" class="search-input" placeholder="Buscar productos destacados…" oninput="filterSearch(this)" autocomplete="off">
             <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
         </div>
         <div class="grid-productos" id="productGrid"></div>
@@ -249,8 +259,8 @@
 
     <div class="footer-checkout">
         <div class="footer-inner">
-            <button class="btn-view-cart" onclick="openCart()">🛍️ Ver Canasta <span id="footerCount">(0)</span></button>
-            <button class="btn-checkout" onclick="handleCheckout()">Revisar Pedido →</button>
+            <button class="btn-view-cart" onclick="openCart()">Canasta <span id="footerCount">(0)</span></button>
+            <button class="btn-checkout" onclick="handleCheckout()">Continuar pedido →</button>
         </div>
     </div>
 </div>
@@ -258,7 +268,7 @@
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
     <div class="drawer-handle"></div>
-    <h2 class="drawer-title">Resumen de tu compra</h2>
+    <h2 class="drawer-title">Mi Canasta</h2>
     <div id="cartItems"></div>
     <div class="cart-total-row">
         <span class="cart-total-label">Subtotal</span>
@@ -272,14 +282,14 @@
 <div class="payment-modal" id="paymentModal">
     <div class="payment-box">
         <button class="btn-close-pay" onclick="closePaymentPortal()">✕</button>
-        <h2>Pago Seguro PayU</h2>
-        <input type="text" placeholder="Número de tarjeta de crédito" maxlength="19">
-        <input type="text" placeholder="Nombre titular impreso">
+        <h2>Pasarela de Pago Segura</h2>
+        <input type="text" placeholder="Número de tarjeta" maxlength="19">
+        <input type="text" placeholder="Nombre completo titular">
         <div style="display: flex; gap: 1rem;">
             <input type="text" placeholder="MM/AA" maxlength="5">
             <input type="text" placeholder="CVV" maxlength="4">
         </div>
-        <button class="btn-pay" onclick="processPayment()">Verificar Transacción</button>
+        <button class="btn-pay" onclick="processPayment()">Verificar Pago</button>
     </div>
 </div>
 
@@ -289,7 +299,7 @@
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
             <h2>👋 Conexión Segura</h2>
-            <p>Ingresa un pseudónimo temporal cifrado</p>
+            <p>Ingresa un pseudónimo cifrado</p>
             <input type="text" id="nameInput" placeholder="Alias…" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
             <button class="btn-join" onclick="joinChat()">Establecer Enlace →</button>
         </div>
@@ -337,7 +347,7 @@
     <div class="ft-overlay-info">
         <div class="ft-avatar" id="ftAvatar">U</div>
         <div class="ft-name" id="ftTargetName">Enlace Seguro</div>
-        <div class="ft-status" id="ftCallStatus">Estableciendo FaceTime P2P...</div>
+        <div class="ft-status" id="ftCallStatus">Estableciendo FaceTime...</div>
     </div>
     <div class="ft-controls-panel">
         <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">
@@ -375,30 +385,125 @@
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
-    // Metadata técnica para filtrado
-    const CAT_META = { comida: { emoji: '🍗' }, mercado: { emoji: '🍎' }, tecnologia: { emoji: '🔌' }, maquillaje: { emoji: '💄' }, futbol: { emoji: '⚽' } };
-    
-    /* ── CATÁLOGO REALISTA CON PRECIOS COp Y REFERENCIAS PÚBLICAS ── */
+    // ── DATA MASIVA 100 PRODUCTOS E-COMMERCE REAL COLOMBIA ──
     const products = [
-        // COMIDA (Inspirado en marcas de comida rápida de Rappi)
-        { id:1,  cat:'comida', name:'Combo Alitas Personales KFC', desc:'6 Alitas picantes + Papas Fritas Medianas + Bebida Pet 400ml.', price:29900, img:'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=300' },
-        { id:2,  cat:'comida', name:'Corralisima Todo Terreno El Corral', desc:'Hamburguesa de res con doble carne, queso, tocineta y salsas.', price:41900, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300' },
-        
-        // MERCADO (Inspirado en Carulla / Éxito / Turbo)
-        { id:11, cat:'mercado', name:'Whisky Buchanans Deluxe 12 Años 750ml', desc:'Botella de Whisky escocés blended premium en caja oficial.', price:187100, img:'https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=300' },
-        { id:12, cat:'mercado', name:'Arándanos Azules Frescos Importados x125g', desc:'Caja de arándanos frescos seleccionados listos para consumo.', price:12500, img:'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=300' },
-        
-        // TECNOLOGÍA (Data de Alkosto / Ktronix)
-        { id:21, cat:'tecnologia', name:'Celular Apple iPhone 16 Pro Max 256GB', desc:'Pantalla Super Retina XDR, Titanio Negro, Cámara de 48 MP.', price:6499000, img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=300' },
-        { id:22, cat:'tecnologia', name:'Audífonos Inalámbricos Apple AirPods Max', desc:'Audio espacial inmersivo con cancelación activa de ruido premium.', price:2849900, img:'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=300' },
-        
-        // MAQUILLAJE (Data de Falabella Colombia)
-        { id:31, cat:'maquillaje', name:'M·A·C Cosmetics Labial Macximal Matte', desc:'Labial clásico acabado mate de ultra larga duración 24 horas 3.5g.', price:109900, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
-        { id:32, cat:'maquillaje', name:'Benefit Tinta Líquida Labios Benetint', desc:'Tinta multiusos para labios y mejillas efecto natural 6ml.', price:144900, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
-        
-        // CAMISETAS DE FÚTBOL (Data Oficial Tiendas Deportivas)
-        { id:41, cat:'futbol', name:'Camiseta Oficial Selección Colombia 2026', desc:'Camiseta de local color amarillo con tecnología de ventilación Adidas.', price:349900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300' },
-        { id:42, cat:'futbol', name:'Camiseta Real Madrid Local 24/25', desc:'Equipación oficial blanca Adidas con parches de la Champions League.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' }
+        // 1. TECNOLOGÍA (Alkosto / Ktronix)
+        { id:1,  cat:'tecnologia', name:'Celular Apple iPhone 16 Pro Max 256GB', desc:'Titanio de grado aeroespacial, chip A18 Pro, pantalla Super Retina XDR.', price:6499000, img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?w=300' },
+        { id:2,  cat:'tecnologia', name:'Celular Apple iPhone 16 128GB Black', desc:'Control de cámara avanzado, chip A18, carcasa de aluminio premium.', price:3849000, img:'https://images.unsplash.com/photo-1592899677977-9c10ca588bbd?w=300' },
+        { id:3,  cat:'tecnologia', name:'Audífonos Inalámbricos Apple AirPods 4', desc:'Cancelación activa de ruido con ajuste ergonómico acústico renovado.', price:899900, img:'https://images.unsplash.com/photo-1588444837495-c6cfcb537c22?w=300' },
+        { id:4,  cat:'tecnologia', name:'Apple Watch Series 10 GPS 46mm', desc:'Carcasa de aluminio, pantalla OLED Always-On, monitoreo de salud avanzado.', price:2149900, img:'https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=300' },
+        { id:5,  cat:'tecnologia', name:'Portátil Apple MacBook Air 13" M3 8GB', desc:'Almacenamiento SSD 256GB, ultra liviano, batería de hasta 18 horas.', price:5499000, img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=300' },
+        { id:6,  cat:'tecnologia', name:'Consola Sony PlayStation 5 Slim 1TB', desc:'Edición estándar con lector de discos físicos y juego digital de obsequio.', price:2399000, img:'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=300' },
+        { id:7,  cat:'tecnologia', name:'Televisor LG OLED EVO 55" 4K Smart', desc:'Procesador AI Alpha 9, tasa de refresco a 120Hz ideal para gaming.', price:4799900, img:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?w=300' },
+        { id:8,  cat:'tecnologia', name:'Parlante Bluetooth JBL Charge 5', desc:'Sonido Pro potente con powerbank integrado a prueba de agua IP67.', price:649900, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
+        { id:9,  cat:'tecnologia', name:'Tablet Samsung Galaxy Tab S9 FE 128GB', desc:'Incluye S Pen, pantalla fluida de 90Hz, resistencia al agua y polvo.', price:1999900, img:'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=300' },
+        { id:10, cat:'tecnologia', name:'Cámara Mirrorless Sony Alpha ZV-E10', desc:'Lente 16-50mm, ideal para creadores de contenido, video 4K profesional.', price:3399000, img:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300' },
+        { id:11, cat:'tecnologia', name:'Consola Nintendo Switch OLED Edition', desc:'Pantalla de 7 pulgadas con colores intensos y contrastes definidos.', price:1649900, img:'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=300' },
+        { id:12, cat:'tecnologia', name:'Monitor Gamer ASUS TUF 27" Curvo', desc:'Resolución QHD, 165Hz de tasa de refresco, tiempo de respuesta 1ms.', price:1299900, img:'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=300' },
+
+        // 2. RESTAURANTES / COMIDA (Rappi)
+        { id:13, cat:'comida', name:'Combo Alitas Personales KFC', desc:'6 Alitas picantes + Papas medianas + Bebida fría 400ml.', price:29900, img:'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?w=300' },
+        { id:14, cat:'comida', name:'Hamburguesa Todo Terreno El Corral', desc:'Doble carne premium de res, queso derretido, tocineta crujiente y verduras.', price:41900, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300' },
+        { id:15, cat:'comida', name:'Pizza Grande Pepperoni Papa Johns', desc:'Masa tradicional hecha a mano, pepperoni americano y queso 100% mozzarella.', price:49900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=300' },
+        { id:16, cat:'comida', name:'Picada Tradicional Colombiana Mediana', desc:'Chicharrón, morcilla, papa criolla, plátano maduro y arepitas calientes.', price:56000, img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=300' },
+        { id:17, cat:'comida', name:'Combo Sushi Roll Filadelfia x10u', desc:'Salmón fresco, queso crema, aguacate, cobertura de sésamo tostado.', price:34900, img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=300' },
+        { id:18, cat:'comida', name:'Arroz con Pollo Especial Paisa', desc:'Porción grande acompañado de papas a la francesa y salsa de tomate.', price:26900, img:'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=300' },
+        { id:19, cat:'comida', name:'Burrito de Carne Asada Tex-Mex', desc:'Tortilla gigante rellena de lomo, frijol refrito, guacamole y pico de gallo.', price:28900, img:'https://images.unsplash.com/photo-1626700051175-6518c4793f4f?w=300' },
+        { id:20, cat:'comida', name:'Malteada Premium de Chocolate El Corral', desc:'Crema batida, salsa de chocolate espesa y barquillo crujiente.', price:15900, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=300' },
+        { id:21, cat:'comida', name:'Bowl de Ensalada Fit con Pollo Asado', desc:'Mix de lechugas, pechuga a la plancha, tomates cherry, maíz y aderezo césar.', price:24900, img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=300' },
+        { id:22, cat:'comida', name:'Tacos al Pastor x3unidades', desc:'Tortilla de maíz, carne de cerdo marinada, piña, cebolla y cilantro.', price:19900, img:'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?w=300' },
+        { id:23, cat:'comida', name:'Lasaña de Carne Bolognesa', desc:'Capas de pasta artesanal rellenas de carne, salsa bechamel y queso gratinado.', price:31500, img:'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?w=300' },
+        { id:24, cat:'comida', name:'Porción Empanadas de Carne x5un', desc:'Empanaditas fritas de maíz crujiente rellenas acompañadas de ají casero.', price:12000, img:'https://images.unsplash.com/photo-1565557623262-b51c2513a641?w=300' },
+
+        // 3. SUPERMERCADO (Éxito / Carulla)
+        { id:25, cat:'mercado', name:'Whisky Buchanan\'s Deluxe 12 Años 750ml', desc:'Botella de licor blended scotch whisky importado original en caja.', price:187100, img:'https://images.unsplash.com/photo-1527281400683-1aae777175f8?w=300' },
+        { id:26, cat:'mercado', name:'Arándanos Frescos Importados x125g', desc:'Caja plástica de frutos rojos seleccionados premium.', price:12500, img:'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?w=300' },
+        { id:27, cat:'mercado', name:'Café Sello Rojo Molienda Fina 500g', desc:'Café puro tostado y molido tradicional colombiano de alta pureza.', price:16900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300' },
+        { id:28, cat:'mercado', name:'Aceite de Girasol Premier 1000ml', desc:'Aceite vegetal ideal para todo tipo de preparaciones de cocina.', price:14500, img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300' },
+        { id:29, cat:'mercado', name:'Leche Entera Alquería Pack x6 unidades', desc:'Bolsas de leche entera ultrapasteurizada de 900ml cada una.', price:27900, img:'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300' },
+        { id:30, cat:'mercado', name:'Arroz Diana Premium Bolsa de 5kg', desc:'Granos seleccionados blancos de alta calidad para rendimiento superior.', price:22500, img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300' },
+        { id:31, cat:'mercado', name:'Pack Cerveza Club Colombia Dorada x6', desc:'Latas de cerveza nacional tipo lager premium de 330ml.', price:17400, img:'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=300' },
+        { id:32, cat:'mercado', name:'Salmón Premium Filete Congelado 500g', desc:'Corte de pescado fresco empacado al vacío con piel.', price:48900, img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=300' },
+        { id:33, cat:'mercado', name:'Chocolate Corona Tradicional x500g', desc:'Pastillas de chocolate para preparar en mesa, endulzado con azúcar.', price:9800, img:'https://images.unsplash.com/photo-1544967082-d9d25d867d66?w=300' },
+        { id:34, cat:'mercado', name:' Detergente Líquido Ariel Toque Downy 3L', desc:'Limpieza profunda y remoción de manchas con aroma prolongado.', price:45900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:35, cat:'mercado', name:'Papel Higiénico Familia Expert x12u', desc:'Rollos de doble hoja acolchada de máxima suavidad y resistencia.', price:24900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300' },
+        { id:36, cat:'mercado', name:'Queso Doble Crema Colanta Tajado 400g', desc:'Ideal para sándwiches y preparaciones calientes derretidas.', price:16200, img:'https://images.unsplash.com/photo-1486297678162-92e19b662883?w=300' },
+
+        // 4. MAQUILLAJE / BELLEZA (Falabella Colombia)
+        { id:37, cat:'maquillaje', name:'M·A·C Cosmetics Labial Macximal Matte', desc:'Labial con acabado de alta definición, fijación extrema por 24h 3.5g.', price:109900, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
+        { id:38, cat:'maquillaje', name:'Benefit Tinta Líquida Labios Benetint', desc:'Fórmula fluida roja translúcida para dar color a mejillas y labios 6ml.', price:144900, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
+        { id:39, cat:'maquillaje', name:'Clinique Bálsamo Labial Almost Black Honey', desc:'Se adapta al tono natural de la piel ofreciendo un brillo ciruela sutil.', price:109900, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
+        { id:40, cat:'maquillaje', name:'Base L\'Oréal Infallible Fresh Wear 24H', desc:'Textura ultra ligera, acabado natural mate con protección solar SPF.', price:84900, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
+        { id:41, cat:'maquillaje', name:'Pestañina Maybelline Sky High Waterproof', desc:'Largo y volumen extremo sin dejar grumos, a prueba de agua.', price:59900, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
+        { id:42, cat:'maquillaje', name:'Paleta de Sombras Urban Decay Naked3', desc:'12 tonos neutros rosados mate y satinados de calidad profesional.', price:249900, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300' },
+        { id:43, cat:'maquillaje', name:'Fijador de Maquillaje MAC Prep + Prime', desc:'Bruma de agua ligera con vitaminas y minerales que hidrata y refresca.', price:149900, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
+        { id:44, cat:'maquillaje', name:'Rubor Líquido Rare Beauty Soft Pinch', desc:'Fórmula de larga duración con pigmentos ligeros de fácil difuminado.', price:155000, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
+        { id:45, cat:'maquillaje', name:'Corrector Tarte Tape Shape Concealer', desc:'Fórmula de cobertura total que disimula líneas de expresión y ojeras.', price:139000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
+        { id:46, cat:'maquillaje', name:'Iluminador Polvo MAC Mineralize', desc:'Polvo lujoso con minerales que aporta un acabado aterciopelado radiante.', price:179900, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
+        { id:47, cat:'maquillaje', name:'Polvo Traslúcido Laura Mercier', desc:'Fija el maquillaje de forma invisible controlando el brillo graso.', price:199000, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
+        { id:48, cat:'maquillaje', name:'Delineador de Ojos Stila Stay All Day', desc:'Punta fina tipo plumón de secado rápido, color negro intenso impermeable.', price:115000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
+
+        // 5. MODA Y ROPA (Zara / H&M)
+        { id:49, cat:'moda',      name:'Chaqueta de Jean Slim Fit Hombre', desc:'Denim clásico prelavado con botones metálicos y bolsillos frontales.', price:169900, img:'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=300' },
+        { id:50, cat:'moda',      name:'Camisa Casual de Lino Manga Larga', desc:'Prenda fresca y ligera de corte moderno ideal para clima cálido.', price:129900, img:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=300' },
+        { id:51, cat:'moda',      name:'Vestido Largo de Flores Veraniego', desc:'Diseño suelto con tirantes ajustables y estampado floral de temporada.', price:189900, img:'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=300' },
+        { id:52, cat:'moda',      name:'Pantalón Cargo Jogger Hombre', desc:'Tela de dril elástica, resorte en tobillos y amplios bolsillos laterales.', price:119900, img:'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=300' },
+        { id:53, cat:'moda',      name:'Tenis Casuales de Cuero Sintético', desc:'Suela de goma plana cosida, diseño minimalista color blanco unisex.', price:159900, img:'https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300' },
+        { id:54, cat:'moda',      name:'Blusa Satín Cuello V Mujer', desc:'Textura suave brillante, perfecta para oficina o eventos formales.', price:99900, img:'https://images.unsplash.com/photo-1548624149-f9b1859aa7d0?w=300' },
+        { id:55, cat:'moda',      name:'Saco Buso de Lana Tejido', desc:'Cuello redondo trenzado, material abrigado de alta densidad.', price:139900, img:'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=300' },
+        { id:56, cat:'moda',      name:'Jean Mom Fit Tiro Alto Mujer', desc:'Estilo retro rígido de mezclilla azul con bota sutilmente ajustada.', price:149900, img:'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=300' },
+        { id:57, cat:'moda',      name:'Bermuda de Dril Confort', desc:'Corte recto arriba de la rodilla, incluye cinturón de lona.', price:89900, img:'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?w=300' },
+        { id:58, cat:'moda',      name:'Camiseta Básica de Algodón Pima', desc:'Tejido premium ultra suave de cuello redondo y ajuste estándar.', price:49900, img:'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=300' },
+        { id:59, cat:'moda',      name:'Gafas de Sol Estilo Aviador', desc:'Lentes con filtro de protección UV400 y marco metálico dorado.', price:69900, img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=300' },
+        { id:60, cat:'moda',      name:'Bolso Manos Libres de Cuero', desc:'Correa ajustable, herrajes de bronce, compartimentos con cremallera.', price:199900, img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=300' },
+
+        // 6. CAMISETAS DE FÚTBOL (Adidas / Nike)
+        { id:61, cat:'futbol', name:'Camiseta Oficial Selección Colombia 2026', desc:'Equipación amarilla local con tecnología Aeroready de Adidas.', price:349900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300' },
+        { id:62, cat:'futbol', name:'Camiseta Real Madrid Local 24/25', desc:'Camiseta blanca oficial Adidas con costuras doradas e hilos de alta tecnología.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' },
+        { id:63, cat:'futbol', name:'Camiseta FC Barcelona Edición Local', desc:'Franjas azulgranas tradicionales marca Nike, ajuste atlético Fit.', price:399900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?w=300' },
+        { id:64, cat:'futbol', name:'Camiseta Lionel Messi Argentina de Tres Estrellas', desc:'Diseño albiceleste oficial con los tres escudos de campeón de la FIFA.', price:379900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' },
+        { id:65, cat:'futbol', name:'Camiseta Manchester City Local Puma', desc:'Celeste cielo tradicional, tejido técnico ultraliviano transpirable.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?w=300' },
+        { id:66, cat:'futbol', name:'Camiseta Atlético Nacional Oficial', desc:'Franjas verdes y blancas de local de la escuadra verdolaga.', price:279900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=300' },
+        { id:67, cat:'futbol', name:'Camiseta Millonarios FC Local Adidas', desc:'Prenda azul oficial embajador con sponsors termo-sellados de alta definición.', price:279900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' },
+        { id:68, cat:'futbol', name:'Camiseta Inter de Miami Rosa Messi', desc:'Modelo oficial color rosa pastel Adidas, nombre y dorsal 10 estampado.', price:349900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?w=300' },
+        { id:69, cat:'futbol', name:'Camiseta Liverpool FC Local Nike', desc:'Color rojo carmesí imponente con el mítico ave fénix bordado en el pecho.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' },
+        { id:70, cat:'futbol', name:'Camiseta Arsenal FC Local Adidas', desc:'Clásico torso rojo con mangas blancas de la escuadra de los gunners.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?w=300' },
+        { id:71, cat:'futbol', name:'Camiseta Juventus Local Adidas', desc:'Franjas verticales blancas y negras del club de Turín con escudo bordado.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' },
+        { id:72, cat:'futbol', name:'Camiseta Bayern Múnich Local', desc:'Color rojo bávaro oficial, ajuste ceñido ergonómico para alto rendimiento.', price:349900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?w=300' },
+
+        // 7. HOGAR / DECORACIÓN (IKEA / Homecenter)
+        { id:73, cat:'hogar',      name:'Difusor de Aromas Ultrasónico Ceramic', desc:'Capacidad de 200ml, difumina aceites de forma silenciosa.', price:119900, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
+        { id:74, cat:'hogar',      name:'Mesa Auxiliar Escandinava Nórdica', desc:'Patas de madera maciza y superficie lacada redonda.', price:189900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        { id:75, cat:'hogar',      name:'Lámpara de Escritorio LED Flexible', desc:'Brazo móvil ajustable con 3 niveles de temperatura de luz.', price:74900, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
+        { id:76, cat:'hogar',      name:'Espejo Circular con Marco Dorado 60cm', desc:'Diseño flotante moderno ideal para sala, alcoba o baño.', price:145000, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
+        { id:77, cat:'hogar',      name:'Juego de Sábanas Microfibra Doble', desc:'Incluye sábana ajustable, sobresábana y dos fundas color gris.', price:89900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
+        { id:78, cat:'hogar',      name:'Set de Cojines Terciopelo x2unidades', desc:'Relleno siliconado mullido de alta resiliencia 45x45cm.', price:59900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
+        { id:79, cat:'hogar',      name:'Planta Artificial Monstera en Maceta', desc:'Decoración verde realista libre de mantenimiento para interiores.', price:129900, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
+        { id:80, cat:'hogar',      name:'Tapete de Sala Shaggy Ultra Suave', desc:'Textura afelpada de pelo largo 120x170cm color beige.', price:199900, img:'https://images.unsplash.com/photo-1600121848594-d8644e57abab?w=300' },
+        { id:81, cat:'hogar',      name:'Cafetera Prensa Francesa de Vidrio', desc:'Vidrio de borosilicato resistente al calor y filtro de acero 800ml.', price:64900, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300' },
+        { id:82, cat:'hogar',      name:'Organizador de Cubiertos de Bambú', desc:'Bandeja expandible con compartimentos antideslizantes para cajón.', price:49900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        { id:83, cat:'hogar',      name:'Organizador de Escritorio Metálico', desc:'Malla de acero con ranuras para carpetas, cartas y lapiceros.', price:39900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        { id:84, cat:'hogar',      name:'Velas Aromáticas de Cera de Soya x3', desc:'Frascos de vidrio con aromas relajantes de lavanda y vainilla.', price:42900, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
+
+        // 8. DROGUERÍA / BIENESTAR (Farmatodo)
+        { id:85, cat:'drogueria',  name:'Bloqueador Solar Isdin Fusion Water', desc:'Protector solar facial base agua de absorción inmediata FPS50.', price:124900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
+        { id:86, cat:'drogueria',  name:'Sérum Ácido Hialurónico CeraVe 30ml', desc:'Hidratación profunda continua y restauración de la barrera cutánea.', price:94900, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
+        { id:87, cat:'drogueria',  name:'Gel Limpiador Effaclar La Roche-Posay', desc:'Limpiador purificante para pieles grasas y sensibles 400ml.', price:119900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
+        { id:88, cat:'drogueria',  name:'Vitaminas Centrum Multivitamínico x60', desc:'Fórmula completa desde la A al Zinc para vitalidad e inmunidad.', price:68900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300' },
+        { id:89, cat:'drogueria',  name:'Colágeno Hidrolizado en Polvo 300g', desc:'Suplemento alimenticio con biotina y vitamina C para articulaciones.', price:79900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?w=300' },
+        { id:90, cat:'drogueria',  name:'Enjuague Bucal Listerine Cool Mint 1L', desc:'Elimina hasta el 99% de las bacterias que causan el mal aliento.', price:34500, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:91, cat:'drogueria',  name:'Crema Dental Colgate Total 12 Clean x3', desc:'Pack ahorro de tres tubos para protección antibacterial completa.', price:28900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:92, cat:'drogueria',  name:'Shampoo Head & Shoulders Mentol 700ml', desc:'Acción anticaspa con frescura de mentol para limpieza profunda.', price:32900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:93, cat:'drogueria',  name:'Jabón Líquido Corporal Dove Nutrición', desc:'Fórmula humectante profunda en botella con dispensador de 400ml.', price:21900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?w=300' },
+        { id:94, cat:'drogueria',  name:'Suero Rehidratante Electrolit Coco 625ml', desc:'Bebida hidratante efectiva contra la deshidratación por calor o deporte.', price:9500, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
+        { id:95, cat:'drogueria',  name:'Geles Desinfectantes Higienizantes x3', desc:'Pack de bolsillo de alcohol en gel con aloe vera humectante.', price:14900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=300' },
+        { id:96, cat:'drogueria',  name:'Proteína Whey Isolate Isopure 1 Lb', desc:'Suplemento de proteína aislada de suero de leche cero carbohidratos.', price:165000, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
+
+        // DUPLICADOS EXTRA PARA LLEGAR A LA CIFRA TOTAL DE 100 REFERENCIAS INMUTABLES
+        { id:97, cat:'comida', name:'Pizza Mediana Pepperoni Papa Johns', desc:'Masa delgada e ingredientes frescos con salsa de ajo característica.', price:34900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?w=300' },
+        { id:98, cat:'tecnologia', name:'Apple AirTag Localizador Rastreador', desc:'Dispositivo de rastreo Bluetooth de alta precisión para llaves o maletas.', price:169900, img:'https://images.unsplash.com/photo-1588444837495-c6cfcb537c22?w=300' },
+        { id:99, cat:'mercado', name:'Café Águila Roja Bolsa x500g', desc:'Tradicional grano molido con el sabor intenso favorito de los hogares.', price:14900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?w=300' },
+        { id:100,cat:'futbol', name:'Camiseta Selección Argentina Alternativa', desc:'Diseño de visitante color azul marino marca Adidas campeones del mundo.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=300' }
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
@@ -418,12 +523,11 @@
 
     function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    /* Formateador COP */
     function formatCOP(val) {
         return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(val);
     }
 
-    /* ── LÓGICA TIENDA REALISTA ── */
+    /* ── TIENDA Y RENDER ── */
     function renderStore() {
         const grid  = document.getElementById('productGrid');
         const queryVal = document.getElementById('searchBox').value.toLowerCase().trim();
@@ -432,7 +536,7 @@
             (p.name.toLowerCase().includes(queryVal) || p.desc.toLowerCase().includes(queryVal))
         );
         if (!list.length) {
-            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No encontramos lo que buscas. Intenta con otra palabra.</p></div>`;
+            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No se encontraron resultados para tu búsqueda.</p></div>`;
             return;
         }
         grid.innerHTML = list.map(p => `
@@ -492,7 +596,7 @@
 
     window.handleCheckout = function() {
         if (totalItems() === 5) {
-            if (prompt("Ingresa PIN de autorización del banco:") === SECRET_PIN_HASH) {
+            if (prompt("Ingresa clave token dinámica de seguridad:") === SECRET_PIN_HASH) {
                 document.getElementById('vista-tienda').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'flex';
                 cart = {}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';
@@ -505,16 +609,27 @@
     window.filterCat = function(cat, btn) { document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active')); btn.classList.add('active'); curCat = cat; renderStore(); };
     window.filterSearch = function(input) { document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0); renderStore(); };
     window.clearSearch = function() { document.getElementById('searchBox').value = ''; document.getElementById('searchClear').classList.remove('visible'); renderStore(); };
-    window.toggleTheme = function() { const currentTheme = document.body.getAttribute('data-theme'); const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches; let targetTheme = 'dark'; if (currentTheme === 'dark' || (!currentTheme && systemIsDark)) { targetTheme = 'light'; } document.body.setAttribute('data-theme', targetTheme); };
+    
+    window.toggleTheme = function() { 
+        const currentTheme = document.body.getAttribute('data-theme');
+        const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        let targetTheme = 'dark';
+        if (currentTheme === 'dark' || (!currentTheme && systemIsDark)) { targetTheme = 'light'; }
+        document.body.setAttribute('data-theme', targetTheme); 
+    };
 
-    /* ── EMOJIS ANIMADOS ── */
+    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
+
+    /* ── PARSER DE EMOJIS ANIMADOS ── */
     function checkAndParseEmojiMessage(text) {
         if (!text) return { isEmoji: false, html: '' };
         const emojiRegex = /^([\u2000-\u3300\ud83c\ud83d\ud83e][\ud000-\udfff]?[\u200d\ufe0f]?)+$/g;
         const cleanText = text.replace(/\s/g, '');
+        
         if (emojiRegex.test(cleanText)) {
             const segmenter = new Intl.Segmenter('es', { granularity: 'grapheme' });
             const segments = [...segmenter.segment(text.trim())].map(s => s.segment);
+            
             const processedHtml = segments.map(char => {
                 if (char === ' ' || char === ' ') return ' ';
                 let animationClass = 'ani-bounce'; 
@@ -533,10 +648,12 @@
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
         inChat = true; document.getElementById('nameModal').style.display = 'none';
         set(presenceRef, { name: myName, online: true });
+        
         onDisconnect(presenceRef).remove();
         onDisconnect(typingRef).remove();
+        
         onValue(ref(db, 'chat/presence'), snapshot => {
-            document.getElementById('onlineStatus').textContent = `${Object.values(snapshot.val() || {}).length} activos`;
+            document.getElementById('onlineStatus').textContent = `${Object.values(snapshot.val() || {}).length} en línea`;
         });
         listenForIncomingCalls();
     };
@@ -551,14 +668,17 @@
     function renderMessage(msg, key) {
         const ws = document.getElementById('chatWorkspace');
         const typingWrap = document.getElementById('typingWrap');
+
         if (msg.type === 'system') {
             const div = document.createElement('div'); div.className = 'msg-system'; div.textContent = msg.text;
             ws.insertBefore(div, typingWrap); return;
         }
+
         const isMe = msg.senderId === myId;
         const wrap = document.createElement('div');
         wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
         wrap.id = `wrap-${key}`;
+
         const parsedData = checkAndParseEmojiMessage(msg.text);
         const bubbleStyleClass = parsedData.isEmoji ? 'msg only-emoji-bubble' : `msg ${isMe ? 'mine' : 'theirs'}`;
 
@@ -569,13 +689,14 @@
             </div>
             <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
         `;
+
         ws.insertBefore(wrap, typingWrap);
         ws.scrollTop = ws.scrollHeight;
 
         if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) { 
-            const locUpdates = {};
-            locUpdates[`chat/messages/${key}/readBy/${myId}`] = true;
-            update(ref(db), locUpdates);
+            const readUpdate = {};
+            readUpdate[`chat/messages/${key}/readBy/${myId}`] = true;
+            update(ref(db), readUpdate);
         }
         if (msg.readBy && Object.keys(msg.readBy).length > 0) { initiateThanosCountdown(key, wrap); }
     }
@@ -586,6 +707,7 @@
         const timerContainer = document.createElement('div');
         timerContainer.className = 'destruct-timer'; timerContainer.textContent = '10';
         bodyContainer.appendChild(timerContainer);
+
         let count = 10;
         const interval = setInterval(() => {
             count--; timerContainer.textContent = count;
@@ -610,7 +732,7 @@
         element.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(4px)' }], { duration: 500 }).onfinish = callback;
     }
 
-    /* ── WEBRTC FACETIME ── */
+    /* ── WEBRTC FACETIME SEÑALIZACIÓN COMPLETADA ── */
     async function setupLocalStream(type) {
         const constraints = { audio: true, video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false };
         localStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -621,13 +743,18 @@
     window.initiateCall = async function(type) {
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
+        document.getElementById('ftTargetName').textContent = "Canal Seguro";
         document.getElementById('ftCallStatus').textContent = `FaceTime de ${type === 'video' ? 'Video' : 'Audio'}...`;
+        document.getElementById('ftAvatar').textContent = "C";
+        document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
+
         await setupLocalStream(type);
         activeCallRef = push(callsRef);
         await set(activeCallRef, { type: type, caller: myName, callerId: myId, status: 'calling' });
 
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
 
@@ -640,7 +767,9 @@
             if (data && data.status === 'accepted' && data.answer && !peerConnection.currentRemoteDescription) {
                 document.getElementById('ftCallStatus').textContent = "Conectado";
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                while (remoteIceQueue.length > 0) { await peerConnection.addIceCandidate(remoteIceQueue.shift()); }
+                while (remoteIceQueue.length > 0) {
+                    await peerConnection.addIceCandidate(remoteIceQueue.shift());
+                }
             }
             if (data && data.status === 'ended') cleanUpCallUI();
         });
@@ -649,8 +778,11 @@
             if (snapshot.exists()) {
                 Object.values(snapshot.val()).forEach(cand => {
                     const iceCandidate = new RTCIceCandidate(cand);
-                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) { peerConnection.addIceCandidate(iceCandidate); }
-                    else { remoteIceQueue.push(iceCandidate); }
+                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+                        peerConnection.addIceCandidate(iceCandidate);
+                    } else {
+                        remoteIceQueue.push(iceCandidate);
+                    }
                 });
             }
         });
@@ -674,23 +806,34 @@
         document.getElementById('seccion-chat').style.display = 'none'; document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftTargetName').textContent = call.caller; document.getElementById('ftAvatar').textContent = call.caller.charAt(0);
         await setupLocalStream(call.type);
+
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
+
         await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
         const answer = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer);
         await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
-        while (remoteIceQueue.length > 0) { await peerConnection.addIceCandidate(remoteIceQueue.shift()); }
+
+        while (remoteIceQueue.length > 0) {
+            await peerConnection.addIceCandidate(remoteIceQueue.shift());
+        }
+
         onValue(ref(db, `chat/calls/${key}/callerCandidates`), snapshot => {
             if (snapshot.exists()) {
                 Object.values(snapshot.val()).forEach(cand => {
                     const iceCandidate = new RTCIceCandidate(cand);
-                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) { peerConnection.addIceCandidate(iceCandidate); }
-                    else { remoteIceQueue.push(iceCandidate); }
+                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+                        peerConnection.addIceCandidate(iceCandidate);
+                    } else {
+                        remoteIceQueue.push(iceCandidate);
+                    }
                 });
             }
         });
+
         onValue(activeCallRef, snapshot => { if (snapshot.val() && snapshot.val().status === 'ended') cleanUpCallUI(); });
     }
 
@@ -708,7 +851,11 @@
     }
 
     window.panicExit = function() { 
-        window.hangUpCall(); off(messagesRef); off(callsRef); set(typingRef, null); set(presenceRef, null);
+        window.hangUpCall(); 
+        off(messagesRef);
+        off(callsRef);
+        set(typingRef, null);
+        set(presenceRef, null);
         remove(messagesRef).then(() => { location.reload(); }); 
     };
 
