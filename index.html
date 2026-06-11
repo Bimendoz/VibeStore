@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>VibeStore</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -38,8 +38,35 @@
             --shadow: 0 4px 24px rgba(0,0,0,0.4);
         }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        /* Ajustes quirúrgicos para iOS Nativo */
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+            -webkit-touch-callout: none; /* Previene el menú contextual de iOS al mantener pulsado */
+        }
+        
+        body { 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            transition: background-color 0.3s, color 0.3s; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden; 
+            overscroll-behavior-y: none; /* Elimina el rebote o "pull-to-refresh" nativo */
+            -webkit-user-select: none; /* Evita seleccionar el texto accidentalmente */
+            user-select: none;
+        }
+
+        /* Reactivar selección y teclado solo donde se necesita */
+        input, textarea, [contenteditable] {
+            -webkit-user-select: auto;
+            user-select: auto;
+            -webkit-touch-callout: default;
+        }
 
         header { background: var(--bg-nav); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: calc(var(--safe-top) + 1rem) 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 0.5px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.5px; }
