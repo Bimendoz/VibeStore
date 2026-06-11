@@ -59,7 +59,7 @@
 
         body { 
             background-color: var(--bg-body); 
-            color: var(--text-main); 
+            color: var(--textMain); 
             transition: background-color 0.3s, color 0.3s; 
             min-height: 100vh; 
             display: flex; 
@@ -109,6 +109,10 @@
         .btn-add:active { transform: scale(0.88); }
         .btn-add.added { background: var(--green); animation: addPop 0.35s ease; }
         @keyframes addPop { 0%{transform:scale(1)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
+
+        /* EMPTY STATE CORRECTED */
+        .empty-state { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 3rem 1rem; color: var(--text-muted); text-align: center; }
+        .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
 
         /* CART DRAWER */
         .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
@@ -445,6 +449,7 @@
 
     let localStream; let peerConnection; let activeCallRef;
     let isMuted = false; let isVideoOff = false;
+    let remoteIceQueue = []; // ARREGLADO: Cola para candidatos WebRTC asíncronos
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
     const SECRET_PIN_HASH = "10231121"; 
 
@@ -537,7 +542,7 @@
             const segments = [...segmenter.segment(text.trim())].map(s => s.segment);
             
             const processedHtml = segments.map(char => {
-                if (char === ' ' || char === ' ') return ' ';
+                if (char === ' ' || char === ' ') return ' ';
                 let animationClass = 'ani-bounce'; 
                 if (['❤️','🖤','💙','💘','💕'].includes(char)) animationClass = 'ani-heart';
                 if (['😀','😂','😉','😍','😘','😎','😜','😈'].includes(char)) animationClass = 'ani-face';
@@ -554,7 +559,11 @@
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
         inChat = true; document.getElementById('nameModal').style.display = 'none';
         set(presenceRef, { name: myName, online: true });
+        
+        // ARREGLADO: onDisconnect ahora purga correctamente tu estado de escritura flotante al salir
         onDisconnect(presenceRef).remove();
+        onDisconnect(typingRef).remove();
+        
         onValue(ref(db, 'chat/presence'), snapshot => {
             document.getElementById('onlineStatus').textContent = `${Object.values(snapshot.val() || {}).length} en línea`;
         });
@@ -596,16 +605,14 @@
         ws.insertBefore(wrap, typingWrap);
         ws.scrollTop = ws.scrollHeight;
 
-        // MEJORA: Marcado de leídos usando update multi-nodo seguro
+        // ARREGLADO: readByUpdate instanciado localmente para bloquear colisiones multinodo asíncronas
         if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) { 
             const readUpdate = {};
-            readByUpdates[`chat/messages/${key}/readBy/${myId}`] = true;
-            update(ref(db), readByUpdates);
+            readUpdate[`chat/messages/${key}/readBy/${myId}`] = true;
+            update(ref(db), readUpdate);
         }
         if (msg.readBy && Object.keys(msg.readBy).length > 0) { initiateThanosCountdown(key, wrap); }
     }
-
-    let readByUpdates = {};
 
     function initiateThanosCountdown(key, element) {
         if (element.querySelector('.destruct-timer')) return;
@@ -661,7 +668,6 @@
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
         
-        // CORRECCIÓN: Uso de RTCIceCandidate con sintaxis nativa estricta
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
 
@@ -674,16 +680,35 @@
             if (data && data.status === 'accepted' && data.answer && !peerConnection.currentRemoteDescription) {
                 document.getElementById('ftCallStatus').textContent = "Conectado";
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                // Vaciar la cola de candidatos ICE acumulados asincrónicamente
+                while (remoteIceQueue.length > 0) {
+                    await peerConnection.addIceCandidate(remoteIceQueue.shift());
+                }
             }
             if (data && data.status === 'ended') cleanUpCallUI();
+        });
+
+        // ARREGLADO: Escucha asíncrona de candidatos ICE estructurada con cola reactiva de RTCIceCandidate
+        onValue(ref(db, `chat/calls/${activeCallRef.key}/receiverCandidates`), snapshot => {
+            if (snapshot.exists()) {
+                Object.values(snapshot.val()).forEach(cand => {
+                    const iceCandidate = new RTCIceCandidate(cand);
+                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+                        peerConnection.addIceCandidate(iceCandidate);
+                    } else {
+                        remoteIceQueue.push(iceCandidate);
+                    }
+                });
+            }
         });
     };
 
     function listenForIncomingCalls() {
+        // ARREGLADO: Matar canales duplicados concurrentes en llamadas entrantes antes de re-escuchar
+        off(callsRef);
         onValue(callsRef, async snapshot => {
             if (!inChat) return; const calls = snapshot.val(); if (!calls) return;
             Object.entries(calls).forEach(([key, call]) => {
-                // CORRECCIÓN: Control de estado estricto para evitar bucles de confirmación infinitos
                 if (call.callerId !== myId && call.status === 'calling') {
                     if (confirm(`FaceTime entrante de: ${call.caller}. ¿Contestar?`)) { acceptIncomingCall(key, call); }
                     else { set(ref(db, `chat/calls/${key}/status`), 'ended'); }
@@ -701,13 +726,30 @@
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
         
-        // CORRECCIÓN: Cambiado de RTCIcandidate a RTCIceCandidate
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
 
         await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
         const answer = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer);
         await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
+
+        // Inyectar candidatos de la cola asíncrona una vez seteada la descripción
+        while (remoteIceQueue.length > 0) {
+            await peerConnection.addIceCandidate(remoteIceQueue.shift());
+        }
+
+        onValue(ref(db, `chat/calls/${key}/callerCandidates`), snapshot => {
+            if (snapshot.exists()) {
+                Object.values(snapshot.val()).forEach(cand => {
+                    const iceCandidate = new RTCIceCandidate(cand);
+                    if (peerConnection && peerConnection.remoteDescription && peerConnection.remoteDescription.type) {
+                        peerConnection.addIceCandidate(iceCandidate);
+                    } else {
+                        remoteIceQueue.push(iceCandidate);
+                    }
+                });
+            }
+        });
 
         onValue(activeCallRef, snapshot => { if (snapshot.val() && snapshot.val().status === 'ended') cleanUpCallUI(); });
     }
@@ -719,6 +761,7 @@
 
     function cleanUpCallUI() {
         if (localStream) localStream.getTracks().forEach(track => track.stop()); if (peerConnection) peerConnection.close();
+        remoteIceQueue = []; // Reset atómico de la cola WebRTC
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
@@ -726,10 +769,12 @@
 
     window.panicExit = function() { 
         window.hangUpCall(); 
-        // CORRECCIÓN: Apagar los canales activos antes del borrado masivo para evitar loops
+        // ARREGLADO: Desconexión y purga atómica de canales y estados antes del reinicio
         off(messagesRef);
         off(callsRef);
-        remove(messagesRef).then(() => { set(presenceRef, null); location.reload(); }); 
+        set(typingRef, null);
+        set(presenceRef, null);
+        remove(messagesRef).then(() => { location.reload(); }); 
     };
 
     /* ── BOOT RUN ── */
