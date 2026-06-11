@@ -167,6 +167,20 @@
         .chat-input-area input:focus { border-color: var(--purple-accent); }
         .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s; }
         .btn-send:active { transform: scale(0.9); }
+
+        /* ── MODIFICACIONES: PAYMENT MODAL & TOAST PROMO ── */
+        .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        .payment-modal.open { opacity: 1; pointer-events: all; }
+        .payment-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 380px; box-shadow: var(--shadow); position: relative; transform: translateY(20px); transition: transform 0.3s; }
+        .payment-modal.open .payment-box { transform: translateY(0); }
+        .payment-box h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 1rem; }
+        .payment-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
+        .payment-box input:focus { border-color: var(--purple-accent); }
+        .btn-close-pay { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
+        
+        .toast-promo { position: fixed; top: calc(var(--safe-top) + 20px); left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--bg-card); border-left: 4px solid var(--purple-accent); padding: 1rem 1.2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 4000; cursor: grab; opacity: 0; transition: transform 0.3s cubic-bezier(0.32,0.72,0,1), opacity 0.3s; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; font-size: 0.9rem; width: 90%; max-width: 340px; color: var(--text-main); }
+        .toast-promo.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-promo.swiped { transform: translateX(calc(-50% - 150vw)); opacity: 0; }
     </style>
 </head>
 <body>
@@ -217,6 +231,20 @@
         <span class="cart-total-value" id="cartTotal">$0.00</span>
     </div>
     <button class="btn-pay" onclick="closeCart(); handleCheckout();">Proceder al Pago</button>
+</div>
+
+<div class="payment-modal" id="paymentModal">
+    <div class="payment-box">
+        <button class="btn-close-pay" onclick="closePaymentPortal()">✕</button>
+        <h2>Pago Seguro</h2>
+        <input type="text" placeholder="Número de tarjeta" maxlength="19">
+        <input type="text" placeholder="Nombre en la tarjeta">
+        <div style="display: flex; gap: 1rem;">
+            <input type="text" placeholder="MM/AA" maxlength="5">
+            <input type="text" placeholder="CVC" maxlength="4">
+        </div>
+        <button class="btn-pay" onclick="processPayment()" style="width: 100%; background: var(--text-main); color: var(--bg-card); border: none; padding: 1.05rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer;">Confirmar Pago</button>
+    </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -336,8 +364,10 @@
     let myId      = 'user_' + Math.random().toString(36).slice(2,8);
     let typingTimer;
     let seenKeys  = new Set();
+    
+    let inChat    = false; // Bandera de seguridad agregada
 
-    const SECRET_PIN = atob("MTAyMzEwMTg=");
+    const SECRET_PIN = "10231121";
 
     /* ── REFS Firebase ── */
     const messagesRef = ref(db, 'chat/messages');
@@ -463,16 +493,33 @@
         toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
     }
 
+    /* ── FUNCIONES DE PORTAL DE PAGOS ── */
+    window.openPaymentPortal = function() {
+        document.getElementById('paymentModal').classList.add('open');
+    }
+    window.closePaymentPortal = function() {
+        document.getElementById('paymentModal').classList.remove('open');
+    }
+    window.processPayment = function() {
+        showToast('Procesando pago...');
+        setTimeout(() => {
+            showToast('Pago completado con éxito ✓');
+            closePaymentPortal();
+            resetCart();
+        }, 1500);
+    }
+
+    /* ── LÓGICA CHECKOUT MODIFICADA ── */
     window.handleCheckout = function() {
-        if (!totalItems()) { showToast('Tu carrito está vacío 🛒'); return; }
-        const m = cart.maquillaje, t = cart.tecnologia, h = cart.hogar, d = cart.deportes;
-        if ((m+t===5) && h===0 && d===0) {
+        const total = totalItems();
+        if (total === 0) { showToast('Tu carrito está vacío 🛒'); return; }
+        
+        if (total === 5) {
             const pin = prompt("Canal seguro detectado. Ingresa el PIN:");
             if (pin === SECRET_PIN) {
                 document.getElementById('vista-tienda').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'flex';
                 resetCart();
-                // Mostrar modal de nombre
                 document.getElementById('nameModal').style.display = 'flex';
                 setTimeout(() => document.getElementById('nameInput').focus(), 100);
             } else if (pin !== null) {
@@ -480,8 +527,8 @@
                 resetCart();
             }
         } else {
-            showToast('Error de comunicación con el banco. Intenta más tarde.');
-            resetCart();
+            // Portal de pagos normal para menos de 4 o mayor a 6
+            openPaymentPortal();
         }
     };
 
@@ -493,22 +540,47 @@
     }
 
     /* ════════════════════
-       CHAT REAL (Firebase)
+       CHAT REAL (Firebase) & TOASTS
     ════════════════════ */
+    
+    const storePromos = [
+        "🔥 ¡Oferta exclusiva 20% OFF!",
+        "✨ Nueva colección de temporada",
+        "📦 ¡Envío gratis activado!",
+        "💎 Descubre los más vendidos",
+        "🌟 ¡Cupón sorpresa desbloqueado!"
+    ];
 
-    // Permiso para notificaciones sigilosas
+    function showPromoToast() {
+        const div = document.createElement('div');
+        div.className = 'toast-promo';
+        div.innerHTML = `<span>🛍️</span> <div>${storePromos[Math.floor(Math.random() * storePromos.length)]}</div>`;
+        document.body.appendChild(div);
+        
+        requestAnimationFrame(() => div.classList.add('show'));
+
+        let startX = 0;
+        div.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive: true});
+        div.addEventListener('touchmove', e => {
+            let diff = e.touches[0].clientX - startX;
+            if (diff < -40 || diff > 40) {
+                div.classList.add('swiped');
+                setTimeout(() => div.remove(), 300);
+            }
+        }, {passive: true});
+
+        setTimeout(() => {
+            if (div.parentElement) {
+                div.classList.remove('show');
+                setTimeout(() => div.remove(), 300);
+            }
+        }, 4000);
+    }
+
+    // Permiso para notificaciones
     if ("Notification" in window && Notification.permission !== "granted") {
         Notification.requestPermission();
     }
-
-    const fakeNotifications = [
-        "🔥 ¡Oferta flash: 50% de descuento en maquillaje!",
-        "⚡ Envío gratis en tu próxima compra de tecnología.",
-        "🏠 ¡Nuevos artículos para el hogar disponibles!",
-        "⚽ ¡Rebajas de temporada en toda la sección de deportes!",
-        "🎁 Cupón secreto desbloqueado: revisa tu bandeja.",
-        "🌟 Producto estrella de la semana con rebaja."
-    ];
 
     const offerSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869.wav");
 
@@ -517,57 +589,29 @@
         const name  = input.value.trim();
         if (!name) { input.focus(); return; }
         myName = name;
+        inChat = true; // El usuario entra al chat
         document.getElementById('nameModal').style.display = 'none';
         document.getElementById('chatInput').focus();
 
-        // Presencia: marcar online y limpiar al desconectar
+        // Presencia
         set(presenceRef, { name: myName, online: true });
         onDisconnect(presenceRef).remove();
-
-        // Limpiar typing al desconectar
         onDisconnect(typingRef).remove();
 
-        // Escuchar mensajes en tiempo real
-        onValue(messagesRef, (snapshot) => {
-            const data = snapshot.val();
-            if (!data) return;
-            Object.entries(data).forEach(([key, msg]) => {
-                if (!seenKeys.has(key)) {
-                    seenKeys.add(key);
-                    renderMessage(msg);
-
-                    // Alerta de oferta sigilosa (sonido y notificación) para mensajes de otros usuarios
-                    if (msg.type === 'text' && msg.senderId !== myId) {
-                        offerSound.play().catch(err => console.log("Audio bloqueado por el navegador"));
-                        if ("Notification" in window && Notification.permission === "granted") {
-                            const randomMsg = fakeNotifications[Math.floor(Math.random() * fakeNotifications.length)];
-                            new Notification("VibeStore", {
-                                body: randomMsg,
-                                icon: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=100"
-                            });
-                        }
-                    }
-                }
-            });
-        });
-
-        // Escuchar presencia (quién está online)
+        // Escuchar presencia
         const presAllRef = ref(db, 'chat/presence');
         onValue(presAllRef, (snapshot) => {
             const data = snapshot.val() || {};
             const users = Object.values(data).filter(u => u.online);
             const count = users.length;
-            document.getElementById('onlineStatus').textContent =
-                count === 1 ? '1 persona en línea' : `${count} personas en línea`;
+            document.getElementById('onlineStatus').textContent = count === 1 ? '1 persona en línea' : `${count} personas en línea`;
         });
 
-        // Escuchar typing de otros
+        // Escuchar typing
         const typingAllRef = ref(db, 'chat/typing');
         onValue(typingAllRef, (snapshot) => {
             const data = snapshot.val() || {};
-            const others = Object.entries(data)
-                .filter(([id, v]) => id !== myId && v && v.name)
-                .map(([, v]) => v.name);
+            const others = Object.entries(data).filter(([id, v]) => id !== myId && v && v.name).map(([, v]) => v.name);
             const wrap = document.getElementById('typingWrap');
             const nameEl = document.getElementById('typingName');
             if (others.length > 0) {
@@ -579,7 +623,6 @@
             }
         });
 
-        // Mensaje de bienvenida al sistema
         pushSystemMsg(`${myName} entró al canal`);
     };
 
@@ -599,6 +642,7 @@
         const isMe = msg.senderId === myId;
         const time  = msg.ts ? new Date(msg.ts).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit' }) : '';
 
+        // El mensaje siempre se renderiza original (Solo visible si inChat es true gracias a display: none de CSS)
         const wrap = document.createElement('div');
         wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
         wrap.innerHTML = `
@@ -624,15 +668,8 @@
         const txt   = input.value.trim();
         if (!txt || !myName) return;
 
-        push(messagesRef, {
-            type: 'text',
-            text: txt,
-            sender: myName,
-            senderId: myId,
-            ts: Date.now()
-        });
+        push(messagesRef, { type: 'text', text: txt, sender: myName, senderId: myId, ts: Date.now() });
 
-        // Limpiar typing
         set(typingRef, null);
         clearTimeout(typingTimer);
         input.value = '';
@@ -649,7 +686,7 @@
 
     window.panicExit = function() {
         if (confirm('¿Salir y borrar rastro de la base de datos?')) {
-            // Elimina por completo los mensajes del canal al presionar pánico
+            // Elimina por completo los mensajes del canal
             remove(messagesRef).then(() => {
                 set(presenceRef, null);
                 set(typingRef, null);
@@ -661,9 +698,33 @@
         }
     };
 
-    /* ── INIT ── */
+    /* ── INIT Y ESCUCHA GLOBAL DE MENSAJES ── */
     renderStore();
+
+    // Escuchar mensajes desde el inicio para poder enviar Promos cuando no estén en chat
+    onValue(messagesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        Object.entries(data).forEach(([key, msg]) => {
+            if (!seenKeys.has(key)) {
+                seenKeys.add(key);
+                
+                // Agrega el mensaje real al DOM oculto
+                renderMessage(msg);
+
+                // Lógica Sigilosa: Si no estoy en el chat y el mensaje no es mío, lanzo promoción flotante
+                if (msg.senderId !== myId && msg.type === 'text') {
+                    if (!inChat) {
+                        showPromoToast();
+                        offerSound.play().catch(e => console.log("Audio bloqueado"));
+                    }
+                }
+            }
+        });
+    });
 
 </script>
 </body>
 </html>
+
+```
