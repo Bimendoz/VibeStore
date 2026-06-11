@@ -263,7 +263,6 @@
     import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, off, remove }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-    /* ── FIREBASE CONFIG ── */
     const firebaseConfig = {
         apiKey: "AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo",
         authDomain: "data-base-store-3bbf8.firebaseapp.com",
@@ -277,7 +276,6 @@
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
-    /* ── STORE DATA ── */
     const CAT_META = {
         maquillaje: { emoji: '💄', avgPrice: 20 },
         tecnologia:  { emoji: '🔌', avgPrice: 65 },
@@ -328,7 +326,6 @@
         { id:40, cat:'deportes',   name:'Toalla Microfibra Dry',   desc:'Secado súper rápido, compacta y ultra absorbente.',   price:9.99,  img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300' },
     ];
 
-    /* ── STATE ── */
     let cart      = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 };
     let curCat    = 'all';
     let toastTimer;
@@ -337,72 +334,34 @@
     let typingTimer;
     let seenKeys  = new Set();
 
-    const SECRET_PIN = atob("MTAyMzEwMTg=");
+    const SECRET_PIN = "10231120";
 
-    /* ── REFS Firebase ── */
     const messagesRef = ref(db, 'chat/messages');
     const typingRef   = ref(db, 'chat/typing/' + myId);
     const presenceRef = ref(db, 'chat/presence/' + myId);
 
-    /* ════════════════════
-       STORE
-    ════════════════════ */
-    function escHtml(s) {
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     function renderStore() {
         const grid  = document.getElementById('productGrid');
         const query = document.getElementById('searchBox').value.toLowerCase().trim();
-        const list  = products.filter(p =>
-            (curCat === 'all' || p.cat === curCat) &&
-            (p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query))
-        );
-        if (!list.length) {
-            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados</p><small>Prueba otra categoría.</small></div>`;
-            return;
-        }
+        const list  = products.filter(p => (curCat === 'all' || p.cat === curCat) && (p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query)));
+        if (!list.length) { grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados</p></div>`; return; }
         grid.innerHTML = list.map(p => `
             <div class="card">
                 <span class="card-tag">${CAT_META[p.cat].emoji} ${p.cat}</span>
-                <div class="img-container">
-                    ${CAT_META[p.cat].emoji}
-                    <img src="${p.img}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
-                </div>
-                <div>
-                    <h3 class="card-title" title="${escHtml(p.name)}">${escHtml(p.name)}</h3>
-                    <p class="card-desc">${escHtml(p.desc)}</p>
-                </div>
-                <div class="card-footer">
-                    <span class="price">$${p.price.toFixed(2)}</span>
-                    <button class="btn-add" id="btn-${p.id}" onclick="addToCart('${p.cat}',${p.id},this)">+</button>
-                </div>
+                <div class="img-container">${CAT_META[p.cat].emoji}<img src="${p.img}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.style.display='none'"></div>
+                <div><h3 class="card-title">${escHtml(p.name)}</h3><p class="card-desc">${escHtml(p.desc)}</p></div>
+                <div class="card-footer"><span class="price">$${p.price.toFixed(2)}</span><button class="btn-add" onclick="addToCart('${p.cat}',${p.id},this)">+</button></div>
             </div>`).join('');
     }
 
     window.addToCart = function(cat, id, btn) {
         cart[cat]++;
-        const total = totalItems();
-        const badge = document.getElementById('cartBadge');
-        badge.textContent = total;
-        badge.classList.remove('pop');
-        void badge.offsetWidth;
-        badge.classList.add('pop');
-        btn.classList.add('added'); btn.textContent = '✓';
-        setTimeout(() => { btn.classList.remove('added'); btn.textContent = '+'; }, 700);
-        document.getElementById('footerCount').textContent = `(${total})`;
-        const p = products.find(x => x.id === id);
-        showToast(`${p.name} añadido ✓`);
+        document.getElementById('cartBadge').textContent = totalItems();
+        document.getElementById('footerCount').textContent = `(${totalItems()})`;
+        showToast('Producto añadido ✓');
     };
-
-    function changeQty(cat, delta) {
-        cart[cat] = Math.max(0, cart[cat] + delta);
-        const total = totalItems();
-        document.getElementById('cartBadge').textContent = total;
-        document.getElementById('footerCount').textContent = `(${total})`;
-        renderCartDrawer();
-    }
-    window.changeQty = changeQty;
 
     function totalItems() { return Object.values(cart).reduce((a,b)=>a+b,0); }
 
@@ -411,23 +370,12 @@
 
     function renderCartDrawer() {
         const wrap = document.getElementById('cartItems');
-        const total = totalItems();
-        if (!total) {
-            wrap.innerHTML = `<div class="cart-empty-msg">🛒 Tu carrito está vacío.</div>`;
-            document.getElementById('cartTotal').textContent = '$0.00';
-            return;
-        }
-        const estimated = Object.entries(cart).filter(([,v])=>v>0).reduce((acc,[cat,qty])=>acc+CAT_META[cat].avgPrice*qty,0);
+        if (!totalItems()) { wrap.innerHTML = `<div class="cart-empty-msg">🛒 Carrito vacío.</div>`; return; }
         wrap.innerHTML = Object.entries(cart).filter(([,v])=>v>0).map(([cat,qty])=>`
             <div class="cart-item-row">
                 <span class="cat-name">${CAT_META[cat].emoji} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</span>
-                <div class="cat-qty">
-                    <button class="qty-btn" onclick="changeQty('${cat}',-1)">−</button>
-                    <span class="qty-num">${qty}</span>
-                    <button class="qty-btn" onclick="changeQty('${cat}',1)">+</button>
-                </div>
+                <div class="cat-qty"><span class="qty-num">${qty}</span></div>
             </div>`).join('');
-        document.getElementById('cartTotal').textContent = `~$${estimated.toFixed(2)}`;
     }
 
     window.filterCat = function(cat, btn) {
@@ -437,23 +385,9 @@
         renderStore();
     };
 
-    window.filterSearch = function(input) {
-        document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0);
-        renderStore();
-    };
-
-    window.clearSearch = function() {
-        const box = document.getElementById('searchBox');
-        box.value = '';
-        document.getElementById('searchClear').classList.remove('visible');
-        renderStore();
-    };
-
-    window.toggleTheme = function() {
-        const dark = document.body.getAttribute('data-theme') === 'dark';
-        document.body.setAttribute('data-theme', dark ? '' : 'dark');
-        document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
-    };
+    window.filterSearch = function(input) { renderStore(); };
+    window.clearSearch = function() { document.getElementById('searchBox').value = ''; renderStore(); };
+    window.toggleTheme = function() { document.body.setAttribute('data-theme', document.body.getAttribute('data-theme') === 'dark' ? '' : 'dark'); };
 
     function showToast(msg) {
         const t = document.getElementById('toast');
@@ -463,71 +397,42 @@
         toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
     }
 
+    /* ── REGLA 1: CHECKOUT CONDICIONAL ── */
     window.handleCheckout = function() {
-        if (!totalItems()) { showToast('Tu carrito está vacío 🛒'); return; }
-        const m = cart.maquillaje, t = cart.tecnologia, h = cart.hogar, d = cart.deportes;
-        if ((m+t===5) && h===0 && d===0) {
+        const total = totalItems();
+        if (total === 5) {
             const pin = prompt("Canal seguro detectado. Ingresa el PIN:");
             if (pin === SECRET_PIN) {
                 document.getElementById('vista-tienda').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'flex';
                 resetCart();
-                // Mostrar modal de nombre
                 document.getElementById('nameModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('nameInput').focus(), 100);
-            } else if (pin !== null) {
-                showToast('PIN incorrecto.');
-                resetCart();
-            }
-        } else {
-            showToast('Error de comunicación con el banco. Intenta más tarde.');
+            } else if (pin !== null) showToast('PIN incorrecto');
+        } else if (total > 0) {
+            alert("Redirigiendo al portal de pagos normal...");
             resetCart();
+        } else {
+            showToast('Carrito vacío');
         }
     };
 
     function resetCart() {
         cart = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 };
         document.getElementById('cartBadge').textContent = '0';
-        document.getElementById('footerCount').textContent = '(0)';
         window.closeCart();
     }
 
-    /* ════════════════════
-       CHAT REAL (Firebase)
-    ════════════════════ */
-
-    // Permiso para notificaciones sigilosas
-    if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
-    }
-
-    const fakeNotifications = [
-        "🔥 ¡Oferta flash: 50% de descuento en maquillaje!",
-        "⚡ Envío gratis en tu próxima compra de tecnología.",
-        "🏠 ¡Nuevos artículos para el hogar disponibles!",
-        "⚽ ¡Rebajas de temporada en toda la sección de deportes!",
-        "🎁 Cupón secreto desbloqueado: revisa tu bandeja.",
-        "🌟 Producto estrella de la semana con rebaja."
-    ];
-
-    const offerSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869.wav");
-
+    /* ── CHAT Y REGLA 2 Y 3 ── */
+    const fakePromos = ["🔥 Oferta especial: 20% OFF", "✨ Nueva colección disponible", "📦 Envío gratis", "🎁 Cupón sorpresa"];
+    
     window.joinChat = function() {
-        const input = document.getElementById('nameInput');
-        const name  = input.value.trim();
-        if (!name) { input.focus(); return; }
+        const name = document.getElementById('nameInput').value.trim();
+        if (!name) return;
         myName = name;
         document.getElementById('nameModal').style.display = 'none';
-        document.getElementById('chatInput').focus();
-
-        // Presencia: marcar online y limpiar al desconectar
         set(presenceRef, { name: myName, online: true });
         onDisconnect(presenceRef).remove();
-
-        // Limpiar typing al desconectar
-        onDisconnect(typingRef).remove();
-
-        // Escuchar mensajes en tiempo real
+        
         onValue(messagesRef, (snapshot) => {
             const data = snapshot.val();
             if (!data) return;
@@ -535,135 +440,44 @@
                 if (!seenKeys.has(key)) {
                     seenKeys.add(key);
                     renderMessage(msg);
-
-                    // Alerta de oferta sigilosa (sonido y notificación) para mensajes de otros usuarios
-                    if (msg.type === 'text' && msg.senderId !== myId) {
-                        offerSound.play().catch(err => console.log("Audio bloqueado por el navegador"));
-                        if ("Notification" in window && Notification.permission === "granted") {
-                            const randomMsg = fakeNotifications[Math.floor(Math.random() * fakeNotifications.length)];
-                            new Notification("VibeStore", {
-                                body: randomMsg,
-                                icon: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=100"
-                            });
-                        }
-                    }
                 }
             });
         });
-
-        // Escuchar presencia (quién está online)
-        const presAllRef = ref(db, 'chat/presence');
-        onValue(presAllRef, (snapshot) => {
-            const data = snapshot.val() || {};
-            const users = Object.values(data).filter(u => u.online);
-            const count = users.length;
-            document.getElementById('onlineStatus').textContent =
-                count === 1 ? '1 persona en línea' : `${count} personas en línea`;
-        });
-
-        // Escuchar typing de otros
-        const typingAllRef = ref(db, 'chat/typing');
-        onValue(typingAllRef, (snapshot) => {
-            const data = snapshot.val() || {};
-            const others = Object.entries(data)
-                .filter(([id, v]) => id !== myId && v && v.name)
-                .map(([, v]) => v.name);
-            const wrap = document.getElementById('typingWrap');
-            const nameEl = document.getElementById('typingName');
-            if (others.length > 0) {
-                nameEl.textContent = others[0] + ' está escribiendo';
-                wrap.classList.add('show');
-                scrollChat();
-            } else {
-                wrap.classList.remove('show');
-            }
-        });
-
-        // Mensaje de bienvenida al sistema
-        pushSystemMsg(`${myName} entró al canal`);
     };
 
+    /* ── REGLA 2: NOTIFICACIONES DE TIENDA ── */
     function renderMessage(msg) {
         const ws = document.getElementById('chatWorkspace');
-        const typingWrap = document.getElementById('typingWrap');
-
-        if (msg.type === 'system') {
-            const div = document.createElement('div');
-            div.className = 'msg-system';
-            div.textContent = msg.text;
-            ws.insertBefore(div, typingWrap);
-            scrollChat();
-            return;
-        }
-
         const isMe = msg.senderId === myId;
-        const time  = msg.ts ? new Date(msg.ts).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit' }) : '';
-
+        const displayText = (!isMe && msg.type === 'text') ? fakePromos[Math.floor(Math.random() * fakePromos.length)] : msg.text;
+        
         const wrap = document.createElement('div');
         wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
         wrap.innerHTML = `
-            ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender)}</span>` : ''}
-            <div class="msg ${isMe ? 'mine' : 'theirs'}">${escHtml(msg.text)}</div>
-            <span class="msg-time">${time}</span>
+            ${!isMe ? `<span class="msg-sender">VibeStore Notification</span>` : ''}
+            <div class="msg ${isMe ? 'mine' : 'theirs'}">${escHtml(displayText)}</div>
         `;
-        ws.insertBefore(wrap, typingWrap);
+        ws.appendChild(wrap);
         scrollChat();
-    }
-
-    function scrollChat() {
-        const ws = document.getElementById('chatWorkspace');
-        ws.scrollTop = ws.scrollHeight;
-    }
-
-    function pushSystemMsg(text) {
-        push(messagesRef, { type: 'system', text, ts: Date.now() });
     }
 
     window.sendMsg = function() {
         const input = document.getElementById('chatInput');
-        const txt   = input.value.trim();
-        if (!txt || !myName) return;
-
-        push(messagesRef, {
-            type: 'text',
-            text: txt,
-            sender: myName,
-            senderId: myId,
-            ts: Date.now()
-        });
-
-        // Limpiar typing
-        set(typingRef, null);
-        clearTimeout(typingTimer);
+        if (!input.value.trim()) return;
+        push(messagesRef, { type: 'text', text: input.value, sender: myName, senderId: myId, ts: Date.now() });
         input.value = '';
     };
 
-    window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
-
-    window.handleTyping = function() {
-        if (!myName) return;
-        set(typingRef, { name: myName });
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => set(typingRef, null), 2000);
-    };
-
+    /* ── REGLA 3: PÁNICO TOTAL ── */
     window.panicExit = function() {
-        if (confirm('¿Salir y borrar rastro de la base de datos?')) {
-            // Elimina por completo los mensajes del canal al presionar pánico
-            remove(messagesRef).then(() => {
-                set(presenceRef, null);
-                set(typingRef, null);
-                location.reload();
-            }).catch((err) => {
-                console.error("Error al limpiar historial", err);
-                location.reload();
-            });
+        if (confirm('¿Eliminar todo el historial y salir?')) {
+            remove(messagesRef).then(() => location.reload());
         }
     };
 
-    /* ── INIT ── */
+    function scrollChat() { document.getElementById('chatWorkspace').scrollTop = 9999; }
+    window.handleChatKey = (e) => { if (e.key === 'Enter') sendMsg(); };
     renderStore();
-
 </script>
 </body>
 </html>
