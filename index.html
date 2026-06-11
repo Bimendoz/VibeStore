@@ -3,38 +3,39 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>VibeStore — Tienda Online</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<title>VibeStore — Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --purple: #7C3AED;
-    --purple-light: #A78BFA;
-    --purple-dark: #5B21B6;
-    --pink: #F472B6;
-    --pink-light: #FDF2F8;
-    --bg: #F8F4FF;
-    --white: #FFFFFF;
-    --gray: #6B7280;
-    --gray-light: #F3F4F6;
-    --dark: #1F1035;
-    --card-radius: 20px;
-    --pill-radius: 50px;
+    --bg-deep: #050507;
+    --surface-glass: rgba(20, 20, 25, 0.65);
+    --surface-solid: #121217;
+    --border-glass: rgba(255, 255, 255, 0.08);
+    --text-main: #f5f5f7;
+    --text-muted: #86868b;
+    --purple-dark: #552583; /* Acento principal serio y elegante */
+    --purple-glow: rgba(85, 37, 131, 0.4);
+    --red-panic: #ef4444;
+    --green-safe: #10b981;
+    --card-radius: 24px;
+    --pill-radius: 100px;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
   body {
-    font-family: 'Poppins', sans-serif;
-    background: var(--bg);
-    color: var(--dark);
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg-deep);
+    color: var(--text-main);
     min-height: 100vh;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     overscroll-behavior-y: none; 
     -webkit-user-select: none; 
     user-select: none;
+    overflow-x: hidden;
   }
 
   input, textarea, [contenteditable] {
@@ -43,907 +44,248 @@
     -webkit-touch-callout: default;
   }
 
-  /* ── NAVBAR ── */
+  /* ── NAVBAR LIQUID GLASS ── */
   nav {
     position: sticky; top: 0; z-index: 100;
-    background: var(--white);
-    border-bottom: 1px solid #EDE9FE;
-    padding: var(--safe-top) 32px 0;
-    display: flex; align-items: center; gap: 24px;
-    height: calc(68px + var(--safe-top));
-    box-shadow: 0 2px 16px rgba(124,58,237,.07);
+    background: var(--surface-glass);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-glass);
+    padding: calc(var(--safe-top) + 12px) 24px 12px;
+    display: flex; align-items: center; justify-content: space-between;
   }
   .nav-logo {
-    font-size: 1.5rem; font-weight: 800; letter-spacing: -1px;
-    background: linear-gradient(135deg, var(--purple), var(--pink));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    flex-shrink: 0;
+    font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px;
+    color: var(--text-main);
   }
-  .nav-search {
-    flex: 1; max-width: 480px; margin-left: 16px;
+  .nav-actions { display: flex; gap: 16px; align-items: center; }
+  .icon-btn {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass);
+    color: var(--text-main); border-radius: 50%;
+    width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.2rem; transition: transform 0.2s, background 0.2s;
     position: relative;
   }
-  .nav-search input {
-    width: 100%; padding: 10px 20px 10px 44px;
-    border: 2px solid #EDE9FE; border-radius: var(--pill-radius);
-    font-family: inherit; font-size: .9rem; outline: none;
-    transition: border-color .2s;
-    background: var(--bg);
-  }
-  .nav-search input:focus { border-color: var(--purple); }
-  .nav-search svg { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--gray); }
-  .nav-links { display: flex; gap: 24px; margin-left: auto; align-items: center; }
-  .nav-links a { text-decoration: none; color: var(--gray); font-size: .92rem; font-weight: 500; transition: color .2s; }
-  .nav-links a:hover { color: var(--purple); }
-  .nav-icon-btn {
-    position: relative; background: none; border: none; cursor: pointer;
-    color: var(--dark); font-size: 1.2rem; padding: 6px;
-  }
+  .icon-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.1); }
   .cart-badge {
-    position: absolute; top: 0; right: 0;
-    background: var(--pink); color: white;
-    font-size: .6rem; font-weight: 700;
-    border-radius: 50%; width: 16px; height: 16px;
+    position: absolute; top: -4px; right: -4px;
+    background: var(--purple-dark); color: white;
+    font-size: 0.65rem; font-weight: 800;
+    border-radius: 50%; min-width: 18px; height: 18px; padding: 0 4px;
     display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--bg-deep); box-shadow: 0 0 10px var(--purple-glow);
   }
 
-  /* ── HERO ── */
-  .hero {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 20px; padding: 32px 32px 24px;
-    max-width: 1400px; margin: 0 auto;
+  /* ── BUSCADOR Y CATEGORÍAS ── */
+  .search-wrap { padding: 20px 24px 10px; position: relative; }
+  .search-input {
+    width: 100%; background: var(--surface-solid); border: 1px solid var(--border-glass);
+    padding: 14px 20px 14px 44px; border-radius: var(--pill-radius);
+    color: var(--text-main); outline: none; font-size: 0.95rem; font-family: inherit;
+    transition: border-color 0.3s, box-shadow 0.3s;
   }
-  .hero-main {
-    background: linear-gradient(135deg, var(--purple) 0%, #B45FBB 60%, var(--pink) 100%);
-    border-radius: var(--card-radius);
-    padding: 48px 40px;
-    color: white;
-    min-height: 340px;
-    display: flex; flex-direction: column; justify-content: flex-end;
-    position: relative; overflow: hidden;
-  }
-  .hero-main::before {
-    content: '';
-    position: absolute; top: -40px; right: -40px;
-    width: 260px; height: 260px;
-    border-radius: 50%;
-    background: rgba(255,255,255,.12);
-  }
-  .hero-badge {
-    background: rgba(255,255,255,.25); backdrop-filter: blur(8px);
-    border-radius: var(--pill-radius);
-    padding: 4px 14px; font-size: .78rem; font-weight: 600;
-    width: fit-content; margin-bottom: 16px;
-  }
-  .hero-main h1 { font-size: 2.4rem; font-weight: 800; line-height: 1.2; margin-bottom: 12px; }
-  .hero-main p { font-size: .95rem; opacity: .85; margin-bottom: 28px; }
-  .btn-hero {
-    background: white; color: var(--purple);
-    border: none; border-radius: var(--pill-radius);
-    padding: 12px 28px; font-family: inherit; font-size: .9rem; font-weight: 700;
-    cursor: pointer; width: fit-content;
-    display: flex; align-items: center; gap: 8px;
-    transition: transform .2s, box-shadow .2s;
-  }
-  .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.15); }
-  .hero-side { display: flex; flex-direction: column; gap: 20px; }
-  .hero-card {
-    border-radius: var(--card-radius);
-    padding: 28px 28px;
-    flex: 1;
-    display: flex; flex-direction: column; justify-content: flex-end;
-    position: relative; overflow: hidden; color: white; min-height: 150px;
-  }
-  .hero-card.pink { background: linear-gradient(135deg, #F472B6, #EC4899); }
-  .hero-card.soft { background: linear-gradient(135deg, #8B5CF6, #6D28D9); }
-  .hero-card h3 { font-size: 1.2rem; font-weight: 700; }
-  .hero-card span { font-size: .8rem; opacity: .8; }
-  .hero-card img {
-    position: absolute; right: -10px; bottom: -10px;
-    height: 120px; width: 120px; object-fit: cover;
-    border-radius: 12px; opacity: .55;
-  }
-
-  /* ── CATEGORIES STRIP ── */
-  .section-wrapper { max-width: 1400px; margin: 0 auto; padding: 0 32px; }
-  .section-title {
-    font-size: 1.4rem; font-weight: 700; margin-bottom: 20px;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .section-title::after {
-    content: ''; flex: 1; height: 2px;
-    background: linear-gradient(90deg, var(--purple-light), transparent);
-    border-radius: 2px;
-  }
-  .section-title a { font-size: .82rem; font-weight: 500; color: var(--purple); text-decoration: none; margin-left: auto; white-space: nowrap; }
+  .search-input:focus { border-color: var(--purple-dark); box-shadow: 0 0 0 2px var(--purple-glow); }
+  .search-icon { position: absolute; left: 40px; top: 50%; transform: translateY(-50%); opacity: 0.5; }
 
   .cats-scroll {
-    display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px;
-    scrollbar-width: none;
+    display: flex; gap: 12px; overflow-x: auto; padding: 10px 24px 20px;
+    scrollbar-width: none; -webkit-overflow-scrolling: touch;
   }
   .cats-scroll::-webkit-scrollbar { display: none; }
   .cat-chip {
-    flex-shrink: 0;
-    background: var(--white);
-    border: 2px solid #EDE9FE;
-    border-radius: var(--card-radius);
-    padding: 18px 24px;
-    text-align: center;
-    cursor: pointer;
-    transition: all .2s;
-    min-width: 110px;
+    flex-shrink: 0; background: var(--surface-solid); border: 1px solid var(--border-glass);
+    border-radius: var(--pill-radius); padding: 10px 20px; color: var(--text-muted);
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.3s;
+    display: flex; align-items: center; gap: 8px;
   }
-  .cat-chip:hover, .cat-chip.active {
-    background: var(--purple); border-color: var(--purple); color: white;
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(124,58,237,.25);
-  }
-  .cat-chip:hover .cat-emoji, .cat-chip.active .cat-emoji { filter: none; }
-  .cat-emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
-  .cat-label { font-size: .78rem; font-weight: 600; white-space: nowrap; }
+  .cat-chip.active { background: var(--text-main); color: var(--bg-deep); border-color: var(--text-main); }
 
-  /* ── FILTER TABS ── */
-  .filter-tabs { display: flex; gap: 10px; margin: 28px 0 20px; flex-wrap: wrap; }
-  .ftab {
-    padding: 8px 20px; border-radius: var(--pill-radius);
-    font-family: inherit; font-size: .83rem; font-weight: 600;
-    border: 2px solid #EDE9FE; background: white; cursor: pointer;
-    transition: all .2s; color: var(--gray);
-  }
-  .ftab:hover { border-color: var(--purple); color: var(--purple); }
-  .ftab.active { background: var(--purple); border-color: var(--purple); color: white; }
-
-  /* ── PRODUCT GRID ── */
+  /* ── GRID DINÁMICO ── */
+  .main-content { padding: 0 24px 120px; max-width: 1200px; margin: 0 auto; }
   .prod-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 24px;
-    margin-bottom: 48px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px;
   }
   .prod-card {
-    background: var(--white);
-    border-radius: var(--card-radius);
-    overflow: hidden;
-    transition: transform .25s, box-shadow .25s;
-    cursor: pointer;
-    position: relative;
+    background: var(--surface-solid); border: 1px solid var(--border-glass);
+    border-radius: var(--card-radius); overflow: hidden; padding: 12px;
+    display: flex; flex-direction: column; transition: transform 0.2s, background 0.3s;
   }
-  .prod-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 16px 40px rgba(124,58,237,.14);
-  }
+  .prod-card:active { transform: scale(0.97); background: rgba(255,255,255,0.03); }
   .prod-img-wrap {
-    height: 220px; background: var(--gray-light);
-    position: relative; overflow: hidden;
+    width: 100%; aspect-ratio: 1/1; border-radius: 16px; background: #1a1a20;
+    overflow: hidden; position: relative; margin-bottom: 12px;
   }
   .prod-img-wrap img {
-    width: 100%; height: 100%; object-fit: cover;
-    transition: transform .4s;
+    width: 100%; height: 100%; object-fit: cover; opacity: 0.9;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
   }
-  .prod-card:hover .prod-img-wrap img { transform: scale(1.07); }
-  .prod-badge {
-    position: absolute; top: 12px; left: 12px;
-    background: var(--purple); color: white;
-    font-size: .7rem; font-weight: 700;
-    padding: 4px 10px; border-radius: var(--pill-radius);
+  .prod-card:active .prod-img-wrap img { transform: scale(1.08); }
+  .prod-info { flex: 1; display: flex; flex-direction: column; }
+  .prod-name { font-size: 0.85rem; font-weight: 600; line-height: 1.3; margin-bottom: 8px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .prod-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
+  .prod-price { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.5px; }
+  .btn-add {
+    background: var(--purple-dark); color: white; border: none;
+    width: 32px; height: 32px; border-radius: 50%; font-size: 1.2rem; font-weight: 300;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    box-shadow: 0 4px 12px var(--purple-glow); transition: transform 0.2s;
   }
-  .prod-badge.sale { background: #EF4444; }
-  .prod-badge.new-badge { background: #10B981; }
-  .wish-btn {
-    position: absolute; top: 12px; right: 12px;
-    background: white; border: none; border-radius: 50%;
-    width: 34px; height: 34px; display: flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,.1);
-    transition: transform .2s;
-  }
-  .wish-btn:hover { transform: scale(1.15); }
-  .prod-info { padding: 16px; }
-  .prod-cat { font-size: .72rem; color: var(--purple); font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-  .prod-name { font-size: .95rem; font-weight: 600; margin-bottom: 8px; line-height: 1.3; }
-  .prod-stars { color: #F59E0B; font-size: .8rem; }
-  .prod-stars span { color: var(--gray); font-size: .75rem; margin-left: 4px; }
-  .prod-price-row { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
-  .prod-price { font-size: 1.1rem; font-weight: 700; color: var(--purple); }
-  .prod-old { font-size: .8rem; color: var(--gray); text-decoration: line-through; margin-left: 6px; }
-  .add-btn {
-    background: var(--purple); color: white;
-    border: none; border-radius: var(--pill-radius);
-    padding: 8px 16px; font-family: inherit; font-size: .8rem; font-weight: 600;
-    cursor: pointer; transition: background .2s, transform .15s;
-  }
-  .add-btn:hover { background: var(--purple-dark); transform: scale(1.04); }
+  .btn-add:active { transform: scale(0.85); }
 
-  /* ── PROMO BANNER ── */
-  .promo-banner {
-    background: linear-gradient(135deg, #1F1035 0%, var(--purple-dark) 100%);
-    border-radius: var(--card-radius);
-    padding: 40px 48px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 32px;
-    margin: 40px 0;
-    color: white; overflow: hidden; position: relative;
+  /* ── CAJÓN DEL CARRITO LIQUID GLASS ── */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
+  .cart-drawer {
+    position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto;
+    background: var(--surface-glass); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+    border-top: 1px solid var(--border-glass); border-radius: 32px 32px 0 0;
+    z-index: 201; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+    padding: 0 24px calc(24px + var(--safe-bottom)); max-height: 85vh; overflow-y: auto;
+    box-shadow: 0 -20px 40px rgba(0,0,0,0.5);
   }
-  .promo-banner::before {
-    content: '';
-    position: absolute; right: -60px; top: -60px;
-    width: 280px; height: 280px; border-radius: 50%;
-    background: rgba(167,139,250,.2);
+  .cart-drawer.open { transform: translateY(0); }
+  .drawer-handle { width: 40px; height: 4px; background: rgba(255,255,255,0.2); border-radius: 2px; margin: 16px auto 24px; }
+  .drawer-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; }
+  .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-glass); }
+  .cat-name { font-weight: 500; font-size: 0.95rem; display: flex; align-items: center; gap: 10px; }
+  .cat-qty { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.05); border-radius: var(--pill-radius); padding: 4px; }
+  .qty-btn { background: transparent; border: none; color: var(--text-main); width: 28px; height: 28px; border-radius: 50%; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .qty-num { font-weight: 700; min-width: 20px; text-align: center; }
+  .btn-pay {
+    background: var(--text-main); color: var(--bg-deep); border: none; width: 100%;
+    padding: 16px; border-radius: var(--pill-radius); font-size: 1.05rem; font-weight: 700;
+    margin-top: 24px; cursor: pointer; transition: transform 0.2s;
   }
-  .promo-banner h2 { font-size: 2rem; font-weight: 800; margin-bottom: 8px; }
-  .promo-banner p { opacity: .8; font-size: .95rem; }
-  .promo-discount {
-    background: linear-gradient(135deg, var(--pink), var(--purple-light));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    font-size: 4rem; font-weight: 900; line-height: 1;
-  }
-  .btn-white {
-    background: white; color: var(--purple-dark);
-    border: none; border-radius: var(--pill-radius);
-    padding: 14px 32px; font-family: inherit; font-size: .95rem; font-weight: 700;
-    cursor: pointer; transition: transform .2s; white-space: nowrap;
-  }
-  .btn-white:hover { transform: translateY(-2px); }
+  .btn-pay:active { transform: scale(0.98); }
 
-  /* ── FOOTER ── */
-  footer {
-    background: var(--dark); color: rgba(255,255,255,.7);
-    padding: 56px 32px calc(32px + var(--safe-bottom));
-    margin-top: 40px;
-  }
-  .footer-inner {
-    max-width: 1400px; margin: 0 auto;
-    display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px;
-    margin-bottom: 40px;
-  }
-  .footer-brand p { font-size: .88rem; line-height: 1.7; margin: 12px 0 20px; }
-  .footer-logo { font-size: 1.6rem; font-weight: 800; background: linear-gradient(135deg, var(--purple-light), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-  .footer-col h4 { color: white; font-size: .95rem; font-weight: 600; margin-bottom: 16px; }
-  .footer-col a { display: block; text-decoration: none; color: rgba(255,255,255,.6); font-size: .85rem; margin-bottom: 10px; transition: color .2s; }
-  .footer-col a:hover { color: var(--purple-light); }
-  .footer-bottom { border-top: 1px solid rgba(255,255,255,.1); padding-top: 24px; text-align: center; font-size: .82rem; }
-
-  /* ── SECTION SPACING ── */
-  .section { padding: 40px 0 8px; }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; }
-    .hero-side { flex-direction: row; }
-    .footer-inner { grid-template-columns: 1fr 1fr; }
-    .nav-links { display: none; }
-  }
-  @media (max-width: 600px) {
-    nav { padding: var(--safe-top) 16px 0; }
-    .hero { padding: 16px; }
-    .section-wrapper { padding: 0 16px; }
-    .footer-inner { grid-template-columns: 1fr; }
-    .promo-banner { flex-direction: column; text-align: center; padding: 32px 24px; }
-    .hero-main h1 { font-size: 1.7rem; }
-    .promo-discount { font-size: 3rem; }
-  }
-
-  /* ── HIDDEN SYSTEM STYLES (PORTAL, CHAT & TOASTS) ── */
-  .payment-modal { position: fixed; inset: 0; background: rgba(31,16,53,0.8); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  /* ── MODALES & SISTEMA OCULTO ── */
+  .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 24px; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
   .payment-modal.open { opacity: 1; pointer-events: all; }
-  .payment-box { background: var(--white); border-radius: var(--card-radius); padding: 2rem; width: 100%; max-width: 400px; position: relative; transform: translateY(30px); transition: transform 0.4s; }
+  .payment-box { background: var(--surface-solid); border: 1px solid var(--border-glass); border-radius: var(--card-radius); padding: 32px 24px; width: 100%; max-width: 400px; transform: translateY(30px); transition: transform 0.4s; }
   .payment-modal.open .payment-box { transform: translateY(0); }
-  .payment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; font-weight: 700; font-size: 1.2rem;}
-  .btn-close-pay { background: transparent; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray); }
-  .card-graphic { height: 160px; background: linear-gradient(135deg, var(--purple), var(--pink)); border-radius: 16px; margin-bottom: 1.5rem; padding: 1.5rem; color: white; display: flex; flex-direction: column; justify-content: flex-end; }
-  .pay-input { width: 100%; background: var(--gray-light); border: 2px solid transparent; padding: 1rem; border-radius: 12px; margin-bottom: 1rem; outline: none; transition: border-color 0.2s; font-family: inherit; }
-  .pay-input:focus { border-color: var(--purple); }
-  .pay-row { display: flex; gap: 10px; }
-  .btn-pay { background: var(--dark); color: white; border: none; width: 100%; padding: 1rem; border-radius: var(--pill-radius); font-weight: 700; font-family: inherit; font-size: 1rem; cursor: pointer; }
+  .payment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; font-weight: 700; font-size: 1.2rem;}
+  .pay-input { width: 100%; background: var(--bg-deep); border: 1px solid var(--border-glass); color: var(--text-main); padding: 14px; border-radius: 12px; margin-bottom: 12px; outline: none; font-family: inherit; }
+  .pay-input:focus { border-color: var(--purple-dark); }
+  .pay-row { display: flex; gap: 12px; }
 
-  .toast-promo { position: fixed; top: calc(var(--safe-top) + 20px); left: 50%; transform: translateX(-50%) translateY(-150%); background: var(--white); border: 1px solid #EDE9FE; padding: 1rem 1.5rem; border-radius: var(--pill-radius); box-shadow: 0 10px 25px rgba(124,58,237,0.15); z-index: 4000; opacity: 0; transition: transform 0.4s, opacity 0.3s; display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: .9rem; width: max-content; max-width: 90%; color: var(--dark); cursor: grab; }
+  /* TOAST CAMUFLADO */
+  .toast-promo { position: fixed; top: calc(var(--safe-top) + 20px); left: 50%; transform: translateX(-50%) translateY(-150%); background: var(--surface-glass); backdrop-filter: blur(16px); border: 1px solid var(--border-glass); padding: 12px 20px; border-radius: var(--pill-radius); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 4000; opacity: 0; transition: transform 0.4s, opacity 0.3s; display: flex; align-items: center; gap: 12px; font-weight: 500; font-size: 0.9rem; color: var(--text-main); width: max-content; max-width: 90%; }
   .toast-promo.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-  #seccion-chat { display: none; flex-direction: column; position: fixed; inset: 0; background: var(--bg); z-index: 9999; padding-top: var(--safe-top); }
-  .chat-header { padding: 1rem 2rem; background: var(--white); border-bottom: 1px solid #EDE9FE; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-  .chat-meta { display: flex; align-items: center; gap: 10px; }
-  .chat-status-dot { width: 10px; height: 10px; background: #10B981; border-radius: 50%; }
-  .chat-header-info p:first-child { font-weight: 700; font-size: 1rem; }
-  .chat-header-info p:last-child { font-size: 0.75rem; color: var(--gray); font-weight: 500;}
-  .btn-panic { background: #EF4444; color: white; border: none; padding: 8px 16px; border-radius: var(--pill-radius); font-weight: 700; cursor: pointer; font-family: inherit; box-shadow: 0 4px 12px rgba(239,68,68,.3); }
+  /* ── CHAT SEGURO (SERIO Y MINIMALISTA) ── */
+  #seccion-chat { display: none; flex-direction: column; position: fixed; inset: 0; background: var(--bg-deep); z-index: 9999; padding-top: var(--safe-top); }
+  .chat-header { padding: 12px 24px; background: var(--surface-glass); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-glass); display: flex; align-items: center; justify-content: space-between; }
+  .chat-meta { display: flex; align-items: center; gap: 12px; }
+  .chat-status-dot { width: 8px; height: 8px; background: var(--green-safe); border-radius: 50%; box-shadow: 0 0 8px var(--green-safe); }
+  .chat-header-info p:first-child { font-weight: 700; font-size: 1rem; letter-spacing: 0.5px; }
+  .chat-header-info p:last-child { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;}
   
-  .name-modal { position: fixed; inset: 0; background: rgba(31,16,53,0.8); backdrop-filter: blur(5px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
-  .name-modal-box { background: var(--white); padding: 2.5rem; border-radius: var(--card-radius); text-align: center; width: 100%; max-width: 360px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-  .name-modal-box h2 { font-weight: 700; margin-bottom: 8px; }
-  .name-modal-box p { color: var(--gray); font-size: 0.85rem; }
-  .name-modal-box input { width: 100%; border: 2px solid #EDE9FE; padding: 12px; border-radius: 12px; margin: 1.5rem 0; outline: none; text-align: center; font-family: inherit; font-weight: 600; font-size: 1rem; }
-  .btn-join { background: var(--purple); color: white; border: none; padding: 12px 24px; border-radius: var(--pill-radius); width: 100%; font-weight: 700; cursor: pointer; font-size: 1rem; }
+  /* Botones WebRTC en el Header */
+  .chat-av-controls { display: flex; gap: 8px; }
+  .btn-av { background: rgba(255,255,255,0.05); color: var(--text-main); border: 1px solid var(--border-glass); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: background 0.2s; }
+  .btn-av:active { background: rgba(255,255,255,0.1); }
+  .btn-panic { background: var(--red-panic); color: white; border: none; padding: 0 16px; height: 36px; border-radius: var(--pill-radius); font-weight: 800; font-size: 0.8rem; cursor: pointer; margin-left: 8px; box-shadow: 0 0 15px rgba(239,68,68,0.4); }
 
-  .chat-messages { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
-  .msg-wrap { display: flex; flex-direction: column; max-width: 80%; }
+  .name-modal { position: fixed; inset: 0; background: var(--bg-deep); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .name-modal-box { background: var(--surface-solid); padding: 40px 32px; border-radius: var(--card-radius); text-align: center; width: 100%; max-width: 340px; border: 1px solid var(--border-glass); }
+  .name-modal-box input { width: 100%; background: var(--bg-deep); border: 1px solid var(--border-glass); color: var(--text-main); padding: 16px; border-radius: 12px; margin: 24px 0; outline: none; text-align: center; font-family: inherit; font-size: 1rem; }
+  .btn-join { background: var(--text-main); color: var(--bg-deep); border: none; padding: 16px; border-radius: var(--pill-radius); width: 100%; font-weight: 700; cursor: pointer; }
+
+  .chat-messages { flex: 1; padding: 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+  .msg-wrap { display: flex; flex-direction: column; max-width: 85%; }
   .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
   .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
-  .msg-sender { font-size: 0.7rem; color: var(--gray); margin-bottom: 4px; padding: 0 10px; font-weight: 600; }
-  .msg { padding: 12px 16px; border-radius: 20px; font-size: .95rem; line-height: 1.4; word-break: break-word; }
-  .msg.mine { background: var(--purple); color: white; border-bottom-right-radius: 4px; }
-  .msg.theirs { background: var(--white); color: var(--dark); border-bottom-left-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-  .msg-time { font-size: 0.65rem; color: var(--gray); margin-top: 4px; padding: 0 10px; font-weight: 500;}
+  .msg-sender { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 4px; padding: 0 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+  .msg { padding: 14px 18px; border-radius: 20px; font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
+  .msg.mine { background: var(--purple-dark); color: white; border-bottom-right-radius: 4px; }
+  .msg.theirs { background: var(--surface-solid); color: var(--text-main); border: 1px solid var(--border-glass); border-bottom-left-radius: 4px; }
 
-  .chat-input-area { padding: 1rem 2rem calc(1rem + var(--safe-bottom)); background: var(--white); border-top: 1px solid #EDE9FE; display: flex; gap: 1rem; align-items: center; }
-  .chat-input-area input { flex: 1; border: 2px solid #EDE9FE; padding: 12px 20px; border-radius: var(--pill-radius); outline: none; font-family: inherit; font-size: .95rem; }
-  .btn-send { background: var(--purple); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform .15s; }
-  .btn-send:active { transform: scale(0.9); }
+  .chat-input-area { padding: 16px 24px calc(16px + var(--safe-bottom)); background: var(--surface-glass); backdrop-filter: blur(20px); border-top: 1px solid var(--border-glass); display: flex; gap: 12px; align-items: center; }
+  .chat-input-area input { flex: 1; background: var(--bg-deep); border: 1px solid var(--border-glass); color: var(--text-main); padding: 14px 20px; border-radius: var(--pill-radius); outline: none; font-family: inherit; font-size: 0.95rem; }
+  .btn-send { background: var(--purple-dark); color: white; border: none; width: 44px; height: 44px; border-radius: 50%; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px var(--purple-glow); }
+
+  /* ── FACETIME VIDEO UI (RESTAURADO) ── */
+  #video-modal { position: fixed; inset: 0; background: #000; z-index: 15000; display: none; flex-direction: column; overflow: hidden; }
+  .remote-video { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1; }
+  .local-video { width: 110px; height: 160px; object-fit: cover; position: absolute; bottom: 120px; right: 20px; z-index: 2; border-radius: 16px; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 10px 30px rgba(0,0,0,0.5); background: #1a1a1a; }
+  .video-controls { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 3; display: flex; gap: 20px; background: rgba(20,20,25,0.8); backdrop-filter: blur(15px); padding: 12px 24px; border-radius: var(--pill-radius); border: 1px solid var(--border-glass); }
+  .btn-hangup { background: var(--red-panic); color: white; border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; }
+  .call-overlay { position: absolute; inset: 0; z-index: 4; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); }
+  .timer-circle { font-size: 3.5rem; font-weight: 300; margin-bottom: 16px; font-variant-numeric: tabular-nums; }
+  .call-status-text { font-size: 0.9rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 2px; }
 </style>
 </head>
 <body>
 
 <div id="vista-tienda">
+  <!-- ── NAVBAR ── -->
   <nav>
     <div class="nav-logo">VibeStore</div>
-    <div class="nav-search">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input type="text" placeholder="Buscar productos, marcas...">
+    <div class="nav-actions">
+      <button class="icon-btn" onclick="toggleTheme()">🌑</button>
+      <button class="icon-btn" onclick="handleCheckout()">
+        🛒<span class="cart-badge" id="cartBadge">0</span>
+      </button>
     </div>
-    <div class="nav-links">
-      <a href="#">Inicio</a>
-      <a href="#">Ofertas</a>
-      <a href="#">Marcas</a>
-      <a href="#">Nuevos</a>
-    </div>
-    <button class="nav-icon-btn" style="margin-left:8px">❤️</button>
-    <button class="nav-icon-btn" id="cartBtn" style="position:relative" onclick="handleCheckout()">
-      🛒
-      <span class="cart-badge" id="cartBadge">0</span>
-    </button>
-    <button class="nav-icon-btn">👤</button>
   </nav>
 
-  <div class="hero">
-    <div class="hero-main">
-      <div class="hero-badge">✨ Colección 2025</div>
-      <h1>Todo lo que necesitas,<br>en un solo lugar</h1>
-      <p>Moda, tecnología, belleza y más — envío gratis en pedidos +$49.990</p>
-      <button class="btn-hero">Explorar ahora →</button>
-    </div>
-    <div class="hero-side">
-      <div class="hero-card pink">
-        <span>Hasta 50% off</span>
-        <h3>Maquillaje &amp; Belleza</h3>
-      </div>
-      <div class="hero-card soft">
-        <span>Lo más nuevo</span>
-        <h3>Smartphones 2025</h3>
-      </div>
-    </div>
+  <!-- ── SEARCH & CATEGORIES ── -->
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchBox" class="search-input" placeholder="Buscar en el catálogo..." oninput="filterStore()">
+  </div>
+  
+  <div class="cats-scroll">
+    <div class="cat-chip active" onclick="setCat('all', this)">⚡ Todos</div>
+    <div class="cat-chip" onclick="setCat('tech', this)">💻 Tecnología</div>
+    <div class="cat-chip" onclick="setCat('av', this)">🎥 Audiovisual</div>
+    <div class="cat-chip" onclick="setCat('home', this)">🛋️ Hogar</div>
   </div>
 
-  <div class="section-wrapper">
-    <div class="section">
-      <div class="section-title">Categorías <a href="#">Ver todas →</a></div>
-      <div class="cats-scroll">
-        <div class="cat-chip active" onclick="filterCat(this,'all')"><span class="cat-emoji">🛍️</span><span class="cat-label">Todo</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'tech')"><span class="cat-emoji">📱</span><span class="cat-label">Tecnología</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'moda')"><span class="cat-emoji">👗</span><span class="cat-label">Moda Mujer</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'hombre')"><span class="cat-emoji">👔</span><span class="cat-label">Moda Hombre</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'belleza')"><span class="cat-emoji">💄</span><span class="cat-label">Belleza</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'hogar')"><span class="cat-emoji">🏠</span><span class="cat-label">Hogar</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'deporte')"><span class="cat-emoji">⚽</span><span class="cat-label">Deportes</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'juguetes')"><span class="cat-emoji">🧸</span><span class="cat-label">Juguetes</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'mascotas')"><span class="cat-emoji">🐾</span><span class="cat-label">Mascotas</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'libros')"><span class="cat-emoji">📚</span><span class="cat-label">Libros</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'auto')"><span class="cat-emoji">🚗</span><span class="cat-label">Autos</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'salud')"><span class="cat-emoji">💊</span><span class="cat-label">Salud</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'zapatillas')"><span class="cat-emoji">👟</span><span class="cat-label">Zapatillas</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'accesorios')"><span class="cat-emoji">💍</span><span class="cat-label">Accesorios</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'gaming')"><span class="cat-emoji">🎮</span><span class="cat-label">Gaming</span></div>
-        <div class="cat-chip" onclick="filterCat(this,'supermercado')"><span class="cat-emoji">🛒</span><span class="cat-label">Supermercado</span></div>
-      </div>
+  <!-- ── PRODUCT GRID ── -->
+  <main class="main-content">
+    <div class="prod-grid" id="prodGrid">
+      <!-- Los productos se inyectan por JS -->
     </div>
-
-    <div class="section">
-      <div class="section-title">Productos destacados <a href="#">Ver todos →</a></div>
-      <div class="filter-tabs">
-        <button class="ftab active">Todos</button>
-        <button class="ftab">Nuevos</button>
-        <button class="ftab">Ofertas</button>
-        <button class="ftab">Más vendidos</button>
-        <button class="ftab">Mejor calificados</button>
-      </div>
-
-      <div class="prod-grid" id="prodGrid">
-
-        <div class="prod-card" data-cat="tech">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&q=80" alt="iPhone 15 Pro">
-            <span class="prod-badge new-badge">NUEVO</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Tecnología</div>
-            <div class="prod-name">iPhone 15 Pro Max 256GB</div>
-            <div class="prod-stars">★★★★★ <span>(4.9 · 2.3k reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$799.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="tech">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400&q=80" alt="Samsung Galaxy">
-            <span class="prod-badge sale">-20%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Tecnología</div>
-            <div class="prod-name">Samsung Galaxy S25 Ultra</div>
-            <div class="prod-stars">★★★★★ <span>(4.8 · 1.8k reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$699.990</span> <span class="prod-old">$874.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="tech">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=400&q=80" alt="MacBook Air">
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Tecnología</div>
-            <div class="prod-name">MacBook Air M3 13"</div>
-            <div class="prod-stars">★★★★★ <span>(4.9 · 987 reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$1.099.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="gaming">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1486401899868-0e435ed85128?w=400&q=80" alt="PS5">
-            <span class="prod-badge sale">-15%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Gaming</div>
-            <div class="prod-name">PlayStation 5 Slim + 2 Controles</div>
-            <div class="prod-stars">★★★★★ <span>(5.0 · 3.1k reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$449.990</span> <span class="prod-old">$529.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="belleza">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=400&q=80" alt="Maquillaje">
-            <span class="prod-badge new-badge">NUEVO</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Maquillaje</div>
-            <div class="prod-name">Set Paleta Sombras 24 Tonos HD</div>
-            <div class="prod-stars">★★★★☆ <span>(4.7 · 1.2k reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$29.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="belleza">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=400&q=80" alt="Skincare">
-            <span class="prod-badge sale">-30%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Skincare</div>
-            <div class="prod-name">Set Rutina Skincare 5 pasos K-Beauty</div>
-            <div class="prod-stars">★★★★★ <span>(4.9 · 854 reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$49.990</span> <span class="prod-old">$71.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="moda">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=400&q=80" alt="Vestido">
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Moda Mujer</div>
-            <div class="prod-name">Vestido Midi Floral Verano</div>
-            <div class="prod-stars">★★★★☆ <span>(4.5 · 620 reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$34.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="moda">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80" alt="Chaqueta">
-            <span class="prod-badge sale">-25%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Moda Mujer</div>
-            <div class="prod-name">Chaqueta Oversize Premium</div>
-            <div class="prod-stars">★★★★★ <span>(4.8 · 430 reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$54.990</span> <span class="prod-old">$73.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="hombre">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1507680434567-5739c80be1ac?w=400&q=80" alt="Camisa hombre">
-            <span class="prod-badge new-badge">NUEVO</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Moda Hombre</div>
-            <div class="prod-name">Camisa Lino Premium Slim Fit</div>
-            <div class="prod-stars">★★★★☆ <span>(4.6 · 318 reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$39.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="zapatillas">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80" alt="Nike">
-            <span class="prod-badge sale">-18%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Zapatillas</div>
-            <div class="prod-name">Nike Air Max 270 React</div>
-            <div class="prod-stars">★★★★★ <span>(4.9 · 2.7k reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$79.990</span> <span class="prod-old">$97.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="zapatillas">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=400&q=80" alt="Adidas">
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Zapatillas</div>
-            <div class="prod-name">Adidas Ultraboost 24</div>
-            <div class="prod-stars">★★★★★ <span>(4.8 · 1.4k reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$89.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="hogar">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80" alt="Cocina">
-            <span class="prod-badge sale">-40%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Hogar &amp; Cocina</div>
-            <div class="prod-name">Set Ollas Antiadherentes 5 piezas</div>
-            <div class="prod-stars">★★★★☆ <span>(4.6 · 910 reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$44.990</span> <span class="prod-old">$74.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="deporte">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&q=80" alt="Deporte">
-            <span class="prod-badge new-badge">NUEVO</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Deportes</div>
-            <div class="prod-name">Kit Yoga Premium — Mat + Bloques</div>
-            <div class="prod-stars">★★★★★ <span>(4.9 · 720 reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$36.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="accesorios">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80" alt="Reloj">
-            <span class="prod-badge">PREMIUM</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Accesorios</div>
-            <div class="prod-name">Reloj Automático Acero Inoxidable</div>
-            <div class="prod-stars">★★★★★ <span>(4.8 · 540 reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$129.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="mascotas">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=400&q=80" alt="Mascotas">
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Mascotas</div>
-            <div class="prod-name">Dispensador Automático Croquetas 3L</div>
-            <div class="prod-stars">★★★★☆ <span>(4.5 · 380 reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$41.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card" data-cat="salud">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80" alt="Salud">
-            <span class="prod-badge sale">-20%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Salud &amp; Farmacia</div>
-            <div class="prod-name">Tensiómetro Digital de Muñeca</div>
-            <div class="prod-stars">★★★★★ <span>(4.7 · 1.1k reseñas)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$27.990</span> <span class="prod-old">$34.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-      </div></div>
-
-    <div class="promo-banner">
-      <div>
-        <h2>Semana de Ofertas VibeStore</h2>
-        <p>Solo por tiempo limitado — no te quedes sin los tuyo</p>
-      </div>
-      <div class="promo-discount">HASTA<br>70%</div>
-      <button class="btn-white">Ver todas las ofertas →</button>
-    </div>
-
-    <div class="section">
-      <div class="section-title">📱 Lo mejor en Tecnología <a href="#">Ver todo →</a></div>
-      <div class="prod-grid">
-
-        <div class="prod-card">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1585060544812-6b45742d762f?w=400&q=80" alt="Airpods">
-            <span class="prod-badge new-badge">NUEVO</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Audio</div>
-            <div class="prod-name">AirPods Pro 3 — Cancelación Activa</div>
-            <div class="prod-stars">★★★★★ <span>(5.0 · 3.4k)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$229.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1546054454-aa26e2b734c7?w=400&q=80" alt="Tablet">
-            <span class="prod-badge sale">-12%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Tablets</div>
-            <div class="prod-name">iPad Pro 11" M4 WiFi 256GB</div>
-            <div class="prod-stars">★★★★★ <span>(4.9 · 1.6k)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$879.990</span> <span class="prod-old">$999.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&q=80" alt="Smartwatch">
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Wearables</div>
-            <div class="prod-name">Apple Watch Series 10 GPS 46mm</div>
-            <div class="prod-stars">★★★★★ <span>(4.8 · 2.1k)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$349.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80" alt="Xiaomi">
-            <span class="prod-badge sale">-22%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Tecnología</div>
-            <div class="prod-name">Xiaomi 14 Pro 5G 512GB</div>
-            <div class="prod-stars">★★★★☆ <span>(4.6 · 789)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$499.990</span> <span class="prod-old">$639.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-title">💄 Belleza &amp; Maquillaje <a href="#">Ver todo →</a></div>
-      <div class="prod-grid">
-
-        <div class="prod-card">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1631214524020-3c69b4b72b7f?w=400&q=80" alt="Labial">
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Labiales</div>
-            <div class="prod-name">Set Labiales Mate Larga Duración x6</div>
-            <div class="prod-stars">★★★★★ <span>(4.8 · 1.9k)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$22.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1487412947147-5cebf100d2c3?w=400&q=80" alt="Perfume">
-            <span class="prod-badge">EXCLUSIVO</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Perfumería</div>
-            <div class="prod-name">Perfume Chanel Nº5 EDP 100ml</div>
-            <div class="prod-stars">★★★★★ <span>(4.9 · 2.4k)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$149.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=400&q=80" alt="Crema">
-            <span class="prod-badge sale">-35%</span>
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Cuidado Facial</div>
-            <div class="prod-name">Sérum Vitamina C Anti-edad 30ml</div>
-            <div class="prod-stars">★★★★★ <span>(4.7 · 870)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$32.990</span> <span class="prod-old">$50.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="prod-card">
-          <div class="prod-img-wrap">
-            <img src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&q=80" alt="Mascarilla">
-            <button class="wish-btn">🤍</button>
-          </div>
-          <div class="prod-info">
-            <div class="prod-cat">Cabello</div>
-            <div class="prod-name">Mascarilla Hidratante Argan + Keratina</div>
-            <div class="prod-stars">★★★★☆ <span>(4.5 · 640)</span></div>
-            <div class="prod-price-row">
-              <span><span class="prod-price">$18.990</span></span>
-              <button class="add-btn">+ Agregar</button>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-  </div><footer>
-    <div class="footer-inner">
-      <div class="footer-brand">
-        <div class="footer-logo">VibeStore</div>
-        <p>Tu tienda favorita con todo lo que necesitas. Moda, tecnología, belleza y mucho más. Entrega rápida en todo el país.</p>
-        <div style="display:flex;gap:12px;font-size:1.3rem">
-          <span style="cursor:pointer">📘</span>
-          <span style="cursor:pointer">📸</span>
-          <span style="cursor:pointer">🐦</span>
-          <span style="cursor:pointer">▶️</span>
-        </div>
-      </div>
-      <div class="footer-col">
-        <h4>Categorías</h4>
-        <a href="#">Tecnología</a>
-        <a href="#">Moda Mujer</a>
-        <a href="#">Moda Hombre</a>
-        <a href="#">Belleza</a>
-        <a href="#">Hogar</a>
-        <a href="#">Deportes</a>
-      </div>
-      <div class="footer-col">
-        <h4>Ayuda</h4>
-        <a href="#">Centro de ayuda</a>
-        <a href="#">Seguir mi pedido</a>
-        <a href="#">Devoluciones</a>
-        <a href="#">Garantías</a>
-        <a href="#">Contacto</a>
-      </div>
-      <div class="footer-col">
-        <h4>VibeStore</h4>
-        <a href="#">Sobre nosotros</a>
-        <a href="#">Términos y condiciones</a>
-        <a href="#">Privacidad</a>
-        <a href="#">Vende con nosotros</a>
-        <a href="#">Blog</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      © 2025 VibeStore — Todos los derechos reservados &nbsp;·&nbsp; 💳 Visa · Mastercard · Webpay · Transferencia
-    </div>
-  </footer>
+  </main>
 </div>
 
+<!-- ── CAJÓN DEL CARRITO ── -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="drawer-handle"></div>
+  <h2 class="drawer-title">Resumen de Orden</h2>
+  <div id="cartItems"></div>
+  <button class="btn-pay" onclick="closeCart(); handleCheckout();">Procesar Pago Seguro</button>
+</div>
+
+<!-- ── PORTAL DE PAGOS (Checkout Normal) ── -->
 <div class="payment-modal" id="paymentModal">
   <div class="payment-box">
       <div class="payment-header">
-          <span>Pago Seguro</span>
-          <button class="btn-close-pay" onclick="closePaymentPortal()">✕</button>
-      </div>
-      <div class="card-graphic">
-          <div style="width:40px;height:25px;background:rgba(255,255,255,0.4);border-radius:4px;margin-bottom:10px;"></div>
-          <div style="font-family:monospace; font-size:1.2rem; letter-spacing:2px;">•••• •••• •••• ••••</div>
+          <span>Checkout</span>
+          <button class="icon-btn" style="width:30px;height:30px;border:none;" onclick="closePaymentPortal()">✕</button>
       </div>
       <input type="tel" class="pay-input" placeholder="Número de tarjeta" maxlength="19">
-      <input type="text" class="pay-input" placeholder="Nombre en la tarjeta">
+      <input type="text" class="pay-input" placeholder="Titular">
       <div class="pay-row">
           <input type="tel" class="pay-input" placeholder="MM/AA" maxlength="5">
           <input type="tel" class="pay-input" placeholder="CVC" maxlength="4">
       </div>
-      <button class="btn-pay" onclick="processPayment()">Pagar Ahora</button>
+      <button class="btn-pay" style="margin-top:10px;" onclick="processPayment()">Confirmar</button>
   </div>
 </div>
 
+<!-- ── TOAST CAMUFLADO ── -->
+<div class="toast-promo" id="toastPromo"></div>
+
+<!-- ── CHAT SEGURO ── -->
 <div id="seccion-chat">
   <div class="name-modal" id="nameModal">
       <div class="name-modal-box">
-          <h2>Ingresa al Canal</h2>
-          <p>Conexión cifrada de extremo a extremo</p>
-          <input type="text" id="nameInput" placeholder="Tu Alias" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
-          <button class="btn-join" onclick="joinChat()">Conectar</button>
+          <h2 style="font-weight:700; margin-bottom:8px;">Autenticación</h2>
+          <p style="color:var(--text-muted); font-size:0.85rem;">Canal Cifrado P2P</p>
+          <input type="text" id="nameInput" placeholder="Identificador" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
+          <button class="btn-join" onclick="joinChat()">Establecer Conexión</button>
       </div>
   </div>
 
@@ -952,19 +294,38 @@
           <div class="chat-status-dot"></div>
           <div class="chat-header-info">
               <p>SecureNet</p>
-              <p id="onlineStatus">Conectando…</p>
+              <p id="onlineStatus">Validando...</p>
           </div>
       </div>
-      <button class="btn-panic" onclick="panicExit()" title="Pánico Total">PÁNICO ⚠</button>
+      <div class="chat-av-controls">
+          <button class="btn-av" onclick="startCall(false)" title="Audio">📞</button>
+          <button class="btn-av" onclick="startCall(true)" title="Video">📹</button>
+          <button class="btn-panic" onclick="panicExit()" title="Destruir">PÁNICO</button>
+      </div>
   </div>
 
   <div class="chat-messages" id="chatWorkspace">
-      <div id="typingWrap" style="display:none; color:var(--gray); font-size:0.8rem; padding: 0 1rem; font-style:italic;"><span id="typingName"></span> escribe...</div>
+      <div id="typingWrap" style="display:none; color:var(--text-muted); font-size:0.75rem; padding: 0 12px; font-style:italic; text-transform:uppercase; letter-spacing:0.5px;"><span id="typingName"></span> escribiendo...</div>
   </div>
 
   <div class="chat-input-area">
-      <input type="text" id="chatInput" placeholder="Mensaje seguro..." onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
+      <input type="text" id="chatInput" placeholder="Transmisión cifrada..." onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
       <button class="btn-send" onclick="sendMsg()">↑</button>
+  </div>
+</div>
+
+<!-- ── FACETIME VIDEO UI (RESTAURADO) ── -->
+<div id="video-modal">
+  <video id="remote-video" class="remote-video" autoplay playsinline></video>
+  <video id="local-video" class="local-video" autoplay playsinline muted></video>
+  
+  <div id="call-overlay" class="call-overlay" style="display:none;">
+      <div id="call-timer" class="timer-circle">60</div>
+      <p class="call-status-text">Negociando claves P2P...</p>
+  </div>
+
+  <div class="video-controls">
+      <button class="btn-hangup" onclick="hangUp(false, true)" title="Finalizar">☎</button>
   </div>
 </div>
 
@@ -988,119 +349,128 @@
   const db  = getDatabase(app);
 
   // ── ESTADO Y VARIABLES GLOBALES ──
-  window.cartCount = 0; // Inicio en 0 para poder llegar a 5 exactos
   const SECRET_PIN = "10231121";
-  
   let myName = '';
   let myId = 'user_' + Math.random().toString(36).slice(2,8);
   let inChat = false; 
   let typingTimer;
   let seenKeys = new Set();
+  
+  // Variables Tienda
+  let cart = { tech:0, av:0, home:0 };
+  let currentCat = 'all';
 
   const messagesRef = ref(db, 'chat/messages');
   const typingRef = ref(db, 'chat/typing/' + myId);
   const presenceRef = ref(db, 'chat/presence/' + myId);
+  
+  // WebRTC Refs Restauradas
+  const callOfferRef = ref(db, 'chat/call/offer');
+  const callAnswerRef = ref(db, 'chat/call/answer');
+  const callOfferCandRef = ref(db, 'chat/call/offerCandidates');
+  const callAnswerCandRef = ref(db, 'chat/call/answerCandidates');
 
-  // ── UI FUNCIONES DE TIENDA ──
-  window.filterCat = function(el, cat) {
-    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
-    el.classList.add('active');
-    const cards = document.querySelectorAll('#prodGrid .prod-card');
-    cards.forEach(card => {
-      if (cat === 'all' || card.dataset.cat === cat) {
-        card.style.display = '';
-      } else {
-        card.style.display = 'none';
-      }
-    });
+  // ── INYECCIÓN DINÁMICA DE PRODUCTOS ──
+  const products = [
+    { id:1, cat:'tech', name:'MacBook Pro M3 Max', price:3499.00, img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400' },
+    { id:2, cat:'tech', name:'iPad Pro OLED 13"', price:1299.00, img:'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400' },
+    { id:3, cat:'av', name:'Blackmagic Studio 6K Pro', price:2495.00, img:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400' },
+    { id:4, cat:'av', name:'ATEM Mini Extreme ISO', price:1295.00, img:'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=400' },
+    { id:5, cat:'tech', name:'iPhone 15 Pro Titanium', price:999.00, img:'https://images.unsplash.com/photo-1695048064971-8b2b73bc11eb?w=400' },
+    { id:6, cat:'home', name:'Lámpara Diseño Nórdico', price:149.00, img:'https://images.unsplash.com/photo-1507473885765-e6ed057f782c?w=400' },
+    { id:7, cat:'av', name:'Microfono Shure SM7B', price:399.00, img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=400' },
+    { id:8, cat:'home', name:'Silla Ergonómica Premium', price:599.00, img:'https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?w=400' }
+  ];
+
+  function renderStore() {
+      const grid = document.getElementById('prodGrid');
+      const q = document.getElementById('searchBox').value.toLowerCase().trim();
+      const list = products.filter(p => (currentCat==='all' || p.cat===currentCat) && p.name.toLowerCase().includes(q));
+      
+      grid.innerHTML = list.map(p => `
+          <div class="prod-card">
+              <div class="prod-img-wrap"><img src="${p.img}" loading="lazy"></div>
+              <div class="prod-info">
+                  <div class="prod-name">${p.name}</div>
+                  <div class="prod-bottom">
+                      <span class="prod-price">$${p.price.toFixed(2)}</span>
+                      <button class="btn-add" onclick="addToCart('${p.cat}')">+</button>
+                  </div>
+              </div>
+          </div>`).join('');
   }
 
-  document.querySelectorAll('.ftab').forEach(tab => {
-    tab.addEventListener('click', function() {
-      document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
-      this.classList.add('active');
-    });
-  });
+  window.setCat = function(cat, el) {
+      document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      currentCat = cat;
+      renderStore();
+  }
+  window.filterStore = () => renderStore();
+  
+  window.addToCart = function(cat) {
+      cart[cat]++;
+      const total = Object.values(cart).reduce((a,b)=>a+b,0);
+      document.getElementById('cartBadge').textContent = total;
+  };
 
-  document.querySelectorAll('.wish-btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      this.textContent = this.textContent === '🤍' ? '❤️' : '🤍';
-    });
-  });
+  // ── LÓGICA DE CHECKOUT Y CARRITO ──
+  window.openCart = () => {
+    const w = document.getElementById('cartItems');
+    const total = Object.values(cart).reduce((a,b)=>a+b,0);
+    if(total === 0) { w.innerHTML = '<p style="color:var(--text-muted); text-align:center;">Carrito vacío</p>'; }
+    else {
+        w.innerHTML = Object.entries(cart).filter(([,v])=>v>0).map(([c,q])=>`
+            <div class="cart-item-row">
+                <span class="cat-name">${c.toUpperCase()}</span>
+                <span class="qty-num">x${q}</span>
+            </div>`).join('');
+    }
+    document.getElementById('drawerOverlay').classList.add('open');
+    document.getElementById('cartDrawer').classList.add('open');
+  };
+  
+  window.closeCart = () => {
+    document.getElementById('drawerOverlay').classList.remove('open');
+    document.getElementById('cartDrawer').classList.remove('open');
+  };
 
-  document.querySelectorAll('.add-btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      window.cartCount++;
-      document.getElementById('cartBadge').textContent = window.cartCount;
-      this.textContent = '✓ Agregado';
-      this.style.background = '#10B981';
-      setTimeout(() => {
-        this.textContent = '+ Agregar';
-        this.style.background = '';
-      }, 1600);
-    });
-  });
-
-  // ── LÓGICA DE CHECKOUT CONDICIONAL ──
   window.handleCheckout = function() {
-      if (window.cartCount === 5) {
-          const pin = prompt("Ingresa el PIN de seguridad:");
+      const totalCount = Object.values(cart).reduce((a,b)=>a+b,0);
+      if (totalCount === 5) {
+          window.closeCart();
+          const pin = prompt("Acceso Seguro Requerido. Ingrese PIN:");
           if (pin === SECRET_PIN) {
               document.getElementById('vista-tienda').style.display = 'none';
               document.getElementById('seccion-chat').style.display = 'flex';
               document.getElementById('nameModal').style.display = 'flex';
-              window.cartCount = 0;
+              cart = { tech:0, av:0, home:0 };
               document.getElementById('cartBadge').textContent = '0';
-          } else if (pin !== null) {
-              alert('Autenticación fallida');
-          }
-      } else if (window.cartCount > 0) {
+          } else if (pin !== null) { alert('Llave incorrecta.'); }
+      } else if (totalCount > 0) {
+          window.closeCart();
           document.getElementById('paymentModal').classList.add('open');
       } else {
-          alert('Tu carrito está vacío');
+          window.openCart();
       }
   };
 
   window.closePaymentPortal = () => document.getElementById('paymentModal').classList.remove('open');
   window.processPayment = () => { 
-      alert('Procesando pago...'); 
       setTimeout(()=>{ 
-          alert('Pago completado ✓'); 
           window.closePaymentPortal(); 
-          window.cartCount = 0; 
+          cart = { tech:0, av:0, home:0 }; 
           document.getElementById('cartBadge').textContent = '0';
-      }, 1500); 
+      }, 1000); 
   };
 
-  // ── NOTIFICACIONES CAMUFLADAS (TOASTS) ──
-  const storePromos = ["🔥 ¡Oferta exclusiva 20% OFF!", "✨ Nueva colección disponible", "📦 ¡Envío gratis hoy!", "💎 Descubre los más vendidos", "🏷️ Cupón aplicado automáticamente"];
-  
+  // ── NOTIFICACIONES CAMUFLADAS ──
+  const promos = ["⚡ Flash Sale: 30% OFF", "✨ Restock de temporada", "📦 Envío Premium activado"];
   function showPromoToast() {
-      const div = document.createElement('div'); div.className = 'toast-promo';
-      div.innerHTML = `<div style="font-size:1.5rem">✨</div> <div>${storePromos[Math.floor(Math.random() * storePromos.length)]}</div>`;
-      document.body.appendChild(div);
-      
-      requestAnimationFrame(()=>div.classList.add('show'));
-      
-      // Lógica Swipeable
-      let startX = 0;
-      div.addEventListener('touchstart', e => startX = e.touches[0].clientX, {passive:true});
-      div.addEventListener('touchmove', e => {
-          if (Math.abs(e.touches[0].clientX - startX) > 40) {
-              div.style.transform = `translateX(-50%) translateY(-150%)`;
-              div.style.opacity = '0';
-              setTimeout(()=>div.remove(), 300);
-          }
-      }, {passive:true});
-
-      setTimeout(()=> { 
-          if(div.parentElement) { 
-              div.classList.remove('show'); 
-              setTimeout(()=>div.remove(), 300); 
-          }
-      }, 4000);
+      const div = document.getElementById('toastPromo');
+      div.innerHTML = `<span style="font-size:1.2rem">✨</span> <span>${promos[Math.floor(Math.random() * promos.length)]}</span>`;
+      div.classList.add('show');
+      setTimeout(() => div.classList.remove('show'), 4000);
   }
 
   // ── CHAT SEGURO FIREBASE ──
@@ -1117,7 +487,7 @@
 
       onValue(ref(db, 'chat/presence'), snap => {
           const data = snap.val() || {}; const c = Object.values(data).filter(u=>u.online).length;
-          document.getElementById('onlineStatus').textContent = c===1 ? '1 agente' : `${c} agentes`;
+          document.getElementById('onlineStatus').textContent = `${c} Activos`;
       });
 
       onValue(ref(db, 'chat/typing'), snap => {
@@ -1126,6 +496,8 @@
           if(others.length) { document.getElementById('typingName').textContent = others[0]; w.style.display = 'block'; scrollChat(); } 
           else w.style.display = 'none';
       });
+      
+      getPendingOffer(); // Inicia escucha de WebRTC
   };
 
   function renderMessage(msg) {
@@ -1153,31 +525,126 @@
   window.handleChatKey = e => { if(e.key==='Enter') window.sendMsg(); };
   window.handleTyping = () => { if(!myName) return; set(typingRef, {name:myName}); clearTimeout(typingTimer); typingTimer = setTimeout(()=>set(typingRef,null), 2000); };
 
-  // ── PÁNICO ──
   window.panicExit = function() {
-      if (confirm('¿Pánico Total? Se destruirá el historial y se cerrará la conexión.')) {
-          remove(messagesRef).then(() => {
-              set(presenceRef, null);
-              set(typingRef, null);
-              location.reload();
-          });
-      }
+      remove(messagesRef).then(() => {
+          set(presenceRef, null);
+          set(typingRef, null);
+          hangUp(false, false);
+          location.reload();
+      });
   };
 
-  // ── ESCUCHA DE MENSAJES ──
   onValue(messagesRef, snap => {
       const data = snap.val(); if(!data) return;
       Object.entries(data).forEach(([k, msg]) => {
           if(!seenKeys.has(k)) {
               seenKeys.add(k);
-              if (inChat) {
-                  renderMessage(msg); // Solo si está en chat se ve el real
-              } else if (msg.senderId !== myId) {
-                  showPromoToast(); // Camuflaje de notificaciones fuera del chat
-              }
+              if (inChat) { renderMessage(msg); } 
+              else if (msg.senderId !== myId && msg.type !== 'system-bot') { showPromoToast(); }
           }
       });
   });
+
+  // ── WEBRTC LÓGICA RESTAURADA (LLAMADAS/VIDEO) ──
+  const rtcConfig = { iceServers: [{ urls: ['stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'] }] };
+  let pc, localStream, remoteStream, callTimeout;
+  let iceProcOff = new Set(), iceProcAns = new Set();
+
+  async function initMedia(videoEnabled = true) {
+      localStream = await navigator.mediaDevices.getUserMedia({ video: videoEnabled, audio: true });
+      const localVidEl = document.getElementById('local-video');
+      localVidEl.srcObject = localStream;
+      localVidEl.style.display = videoEnabled ? 'block' : 'none';
+
+      remoteStream = new MediaStream();
+      document.getElementById('remote-video').srcObject = remoteStream;
+      
+      pc = new RTCPeerConnection(rtcConfig);
+      localStream.getTracks().forEach(t => pc.addTrack(t, localStream));
+      pc.ontrack = e => e.streams[0].getTracks().forEach(t => remoteStream.addTrack(t));
+  }
+
+  window.startCall = async function(videoEnabled = true) {
+      document.getElementById('video-modal').style.display = 'flex';
+      document.getElementById('call-overlay').style.display = 'flex';
+      await initMedia(videoEnabled);
+
+      pc.onicecandidate = e => { if(e.candidate) push(callOfferCandRef, e.candidate.toJSON()); };
+
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      set(callOfferRef, { sdp: offer.sdp, type: offer.type, callerId: myId, video: videoEnabled });
+
+      let tl = 60; document.getElementById('call-timer').innerText = tl;
+      callTimeout = setInterval(() => {
+          tl--; document.getElementById('call-timer').innerText = tl;
+          if(tl <= 0) hangUp(true, false); 
+      }, 1000);
+
+      onValue(callAnswerRef, snap => {
+          const ans = snap.val();
+          if(ans && !pc.currentRemoteDescription) {
+              pc.setRemoteDescription(new RTCSessionDescription(ans));
+              clearInterval(callTimeout);
+              document.getElementById('call-overlay').style.display = 'none';
+          }
+      });
+
+      onValue(callAnswerCandRef, snap => {
+          const data = snap.val();
+          if(data) Object.entries(data).forEach(([k, c]) => {
+              if(!iceProcAns.has(k)) { iceProcAns.add(k); pc.addIceCandidate(new RTCIceCandidate(c)); }
+          });
+      });
+  };
+
+  async function getPendingOffer() {
+      onValue(callOfferRef, async snap => {
+          const offer = snap.val();
+          if (offer && offer.callerId !== myId) {
+              if (!inChat) {
+                  showPromoToast(); // Camuflaje si te llaman y no estás dentro
+              } else if (!pc) {
+                  document.getElementById('video-modal').style.display = 'flex';
+                  document.getElementById('call-overlay').style.display = 'none';
+                  await initMedia(offer.video);
+
+                  pc.onicecandidate = e => { if(e.candidate) push(callAnswerCandRef, e.candidate.toJSON()); };
+                  
+                  await pc.setRemoteDescription(new RTCSessionDescription(offer));
+                  const ans = await pc.createAnswer();
+                  await pc.setLocalDescription(ans);
+                  set(callAnswerRef, { type: ans.type, sdp: ans.sdp });
+
+                  onValue(callOfferCandRef, snapCand => {
+                      const data = snapCand.val();
+                      if(data) Object.entries(data).forEach(([k, c]) => {
+                          if(!iceProcOff.has(k)) { iceProcOff.add(k); pc.addIceCandidate(new RTCIceCandidate(c)); }
+                      });
+                  });
+              }
+          } else if (!offer && pc) {
+              hangUp(false, false);
+          }
+      });
+  }
+
+  window.hangUp = function(isMissed = false, sendMissedMessage = false) {
+      if(callTimeout) clearInterval(callTimeout);
+      if(localStream) localStream.getTracks().forEach(t => t.stop());
+      if(pc) { pc.close(); pc = null; }
+      
+      document.getElementById('video-modal').style.display = 'none';
+      remove(ref(db, 'chat/call'));
+      iceProcOff.clear(); iceProcAns.clear();
+
+      if(isMissed && sendMissedMessage) {
+          push(messagesRef, { type: 'system-bot', text: 'Transmisión finalizada o perdida.', ts: Date.now() });
+      }
+  };
+
+  // Inicializar tienda
+  renderStore();
 
 </script>
 </body>
