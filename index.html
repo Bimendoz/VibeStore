@@ -48,6 +48,8 @@
         .icon-btn:active { transform: scale(0.9); }
         .cart-btn { background: var(--purple-light); color: var(--purple-accent); position: relative; }
         .badge { position: absolute; top: -2px; right: -2px; background-color: var(--red); color: #fff; font-size: 0.65rem; font-weight: 800; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-card); }
+        .badge.pop { animation: pop 0.3s cubic-bezier(0.36,0.07,0.19,0.97); }
+        @keyframes pop { 0%,100%{transform:scale(1)} 40%{transform:scale(1.3)} 70%{transform:scale(0.9)} }
 
         .nav-scroller { overflow-x: auto; white-space: nowrap; padding: 1rem 1.5rem; background: var(--bg-body); -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .nav-scroller::-webkit-scrollbar { display: none; }
@@ -67,6 +69,7 @@
         .card:active { transform: scale(0.97); }
         .img-container { width: 100%; aspect-ratio: 1/1; border-radius: 18px; background: var(--bg-body); margin-bottom: 0.8rem; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 3rem; position: relative; }
         .img-container img { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; transition: transform 0.3s; }
+        .card:hover .img-container img { transform: scale(1.05); }
         .card-tag { position: absolute; top: 0.8rem; left: 0.8rem; background: rgba(255,255,255,0.85); backdrop-filter: blur(8px); color: #000; font-size: 0.65rem; font-weight: 800; padding: 4px 10px; border-radius: 12px; text-transform: uppercase; z-index: 2; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         .card-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; letter-spacing: -0.3px;}
         .card-desc { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 32px; line-height: 1.4; }
@@ -74,7 +77,7 @@
         .price { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.5px;}
         .btn-add { background: var(--text-main); color: var(--bg-body); border: none; width: 36px; height: 36px; border-radius: 50%; font-weight: 700; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
         .btn-add:active { transform: scale(0.85); }
-        .btn-add.added { background: var(--green); color: #fff; }
+        .btn-add.added { background: var(--green); color: #fff; animation: addPop 0.35s ease; }
 
         .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .drawer-overlay.open { opacity: 1; pointer-events: all; }
@@ -86,78 +89,101 @@
         .cat-name { font-weight: 600; font-size: 1rem; display: flex; align-items: center; gap: 0.6rem; }
         .cat-qty { display: flex; align-items: center; gap: 0.8rem; background: var(--bg-body); border-radius: 20px; padding: 4px; }
         .qty-btn { background: var(--bg-card); border: none; color: var(--text-main); width: 28px; height: 28px; border-radius: 50%; font-size: 1.2rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .qty-btn:active { transform: scale(0.9); }
         .qty-num { font-weight: 700; min-width: 20px; text-align: center; }
         .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
         .cart-total-label { font-size: 1rem; color: var(--text-muted); font-weight: 600; }
         .cart-total-value { font-size: 1.6rem; font-weight: 800; letter-spacing: -1px; }
         .btn-pay { background: var(--purple-accent); color: #fff; border: none; width: 100%; padding: 1.2rem; border-radius: 20px; font-size: 1.1rem; font-weight: 700; cursor: pointer; margin-top: 1.5rem; transition: transform 0.15s, filter 0.2s; box-shadow: 0 10px 20px rgba(0,113,227,0.3); }
+        .btn-pay:active { transform: scale(0.97); filter: brightness(0.9); }
+        .cart-empty-msg { text-align: center; color: var(--text-muted); padding: 3rem 0; font-size: 1rem; font-weight: 600; }
 
-        .footer-checkout { position: sticky; bottom: 0; padding: 1rem 1.5rem calc(1rem + var(--safe-bottom)); background: var(--bg-nav); backdrop-filter: blur(12px); border-top: 0.5px solid var(--border-color); z-index: 90; max-width: 600px; margin: 0 auto; width: 100%; }
+        .footer-checkout { position: sticky; bottom: 0; padding: 1rem 1.5rem calc(1rem + var(--safe-bottom)); background: var(--bg-nav); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-top: 0.5px solid var(--border-color); z-index: 90; max-width: 600px; margin: 0 auto; width: 100%; }
         .footer-inner { display: flex; gap: 1rem; align-items: center; }
-        .btn-view-cart { flex: 1; background: var(--bg-body); color: var(--text-main); border: none; padding: 1.1rem; border-radius: 20px; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
-        .btn-checkout { flex: 2; background: var(--text-main); color: var(--bg-body); border: none; padding: 1.1rem; border-radius: 20px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .btn-view-cart { flex: 1; background: var(--bg-body); color: var(--text-main); border: none; padding: 1.1rem; border-radius: 20px; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.15s; }
+        .btn-view-cart:active { transform: scale(0.96); }
+        .btn-checkout { flex: 2; background: var(--text-main); color: var(--bg-body); border: none; padding: 1.1rem; border-radius: 20px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+        .btn-checkout:active { transform: scale(0.96); }
 
+        /* PORTAL DE PAGOS PREMIUM */
         .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         .payment-modal.open { opacity: 1; pointer-events: all; }
-        .payment-box { background: var(--bg-card); border-radius: 28px; padding: 2rem; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; transform: translateY(30px); transition: transform 0.4s; }
+        .payment-box { background: var(--bg-card); border-radius: 28px; padding: 2rem; width: 100%; max-width: 400px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative; transform: translateY(30px); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .payment-modal.open .payment-box { transform: translateY(0); }
         .payment-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-        .card-graphic { height: 160px; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 16px; margin-bottom: 1.5rem; padding: 1.5rem; color: white; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; }
+        .payment-header h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
+        .btn-close-pay { background: var(--bg-body); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; font-weight: bold; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
+        .card-graphic { height: 160px; background: linear-gradient(135deg, #1e293b, #0f172a); border-radius: 16px; margin-bottom: 1.5rem; padding: 1.5rem; color: white; display: flex; flex-direction: column; justify-content: flex-end; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.15);}
+        .card-graphic::after { content: ''; position: absolute; top: -50%; right: -20%; width: 200px; height: 200px; background: rgba(255,255,255,0.05); border-radius: 50%; }
+        .card-graphic .chip { width: 40px; height: 28px; background: #e2e8f0; border-radius: 6px; margin-bottom: auto; opacity: 0.8; }
+        .card-graphic .dots { font-size: 1.2rem; letter-spacing: 2px; }
         .pay-input-group { background: var(--bg-body); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; margin-bottom: 1.5rem; }
         .pay-input { width: 100%; background: transparent; border: none; padding: 1.1rem; color: var(--text-main); font-size: 1rem; outline: none; border-bottom: 1px solid var(--border-color); }
-        .pay-row { display: flex; } .pay-row .pay-input { border-bottom: none; border-right: 1px solid var(--border-color); }
+        .pay-input:last-child { border-bottom: none; }
+        .pay-row { display: flex; }
+        .pay-row .pay-input { border-bottom: none; border-right: 1px solid var(--border-color); }
+        .pay-row .pay-input:last-child { border-right: none; }
 
-        .toast-promo { position: fixed; top: calc(var(--safe-top) + 15px); left: 50%; transform: translateX(-50%) translateY(-100%); background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 0.5px solid rgba(0,0,0,0.05); padding: 1rem 1.2rem; border-radius: 100px; box-shadow: 0 12px 30px rgba(0,0,0,0.12); z-index: 4000; cursor: grab; opacity: 0; transition: transform 0.4s, opacity 0.3s; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; font-size: 0.95rem; width: max-content; max-width: 90%; color: #000; }
-        [data-theme="dark"] .toast-promo { background: rgba(30, 30, 30, 0.9); color: #fff; border: 0.5px solid rgba(255,255,255,0.1); }
+        /* TOAST PROMO / GLITCH */
+        .toast-promo { position: fixed; top: calc(var(--safe-top) + 15px); left: 50%; transform: translateX(-50%) translateY(-100%); background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 0.5px solid rgba(0,0,0,0.05); padding: 1rem 1.2rem; border-radius: 100px; box-shadow: 0 12px 30px rgba(0,0,0,0.12); z-index: 4000; cursor: grab; opacity: 0; transition: transform 0.4s cubic-bezier(0.32,0.72,0,1), opacity 0.3s; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; font-size: 0.95rem; width: max-content; max-width: 90%; color: #000; }
+        [data-theme="dark"] .toast-promo { background: rgba(30, 30, 30, 0.9); color: #fff; border: 0.5px solid rgba(255,255,255,0.1); box-shadow: 0 12px 30px rgba(0,0,0,0.5); }
         .toast-promo.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast-promo.swiped { transform: translateX(calc(-50% - 150vw)); opacity: 0; }
+        .toast-icon { background: var(--purple-accent); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; }
         
-        /* 🚨 GLITCH NOTIFICATION */
         .toast-promo.glitch-promo { border: 2px solid var(--red); background: rgba(255,255,255,0.95); animation: pulse-glitch 2s infinite; }
         [data-theme="dark"] .toast-promo.glitch-promo { background: rgba(20,0,0,0.95); }
         @keyframes pulse-glitch { 0%,100%{box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);} 50%{box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);} }
 
-        .toast { position: fixed; bottom: calc(6rem + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); color: #fff; padding: 0.8rem 1.5rem; border-radius: 100px; font-size: 0.9rem; font-weight: 600; opacity: 0; transition: opacity 0.3s, transform 0.3s; z-index: 300; pointer-events: none; }
+        .toast { position: fixed; bottom: calc(6rem + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); color: #fff; padding: 0.8rem 1.5rem; border-radius: 100px; font-size: 0.9rem; font-weight: 600; white-space: nowrap; opacity: 0; transition: opacity 0.3s, transform 0.3s; z-index: 300; pointer-events: none; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+        /* ESTILOS DEL CHAT */
         #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
         .chat-header { padding: 1rem 1.5rem; background: var(--bg-nav); backdrop-filter: blur(12px); border-bottom: 0.5px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
         .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
-        .chat-status-dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; }
-        .chat-header-info p:first-child { font-weight: 800; font-size: 1rem; }
+        .chat-status-dot { width: 10px; height: 10px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
+        .chat-header-info p:first-child { font-weight: 800; font-size: 1rem; letter-spacing: -0.3px; }
         .chat-header-info p:last-child { font-size: 0.75rem; color: var(--text-muted); font-weight: 600;}
 
-        /* ── BOTONES HEADER (iOS GLASS) ── */
+        /* BOTONES WEBRTC & PANICO */
         .btn-call, .btn-video, .btn-panic { color: #fff; border: none; padding: 0.55rem 0.9rem; border-radius: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
         .btn-call:active, .btn-video:active, .btn-panic:active { transform: scale(0.92); }
-        
         .btn-call { background: rgba(16, 185, 129, 0.9); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35); }
         .btn-video { background: rgba(0, 113, 227, 0.9); box-shadow: 0 4px 12px rgba(0, 113, 227, 0.35); }
         .btn-panic { background: rgba(239, 68, 68, 0.9); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35); }
 
         .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .name-modal-box { background: var(--bg-card); border-radius: 28px; padding: 2.5rem 2rem; width: 100%; max-width: 340px; text-align: center; }
-        .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 1.1rem; border-radius: 16px; outline: none; font-size: 1rem; margin-bottom: 1.5rem; text-align: center; font-weight: 600;}
-        .btn-join { width: 100%; background: var(--text-main); color: var(--bg-body); border: none; padding: 1.1rem; border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .name-modal-box { background: var(--bg-card); border-radius: 28px; padding: 2.5rem 2rem; width: 100%; max-width: 340px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        .name-modal-box h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; letter-spacing: -0.5px;}
+        .name-modal-box p { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+        .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 1.1rem; border-radius: 16px; color: var(--text-main); outline: none; font-size: 1rem; margin-bottom: 1.5rem; text-align: center; font-weight: 600;}
+        .name-modal-box input:focus { border-color: var(--purple-accent); box-shadow: 0 0 0 3px rgba(0,113,227,0.15); }
+        .btn-join { width: 100%; background: var(--text-main); color: var(--bg-body); border: none; padding: 1.1rem; border-radius: 16px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; }
+        .btn-join:active { transform: scale(0.96); }
 
         .chat-messages { flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
         .msg-wrap { display: flex; flex-direction: column; max-width: 80%; }
         .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
         .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
         .msg-sender { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.3rem; padding: 0 0.5rem; }
-        .msg { padding: 0.9rem 1.1rem; border-radius: 20px; font-size: 0.95rem; line-height: 1.4; word-break: break-word; }
+        .msg { padding: 0.9rem 1.1rem; border-radius: 20px; font-size: 0.95rem; line-height: 1.4; word-break: break-word; box-shadow: 0 2px 5px rgba(0,0,0,0.02);}
         .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
         .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 0.5px solid var(--border-color); }
         .msg-time { font-size: 0.65rem; color: var(--text-muted); margin-top: 0.3rem; padding: 0 0.5rem; font-weight: 600;}
-        
+        .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-card); border: 0.5px solid var(--border-color); padding: 0.4rem 1rem; border-radius: 100px; font-weight: 600; }
         .msg-wrap.bot .msg { background: var(--bg-body); color: var(--text-muted); font-style: italic; border: 1px dashed var(--border-color); }
 
         .chat-input-area { padding: 1rem 1.5rem calc(1rem + var(--safe-bottom)); background: var(--bg-nav); backdrop-filter: blur(12px); border-top: 0.5px solid var(--border-color); display: flex; gap: 0.8rem; align-items: center; }
-        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 1rem 1.2rem; border-radius: 24px; outline: none; font-size: 1rem; }
-        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s; }
+        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 1rem 1.2rem; border-radius: 24px; color: var(--text-main); outline: none; font-size: 1rem; transition: border-color 0.2s; }
+        .chat-input-area input:focus { border-color: var(--purple-accent); }
+        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 48px; height: 48px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s; box-shadow: 0 4px 10px rgba(0,113,227,0.3); }
+        .btn-send:active { transform: scale(0.9); }
         
         .empty-state { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 4rem 1rem; color: var(--text-muted); text-align: center; }
+        .empty-state .empty-icon { font-size: 3rem; margin-bottom: 0.5rem; opacity: 0.5; }
 
-        /* ── FACETIME VIDEO UI ── */
+        /* ── FACETIME VIDEO UI (GLASSMORPHISM) ── */
         #video-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 5000; display: none; flex-direction: column; overflow: hidden; }
         .remote-video { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; z-index: 1; background: #000; }
         .local-video { width: 110px; height: 160px; object-fit: cover; position: absolute; bottom: 120px; right: 20px; z-index: 2; border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.15); transition: transform 0.3s; }
@@ -175,30 +201,35 @@
     <header>
         <div class="logo">VibeStore</div>
         <div class="header-actions">
-            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
-            <button class="icon-btn cart-btn" onclick="openCart()">🛍️<span class="badge" id="cartBadge">0</span></button>
+            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Cambiar tema">🌙</button>
+            <button class="icon-btn cart-btn" onclick="openCart()" aria-label="Ver carrito">
+                🛍️<span class="badge" id="cartBadge">0</span>
+            </button>
         </div>
     </header>
 
     <nav class="nav-scroller">
         <button class="btn-cat active" onclick="filterCat('all',this)">⚡ Todo</button>
         <button class="btn-cat" onclick="filterCat('maquillaje',this)">💄 Maquillaje</button>
-        <button class="btn-cat" onclick="filterCat('tecnologia',this)">🔌 Tecnología</button>
-        <button class="btn-cat" onclick="filterCat('hogar',this)">🏠 Hogar</button>
-        <button class="btn-cat" onclick="filterCat('deportes',this)">⚽ Deportes</button>
+        <button class="btn-cat" onclick="filterCat('tecnologia',this)">📱 Tecnología</button>
+        <button class="btn-cat" onclick="filterCat('hogar',this)">🛋️ Hogar</button>
+        <button class="btn-cat" onclick="filterCat('deportes',this)">👟 Deportes</button>
     </nav>
 
     <main class="main-content">
         <div class="search-wrap">
             <span class="search-icon">🔍</span>
-            <input type="search" id="searchBox" class="search-input" placeholder="Buscar en VibeStore..." oninput="filterSearch(this)">
+            <input type="search" id="searchBox" class="search-input" placeholder="Buscar en VibeStore..." oninput="filterSearch(this)" autocomplete="off">
+            <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
         </div>
         <div class="grid-productos" id="productGrid"></div>
     </main>
 
     <div class="footer-checkout">
         <div class="footer-inner">
-            <button class="btn-view-cart" onclick="openCart()"><span>Total:</span> <strong id="footerCount">(0)</strong></button>
+            <button class="btn-view-cart" onclick="openCart()">
+                <span>Total:</span> <strong id="footerCount">(0)</strong>
+            </button>
             <button class="btn-checkout" onclick="handleCheckout()">Pagar Seguro</button>
         </div>
     </div>
@@ -216,17 +247,18 @@
     <button class="btn-pay" onclick="closeCart(); handleCheckout();">Completar Pedido</button>
 </div>
 
-<!-- PORTAL DE PAGOS PREMIUM -->
 <div class="payment-modal" id="paymentModal">
     <div class="payment-box">
         <div class="payment-header">
             <h2>Pago Seguro</h2>
             <button class="btn-close-pay" onclick="closePaymentPortal()">✕</button>
         </div>
+        
         <div class="card-graphic">
             <div class="chip"></div>
             <div class="dots">•••• •••• •••• ••••</div>
         </div>
+
         <div class="pay-input-group">
             <input type="tel" class="pay-input" placeholder="Número de tarjeta" maxlength="19">
             <input type="text" class="pay-input" placeholder="Nombre en la tarjeta">
@@ -235,14 +267,15 @@
                 <input type="tel" class="pay-input" placeholder="CVC" maxlength="4">
             </div>
         </div>
-        <button class="btn-pay" style="width:100%; margin-top:0; background:var(--text-main); color:var(--bg-card);" onclick="processPayment()">Pagar Ahora</button>
+        
+        <button class="btn-pay" style="width: 100%; margin-top: 0; background: var(--text-main); color: var(--bg-card); box-shadow: 0 8px 20px rgba(0,0,0,0.15);" onclick="processPayment()">Pagar Ahora</button>
     </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<!-- CHAT SEGURO -->
 <div id="seccion-chat">
+
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
             <h2>Ingresa al Canal</h2>
@@ -261,7 +294,6 @@
             </div>
         </div>
         
-        <!-- BOTONES HEADER iOS GLASS -->
         <div style="display:flex; gap: 0.6rem; align-items:center;">
             <button class="btn-call" onclick="startCall(false)" title="Llamada de audio">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
@@ -276,7 +308,12 @@
     </div>
 
     <div class="chat-messages" id="chatWorkspace">
-        <div class="typing-wrap" id="typingWrap"><span class="typing-name" id="typingName"></span><div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>
+        <div class="typing-wrap" id="typingWrap">
+            <span class="typing-name" id="typingName"></span>
+            <div class="typing-bubble">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
+        </div>
     </div>
 
     <div class="chat-input-area">
@@ -285,7 +322,6 @@
     </div>
 </div>
 
-<!-- INTERFAZ FACETIME / WEBRTC -->
 <div id="video-modal">
     <video id="remote-video" class="remote-video" autoplay playsinline></video>
     <video id="local-video" class="local-video" autoplay playsinline muted></video>
@@ -303,7 +339,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, remove }
+    import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, off, remove }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     /* ── FIREBASE CONFIG ── */
@@ -320,31 +356,75 @@
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
-    const CAT_META = { maquillaje: { emoji: '💄', avgPrice: 20 }, tecnologia: { emoji: '📱', avgPrice: 65 }, hogar: { emoji: '🛋️', avgPrice: 25 }, deportes: { emoji: '👟', avgPrice: 18 } };
+    /* ── STORE DATA ── */
+    const CAT_META = {
+        maquillaje: { emoji: '💄', avgPrice: 20 },
+        tecnologia:  { emoji: '📱', avgPrice: 65 },
+        hogar:       { emoji: '🛋️', avgPrice: 25 },
+        deportes:    { emoji: '👟', avgPrice: 18 },
+    };
+
+    // RESTAURADOS TUS 40 PRODUCTOS ORIGINALES INTACTOS
     const products = [
-        { id:1, cat:'maquillaje', name:'Paleta Nude Rose', price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:11, cat:'tecnologia', name:'Pods Max Pro', price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
-        { id:21, cat:'hogar', name:'Difusor Ultrasónico', price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
-        { id:31, cat:'deportes', name:'Botella de Acero Pro', price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
-        { id:2, cat:'maquillaje', name:'Labial Matte Crimson', price:18.50, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
-        { id:12, cat:'tecnologia', name:'Smartband Series 7', price:45.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
-        { id:22, cat:'hogar', name:'Taza Térmica Inteligente', price:35.00, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300' },
-        { id:32, cat:'deportes', name:'Bandas Resistencia', price:16.50, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' }
+        { id:1,  cat:'maquillaje', name:'Paleta Nude Rose',        desc:'18 tonos ultra pigmentados satinados y mate.',         price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
+        { id:2,  cat:'maquillaje', name:'Labial Matte Crimson',    desc:'Fórmula líquida indeleble 24 horas de fijación.',      price:18.50, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
+        { id:3,  cat:'maquillaje', name:'Base Hydra Glow',         desc:'Acabado natural con ácido hialurónico.',               price:29.00, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
+        { id:4,  cat:'maquillaje', name:'Máscara Lash Lift',       desc:'Volumen extremo y curvas perfectas sin grumos.',       price:16.00, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
+        { id:5,  cat:'maquillaje', name:'Iluminador Stardust',     desc:'Polvo compacto con destellos holográficos.',           price:22.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
+        { id:6,  cat:'maquillaje', name:'Fijador de Maquillaje',   desc:'Bruma hidratante acabado mate larga duración.',        price:15.00, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
+        { id:7,  cat:'maquillaje', name:'Corrector Full Coverage', desc:'Oculta imperfecciones de forma ligera.',               price:14.20, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300' },
+        { id:8,  cat:'maquillaje', name:'Rubor Líquido Blush',     desc:'Tono coral natural de fácil difuminado.',              price:19.00, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
+        { id:9,  cat:'maquillaje', name:'Delineador Ink Black',    desc:'Punta de fieltro a prueba de agua y sudor.',          price:12.50, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
+        { id:10, cat:'maquillaje', name:'Sérum Primer Control',    desc:'Prepara la piel minimizando poros abiertos.',         price:26.00, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
+        { id:11, cat:'tecnologia', name:'Pods Max Pro',             desc:'Audio espacial inmersivo y cancelación activa.',      price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
+        { id:12, cat:'tecnologia', name:'Smartband Series 7',      desc:'Monitor de oxígeno y pantalla AMOLED de 1.69".',      price:45.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
+        { id:13, cat:'tecnologia', name:'Teclado Mecánico Swift',  desc:'Switches lineales amarillos y layout del 65%.',       price:89.00, img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300' },
+        { id:14, cat:'tecnologia', name:'Mouse Ergonómico Air',    desc:'Sensor óptico de 16000 DPI con agarre premium.',      price:54.00, img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300' },
+        { id:15, cat:'tecnologia', name:'Cargador GaN 65W',        desc:'Triple puerto de carga rápida ultra compacto.',       price:32.00, img:'https://images.unsplash.com/photo-1619134177114-f8605c2a13ba?w=300' },
+        { id:16, cat:'tecnologia', name:'Hub USB-C 8 en 1',        desc:'Salida HDMI 4K, lectores SD y puertos USB 3.0.',      price:39.99, img:'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=300' },
+        { id:17, cat:'tecnologia', name:'Batería Magsafe Slim',    desc:'Ajuste magnético perfecto de 10000mAh.',              price:42.00, img:'https://images.unsplash.com/photo-1622445262465-2481c4574875?w=300' },
+        { id:18, cat:'tecnologia', name:'Luz LED Streamer RGB',    desc:'Panel de iluminación regulable mediante app.',        price:68.00, img:'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=300' },
+        { id:19, cat:'tecnologia', name:'Bocina BT Waterproof',    desc:'Sonido estéreo 360 grados resistente al agua.',       price:59.00, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
+        { id:20, cat:'tecnologia', name:'Micrófono USB Vocal',     desc:'Patrón cardioide ideal para pódcast y llamadas.',     price:79.00, img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300' },
+        { id:21, cat:'hogar',      name:'Difusor Ultrasónico',     desc:'Luz ambiental y vaporización de aceites esenciales.', price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
+        { id:22, cat:'hogar',      name:'Taza Térmica Inteligente',desc:'Mantiene la temperatura exacta de tus bebidas.',      price:35.00, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300' },
+        { id:23, cat:'hogar',      name:'Lámpara de Luna 3D',      desc:'Esfera táctil recargable con 3 tonos de luz.',        price:19.99, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
+        { id:24, cat:'hogar',      name:'Set de Cojines Velvet',   desc:'Dos piezas de texturas suaves color gris nórdico.',   price:28.00, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
+        { id:25, cat:'hogar',      name:'Velitas Aromáticas Cera', desc:'Pack de 3 aromas relajantes de lavanda y vainilla.',  price:15.00, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
+        { id:26, cat:'hogar',      name:'Organizador Escritorio',  desc:'Madera de bambú sustentable de alta calidad.',        price:22.50, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        { id:27, cat:'hogar',      name:'Planta Artificial Monstera',desc:'Maceta cerámica incluida, decoración minimalista.', price:31.00, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
+        { id:28, cat:'hogar',      name:'Cafetera Prensa Francesa', desc:'Vidrio borosilicato resistente a altas temperaturas.',price:26.90, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300' },
+        { id:29, cat:'hogar',      name:'Espejo de Mesa LED',      desc:'Aumento de 5x con rotación ajustable.',               price:18.00, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
+        { id:30, cat:'hogar',      name:'Humidificador Cute Pet',  desc:'Diseño compacto ideal para buró de noche.',           price:14.00, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
+        { id:31, cat:'deportes',   name:'Botella de Acero Pro',    desc:'Aislamiento al vacío térmico por 24 horas.',          price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
+        { id:32, cat:'deportes',   name:'Bandas de Resistencia',   desc:'Set de 5 intensidades con agarres cómodos.',         price:16.50, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' },
+        { id:33, cat:'deportes',   name:'Mat de Yoga Ecológico',   desc:'Grosor antideslizante de 6mm TPE premium.',           price:35.00, img:'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=300' },
+        { id:34, cat:'deportes',   name:'Cuerda Saltar Speed',     desc:'Baleros de alta velocidad entrenamiento funcional.',  price:12.00, img:'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=300' },
+        { id:35, cat:'deportes',   name:'Mancuernas Neopreno Hex', desc:'Par de pesas de 2.5kg con diseño texturizado.',      price:24.00, img:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300' },
+        { id:36, cat:'deportes',   name:'Maletín Deportivo Active',desc:'Compartimento separado para tenis húmedos.',         price:39.00, img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300' },
+        { id:37, cat:'deportes',   name:'Rodillo Masajeador Foam', desc:'Liberación miofascial post-entrenamiento.',          price:19.50, img:'https://images.unsplash.com/photo-1600881333168-2ef49b341f30?w=300' },
+        { id:38, cat:'deportes',   name:'Guantes Gimnasio Breath', desc:'Protección con gel antideslizante en las palmas.',   price:14.00, img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300' },
+        { id:39, cat:'deportes',   name:'Smart Shaker Pro',        desc:'Mezclador de proteína con compartimentos internos.',  price:15.90, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
+        { id:40, cat:'deportes',   name:'Toalla Microfibra Dry',   desc:'Secado súper rápido, compacta y ultra absorbente.',   price:9.99,  img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300' },
     ];
 
-    let cart = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 };
-    let curCat = 'all';
+    /* ── STATE ── */
+    let cart      = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 };
+    let curCat    = 'all';
     let toastTimer;
-    let myName = '';
-    let myId = 'user_' + Math.random().toString(36).slice(2,8);
+    let myName    = '';
+    let myId      = 'user_' + Math.random().toString(36).slice(2,8);
     let typingTimer;
-    let seenKeys = new Set();
-    let inChat = false; 
+    let seenKeys  = new Set();
+    
+    let inChat    = false; 
 
+    // LÓGICA DE SEGURIDAD INTACTA
     const SECRET_PIN = "10231121";
 
+    /* ── REFS Firebase ── */
     const messagesRef = ref(db, 'chat/messages');
-    const typingRef = ref(db, 'chat/typing/' + myId);
+    const typingRef   = ref(db, 'chat/typing/' + myId);
     const presenceRef = ref(db, 'chat/presence/' + myId);
     
     // Nodos WebRTC
@@ -353,55 +433,146 @@
     const callOfferCandRef = ref(db, 'chat/call/offerCandidates');
     const callAnswerCandRef = ref(db, 'chat/call/answerCandidates');
 
-    /* ── LOGICA TIENDA ── */
-    function escHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+    /* ════════════════════
+       STORE
+    ════════════════════ */
+    function escHtml(s) {
+        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
 
     function renderStore() {
-        const grid = document.getElementById('productGrid');
-        const q = document.getElementById('searchBox').value.toLowerCase().trim();
-        const list = products.filter(p => (curCat==='all' || p.cat===curCat) && p.name.toLowerCase().includes(q));
-        if(!list.length) { grid.innerHTML = `<div class="empty-state">🔍<p>Sin resultados</p></div>`; return; }
+        const grid  = document.getElementById('productGrid');
+        const query = document.getElementById('searchBox').value.toLowerCase().trim();
+        const list  = products.filter(p =>
+            (curCat === 'all' || p.cat === curCat) &&
+            (p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query))
+        );
+        if (!list.length) {
+            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>No se encontraron resultados</p><small>Intenta con otra palabra clave.</small></div>`;
+            return;
+        }
         grid.innerHTML = list.map(p => `
             <div class="card">
-                <span class="card-tag">${CAT_META[p.cat].emoji}</span>
-                <div class="img-container"><img src="${p.img}" loading="lazy"></div>
-                <div><h3 class="card-title">${escHtml(p.name)}</h3><span class="price">$${p.price.toFixed(2)}</span></div>
-                <button class="btn-add" onclick="addToCart('${p.cat}',${p.id},this)">+</button>
+                <span class="card-tag">${CAT_META[p.cat].emoji} ${p.cat}</span>
+                <div class="img-container">
+                    ${CAT_META[p.cat].emoji}
+                    <img src="${p.img}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
+                </div>
+                <div>
+                    <h3 class="card-title" title="${escHtml(p.name)}">${escHtml(p.name)}</h3>
+                    <p class="card-desc">${escHtml(p.desc)}</p>
+                </div>
+                <div class="card-footer">
+                    <span class="price">$${p.price.toFixed(2)}</span>
+                    <button class="btn-add" id="btn-${p.id}" onclick="addToCart('${p.cat}',${p.id},this)">+</button>
+                </div>
             </div>`).join('');
     }
 
     window.addToCart = function(cat, id, btn) {
         cart[cat]++;
-        const t = Object.values(cart).reduce((a,b)=>a+b,0);
-        document.getElementById('cartBadge').textContent = t;
-        document.getElementById('footerCount').textContent = `(${t})`;
+        const total = totalItems();
+        const badge = document.getElementById('cartBadge');
+        badge.textContent = total;
+        badge.classList.remove('pop');
+        void badge.offsetWidth;
+        badge.classList.add('pop');
+        btn.classList.add('added'); btn.textContent = '✓';
+        setTimeout(() => { btn.classList.remove('added'); btn.textContent = '+'; }, 700);
+        document.getElementById('footerCount').textContent = `(${total})`;
+        const p = products.find(x => x.id === id);
+        showToast(`${p.name} añadido ✓`);
     };
-    window.changeQty = function(cat, d) { cart[cat] = Math.max(0, cart[cat]+d); document.getElementById('cartBadge').textContent = Object.values(cart).reduce((a,b)=>a+b,0); renderCartDrawer(); };
-    window.openCart = () => { renderCartDrawer(); document.getElementById('drawerOverlay').classList.add('open'); document.getElementById('cartDrawer').classList.add('open'); };
-    window.closeCart = () => { document.getElementById('drawerOverlay').classList.remove('open'); document.getElementById('cartDrawer').classList.remove('open'); };
-    
+
+    function changeQty(cat, delta) {
+        cart[cat] = Math.max(0, cart[cat] + delta);
+        const total = totalItems();
+        document.getElementById('cartBadge').textContent = total;
+        document.getElementById('footerCount').textContent = `(${total})`;
+        renderCartDrawer();
+    }
+    window.changeQty = changeQty;
+
+    function totalItems() { return Object.values(cart).reduce((a,b)=>a+b,0); }
+
+    window.openCart = function() { renderCartDrawer(); document.getElementById('drawerOverlay').classList.add('open'); document.getElementById('cartDrawer').classList.add('open'); };
+    window.closeCart = function() { document.getElementById('drawerOverlay').classList.remove('open'); document.getElementById('cartDrawer').classList.remove('open'); };
+
     function renderCartDrawer() {
-        const w = document.getElementById('cartItems');
-        if(!Object.values(cart).reduce((a,b)=>a+b,0)) { w.innerHTML = `<div class="cart-empty-msg">Tu carrito está vacío</div>`; document.getElementById('cartTotal').textContent='$0.00'; return; }
-        w.innerHTML = Object.entries(cart).filter(([,v])=>v>0).map(([c,q])=>`
-            <div class="cart-item-row"><span class="cat-name">${CAT_META[c].emoji} ${c}</span>
-            <div class="cat-qty"><button class="qty-btn" onclick="changeQty('${c}',-1)">-</button><span class="qty-num">${q}</span><button class="qty-btn" onclick="changeQty('${c}',1)">+</button></div></div>`).join('');
+        const wrap = document.getElementById('cartItems');
+        const total = totalItems();
+        if (!total) {
+            wrap.innerHTML = `<div class="cart-empty-msg">Tu carrito está vacío</div>`;
+            document.getElementById('cartTotal').textContent = '$0.00';
+            return;
+        }
+        const estimated = Object.entries(cart).filter(([,v])=>v>0).reduce((acc,[cat,qty])=>acc+CAT_META[cat].avgPrice*qty,0);
+        wrap.innerHTML = Object.entries(cart).filter(([,v])=>v>0).map(([cat,qty])=>`
+            <div class="cart-item-row">
+                <span class="cat-name">${CAT_META[cat].emoji} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</span>
+                <div class="cat-qty">
+                    <button class="qty-btn" onclick="changeQty('${cat}',-1)">−</button>
+                    <span class="qty-num">${qty}</span>
+                    <button class="qty-btn" onclick="changeQty('${cat}',1)">+</button>
+                </div>
+            </div>`).join('');
+        document.getElementById('cartTotal').textContent = `~$${estimated.toFixed(2)}`;
     }
 
-    window.filterCat = (cat, btn) => { document.querySelectorAll('.btn-cat').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); curCat = cat; renderStore(); };
-    window.filterSearch = () => renderStore();
-    window.clearSearch = () => { document.getElementById('searchBox').value=''; renderStore(); };
-    window.toggleTheme = () => document.body.setAttribute('data-theme', document.body.getAttribute('data-theme')==='dark'?'':'dark');
+    window.filterCat = function(cat, btn) {
+        document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        curCat = cat;
+        renderStore();
+    };
 
-    function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.classList.remove('show'), 2000); }
+    window.filterSearch = function(input) {
+        document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0);
+        renderStore();
+    };
 
-    window.openPaymentPortal = () => document.getElementById('paymentModal').classList.add('open');
-    window.closePaymentPortal = () => document.getElementById('paymentModal').classList.remove('open');
-    window.processPayment = () => { showToast('Procesando...'); setTimeout(()=>{showToast('Pago completado ✓'); closePaymentPortal(); resetCart();}, 1500); };
+    window.clearSearch = function() {
+        const box = document.getElementById('searchBox');
+        box.value = '';
+        document.getElementById('searchClear').classList.remove('visible');
+        renderStore();
+    };
 
-    /* ── RITUAL DE ENTRADA AL BUNKER ── */
+    window.toggleTheme = function() {
+        const dark = document.body.getAttribute('data-theme') === 'dark';
+        document.body.setAttribute('data-theme', dark ? '' : 'dark');
+        document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
+    };
+
+    function showToast(msg) {
+        const t = document.getElementById('toast');
+        t.textContent = msg;
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+    }
+
+    /* ── FUNCIONES DE PORTAL DE PAGOS ── */
+    window.openPaymentPortal = function() {
+        document.getElementById('paymentModal').classList.add('open');
+    }
+    window.closePaymentPortal = function() {
+        document.getElementById('paymentModal').classList.remove('open');
+    }
+    window.processPayment = function() {
+        showToast('Procesando pago...');
+        setTimeout(() => {
+            showToast('Pago completado con éxito ✓');
+            closePaymentPortal();
+            resetCart();
+        }, 1500);
+    }
+
+    /* ── LÓGICA CHECKOUT MODIFICADA ── */
     window.handleCheckout = function() {
-        const total = Object.values(cart).reduce((a,b)=>a+b,0);
+        const total = totalItems();
+        if (total === 0) { showToast('Añade productos para continuar'); return; }
+        
         if (total === 5) {
             const pin = prompt("Canal seguro detectado. Ingresa el PIN:");
             if (pin === SECRET_PIN) {
@@ -409,22 +580,59 @@
                 document.getElementById('seccion-chat').style.display = 'flex';
                 resetCart();
                 document.getElementById('nameModal').style.display = 'flex';
-            } else if (pin !== null) showToast('Autenticación fallida');
-        } else if (total > 0) openPaymentPortal();
-        else showToast('Carrito vacío');
+                setTimeout(() => document.getElementById('nameInput').focus(), 100);
+            } else if (pin !== null) {
+                showToast('Autenticación fallida');
+                resetCart();
+            }
+        } else {
+            openPaymentPortal();
+        }
     };
 
-    function resetCart() { cart = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 }; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)'; window.closeCart(); }
+    function resetCart() {
+        cart = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 };
+        document.getElementById('cartBadge').textContent = '0';
+        document.getElementById('footerCount').textContent = '(0)';
+        window.closeCart();
+    }
 
-    /* ── NOTIFICACIONES CAMUFLADAS ── */
-    const storePromos = ["🔥 ¡Oferta exclusiva 20% OFF!", "✨ Colección de temporada", "📦 ¡Envío gratis!", "💎 Más vendidos"];
+    /* ════════════════════
+       CHAT REAL Y NOTIFICACIONES FLOTANTES PRO
+    ════════════════════ */
+    
+    const storePromos = [
+        "🔥 ¡Oferta exclusiva 20% OFF!",
+        "✨ Nueva colección de temporada",
+        "📦 ¡Envío gratis activado!",
+        "💎 Descubre los más vendidos",
+        "🌟 ¡Cupón sorpresa desbloqueado!"
+    ];
+
     function showPromoToast() {
-        const div = document.createElement('div'); div.className = 'toast-promo';
+        const div = document.createElement('div');
+        div.className = 'toast-promo';
         div.innerHTML = `<div class="toast-icon">✨</div> <div>${storePromos[Math.floor(Math.random() * storePromos.length)]}</div>`;
-        document.body.appendChild(div); requestAnimationFrame(()=>div.classList.add('show'));
-        let startX=0; div.addEventListener('touchstart', e=>startX=e.touches[0].clientX, {passive:true});
-        div.addEventListener('touchmove', e=>{ if(Math.abs(e.touches[0].clientX-startX)>40){ div.classList.add('swiped'); setTimeout(()=>div.remove(),300);}}, {passive:true});
-        setTimeout(()=> { if(div.parentElement){ div.classList.remove('show'); setTimeout(()=>div.remove(),300); }}, 4000);
+        document.body.appendChild(div);
+        
+        requestAnimationFrame(() => div.classList.add('show'));
+
+        let startX = 0;
+        div.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive: true});
+        div.addEventListener('touchmove', e => {
+            let diff = e.touches[0].clientX - startX;
+            if (diff < -40 || diff > 40) {
+                div.classList.add('swiped');
+                setTimeout(() => div.remove(), 300);
+            }
+        }, {passive: true});
+
+        setTimeout(() => {
+            if (div.parentElement) {
+                div.classList.remove('show');
+                setTimeout(() => div.remove(), 300);
+            }
+        }, 4000);
     }
 
     function showGlitchPromo() {
@@ -436,33 +644,65 @@
         setTimeout(()=> { if(div.parentElement){ div.classList.remove('show'); setTimeout(()=>div.remove(),300); }}, 60000);
     }
 
-    /* ── CHAT ── */
+    if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+    }
+
+    const offerSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869.wav");
+
     window.joinChat = function() {
-        const name = document.getElementById('nameInput').value.trim();
-        if (!name) return;
-        myName = name; inChat = true;
+        const input = document.getElementById('nameInput');
+        const name  = input.value.trim();
+        if (!name) { input.focus(); return; }
+        myName = name;
+        inChat = true; 
         document.getElementById('nameModal').style.display = 'none';
+        document.getElementById('chatInput').focus();
 
         set(presenceRef, { name: myName, online: true });
-        onDisconnect(presenceRef).remove(); onDisconnect(typingRef).remove();
+        onDisconnect(presenceRef).remove();
+        onDisconnect(typingRef).remove();
 
-        onValue(ref(db, 'chat/presence'), snap => {
-            const data = snap.val() || {}; const c = Object.values(data).filter(u=>u.online).length;
-            document.getElementById('onlineStatus').textContent = c===1 ? '1 agente conectado' : `${c} agentes conectados`;
+        const presAllRef = ref(db, 'chat/presence');
+        onValue(presAllRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            const users = Object.values(data).filter(u => u.online);
+            const count = users.length;
+            document.getElementById('onlineStatus').textContent = count === 1 ? '1 agente conectado' : `${count} agentes conectados`;
         });
 
-        onValue(ref(db, 'chat/typing'), snap => {
-            const data = snap.val() || {}; const others = Object.entries(data).filter(([id,v])=>id!==myId && v&&v.name).map(([,v])=>v.name);
-            const w = document.getElementById('typingWrap'); 
-            if(others.length) { document.getElementById('typingName').textContent = others[0]+' escribe'; w.classList.add('show'); scrollChat(); } 
-            else w.classList.remove('show');
+        const typingAllRef = ref(db, 'chat/typing');
+        onValue(typingAllRef, (snapshot) => {
+            const data = snapshot.val() || {};
+            const others = Object.entries(data).filter(([id, v]) => id !== myId && v && v.name).map(([, v]) => v.name);
+            const wrap = document.getElementById('typingWrap');
+            const nameEl = document.getElementById('typingName');
+            if (others.length > 0) {
+                nameEl.textContent = others[0] + ' está escribiendo';
+                wrap.classList.add('show');
+                scrollChat();
+            } else {
+                wrap.classList.remove('show');
+            }
         });
 
+        pushSystemMsg(`${myName} entró al canal`);
         getPendingOffer();
     };
 
     function renderMessage(msg) {
         const ws = document.getElementById('chatWorkspace');
+        const typingWrap = document.getElementById('typingWrap');
+
+        if (msg.type === 'system') {
+            const div = document.createElement('div');
+            div.className = 'msg-system';
+            div.textContent = msg.text;
+            ws.insertBefore(div, typingWrap);
+            scrollChat();
+            return;
+        }
+
         const isMe = msg.senderId === myId;
         const wrap = document.createElement('div');
         
@@ -472,23 +712,45 @@
             wrap.innerHTML = `<div class="msg">🤖 ${escHtml(msg.text)}</div>`;
         } else {
             wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
-            wrap.innerHTML = `${!isMe ? `<span class="msg-sender">${escHtml(msg.sender)}</span>` : ''}
+            wrap.innerHTML = `
+                ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender)}</span>` : ''}
                 <div class="msg ${isMe ? 'mine' : 'theirs'}">${escHtml(msg.text)}</div>
-                <span class="msg-time">${new Date(msg.ts).toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})}</span>`;
+                <span class="msg-time">${new Date(msg.ts).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit' })}</span>
+            `;
         }
-        ws.insertBefore(wrap, document.getElementById('typingWrap'));
+        ws.insertBefore(wrap, typingWrap);
         scrollChat();
     }
-    
-    function scrollChat() { document.getElementById('chatWorkspace').scrollTop = 9999; }
+
+    function scrollChat() {
+        const ws = document.getElementById('chatWorkspace');
+        ws.scrollTop = ws.scrollHeight;
+    }
+
+    function pushSystemMsg(text) {
+        push(messagesRef, { type: 'system', text, ts: Date.now() });
+    }
 
     window.sendMsg = function() {
-        const i = document.getElementById('chatInput'); if(!i.value.trim() || !myName) return;
-        push(messagesRef, { type: 'text', text: i.value, sender: myName, senderId: myId, ts: Date.now() });
-        set(typingRef, null); i.value = '';
+        const input = document.getElementById('chatInput');
+        const txt   = input.value.trim();
+        if (!txt || !myName) return;
+
+        push(messagesRef, { type: 'text', text: txt, sender: myName, senderId: myId, ts: Date.now() });
+
+        set(typingRef, null);
+        clearTimeout(typingTimer);
+        input.value = '';
     };
-    window.handleChatKey = e => { if(e.key==='Enter') window.sendMsg(); };
-    window.handleTyping = () => { if(!myName) return; set(typingRef, {name:myName}); clearTimeout(typingTimer); typingTimer = setTimeout(()=>set(typingRef,null), 2000); };
+
+    window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
+
+    window.handleTyping = function() {
+        if (!myName) return;
+        set(typingRef, { name: myName });
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => set(typingRef, null), 2000);
+    };
 
     /* ══════════════════════════════════════════════
        MOTOR WEBRTC (LLAMADAS ENCRIPTADAS P2P)
@@ -596,7 +858,7 @@
 
     /* ── PANICO LETHAL ── */
     window.panicExit = function() {
-        if (confirm('¿Pánico Total? Se destruirá hardware, señal y base de datos.')) {
+        if (confirm('¿Eliminar rastro y cerrar conexión?')) {
             hangUp(false, false); 
             remove(messagesRef).then(() => {
                 set(presenceRef, null);
@@ -606,18 +868,23 @@
         }
     };
 
-    /* ── ESCUCHA GLOBAL DE MENSAJES ── */
+    /* ── INIT Y ESCUCHA GLOBAL DE MENSAJES ── */
     renderStore();
-    getPendingOffer(); 
 
-    onValue(messagesRef, snap => {
-        const data = snap.val(); if(!data) return;
-        Object.entries(data).forEach(([k, msg]) => {
-            if(!seenKeys.has(k)) {
-                seenKeys.add(k);
+    onValue(messagesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        Object.entries(data).forEach(([key, msg]) => {
+            if (!seenKeys.has(key)) {
+                seenKeys.add(key);
+                
                 renderMessage(msg);
-                if(msg.senderId !== myId && msg.type === 'text' && !inChat) {
-                    showPromoToast();
+
+                if (msg.senderId !== myId && msg.type === 'text') {
+                    if (!inChat) {
+                        showPromoToast();
+                        offerSound.play().catch(e => console.log("Audio no reproducido automáticamente"));
+                    }
                 }
             }
         });
