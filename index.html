@@ -132,14 +132,7 @@
         .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 28px; height: 28px; border-radius: 50%; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.5rem; }
         .cart-total-value { font-size: 1.15rem; font-weight: 900; }
-        
-        /* PAYMENT MODAL */
-        .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 1rem; }
-        .payment-box { background: var(--bg-card); border-radius: 24px; padding: 1.5rem; width: 100%; max-width: 400px; position: relative; }
-        .payment-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 1rem; text-align: center; }
-        .payment-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 0.8rem; }
-        .btn-pay { width: 100%; background: var(--green); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; }
-        .btn-close-pay { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1rem; cursor: pointer; color: var(--text-muted); }
+        .btn-pay { width: 100%; background: var(--green); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; margin-bottom: 1rem; text-align: center; }
 
         /* FOOTER */
         .footer-checkout { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); padding: 0.7rem 1.2rem calc(0.7rem + var(--safe-bottom)); background: var(--bg-nav); border-top: 1px solid var(--border-color); z-index: 90; max-width: 600px; width: 100%; box-shadow: 0 -4px 12px rgba(0,0,0,0.03); }
@@ -170,43 +163,17 @@
         .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; }
 
         .chat-messages { flex: 1; padding: 1.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; position: relative; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
-        .msg-wrap { display: flex; flex-direction: column; max-width: 78%; position: relative; transition: opacity 0.4s ease; }
-        .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
-        .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
-        .msg-sender { font-size: 0.72rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.25rem; padding: 0 0.4rem; display: block; width: 100%; }
-        .msg-body-container { display: flex; align-items: center; gap: 0.5rem; position: relative; width: 100%; }
-        .msg-wrap.theirs .msg-body-container { justify-content: flex-start; }
-        .msg-wrap.mine .msg-body-container { justify-content: flex-end; }
-        .msg { padding: 0.85rem 1.05rem; border-radius: 20px; font-size: 0.92rem; line-height: 1.45; word-break: break-word; position: relative; }
-        .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
-        .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
-        .msg.only-emoji-bubble { background: transparent !important; border: none !important; font-size: 2.85rem; padding: 0.2rem 0.5rem; line-height: 1.2; display: inline-block; }
-        
-        .ani-heart { display: inline-block; animation: whatsapp-heart 1s infinite cubic-bezier(0.215, 0.61, 0.355, 1); transform-origin: center; }
-        .ani-face { display: inline-block; animation: whatsapp-face 1.4s infinite ease-in-out; }
-        .ani-fire { display: inline-block; animation: whatsapp-fire 1.8s infinite ease-in-out; transform-origin: bottom center; }
-        .ani-bounce { display: inline-block; animation: whatsapp-generic 2s infinite ease-in-out; }
-        @keyframes whatsapp-heart { 0% { transform: scale(1); } 14% { transform: scale(1.22); } 28% { transform: scale(1); } 42% { transform: scale(1.18); } 70% { transform: scale(1); } }
-        @keyframes whatsapp-face { 0%, 100% { transform: translateY(0) scale(1); } 30% { transform: translateY(-8px) scale(1.05); } 50% { transform: translateY(2px) scale(0.95); } }
-        @keyframes whatsapp-fire { 0%, 100% { transform: scale(1) rotate(-2deg); filter: brightness(1); } 50% { transform: scale(1.1) rotate(3deg); filter: brightness(1.2); } }
-        @keyframes whatsapp-generic { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
-
-        .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; animation: pulse-timer 1s infinite alternate; flex-shrink: 0; }
-        .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
-        .disintegrating { pointer-events: none; }
-        .particle { position: absolute; background: var(--purple-accent); border-radius: 50%; pointer-events: none; opacity: 0.8; }
-
-        .typing-wrap { align-self: flex-start; display: none; align-items: center; gap: 0.5rem; padding: 0.5rem 0; }
-        .typing-wrap.show { display: flex; }
-        .typing-bubble { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; border-bottom-left-radius: 4px; padding: 0.75rem 1rem; display: flex; gap: 4px; align-items: center; }
-        .dot { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-        .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; }
-
         .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
         .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
+        .btn-send { background: var(--purple-accent); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; cursor: pointer; }
+
+        /* MODAL CHAT ACCESS / VALIDACIÓN DE CLAVE Y COMPRAS */
+        .chat-access-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 1.5rem; }
+        .chat-access-box { background: var(--bg-card); border-radius: 20px; padding: 1.8rem; width: 100%; max-width: 320px; text-align: center; }
+        .chat-access-box h3 { margin-bottom: 0.5rem; font-size: 1.1rem; font-weight: 800; }
+        .chat-access-box p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 1.2rem; }
+        .chat-access-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.75rem; border-radius: 10px; color: var(--text-main); outline: none; font-size: 0.9rem; margin-bottom: 0.8rem; }
+        .access-error { color: var(--red); font-size: 0.75rem; margin-bottom: 0.8rem; display: block; }
 
         /* INTERFAZ FACETIME */
         #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2.5rem) 2rem calc(var(--safe-bottom) + 3.5rem); color: #fff; overscroll-behavior: none; }
@@ -224,8 +191,9 @@
         .ft-btn.btn-hangup { background: var(--red); width: 56px; height: 56px; transform: rotate(135deg); }
         .ft-btn.btn-ft-panic { background: rgba(255, 59, 48, 0.25); color: #ff453a; font-weight: 700; font-size: 0.72rem; border: 1px solid rgba(255, 59, 48, 0.3); }
         
-        .toast { position: fixed; bottom: 140px; left: 50%; transform: translateX(-50%) translateY(50px); background: rgba(0,0,0,0.85); color: #fff; padding: 0.75rem 1.2rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; z-index: 5000; opacity: 0; transition: transform 0.3s, opacity 0.3s; pointer-events: none; }
-        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        /* Toast notificación */
+        .toast { position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%) translateY(50px); background: rgba(0,0,0,0.85); color: white; padding: 0.75rem 1.2rem; border-radius: 20px; font-size: 0.85rem; z-index: 5000; opacity: 0; transition: all 0.3s ease; pointer-events: none; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     </style>
 </head>
 <body>
@@ -244,8 +212,8 @@
         </div>
     </header>
 
-    <div class="promo-banner-top" onclick="triggerPromoBanner()">
-        <p>¡Ofertas de hoy! Combo de hamburguesa artesanal + papas por $24.900 COP en restaurantes seleccionados.</p>
+    <div class="promo-banner-top" onclick="abrirModalAccesoChat()">
+        <p>¿Tienes una clave secreta y 5 compras? ¡Entra a nuestro chat cifrado aquí!</p>
         <span>→</span>
     </div>
 
@@ -287,6 +255,18 @@
     </div>
 </div>
 
+<div class="chat-access-modal" id="modalAccesoChat" style="display: none;">
+    <div class="chat-access-box">
+        <h3>Acceso a Canal Seguro</h3>
+        <p>Ingresa tu clave y verifica que tengas al menos 5 artículos en tu canasta.</p>
+        <input type="password" id="inputClaveChat" placeholder="Clave de acceso...">
+        <input type="number" id="inputComprasChat" placeholder="Cantidad de compras...">
+        <span class="access-error" id="errorAccesoChat"></span>
+        <button class="btn-pay" onclick="validarAccesoChat()">Verificar Acceso</button>
+        <button class="btn-view-cart" onclick="cerrarModalAccesoChat()" style="width:100%; margin-top:5px;">Cancelar</button>
+    </div>
+</div>
+
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeCart()"></div>
 <div class="cart-drawer" id="cartDrawer">
     <div class="drawer-handle"></div>
@@ -296,22 +276,8 @@
         <span class="cart-total-label">Subtotal</span>
         <span class="cart-total-value" id="cartTotal">$0</span>
     </div>
-    <div style="padding: 1rem 0;">
-        <button class="btn-pay" onclick="closeCart(); openPaymentPortal();">Ir a Pagar</button>
-    </div>
-</div>
-
-<div class="payment-modal" id="paymentModal">
-    <div class="payment-box">
-        <button class="btn-close-pay" onclick="closePaymentPortal()">✕</button>
-        <h2>Pasarela de Pago Segura PayU</h2>
-        <input type="text" placeholder="Número de tarjeta de crédito" maxlength="19">
-        <input type="text" placeholder="Nombre completo titular impreso">
-        <div style="display: flex; gap: 1rem;">
-            <input type="text" placeholder="MM/AA" maxlength="5">
-            <input type="text" placeholder="CVV" maxlength="4">
-        </div>
-        <button class="btn-pay" onclick="processPayment()">Verificar Pago</button>
+    <div style="padding: 0; margin-top: 1rem;">
+        <button class="btn-pay" onclick="closeCart(); handleCheckout();">Ir a Pagar</button>
     </div>
 </div>
 
@@ -356,7 +322,7 @@
     </div>
 
     <div class="chat-input-area">
-        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" autocomplete="off" oninput="handleTyping()">
+        <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" autocomplete="off">
         <button class="btn-send" onclick="sendMsg()">➤</button>
     </div>
 </div>
@@ -388,314 +354,214 @@
     </div>
 </div>
 
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, remove, update, off }
-        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+<script>
+    // Configuración general de la tienda y lógica
+    const CLAVE_SECRETA = "MI_CLAVE_SECRETA"; // Cambia tu clave aquí
+    let cart = [];
 
-    /* ── FIREBASE CONFIG ── */
-    const firebaseConfig = {
-        apiKey: "AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo",
-        authDomain: "data-base-store-3bbf8.firebaseapp.com",
-        databaseURL: "https://data-base-store-3bbf8-default-rtdb.firebaseio.com",
-        projectId: "data-base-store-3bbf8",
-        storageBucket: "data-base-store-3bbf8.firebasestorage.app",
-        messagingSenderId: "705642961874",
-        appId: "1:705642961874:web:06262c925765027ee7460b"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db  = getDatabase(app);
-
-    const CAT_META = { tecnologia: {}, comida: {}, mercado: {}, maquillaje: {}, moda: {}, futbol: {}, hogar: {}, drogueria: {} };
-    
-    /* ── DATA COMPLETA ── */
     const products = [
-        // 1. TECNOLOGÍA
-        { id:1,  cat:'tecnologia', name:'Apple iPhone 16 Pro Max 256GB', desc:'Titanio de grado aeroespacial, chip M-Series avanzado y pantalla Super Retina XDR.', price:6499000, img:'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=300&q=80' },
-        { id:2,  cat:'tecnologia', name:'Apple iPhone 16 128GB Black', desc:'Control de cámara avanzado, chip A18, carcasa de aluminio premium reciclado.', price:3849000, img:'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=300&q=80' },
-        // 2. COMIDA / RESTAURANTES
-        { id:3,  cat:'comida', name:'Combo Hamburguesa Artesanal + Papas', desc:'Carne Angus, queso cheddar fundido, tocineta crujiente y papas rústicas.', price:24900, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80' },
-        { id:4,  cat:'comida', name:'Pizza Familiar Pepperoni', desc:'Masa madre, salsa pomodoro italiana, pepperoni premium y queso mozzarella.', price:39900, img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=300&q=80' },
-        // 3. SUPERMERCADO
-        { id:5,  cat:'mercado', name:'Leche Descremada Alquería 1.1L', desc:'Leche larga vida descremada, aporte de calcio y vitaminas.', price:5200, img:'https://images.unsplash.com/photo-1550583724-b2692b753155?auto=format&fit=crop&w=300&q=80' },
-        { id:6,  cat:'mercado', name:'Arroz Diana Premium Bolsa 1kg', desc:'Arroz blanco seleccionado, grano entero y excelente textura.', price:4800, img:'https://images.unsplash.com/photo-1586201375761-83865001e316?auto=format&fit=crop&w=300&q=80' },
-        // 4. MAQUILLAJE
-        { id:7,  cat:'maquillaje', name:'Base Fit Me Maybelline Tono 115', desc:'Base líquida matificante, efecto natural, ideal para piel normal a grasa.', price:45900, img:'https://images.unsplash.com/photo-1631309852266-993d54836f1c?auto=format&fit=crop&w=300&q=80' },
-        { id:8,  cat:'maquillaje', name:'Labial Super Stay Matte Ink Pioneer', desc:'Labial líquido intransferible de larga duración hasta 16 horas.', price:39900, img:'https://images.unsplash.com/photo-1586495777744-44df3a7a3d0b?auto=format&fit=crop&w=300&q=80' },
-        // 5. MODA
-        { id:9,  cat:'moda', name:'Camiseta Básica Oversized Algodón', desc:'Corte holgado, tejido premium 100% algodón suave al tacto.', price:59900, img:'https://images.unsplash.com/photo-1521572267360-ee392905cc56?auto=format&fit=crop&w=300&q=80' },
-        { id:10, cat:'moda', name:'Jeans Cargo Hombre Azul Oscuro', desc:'Múltiples bolsillos utilitarios, corte recto y ajuste cómodo.', price:129900, img:'https://images.unsplash.com/photo-1542272201-b1ca355f86bf?auto=format&fit=crop&w=300&q=80' },
-        // 6. DEPORTES / FÚTBOL
-        { id:11, cat:'futbol', name:'Balón Fútbol Golty Evoking Pro', desc:'Balón profesional avalado, alta retención de aire y durabilidad.', price:89900, img:'https://images.unsplash.com/photo-1612872333045-8533362e6322?auto=format&fit=crop&w=300&q=80' },
-        { id:12, cat:'futbol', name:'Tines Deportivos Largos Pack x3', desc:'Tejido transpirable, refuerzo en talón y punta, diseño anatómico.', price:15000, img:'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&w=300&q=80' },
-        // 7. HOGAR
-        { id:13, cat:'hogar', name:'Freidora de Aire Airfryer 4L Digital', desc:'Cocción sin aceite, pantalla táctil LED, cesta antiadherente.', price:249900, img:'https://images.unsplash.com/photo-1583578351574-e866085a690d?auto=format&fit=crop&w=300&q=80' },
-        { id:14, cat:'hogar', name:'Juego de Sábanas Microfibra Cama Doble', desc:'Suaves, hipoalergénicas, incluye sábanas y fundas de almohada.', price:69900, img:'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?auto=format&fit=crop&w=300&q=80' },
-        // 8. DROGUERÍA / BIENESTAR
-        { id:15, cat:'drogueria', name:'Vitamina C 1000mg Frasco x60 Tabs', desc:'Suplemento dietario, apoyo al sistema inmunológico y antioxidante.', price:42000, img:'https://images.unsplash.com/photo-1584308666744-2484c47f1854?auto=format&fit=crop&w=300&q=80' },
-        { id:16, cat:'drogueria', name:'Protector Solar Facial Toque Seco 50g', desc:'Alta protección UVA/UVB, textura ligera sin efecto graso.', price:65000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80' }
+        { id: 1, cat: 'tecnologia', name: 'Apple iPhone 16 Pro Max 256GB', desc: 'Titanio de grado aeroespacial, chip M-Series avanzado y pantalla Super Retina XDR.', price: 6499000, img: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=300&q=80' },
+        { id: 2, cat: 'tecnologia', name: 'Apple iPhone 16 128GB Black', desc: 'Control de cámara avanzado, chip A18, carcasa de aluminio premium reciclado.', price: 3849000, img: 'https://images.unsplash.com/photo-1510557880182-3d4d3cba30a2?auto=format&fit=crop&w=300&q=80' },
+        { id: 3, cat: 'comida', name: 'Hamburguesa Artesanal Vibe', desc: 'Carne Angus, queso cheddar fundido, tocineta crujiente y vegetales frescos.', price: 24900, img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80' }
     ];
 
-    let cart = {};
-    let currentTheme = 'light';
-
-    // Funciones básicas de UI de la Tienda
-    window.toggleTheme = function() {
-        currentTheme = currentTheme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', currentTheme);
-    };
-
-    window.openCart = function() {
-        document.getElementById('drawerOverlay').classList.add('open');
-        document.getElementById('cartDrawer').classList.add('open');
-        renderCart();
-    };
-
-    window.closeCart = function() {
-        document.getElementById('drawerOverlay').classList.remove('open');
-        document.getElementById('cartDrawer').classList.remove('open');
-    };
-
-    window.filterCat = function(cat, btn) {
-        document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderProducts(cat);
-    };
-
-    window.filterSearch = function(input) {
-        const query = input.value.toLowerCase();
-        const clearBtn = document.getElementById('searchClear');
-        if(query.length > 0) {
-            clearBtn.classList.add('visible');
-        } else {
-            clearBtn.classList.remove('visible');
-        }
-        
-        const cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            const title = card.querySelector('.card-title').textContent.toLowerCase();
-            const desc = card.querySelector('.card-desc').textContent.toLowerCase();
-            if(title.includes(query) || desc.includes(query)) {
-                card.style.display = 'flex';
-            } else {
-                card.style.display = 'none';
-            }
-        });
-    };
-
-    window.clearSearch = function() {
-        const input = document.getElementById('searchBox');
-        input.value = '';
-        document.getElementById('searchClear').classList.remove('visible');
-        filterSearch(input);
-    };
-
-    function renderProducts(catFilter = 'all') {
+    function renderProducts(filteredProducts = products) {
         const grid = document.getElementById('productGrid');
         grid.innerHTML = '';
         
-        const filtered = catFilter === 'all' ? products : products.filter(p => p.cat === catFilter);
-        
-        if(filtered.length === 0) {
-            grid.innerHTML = `<div class="empty-state">No hay productos disponibles en esta categoría.</div>`;
+        if(filteredProducts.length === 0) {
+            grid.innerHTML = `<div class="empty-state"><p>No se encontraron productos en esta categoría.</p></div>`;
             return;
         }
 
-        filtered.forEach(p => {
+        filteredProducts.forEach(p => {
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
-                <div class="card-tag">${p.cat}</div>
                 <div class="img-container">
+                    <span class="card-tag">${p.cat}</span>
                     <img src="${p.img}" alt="${p.name}" loading="lazy">
                 </div>
                 <div class="card-title">${p.name}</div>
                 <div class="card-desc">${p.desc}</div>
                 <div class="card-footer">
-                    <span class="price">$${p.price.toLocaleString('es-CO')}</span>
-                    <button class="btn-add ${cart[p.id] ? 'added' : ''}" onclick="event.stopPropagation(); toggleCartItem(${p.id})">${cart[p.id] ? '✓' : '+'}</button>
+                    <span class="price">$${p.price.toLocaleString()}</span>
+                    <button class="btn-add" onclick="addToCart(${p.id})">+</button>
                 </div>
             `;
             grid.appendChild(card);
         });
-        updateBadge();
     }
 
-    window.toggleCartItem = function(id) {
-        if(cart[id]) {
-            delete cart[id];
-        } else {
-            cart[id] = 1;
-        }
-        renderProducts(document.querySelector('.btn-cat.active').getAttribute('onclick').split("'")[1]);
-        renderCart();
-        updateBadge();
-        
-        const badge = document.getElementById('cartBadge');
-        badge.classList.add('pop');
-        setTimeout(() => badge.classList.remove('pop'), 300);
-    };
+    function filterCat(cat, btn) {
+        document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if(cat === 'all') renderProducts();
+        else renderProducts(products.filter(p => p.cat === cat));
+    }
 
-    function renderCart() {
+    function filterSearch(input) {
+        const val = input.value.toLowerCase();
+        const clearBtn = document.getElementById('searchClear');
+        clearBtn.classList.toggle('visible', val.length > 0);
+        renderProducts(products.filter(p => p.name.toLowerCase().includes(val) || p.desc.toLowerCase().includes(val)));
+    }
+
+    function clearSearch() {
+        document.getElementById('searchBox').value = '';
+        document.getElementById('searchClear').classList.remove('visible');
+        renderProducts();
+    }
+
+    function addToCart(id) {
+        const p = products.find(x => x.id === id);
+        const exist = cart.find(x => x.id === id);
+        if(exist) exist.qty++;
+        else cart.push({ ...p, qty: 1 });
+        
+        updateCartBadge();
+        showToast("¡Producto agregado a la canasta!");
+    }
+
+    function updateCartBadge() {
+        const count = cart.reduce((a, b) => a + b.qty, 0);
+        document.getElementById('cartBadge').innerText = count;
+        document.getElementById('footerCount').innerText = `(${count})`;
+        renderCartItems();
+    }
+
+    function renderCartItems() {
         const container = document.getElementById('cartItems');
         container.innerHTML = '';
         let total = 0;
-        let count = 0;
+        
+        if(cart.length === 0) {
+            container.innerHTML = `<p style="padding: 2rem 0; text-align: center; color: var(--text-muted);">Tu canasta está vacía</p>`;
+            document.getElementById('cartTotal').innerText = "$0";
+            return;
+        }
 
-        for(const [id, qty] of Object.entries(cart)) {
-            const p = products.find(item => item.id == id);
-            if(!p) continue;
-            
-            count += qty;
-            total += p.price * qty;
-
+        cart.forEach(item => {
+            total += item.price * item.qty;
             const row = document.createElement('div');
             row.className = 'cart-item-row';
             row.innerHTML = `
                 <div class="cat-info">
-                    <div class="cat-name">${p.name}</div>
-                    <div class="cat-price-sub">$${p.price.toLocaleString('es-CO')} c/u</div>
+                    <div class="cat-name">${item.name}</div>
+                    <div class="cat-price-sub">$${item.price.toLocaleString()} x ${item.qty}</div>
                 </div>
                 <div class="cat-qty">
-                    <button class="qty-btn" onclick="updateQty(${p.id}, -1)">-</button>
-                    <span>${qty}</span>
-                    <button class="qty-btn" onclick="updateQty(${p.id}, 1)">+</button>
+                    <button class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
+                    <span>${item.qty}</span>
+                    <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
                 </div>
             `;
             container.appendChild(row);
-        }
-
-        if(count === 0) {
-            container.innerHTML = `<div style="padding: 2rem 0; text-align:center; color:var(--text-muted);">Tu canasta está vacía</div>`;
-        }
-
-        document.getElementById('cartTotal').textContent = `$${total.toLocaleString('es-CO')}`;
-        document.getElementById('footerCount').textContent = `(${count})`;
+        });
+        document.getElementById('cartTotal').innerText = "$" + total.toLocaleString();
     }
 
-    window.updateQty = function(id, change) {
-        if(cart[id] + change > 0) {
-            cart[id] += change;
-        } else {
-            delete cart[id];
+    function updateQty(id, val) {
+        const item = cart.find(x => x.id === id);
+        if(item) {
+            item.qty += val;
+            if(item.qty <= 0) cart = cart.filter(x => x.id !== id);
         }
-        renderCart();
-        renderProducts(document.querySelector('.btn-cat.active').getAttribute('onclick').split("'")[1]);
-        updateBadge();
-    };
-
-    function updateBadge() {
-        let count = 0;
-        for(const qty of Object.values(cart)) { count += qty; }
-        document.getElementById('cartBadge').textContent = count;
+        updateCartBadge();
     }
 
-    window.handleCheckout = function() {
-        let count = 0;
-        for(const qty of Object.values(cart)) { count += qty; }
-        if(count === 0) {
-            showToast("Agrega productos a tu canasta antes de continuar.");
-            return;
-        }
-        openCart();
-    };
-
-    window.openPaymentPortal = function() {
-        document.getElementById('paymentModal').style.display = 'flex';
-    };
-
-    window.closePaymentPortal = function() {
-        document.getElementById('paymentModal').style.display = 'none';
-    };
-
-    window.processPayment = function() {
-        showToast("¡Pago verificado y procesado con éxito!");
-        closePaymentPortal();
-        cart = {};
-        renderCart();
-        renderProducts('all');
-    };
-
-    window.triggerPromoBanner = function() {
-        const toast = document.getElementById('fakeOfferToast');
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3500);
-    };
+    function openCart() {
+        document.getElementById('cartDrawer').classList.add('open');
+        document.getElementById('drawerOverlay').classList.add('open');
+    }
+    
+    function closeCart() {
+        document.getElementById('cartDrawer').classList.remove('open');
+        document.getElementById('drawerOverlay').classList.remove('open');
+    }
 
     function showToast(msg) {
         const toast = document.getElementById('toast');
-        toast.textContent = msg;
+        toast.innerText = msg;
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+        setTimeout(() => toast.classList.remove('show'), 2000);
     }
 
-    // Funciones base de Chat y llamadas (Simuladas para mantener la interfaz)
-    window.joinChat = function() {
-        const name = document.getElementById('nameInput').value.trim();
-        if(name) {
-            document.getElementById('nameModal').style.display = 'none';
-            document.getElementById('onlineStatus').textContent = 'Conectado de forma segura';
+    // Funciones del Chat Seguro
+    function abrirModalAccesoChat() {
+        document.getElementById('modalAccesoChat').style.display = 'flex';
+    }
+
+    function cerrarModalAccesoChat() {
+        document.getElementById('modalAccesoChat').style.display = 'none';
+        document.getElementById('errorAccesoChat').innerText = '';
+    }
+
+    function validarAccesoChat() {
+        const clave = document.getElementById('inputClaveChat').value;
+        const comprasIngresadas = parseInt(document.getElementById('inputComprasChat').value) || 0;
+        const totalItemsEnCanasta = cart.reduce((a, b) => a + b.qty, 0);
+        const errorSpan = document.getElementById('errorAccesoChat');
+
+        if (clave !== CLAVE_SECRETA) {
+            errorSpan.innerText = "Clave de acceso incorrecta.";
+            return;
         }
-    };
 
-    window.initiateCall = function(type) {
-        document.getElementById('seccion-facetime').style.display = 'flex';
-        document.getElementById('ftCallStatus').textContent = `Estableciendo llamada ${type}...`;
-    };
+        // Validación de las 5 compras solicitadas
+        if (comprasIngresadas < 5 || totalItemsEnCanasta < 5) {
+            errorSpan.innerText = "Se requieren al menos 5 compras o artículos en la canasta para entrar.";
+            return;
+        }
 
-    window.hangUpCall = function() {
-        document.getElementById('seccion-facetime').style.display = 'none';
-    };
-
-    window.panicExit = function() {
-        document.getElementById('seccion-facetime').style.display = 'none';
-        document.getElementById('seccion-chat').style.display = 'none';
-    };
-
-    window.minimizeCallToChat = function() {
-        document.getElementById('seccion-facetime').style.display = 'none';
+        errorSpan.innerText = "";
+        cerrarModalAccesoChat();
+        // Abre sección chat
         document.getElementById('seccion-chat').style.display = 'flex';
-    };
+        document.getElementById('nameModal').style.display = 'flex'; // Pide el pseudónimo
+    }
 
-    window.toggleMuteMic = function() {
-        const btn = document.getElementById('btnFtMute');
-        btn.classList.toggle('active');
-    };
+    function joinChat() {
+        const alias = document.getElementById('nameInput').value.trim();
+        if(alias) {
+            document.getElementById('nameModal').style.display = 'none';
+            document.getElementById('onlineStatus').innerText = "Conectado de forma segura";
+        }
+    }
 
-    window.toggleVideoTrack = function() {
-        const btn = document.getElementById('btnFtVideo');
-        btn.classList.toggle('active');
-    };
+    function panicExit() {
+        document.getElementById('seccion-chat').style.display = 'none';
+        document.getElementById('seccion-facetime').style.display = 'none';
+        window.location.href = "https://www.google.com";
+    }
 
-    window.sendMsg = function() {
+    function sendMsg() {
         const input = document.getElementById('chatInput');
-        const text = input.value.trim();
-        if(text) {
-            const workspace = document.getElementById('chatWorkspace');
-            const msgWrap = document.createElement('div');
-            msgWrap.className = 'msg-wrap mine';
-            msgWrap.innerHTML = `
+        if (input.value.trim() !== "") {
+            const msgArea = document.getElementById('chatWorkspace');
+            const wrap = document.createElement('div');
+            wrap.className = "msg-wrap mine";
+            wrap.innerHTML = `
+                <span class="msg-sender">Tú</span>
                 <div class="msg-body-container">
-                    <div class="msg mine">${text}</div>
+                    <div class="msg mine">${input.value}</div>
                 </div>
             `;
-            workspace.appendChild(msgWrap);
-            input.value = '';
-            workspace.scrollTop = workspace.scrollHeight;
+            msgArea.appendChild(wrap);
+            input.value = "";
+            msgArea.scrollTop = msgArea.scrollHeight;
         }
-    };
+    }
 
-    window.handleChatKey = function(e) {
-        if(e.key === 'Enter') sendMsg();
-    };
+    function handleCheckout() {
+        alert("¡Pedido procesado exitosamente en la tienda!");
+        cart = [];
+        updateCartBadge();
+        closeCart();
+    }
 
-    window.handleTyping = function() {};
-
-    // Inicialización al cargar la página
-    renderProducts('all');
+    // Inicializar
+    renderProducts();
 </script>
 </body>
 </html>
-
-```
