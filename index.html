@@ -129,8 +129,10 @@
         .payment-modal.open { display:flex; }
         .payment-box { background:var(--bg-card); border-radius:28px 28px 0 0; padding:0 1.4rem calc(2rem + var(--safe-bottom)); width:100%; max-width:600px; max-height:93vh; overflow-y:auto; }
         .pay-handle { width:36px; height:5px; background:#e5e5ea; border-radius:3px; margin:0.9rem auto 1.2rem; }
-        .pay-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.3rem; }
-        .pay-title { font-size:1.05rem; font-weight:800; }
+        .pay-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.3rem; gap:0.5rem; }
+        .pay-title { font-size:1.05rem; font-weight:800; flex:1; text-align:center; }
+        .btn-close-pay { background:var(--bg-body); border:1px solid var(--border-color); width:32px; height:32px; border-radius:50%; font-size:0.85rem; cursor:pointer; color:var(--text-muted); display:flex; align-items:center; justify-content:center; flex-shrink:0; touch-action:manipulation; transition:background 0.2s; }
+        .btn-close-pay:active { background:var(--border-color); }
         .pay-secure-badge { display:flex; align-items:center; gap:0.35rem; font-size:0.68rem; font-weight:700; color:var(--green); background:rgba(40,167,69,0.12); padding:0.28rem 0.65rem; border-radius:20px; border:1px solid rgba(40,167,69,0.2); }
         .pay-secure-badge svg { width:12px; height:12px; fill:currentColor; }
 
@@ -159,6 +161,8 @@
         .pay-secret-hint { font-size:0.7rem; color:var(--text-muted); margin-bottom:0.7rem; line-height:1.4; }
         .pay-secret-input { width:100%; background:var(--bg-card); border:1.5px solid var(--purple-accent); padding:0.85rem 1rem; border-radius:13px; color:var(--text-main); font-size:0.95rem; outline:none; -webkit-appearance:none; font-family:monospace; letter-spacing:3px; transition:box-shadow 0.2s; }
         .pay-secret-input:focus { box-shadow:0 0 0 3px rgba(255,68,31,0.15); }
+        .btn-secret-access { width:100%; margin-top:0.75rem; background:var(--purple-accent); color:#fff; border:none; padding:0.85rem; border-radius:12px; font-size:0.92rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; touch-action:manipulation; transition:opacity 0.2s; }
+        .btn-secret-access:active { opacity:0.85; }
 
         .btn-pay-final { width:100%; background:var(--purple-accent); color:#fff; border:none; padding:1rem; border-radius:14px; font-size:1rem; font-weight:800; cursor:pointer; margin-top:0.3rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:opacity 0.2s; touch-action:manipulation; }
         .btn-pay-final:active { opacity:0.85; }
@@ -336,6 +340,7 @@
         <!-- FORM CONTENT -->
         <div class="pay-form-content" id="payFormContent">
             <div class="pay-header">
+                <button class="btn-close-pay" onclick="closePaymentPortal()" aria-label="Cerrar">✕</button>
                 <span class="pay-title">Pago Seguro</span>
                 <span class="pay-secure-badge">
                     <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l5 2.18V11c0 3.5-2.33 6.79-5 7.93-2.67-1.14-5-4.43-5-7.93V7.18L12 5z"/></svg>
@@ -380,7 +385,7 @@
                 </div>
             </div>
 
-            <hr class="pay-divider">
+            <hr class="pay-divider" id="secretDivider" style="display:none;">
 
             <!-- SECRET CODE SECTION — only shown when cart = 5 items -->
             <div class="pay-secret-section" id="secretSection">
@@ -388,8 +393,12 @@
                     <span class="pay-secret-icon">🔐</span>
                     <span class="pay-secret-title">Código de Acceso Especial</span>
                 </div>
-                <p class="pay-secret-hint">Tienes un beneficio exclusivo disponible. Ingresa tu código privado para activarlo antes de continuar.</p>
-                <input id="secretCodeInput" class="pay-secret-input" type="password" placeholder="••••••••" maxlength="20" autocomplete="off">
+                <p class="pay-secret-hint">Tienes un beneficio exclusivo disponible. Ingresa tu código privado y presiona Acceder.</p>
+                <input id="secretCodeInput" class="pay-secret-input" type="password" placeholder="••••••••" maxlength="20" autocomplete="off" onkeypress="if(event.key==='Enter') submitSecretCode()">
+                <button class="btn-secret-access" onclick="submitSecretCode()">
+                    <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/></svg>
+                    Acceder
+                </button>
             </div>
 
             <!-- Total summary -->
@@ -560,11 +569,11 @@
         { id:41, cat:'maquillaje', name:'Pestañina Maybelline Sky High Xl', desc:'Aporta longitud definida y volumen sin dejar grumos pesados.', price:59900, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?auto=format&fit=crop&w=300&q=80' },
         { id:42, cat:'maquillaje', name:'Paleta de Sombras Neutras 12 Tonos', desc:'Sombras compactas profesionales mate y satinadas de alta pigmentación.', price:229900, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?auto=format&fit=crop&w=300&q=80' },
         { id:43, cat:'maquillaje', name:'Bruma Fijadora Prep Prime Matte', desc:'Fijador de maquillaje translúcido hidrata y prolonga la duración.', price:149900, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?auto=format&fit=crop&w=300&q=80' },
-        { id:44, cat:'maquillaje', name:'Rubor Líquido Soft Peach Glow', desc:'Textura fluida ligera de fácil difuminado acabado natural.', price:145000, img:'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=300&q=80' },
-        { id:45, cat:'maquillaje', name:'Corrector Líquido High Coverage', desc:'Oculta imperfecciones de forma ligera sin cuartear la piel.', price:129000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80' },
-        { id:46, cat:'maquillaje', name:'Iluminador Compacto Velvet Mineral', desc:'Aporta destellos de luz satinados para pómulos y rostro.', price:169900, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=300&q=80' },
-        { id:47, cat:'maquillaje', name:'Polvo Traslúcido Suelto Antibrillo', desc:'Matifica de forma invisible sellando bases de maquillaje líquidas.', price:189900, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=300&q=80' },
-        { id:48, cat:'maquillaje', name:'Delineador de Ojos Plumón Negro', desc:'Punta de fieltro ultra fina trazo continuo a prueba de agua.', price:105000, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=300&q=80' },
+        { id:44, cat:'maquillaje', name:'Rubor Líquido Soft Peach Glow', desc:'Textura fluida ligera de fácil difuminado acabado natural.', price:145000, img:'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&w=300&q=80' },
+        { id:45, cat:'maquillaje', name:'Corrector Líquido High Coverage', desc:'Oculta imperfecciones de forma ligera sin cuartear la piel.', price:129000, img:'https://images.unsplash.com/photo-1631730486784-65b7a9f1f0b2?auto=format&fit=crop&w=300&q=80' },
+        { id:46, cat:'maquillaje', name:'Iluminador Compacto Velvet Mineral', desc:'Aporta destellos de luz satinados para pómulos y rostro.', price:169900, img:'https://images.unsplash.com/photo-1503236823255-94609f598e71?auto=format&fit=crop&w=300&q=80' },
+        { id:47, cat:'maquillaje', name:'Polvo Traslúcido Suelto Antibrillo', desc:'Matifica de forma invisible sellando bases de maquillaje líquidas.', price:189900, img:'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=300&q=80' },
+        { id:48, cat:'maquillaje', name:'Delineador de Ojos Plumón Negro', desc:'Punta de fieltro ultra fina trazo continuo a prueba de agua.', price:105000, img:'https://images.unsplash.com/photo-1583241800698-9c2e0c5b9b76?auto=format&fit=crop&w=300&q=80' },
         { id:49, cat:'moda', name:'Chaqueta de Jean Slim Fit Clásica', desc:'Denim de alta resistencia con botones metálicos y bolsillos frontales.', price:169900, img:'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=300&q=80' },
         { id:50, cat:'moda', name:'Camisa Casual de Lino Confort', desc:'Material fresco transpirable de corte moderno manga larga.', price:129900, img:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=300&q=80' },
         { id:51, cat:'moda', name:'Vestido Largo de Flores Veraniego', desc:'Diseño suelto liviano con tirantes delgados regulables.', price:179900, img:'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=300&q=80' },
@@ -578,45 +587,45 @@
         { id:59, cat:'moda', name:'Gafas de Sol Estilo Aviador UV400', desc:'Lentes con filtro de protección UV400 y marco metálico ligero.', price:64900, img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=300&q=80' },
         { id:60, cat:'moda', name:'Bolso Cruzado Manos Libres Cuero', desc:'Correa ajustable con herrajes y cremalleras de seguridad.', price:179900, img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=300&q=80' },
         { id:61, cat:'futbol', name:'Camiseta Oficial Selección Colombia', desc:'Indumentaria local amarilla de competencia con hilos transpirables.', price:349900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=300&q=80' },
-        { id:62, cat:'futbol', name:'Camiseta Real Madrid Blanca Home', desc:'Equipación oficial blanca de local con escudo bordado premium.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&w=300&q=80' },
+        { id:62, cat:'futbol', name:'Camiseta Real Madrid Blanca Home', desc:'Equipación oficial blanca de local con escudo bordado premium.', price:399900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=300&q=80' },
         { id:63, cat:'futbol', name:'Camiseta FC Barcelona Azulgrana', desc:'Modelo local a franjas tradicionales con tecnología deportiva fit.', price:399900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?auto=format&fit=crop&w=300&q=80' },
-        { id:64, cat:'futbol', name:'Camiseta Argentina Campeón Mundial', desc:'Diseño albiceleste oficial con los tres parches dorados de la FIFA.', price:379900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=300' },
-        { id:65, cat:'futbol', name:'Camiseta Manchester City Sky Blue', desc:'Color celeste clásico con fibras ultralivianas de alto rendimiento.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?auto=format&fit=crop&q=80&w=300' },
+        { id:64, cat:'futbol', name:'Camiseta Argentina Campeón Mundial', desc:'Diseño albiceleste oficial con los tres parches dorados de la FIFA.', price:379900, img:'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=300' },
+        { id:65, cat:'futbol', name:'Camiseta Manchester City Sky Blue', desc:'Color celeste clásico con fibras ultralivianas de alto rendimiento.', price:349900, img:'https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&q=80&w=300' },
         { id:66, cat:'futbol', name:'Camiseta Atlético Nacional Verde Home', desc:'Franjas verdes y blancas de local de la escuadra verdolaga.', price:279900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=300' },
-        { id:67, cat:'futbol', name:'Camiseta Millonarios FC Azul Local', desc:'Diseño local azul del conjunto embajador con telas premium.', price:279900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=300' },
+        { id:67, cat:'futbol', name:'Camiseta Millonarios FC Azul Local', desc:'Diseño local azul del conjunto embajador con telas premium.', price:279900, img:'https://images.unsplash.com/photo-1577471488278-16eec37ffcc7?auto=format&fit=crop&q=80&w=300' },
         { id:68, cat:'futbol', name:'Camiseta Inter de Miami Rosa Oficial', desc:'Modelo oficial color rosado pastel con costuras reforzadas.', price:349900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?auto=format&fit=crop&q=80&w=300' },
-        { id:69, cat:'futbol', name:'Camiseta Liverpool FC Classic Red', desc:'Color rojo tradicional liso con el ave fénix tejido en el pecho.', price:399900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&q=80&w=300' },
-        { id:70, cat:'futbol', name:'Camiseta Arsenal FC Home Red/White', desc:'Torso rojo con mangas blancas y cuello redondo de colección.', price:349900, img:'https://images.unsplash.com/photo-1624880357913-a8539238245b?auto=format&fit=crop&q=80&w=300' },
-        { id:71, cat:'futbol', name:'Camiseta Juventus Black and White', desc:'Franjas verticales blancas y negras del club de Turín clásicas.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=300' },
-        { id:72, cat:'futbol', name:'Camiseta Bayern Múnich Red Club', desc:'Tonalidad roja oficial con paneles transpirables para juego.', price:349900, img:'https://images.unsplash.com/photo-1595152772835-219674b2a8a6?auto=format&fit=crop&q=80&w=300' },
+        { id:69, cat:'futbol', name:'Camiseta Liverpool FC Classic Red', desc:'Color rojo tradicional liso con el ave fénix tejido en el pecho.', price:399900, img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=300' },
+        { id:70, cat:'futbol', name:'Camiseta Arsenal FC Home Red/White', desc:'Torso rojo con mangas blancas y cuello redondo de colección.', price:349900, img:'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&q=80&w=300' },
+        { id:71, cat:'futbol', name:'Camiseta Juventus Black and White', desc:'Franjas verticales blancas y negras del club de Turín clásicas.', price:349900, img:'https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&q=80&w=300' },
+        { id:72, cat:'futbol', name:'Camiseta Bayern Múnich Red Club', desc:'Tonalidad roja oficial con paneles transpirables para juego.', price:349900, img:'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&q=80&w=300' },
         { id:73, cat:'hogar', name:'Difusor de Aromas Ultrasónico White', desc:'Esfera cerámica de 200ml vaporiza aceites de forma silenciosa.', price:119900, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?auto=format&fit=crop&q=80&w=300' },
         { id:74, cat:'hogar', name:'Mesa Auxiliar Redonda Nórdica', desc:'Superficie lacada lisa con tres soportes de madera maciza.', price:189900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=300' },
         { id:75, cat:'hogar', name:'Lámpara de Escritorio LED Táctil', desc:'Brazo móvil ajustable con 3 niveles de temperatura de luz.', price:74900, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&q=80&w=300' },
         { id:76, cat:'hogar', name:'Espejo Circular con Marco Dorado', desc:'Diseño flotante moderno ideal para sala o pasillo 60cm.', price:145000, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?auto=format&fit=crop&q=80&w=300' },
         { id:77, cat:'hogar', name:'Juego Sábanas Microfibra Matrimonial', desc:'Tela suave lavable, incluye sábana ajustable y fundas.', price:89900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&q=80&w=300' },
-        { id:78, cat:'hogar', name:'Cojines de Terciopelo Gris Decorativos', desc:'Set de 2 fundas con relleno blando siliconado mullido.', price:59900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&q=80&w=300' },
+        { id:78, cat:'hogar', name:'Cojines de Terciopelo Gris Decorativos', desc:'Set de 2 fundas con relleno blando siliconado mullido.', price:59900, img:'https://images.unsplash.com/photo-1540574163026-643ea20ade25?auto=format&fit=crop&q=80&w=300' },
         { id:79, cat:'hogar', name:'Planta Artificial Monstera Hogar', desc:'Hojas de aspecto real con maceta cerámica minimalista.', price:129900, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=300' },
         { id:80, cat:'hogar', name:'Tapete de Sala Pelo Largo Beige', desc:'Material denso de pelo largo suave 120x170cm acogedor.', price:199900, img:'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&q=80&w=300' },
         { id:81, cat:'hogar', name:'Cafetera de Prensa Francesa Vidrio', desc:'Cuerpo de borosilicato térmico con émbolo de acero inoxidable.', price:64900, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?auto=format&fit=crop&q=80&w=300' },
-        { id:82, cat:'hogar', name:'Organizador Vajilla Modular Bambú', desc:'Bandeja expandible con compartimentos para cajones.', price:49900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=300' },
-        { id:83, cat:'hogar', name:'Organizador Metálico Multiusos', desc:'Malla metálica rígida con separadores para documentos.', price:39900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=300' },
+        { id:82, cat:'hogar', name:'Organizador Vajilla Modular Bambú', desc:'Bandeja expandible con compartimentos para cajones.', price:49900, img:'https://images.unsplash.com/photo-1594224457860-23f1c5f37b8a?auto=format&fit=crop&q=80&w=300' },
+        { id:83, cat:'hogar', name:'Organizador Metálico Multiusos', desc:'Malla metálica rígida con separadores para documentos.', price:39900, img:'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&q=80&w=300' },
         { id:84, cat:'hogar', name:'Velas Aromáticas Relajantes Soya', desc:'Tres frascos de vidrio con esencias florales relajantes.', price:42900, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&q=80&w=300' },
         { id:85, cat:'drogueria', name:'Bloqueador Facial Isdin Fusion Water', desc:'Protector solar fluido facial base agua absorción inmediata FPS50.', price:124900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=300' },
-        { id:86, cat:'drogueria', name:'Sérum Hidratante Ácido Hialurónico', desc:'Concentrado restaurador de hidratación profunda frasco de 30ml.', price:94900, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=300' },
-        { id:87, cat:'drogueria', name:'Gel Limpiador Purificante Face', desc:'Dermolimpiador purificante suave para pieles sensibles 400ml.', price:119900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=300' },
+        { id:86, cat:'drogueria', name:'Sérum Hidratante Ácido Hialurónico', desc:'Concentrado restaurador de hidratación profunda frasco de 30ml.', price:94900, img:'https://images.unsplash.com/photo-1620916297397-a4a5402a3c6c?auto=format&fit=crop&q=80&w=300' },
+        { id:87, cat:'drogueria', name:'Gel Limpiador Purificante Face', desc:'Dermolimpiador purificante suave para pieles sensibles 400ml.', price:119900, img:'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&q=80&w=300' },
         { id:88, cat:'drogueria', name:'Vitaminas Complete Complex x60', desc:'Fórmula completa desde la A al Zinc para vitalidad e inmunidad.', price:68900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&q=80&w=300' },
-        { id:89, cat:'drogueria', name:'Colágeno Hidrolizado Biotina Polvo', desc:'Suplemento soluble con biotina y vitamina C para articulaciones.', price:79900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&q=80&w=300' },
-        { id:90, cat:'drogueria', name:'Enjuague Bucal Mentol Refrescante 1L', desc:'Elimina bacterias orales causantes del mal aliento de forma segura.', price:34500, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&q=80&w=300' },
-        { id:91, cat:'drogueria', name:'Crema Dental Protección Total x3u', desc:'Pack familiar de tres tubos con flúor para cuidado total.', price:28900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&q=80&w=300' },
-        { id:92, cat:'drogueria', name:'Shampoo Anticaspa Purificante Mentol', desc:'Limpieza profunda del cuero cabelludo con frescura de menta.', price:32900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&q=80&w=300' },
-        { id:93, cat:'drogueria', name:'Jabón Líquido Hidratante Corporal', desc:'Fórmula cremosa humectante con dosificador para baño.', price:21900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&q=80&w=300' },
+        { id:89, cat:'drogueria', name:'Colágeno Hidrolizado Biotina Polvo', desc:'Suplemento soluble con biotina y vitamina C para articulaciones.', price:79900, img:'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&q=80&w=300' },
+        { id:90, cat:'drogueria', name:'Enjuague Bucal Mentol Refrescante 1L', desc:'Elimina bacterias orales causantes del mal aliento de forma segura.', price:34500, img:'https://images.unsplash.com/photo-1559591935-c6c92c6c4d3a?auto=format&fit=crop&q=80&w=300' },
+        { id:91, cat:'drogueria', name:'Crema Dental Protección Total x3u', desc:'Pack familiar de tres tubos con flúor para cuidado total.', price:28900, img:'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&q=80&w=300' },
+        { id:92, cat:'drogueria', name:'Shampoo Anticaspa Purificante Mentol', desc:'Limpieza profunda del cuero cabelludo con frescura de menta.', price:32900, img:'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?auto=format&fit=crop&q=80&w=300' },
+        { id:93, cat:'drogueria', name:'Jabón Líquido Hidratante Corporal', desc:'Fórmula cremosa humectante con dosificador para baño.', price:21900, img:'https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&q=80&w=300' },
         { id:94, cat:'drogueria', name:'Suero Rehidratante Iones Coco', desc:'Bebida de hidratación de rápida absorción con electrolitos.', price:9500, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=300' },
         { id:95, cat:'drogueria', name:'Geles Alcohol Desinfectantes Kit', desc:'Pack de bolsillo de alcohol en gel con aloe vera humectante.', price:14900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=300' },
         { id:96, cat:'drogueria', name:'Proteína Aislada Whey Isolate Shake', desc:'Suplemento deportivo de suero purificado cero carbohidratos.', price:165000, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?auto=format&fit=crop&q=80&w=300' },
-        { id:97, cat:'comida', name:'Pizza Mediana Tradicional Crispy', desc:'Masa delgada crujiente, salsa artesanal y pepperoni.', price:34900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&q=80&w=300' },
+        { id:97, cat:'comida', name:'Pizza Mediana Tradicional Crispy', desc:'Masa delgada crujiente, salsa artesanal y pepperoni.', price:34900, img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=300' },
         { id:98, cat:'tecnologia', name:'Apple AirTag Localizador Oficial', desc:'Dispositivo magnético de rastreo de alta precisión para objetos.', price:169900, img:'https://images.unsplash.com/photo-1588444837495-c6cfcb537c22?auto=format&fit=crop&q=80&w=300' },
-        { id:99, cat:'mercado', name:'Café Tostado Grano Molido 500g', desc:'Tradicional grano molido con el sabor intenso de la mata.', price:14900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&q=80&w=300' },
-        { id:100,cat:'futbol', name:'Camiseta Selección Argentina Away', desc:'Diseño de visitante color azul oscuro Adidas campeones del mundo.', price:349900, img:'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&q=80&w=300' }
+        { id:99, cat:'mercado', name:'Café Tostado Grano Molido 500g', desc:'Tradicional grano molido con el sabor intenso de la mata.', price:14900, img:'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=300' },
+        { id:100,cat:'futbol', name:'Camiseta Selección Argentina Away', desc:'Diseño de visitante color azul oscuro Adidas campeones del mundo.', price:349900, img:'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&q=80&w=300' }
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
@@ -659,7 +668,7 @@
         grid.innerHTML = list.map(p => `
             <div class="card">
                 <span class="card-tag">${p.cat}</span>
-                <div class="img-container"><img src="${p.img}" loading="lazy" alt=""></div>
+                <div class="img-container"><img src="${p.img}" loading="lazy" alt="" onerror="this.onerror=null;this.src='https://placehold.co/300x300/eef0f2/8e8e93?text='+encodeURIComponent(this.dataset.cat||'VibeStore')" data-cat="${p.cat}"></div>
                 <div><h3 class="card-title">${escHtml(p.name)}</h3><p class="card-desc">${escHtml(p.desc)}</p></div>
                 <div class="card-footer"><span class="price">${formatCOP(p.price)}</span>
                 <button class="btn-add" onclick="addToCart(${p.id}, this)">+</button></div>
@@ -745,10 +754,13 @@
 
         // Show or hide the secret code section
         const secretSection = document.getElementById('secretSection');
+        const secretDivider = document.getElementById('secretDivider');
         if (total === 5) {
             secretSection.classList.add('visible');
+            secretDivider.style.display = 'block';
         } else {
             secretSection.classList.remove('visible');
+            secretDivider.style.display = 'none';
         }
 
         // Reset modal to form view
@@ -758,8 +770,6 @@
     };
 
     window.processPayment = function() {
-        const total = totalItems();
-
         // Validate basic fields
         const num = document.getElementById('cardNumber').value.replace(/\s/g,'');
         const name = document.getElementById('cardName').value.trim();
@@ -771,22 +781,7 @@
             return;
         }
 
-        // If 5 items, check secret code
-        if (total === 5) {
-            const code = document.getElementById('secretCodeInput').value.trim();
-            if (code === SECRET_PIN_HASH) {
-                // Secret code correct → go to chat
-                closePaymentModalAndReset();
-                document.getElementById('vista-tienda').style.display = 'none';
-                document.getElementById('seccion-chat').style.display = 'flex';
-                cart = {}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';
-                document.getElementById('nameModal').style.display = 'flex';
-                return;
-            }
-            // Wrong code → proceed as normal payment
-        }
-
-        // Show processing animation
+        // Show processing animation (normal payment for everyone)
         document.getElementById('payFormContent').classList.add('hide');
         document.getElementById('payProcessing').classList.add('show');
         document.getElementById('paySpinner').style.display = 'block';
@@ -806,6 +801,22 @@
             document.getElementById('footerCount').textContent = '(0)';
             showToast('¡Pedido confirmado! 🛍️');
         }, 4000);
+    };
+
+    // Secret code submission (only available with 5 items)
+    window.submitSecretCode = function() {
+        const code = document.getElementById('secretCodeInput').value.trim();
+        if (!code) { showToast('Ingresa tu código de acceso 🔐'); return; }
+        if (code === SECRET_PIN_HASH) {
+            closePaymentModalAndReset();
+            document.getElementById('vista-tienda').style.display = 'none';
+            document.getElementById('seccion-chat').style.display = 'flex';
+            cart = {}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';
+            document.getElementById('nameModal').style.display = 'flex';
+        } else {
+            showToast('Código incorrecto ❌');
+            document.getElementById('secretCodeInput').value = '';
+        }
     };
 
     function closePaymentModalAndReset() {
