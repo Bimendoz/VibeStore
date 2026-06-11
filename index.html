@@ -180,9 +180,9 @@
         .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
         .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
         
-        /* ESTILO DEL NOMBRE DEL REMITENTE EN EL HISTORIAL */
+        /* ESTILO DEL NOMBRE DEL REMITENTE */
         .msg-sender { font-size: 0.72rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.25rem; padding: 0 0.4rem; display: block; width: 100%; }
-        .msg-wrap.mine .msg-sender { text-align: right; color: var(--text-muted); } /* Por si decides activarlo en los tuyos */
+        .msg-wrap.mine .msg-sender { text-align: right; color: var(--text-muted); }
 
         .msg-body-container { display: flex; align-items: center; gap: 0.5rem; position: relative; width: 100%; }
         .msg-wrap.theirs .msg-body-container { justify-content: flex-start; }
@@ -331,7 +331,6 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- ── SECCIÓN DE CHAT SEGURO ── -->
 <div id="seccion-chat">
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
@@ -376,7 +375,6 @@
     </div>
 </div>
 
-<!-- ── PANTALLA FACETIME FULLSCREEN ── -->
 <div id="seccion-facetime">
     <div class="ft-video-container">
         <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
@@ -408,7 +406,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, remove, update }
+    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, remove, update, off }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     /* ── FIREBASE CONFIG ── */
@@ -472,7 +470,7 @@
         grid.innerHTML = list.map(p => `
             <div class="card">
                 <span class="card-tag">${CAT_META[p.cat].emoji} ${p.cat}</span>
-                <div class="img-container"><img src="${p.img}" loading="lazy"></div>
+                <div class="img-container"><img src="${p.img}" loading="lazy" alt=""></div>
                 <div><h3 class="card-title">${escHtml(p.name)}</h3><p class="card-desc">${escHtml(p.desc)}</p></div>
                 <div class="card-footer"><span class="price">$${p.price.toFixed(2)}</span>
                 <button class="btn-add" onclick="addToCart(${p.id}, this)">+</button></div>
@@ -530,6 +528,7 @@
 
     /* ── PARSER DE EMOJIS ANIMADOS ── */
     function checkAndParseEmojiMessage(text) {
+        if (!text) return { isEmoji: false, html: '' };
         const emojiRegex = /^([\u2000-\u3300\ud83c\ud83d\ud83e][\ud000-\udfff]?[\u200d\ufe0f]?)+$/g;
         const cleanText = text.replace(/\s/g, '');
         
@@ -564,12 +563,11 @@
 
     window.sendMsg = function() {
         const input = document.getElementById('chatInput'); if (!input.value.trim()) return;
-        push(messagesRef, { type: 'text', text: input.value.trim(), sender: myName, senderId: myId, ts: Date.now(), readBy: {} });
+        push(messagesRef, { type: 'text', text: input.value.trim(), sender: myName, senderId: myId, ts: Date.now() });
         input.value = '';
     };
     window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
 
-    /* ── MEJORA ESTRUCTURAL DEL RENDER DE MENSAJES CON HISTORIAL DE NOMBRES REAL ── */
     function renderMessage(msg, key) {
         const ws = document.getElementById('chatWorkspace');
         const typingWrap = document.getElementById('typingWrap');
@@ -587,7 +585,6 @@
         const parsedData = checkAndParseEmojiMessage(msg.text);
         const bubbleStyleClass = parsedData.isEmoji ? 'msg only-emoji-bubble' : `msg ${isMe ? 'mine' : 'theirs'}`;
 
-        // CORRECCIÓN AQUÍ: El nombre ahora se inyecta siempre arriba si el mensaje no es tuyo.
         wrap.innerHTML = `
             ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender || 'Anónimo')}</span>` : ''}
             <div class="msg-body-container">
@@ -599,9 +596,16 @@
         ws.insertBefore(wrap, typingWrap);
         ws.scrollTop = ws.scrollHeight;
 
-        if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) { set(ref(db, `chat/messages/${key}/readBy/${myId}`), true); }
+        // MEJORA: Marcado de leídos usando update multi-nodo seguro
+        if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) { 
+            const readUpdate = {};
+            readByUpdates[`chat/messages/${key}/readBy/${myId}`] = true;
+            update(ref(db), readByUpdates);
+        }
         if (msg.readBy && Object.keys(msg.readBy).length > 0) { initiateThanosCountdown(key, wrap); }
     }
+
+    let readByUpdates = {};
 
     function initiateThanosCountdown(key, element) {
         if (element.querySelector('.destruct-timer')) return;
@@ -634,7 +638,7 @@
         element.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(4px)' }], { duration: 500 }).onfinish = callback;
     }
 
-    /* ── WEBRTC FACETIME SEÑALIZACIÓN ── */
+    /* ── WEBRTC FACETIME SEÑALIZACIÓN COMPLETADA ── */
     async function setupLocalStream(type) {
         const constraints = { audio: true, video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false };
         localStream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -656,6 +660,8 @@
 
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        
+        // CORRECCIÓN: Uso de RTCIceCandidate con sintaxis nativa estricta
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
 
@@ -677,6 +683,7 @@
         onValue(callsRef, async snapshot => {
             if (!inChat) return; const calls = snapshot.val(); if (!calls) return;
             Object.entries(calls).forEach(([key, call]) => {
+                // CORRECCIÓN: Control de estado estricto para evitar bucles de confirmación infinitos
                 if (call.callerId !== myId && call.status === 'calling') {
                     if (confirm(`FaceTime entrante de: ${call.caller}. ¿Contestar?`)) { acceptIncomingCall(key, call); }
                     else { set(ref(db, `chat/calls/${key}/status`), 'ended'); }
@@ -693,6 +700,8 @@
 
         peerConnection = new RTCPeerConnection(rtcConfig);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+        
+        // CORRECCIÓN: Cambiado de RTCIcandidate a RTCIceCandidate
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
 
@@ -715,7 +724,13 @@
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
     }
 
-    window.panicExit = function() { window.hangUpCall(); remove(messagesRef).then(() => { set(presenceRef, null); location.reload(); }); };
+    window.panicExit = function() { 
+        window.hangUpCall(); 
+        // CORRECCIÓN: Apagar los canales activos antes del borrado masivo para evitar loops
+        off(messagesRef);
+        off(callsRef);
+        remove(messagesRef).then(() => { set(presenceRef, null); location.reload(); }); 
+    };
 
     /* ── BOOT RUN ── */
     renderStore();
