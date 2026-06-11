@@ -59,7 +59,7 @@
 
         body { 
             background-color: var(--bg-body); 
-            color: var(--textMain); 
+            color: var(--text-main); 
             transition: background-color 0.3s, color 0.3s; 
             min-height: 100vh; 
             display: flex; 
@@ -104,7 +104,7 @@
         .card-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .card-desc { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 30px; }
         .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
-        .price { font-weight: 800; font-size: 1.05rem; }
+        .price { font-weight: 800; font-size: 0.95rem; color: var(--text-main); }
         .btn-add { background: var(--text-main); color: var(--bg-card); border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: 700; font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, background-color 0.2s; flex-shrink: 0; touch-action: manipulation; }
         .btn-add:active { transform: scale(0.88); }
         .btn-add.added { background: var(--green); animation: addPop 0.35s ease; }
@@ -122,8 +122,8 @@
         .drawer-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 1rem auto 1.2rem; }
         .drawer-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem; }
         .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--border-color); }
-        .cat-info { display: flex; flex-direction: column; gap: 0.1rem; }
-        .cat-name { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; }
+        .cat-info { display: flex; flex-direction: column; gap: 0.1rem; max-width: 70%; }
+        .cat-name { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .cat-price-sub { font-size: 0.75rem; color: var(--text-muted); margin-left: 1.8rem; }
         .cat-qty { display: flex; align-items: center; gap: 0.7rem; }
         .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 30px; height: 30px; border-radius: 50%; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
@@ -131,7 +131,7 @@
         .qty-num { font-weight: 700; min-width: 18px; text-align: center; }
         .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.5rem; }
         .cart-total-label { font-size: 0.9rem; color: var(--text-muted); }
-        .cart-total-value { font-size: 1.3rem; font-weight: 900; }
+        .cart-total-value { font-size: 1.2rem; font-weight: 900; }
         .btn-pay { background: var(--text-main); color: var(--bg-card); border: none; width: 100%; padding: 1.05rem; border-radius: 18px; font-size: 1rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.15); cursor: pointer; margin-top: 1.1rem; transition: transform 0.15s; touch-action: manipulation; }
         .btn-pay:active { transform: scale(0.98); }
         .cart-empty-msg { text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.95rem; }
@@ -428,19 +428,29 @@
     const db  = getDatabase(app);
 
     const CAT_META = { maquillaje: { emoji: '💄' }, tecnologia: { emoji: '🔌' }, hogar: { emoji: '🏠' }, deportes: { emoji: '⚽' } };
+    
+    /* ── DATA REAL EXTRAÍDA DE FALABELLA COLOMBIA Y ALKOSTO ── */
     const products = [
-        { id:1,  cat:'maquillaje', name:'Paleta Nude Rose',        desc:'18 tonos ultra pigmentados satinados y mate.',         price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:2,  cat:'maquillaje', name:'Labial Matte Crimson',    desc:'Fórmula líquida indeleble 24 horas de fijación.',      price:18.50, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
-        { id:3,  cat:'maquillaje', name:'Base Hydra Glow',         desc:'Acabado natural con ácido hialurónico.',               price:29.00, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
-        { id:4,  cat:'maquillaje', name:'Máscara Lash Lift',       desc:'Volumen extremo y curvas perfectas sin grumos.',       price:16.00, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
-        { id:5,  cat:'maquillaje', name:'Iluminador Stardust',     desc:'Polvo compacto con destellos holográficos.',           price:22.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
-        { id:11, cat:'tecnologia', name:'Pods Max Pro',             desc:'Audio espacial inmersivo y cancelación activa.',      price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
-        { id:12, cat:'tecnologia', name:'Smartband Series 7',      desc:'Monitor de oxígeno y pantalla AMOLED de 1.69".',      price:45.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
-        { id:13, cat:'tecnologia', name:'Teclado Mecánico Swift',  desc:'Switches lineales amarillos y layout del 65%.',       price:89.00, img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300' },
-        { id:21, cat:'hogar',      name:'Difusor Ultrasónico',     desc:'Luz ambiental y vaporización de aceites esenciales.', price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
-        { id:22, cat:'hogar',      name:'Taza Térmica Inteligente',desc:'Mantiene la temperatura exacta de tus bebidas.',      price:35.00, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300' },
-        { id:31, cat:'deportes',   name:'Botella de Acero Pro',    desc:'Aislamiento al vacío térmico por 24 horas.',          price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
-        { id:32, cat:'deportes',   name:'Bandas de Resistencia',   desc:'Set de 5 intensidades con agarres cómodos.',         price:16.50, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' }
+        // MAQUILLAJE (Data Falabella Colombia)
+        { id:1,  cat:'maquillaje', name:'M·A·C Cosmetics Labial Macximal Matte', desc:'Labial Macximal Matte Lipstick 3.5 gr acabado mate de larga duración.', price:109900.00, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
+        { id:2,  cat:'maquillaje', name:'Benefit Tinta Líquida Benetint Rose', desc:'Tinta líquida multiusos para labios y mejillas 6 ml de larga duración.', price:144990.00, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
+        { id:3,  cat:'maquillaje', name:'Clinique Bálsamo Almost Black Honey', desc:'Bálsamo labial hidratante que se fusiona con el tono natural 1.9 gr.', price:109900.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
+        { id:4,  cat:'maquillaje', name:'Maybelline SuperStay Vinyl Ink Pink', desc:'Labial líquido de larga duración con acabado brillante vinilo 4.2 ml.', price:67900.00, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
+        { id:5,  cat:'maquillaje', name:'M·A·C Cosmetics Glow Play Lip Balm', desc:'Bálsamo de labios Glow Play Tendertalk reactivo al PH 3.6 gr.', price:134900.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
+        
+        // TECNOLOGÍA (Data Alkosto Celulares)
+        { id:11, cat:'tecnologia', name:'Celular Apple iPhone 16 5G 128GB', desc:'Pantalla Super Retina XDR, Chip A18, cámara de 48 MP.', price:3599010.00, img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
+        { id:12, cat:'tecnologia', name:'Celular Apple iPhone 17 Pro 5G 256GB', desc:'Titanio de grado aeroespacial, Chip A19 Pro, pantalla ProMotion.', price:6029010.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
+        { id:13, cat:'tecnologia', name:'Celular Apple iPhone 17 5G 256GB', desc:'Última generación con almacenamiento ampliado y conectividad 5G.', price:4199010.00, img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300' },
+        { id:14, cat:'tecnologia', name:'Funda Apple Silicone Case MagSafe', desc:'Silicona premium con alineamiento magnético oficial.', price:269900.00, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
+        
+        // HOGAR (Data Falabella)
+        { id:21, cat:'hogar',      name:'Difusor de Aromas Ultrasónico Ceramic', desc:'Capacidad de 200ml con luces LED cálidas y temporizador.', price:119900.00, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
+        { id:22, cat:'hogar',      name:'Mesa Auxiliar Escandinava Nórdica', desc:'Estructura de madera de bambú sustentable y tapa blanca.', price:189900.00, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
+        
+        // DEPORTES (Data Falabella)
+        { id:31, cat:'deportes',   name:'Termo Deportivo Inoxidable Insulated 1L', desc:'Aislamiento térmico al vacío de doble pared por 24 horas.', price:89900.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
+        { id:32, cat:'deportes',   name:'Bandas Elásticas de Resistencia Set x5', desc:'Látex natural, incluye anclaje para puerta, manijas y bolso.', price:54900.00, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' }
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
@@ -449,7 +459,7 @@
 
     let localStream; let peerConnection; let activeCallRef;
     let isMuted = false; let isVideoOff = false;
-    let remoteIceQueue = []; // ARREGLADO: Cola para candidatos WebRTC asíncronos
+    let remoteIceQueue = []; 
     const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
     const SECRET_PIN_HASH = "10231121"; 
 
@@ -459,6 +469,11 @@
     const callsRef    = ref(db, 'chat/calls');
 
     function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+    /* Formateador de moneda colombiana */
+    function formatCOP(value) {
+        return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+    }
 
     /* ── TIENDA Y RENDER ── */
     function renderStore() {
@@ -477,7 +492,7 @@
                 <span class="card-tag">${CAT_META[p.cat].emoji} ${p.cat}</span>
                 <div class="img-container"><img src="${p.img}" loading="lazy" alt=""></div>
                 <div><h3 class="card-title">${escHtml(p.name)}</h3><p class="card-desc">${escHtml(p.desc)}</p></div>
-                <div class="card-footer"><span class="price">$${p.price.toFixed(2)}</span>
+                <div class="card-footer"><span class="price">${formatCOP(p.price)}</span>
                 <button class="btn-add" onclick="addToCart(${p.id}, this)">+</button></div>
             </div>`).join('');
     }
@@ -499,11 +514,32 @@
         const html = Object.entries(cart).map(([idStr, qty]) => {
             const p = products.find(x => x.id === parseInt(idStr));
             totalPrice += p.price * qty;
-            return `<div class="cart-item-row"><div>${p.name}</div><div>${qty} un.</div></div>`;
+            return `<div class="cart-item-row">
+                <div class="cat-info">
+                    <span class="cat-name">${escHtml(p.name)}</span>
+                    <span class="cat-price-sub">${formatCOP(p.price)} x ${qty}</span>
+                </div>
+                <div class="cat-qty">
+                    <button class="qty-btn" onclick="changeQty(${p.id},-1)">−</button>
+                    <span class="qty-num">${qty}</span>
+                    <button class="qty-btn" onclick="changeQty(${p.id},1)">+</button>
+                </div>
+            </div>`;
         }).join('');
-        document.getElementById('cartItems').innerHTML = html || 'Vacío';
-        document.getElementById('cartTotal').textContent = `$${totalPrice.toFixed(2)}`;
+        document.getElementById('cartItems').innerHTML = html || '<div class="cart-empty-msg">Tu carrito está vacío</div>';
+        document.getElementById('cartTotal').textContent = formatCOP(totalPrice);
     }
+
+    function changeQty(id, delta) {
+        if (!cart[id]) return;
+        cart[id] += delta;
+        if (cart[id] <= 0) delete cart[id];
+        const total = totalItems();
+        document.getElementById('cartBadge').textContent = total;
+        document.getElementById('footerCount').textContent = `(${total})`;
+        renderCartDrawer();
+    }
+    window.changeQty = changeQty;
 
     window.handleCheckout = function() {
         if (totalItems() === 5) {
@@ -516,10 +552,10 @@
         } else { document.getElementById('paymentModal').classList.add('open'); }
     };
     window.closePaymentPortal = function() { document.getElementById('paymentModal').classList.remove('open'); };
-    window.processPayment = function() { showToast("Completado"); closePaymentPortal(); cart={}; };
+    window.processPayment = function() { showToast("Pago aprobado de forma segura"); closePaymentPortal(); cart={}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';};
     window.filterCat = function(cat, btn) { document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active')); btn.classList.add('active'); curCat = cat; renderStore(); };
     window.filterSearch = function(input) { document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0); renderStore(); };
-    window.clearSearch = function() { document.getElementById('searchBox').value = ''; renderStore(); };
+    window.clearSearch = function() { document.getElementById('searchBox').value = ''; document.getElementById('searchClear').classList.remove('visible'); renderStore(); };
     
     window.toggleTheme = function() { 
         const currentTheme = document.body.getAttribute('data-theme');
@@ -560,7 +596,6 @@
         inChat = true; document.getElementById('nameModal').style.display = 'none';
         set(presenceRef, { name: myName, online: true });
         
-        // ARREGLADO: onDisconnect ahora purga correctamente tu estado de escritura flotante al salir
         onDisconnect(presenceRef).remove();
         onDisconnect(typingRef).remove();
         
@@ -605,7 +640,6 @@
         ws.insertBefore(wrap, typingWrap);
         ws.scrollTop = ws.scrollHeight;
 
-        // ARREGLADO: readByUpdate instanciado localmente para bloquear colisiones multinodo asíncronas
         if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) { 
             const readUpdate = {};
             readUpdate[`chat/messages/${key}/readBy/${myId}`] = true;
@@ -680,7 +714,6 @@
             if (data && data.status === 'accepted' && data.answer && !peerConnection.currentRemoteDescription) {
                 document.getElementById('ftCallStatus').textContent = "Conectado";
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
-                // Vaciar la cola de candidatos ICE acumulados asincrónicamente
                 while (remoteIceQueue.length > 0) {
                     await peerConnection.addIceCandidate(remoteIceQueue.shift());
                 }
@@ -688,7 +721,6 @@
             if (data && data.status === 'ended') cleanUpCallUI();
         });
 
-        // ARREGLADO: Escucha asíncrona de candidatos ICE estructurada con cola reactiva de RTCIceCandidate
         onValue(ref(db, `chat/calls/${activeCallRef.key}/receiverCandidates`), snapshot => {
             if (snapshot.exists()) {
                 Object.values(snapshot.val()).forEach(cand => {
@@ -704,7 +736,6 @@
     };
 
     function listenForIncomingCalls() {
-        // ARREGLADO: Matar canales duplicados concurrentes en llamadas entrantes antes de re-escuchar
         off(callsRef);
         onValue(callsRef, async snapshot => {
             if (!inChat) return; const calls = snapshot.val(); if (!calls) return;
@@ -733,7 +764,6 @@
         const answer = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer);
         await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
 
-        // Inyectar candidatos de la cola asíncrona una vez seteada la descripción
         while (remoteIceQueue.length > 0) {
             await peerConnection.addIceCandidate(remoteIceQueue.shift());
         }
@@ -761,7 +791,7 @@
 
     function cleanUpCallUI() {
         if (localStream) localStream.getTracks().forEach(track => track.stop()); if (peerConnection) peerConnection.close();
-        remoteIceQueue = []; // Reset atómico de la cola WebRTC
+        remoteIceQueue = [];
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
@@ -769,7 +799,6 @@
 
     window.panicExit = function() { 
         window.hangUpCall(); 
-        // ARREGLADO: Desconexión y purga atómica de canales y estados antes del reinicio
         off(messagesRef);
         off(callsRef);
         set(typingRef, null);
