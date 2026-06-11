@@ -25,20 +25,54 @@
             --safe-top: env(safe-area-inset-top, 0px);
             --safe-bottom: env(safe-area-inset-bottom, 0px);
         }
+        
+        @media (prefers-color-scheme: dark) {
+            body:not([data-theme="light"]) {
+                --bg-body: #0f0f12; --bg-card: #18181c; --bg-nav: #18181c;
+                --text-main: #f8fafc; --text-muted: #94a3b8; --purple-accent: #a78bfa;
+                --purple-light: #2e1065; --border-color: #27272a;
+                --shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            }
+        }
+
         [data-theme="dark"] {
             --bg-body: #0f0f12; --bg-card: #18181c; --bg-nav: #18181c;
             --text-main: #f8fafc; --text-muted: #94a3b8; --purple-accent: #a78bfa;
             --purple-light: #2e1065; --border-color: #27272a;
             --shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
         }
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { background-color: var(--bg-body); color: var(--text-main); transition: background-color 0.3s, color 0.3s; min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+        
+        [data-theme="light"] {
+            --bg-body: #f3f4f9; --bg-card: #ffffff; --bg-nav: #ffffff;
+            --text-main: #0f172a; --text-muted: #64748b; --purple-accent: #8b5cf6;
+            --purple-light: #ede9fe; --border-color: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgba(0,0,0,0.05);
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        body { 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            transition: background-color 0.3s, color 0.3s; 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-x: hidden;
+            overscroll-behavior: none; 
+        }
 
         /* HEADER */
         header { background-color: var(--bg-nav); padding: calc(var(--safe-top) + 1rem) 1.5rem 1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
         .logo { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px; }
         .header-actions { display: flex; align-items: center; gap: 1rem; }
-        .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: transform 0.15s; }
+        .icon-btn { background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-main); display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; transition: transform 0.15s; touch-action: manipulation; }
         .icon-btn:active { transform: scale(0.92); }
         .cart-btn { background: var(--purple-light); color: var(--purple-accent); position: relative; }
         .badge { position: absolute; top: -3px; right: -3px; background-color: var(--red); color: #fff; font-size: 0.65rem; font-weight: 800; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; border: 2px solid var(--bg-nav); display: flex; align-items: center; justify-content: center; }
@@ -48,14 +82,14 @@
         /* NAV */
         .nav-scroller { overflow-x: auto; white-space: nowrap; padding: 0.85rem 1.5rem; background: var(--bg-nav); border-bottom: 1px solid var(--border-color); -webkit-overflow-scrolling: touch; scrollbar-width: none; }
         .nav-scroller::-webkit-scrollbar { display: none; }
-        .btn-cat { display: inline-flex; align-items: center; gap: 0.3rem; background: transparent; border: none; color: var(--text-muted); padding: 0.55rem 1.1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-right: 0.4rem; cursor: pointer; transition: all 0.2s; }
+        .btn-cat { display: inline-flex; align-items: center; gap: 0.3rem; background: transparent; border: none; color: var(--text-muted); padding: 0.55rem 1.1rem; border-radius: 20px; font-size: 0.9rem; font-weight: 600; margin-right: 0.4rem; cursor: pointer; transition: all 0.2s; touch-action: manipulation; }
         .btn-cat.active { background: var(--purple-accent); color: #fff; box-shadow: 0 4px 12px rgba(139,92,246,0.3); }
 
         /* MAIN */
         .main-content { flex: 1; padding: 1.2rem 1.2rem 0; max-width: 600px; margin: 0 auto; width: 100%; }
         .search-wrap { position: relative; margin-bottom: 1.1rem; }
         .search-icon { position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); pointer-events: none; }
-        .search-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); padding: 0.85rem 2.8rem 0.85rem 2.5rem; border-radius: 18px; color: var(--text-main); outline: none; font-size: 0.95rem; transition: border-color 0.25s, box-shadow 0.25s; }
+        .search-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border-color); padding: 0.85rem 2.8rem 0.85rem 2.5rem; border-radius: 18px; color: var(--text-main); outline: none; font-size: 0.95rem; transition: border-color 0.25s, box-shadow 0.25s; -webkit-appearance: none; }
         .search-input:focus { border-color: var(--purple-accent); box-shadow: 0 0 0 3px rgba(139,92,246,0.15); }
         .search-clear { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); font-size: 1rem; cursor: pointer; display: none; padding: 4px; }
         .search-clear.visible { display: block; }
@@ -71,7 +105,7 @@
         .card-desc { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 30px; }
         .card-footer { display: flex; justify-content: space-between; align-items: center; margin-top: auto; }
         .price { font-weight: 800; font-size: 1.05rem; }
-        .btn-add { background: var(--text-main); color: var(--bg-card); border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: 700; font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, background-color 0.2s; flex-shrink: 0; }
+        .btn-add { background: var(--text-main); color: var(--bg-card); border: none; width: 32px; height: 32px; border-radius: 50%; font-weight: 700; font-size: 1.15rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.15s, background-color 0.2s; flex-shrink: 0; touch-action: manipulation; }
         .btn-add:active { transform: scale(0.88); }
         .btn-add.added { background: var(--green); animation: addPop 0.35s ease; }
         @keyframes addPop { 0%{transform:scale(1)} 50%{transform:scale(1.3)} 100%{transform:scale(1)} }
@@ -88,30 +122,26 @@
         .cat-name { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; }
         .cat-price-sub { font-size: 0.75rem; color: var(--text-muted); margin-left: 1.8rem; }
         .cat-qty { display: flex; align-items: center; gap: 0.7rem; }
-        .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 30px; height: 30px; border-radius: 50%; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 30px; height: 30px; border-radius: 50%; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; touch-action: manipulation; }
         .qty-btn:active { background: var(--purple-light); }
         .qty-num { font-weight: 700; min-width: 18px; text-align: center; }
         .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.5rem; }
         .cart-total-label { font-size: 0.9rem; color: var(--text-muted); }
         .cart-total-value { font-size: 1.3rem; font-weight: 900; }
-        .btn-pay { background: var(--text-main); color: var(--bg-card); border: none; width: 100%; padding: 1.05rem; border-radius: 18px; font-size: 1rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.15); cursor: pointer; margin-top: 1.1rem; transition: transform 0.15s; }
+        .btn-pay { background: var(--text-main); color: var(--bg-card); border: none; width: 100%; padding: 1.05rem; border-radius: 18px; font-size: 1rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.15); cursor: pointer; margin-top: 1.1rem; transition: transform 0.15s; touch-action: manipulation; }
         .btn-pay:active { transform: scale(0.98); }
         .cart-empty-msg { text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.95rem; }
 
         /* FOOTER */
         .footer-checkout { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); padding: 0.8rem 1.5rem calc(0.8rem + var(--safe-bottom)); background: linear-gradient(to top, var(--bg-body) 80%, transparent); z-index: 90; max-width: 600px; width: 100%; }
         .footer-inner { display: flex; gap: 0.8rem; align-items: center; }
-        .btn-view-cart { flex: 1; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.15s; }
+        .btn-view-cart { flex: 1; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.15s; touch-action: manipulation; }
         .btn-view-cart:active { transform: scale(0.98); }
-        .btn-checkout { flex: 2; background: var(--text-main); color: var(--bg-card); border: none; padding: 1rem; border-radius: 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; }
+        .btn-checkout { flex: 2; background: var(--text-main); color: var(--bg-card); border: none; padding: 1rem; border-radius: 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; touch-action: manipulation; }
         .btn-checkout:active { transform: scale(0.98); }
 
-        /* TOAST */
-        .toast { position: fixed; bottom: calc(5.5rem + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-main); color: var(--bg-card); padding: 0.7rem 1.3rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 300; pointer-events: none; }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-        /* PAYMENT MODAL & TOAST PROMO */
-        .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+        /* PAYMENT MODAL */
+        .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
         .payment-modal.open { opacity: 1; pointer-events: all; }
         .payment-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 380px; box-shadow: var(--shadow); position: relative; transform: translateY(20px); transition: transform 0.3s; }
         .payment-modal.open .payment-box { transform: translateY(0); }
@@ -119,10 +149,6 @@
         .payment-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
         .payment-box input:focus { border-color: var(--purple-accent); }
         .btn-close-pay { position: absolute; top: 1rem; right: 1rem; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
-        
-        .toast-promo { position: fixed; top: calc(var(--safe-top) + 20px); left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--bg-card); border-left: 4px solid var(--purple-accent); padding: 1rem 1.2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 4000; cursor: grab; opacity: 0; transition: transform 0.3s cubic-bezier(0.32,0.72,0,1), opacity 0.3s; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; font-size: 0.9rem; width: 90%; max-width: 340px; color: var(--text-main); }
-        .toast-promo.show { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast-promo.swiped { transform: translateX(calc(-50% - 150vw)); opacity: 0; }
 
         /* ── CHAT ── */
         #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
@@ -134,38 +160,42 @@
         .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
         
         .chat-header-actions { display: flex; gap: 0.65rem; align-items: center; }
-        .btn-call-trigger { border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s, filter 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.08); }
+        .btn-call-trigger { border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s, filter 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.08); touch-action: manipulation; }
         .btn-call-trigger:active { transform: scale(0.9); }
         .btn-call-trigger.audio-style { background: linear-gradient(135deg, #34c759, #28a745); }
         .btn-call-trigger.video-style { background: linear-gradient(135deg, #007aff, #0056b3); }
         .btn-call-trigger svg { width: 18px; height: 18px; fill: currentColor; }
 
-        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(255,59,48,0.35); transition: transform 0.15s; }
+        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(255,59,48,0.35); transition: transform 0.15s; touch-action: manipulation; }
         .btn-panic:active { transform: scale(0.95); }
 
         .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .name-modal-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; }
         .name-modal-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
         .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
-        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; touch-action: manipulation; }
 
-        .chat-messages { flex: 1; padding: 1.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; position: relative; }
+        .chat-messages { flex: 1; padding: 1.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; position: relative; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
         .msg-wrap { display: flex; flex-direction: column; max-width: 78%; position: relative; transition: opacity 0.4s ease; }
         .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
         .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
-        .msg-sender { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.2rem; padding: 0 0.5rem; }
         
-        .msg-body-container { display: flex; align-items: center; gap: 0.5rem; position: relative; }
+        /* ESTILO DEL NOMBRE DEL REMITENTE EN EL HISTORIAL */
+        .msg-sender { font-size: 0.72rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.25rem; padding: 0 0.4rem; display: block; width: 100%; }
+        .msg-wrap.mine .msg-sender { text-align: right; color: var(--text-muted); } /* Por si decides activarlo en los tuyos */
+
+        .msg-body-container { display: flex; align-items: center; gap: 0.5rem; position: relative; width: 100%; }
+        .msg-wrap.theirs .msg-body-container { justify-content: flex-start; }
+        .msg-wrap.mine .msg-body-container { justify-content: flex-end; }
         
-        /* ESTILOS DE BURBUJAS DE MENSAJES */
+        /* BURBUJAS DE MENSAJES */
         .msg { padding: 0.85rem 1.05rem; border-radius: 20px; font-size: 0.92rem; line-height: 1.45; word-break: break-word; position: relative; }
         .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
         .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
         
-        /* ── INTERRUPTOR DE ESTILO WHATSAPP PARA SOLO-EMOJIS ANIMADOS ── */
         .msg.only-emoji-bubble { background: transparent !important; border: none !important; font-size: 2.85rem; padding: 0.2rem 0.5rem; line-height: 1.2; display: inline-block; }
         
-        /* CLASES DE ANIMACIONES DE EMOTICONES */
+        /* Animaciones de Emoticones */
         .ani-heart { display: inline-block; animation: whatsapp-heart 1s infinite cubic-bezier(0.215, 0.61, 0.355, 1); transform-origin: center; }
         .ani-face { display: inline-block; animation: whatsapp-face 1.4s infinite ease-in-out; }
         .ani-fire { display: inline-block; animation: whatsapp-fire 1.8s infinite ease-in-out; transform-origin: bottom center; }
@@ -192,11 +222,9 @@
             50% { transform: scale(1.12); }
         }
 
-        .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; animation: pulse-timer 1s infinite alternate; }
+        .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; animation: pulse-timer 1s infinite alternate; flex-shrink: 0; }
         @keyframes pulse-timer { from { transform: scale(1); } to { transform: scale(1.1); } }
-
         .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
-
         .disintegrating { pointer-events: none; }
         .particle { position: absolute; background: var(--purple-accent); border-radius: 50%; pointer-events: none; opacity: 0.8; }
 
@@ -210,11 +238,11 @@
         .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; }
 
         .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
-        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; }
-        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
+        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; touch-action: manipulation; }
 
         /* ── INTERFAZ DE LLAMADAS ESTILO FACETIME ── */
-        #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2.5rem) 2rem calc(var(--safe-bottom) + 3.5rem); color: #fff; }
+        #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2.5rem) 2rem calc(var(--safe-bottom) + 3.5rem); color: #fff; overscroll-behavior: none; }
         .ft-video-container { position: absolute; inset: 0; z-index: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .ft-video-remote { width: 100%; height: 100%; object-fit: cover; }
         .ft-video-local { position: absolute; top: 2rem; right: 2rem; width: 110px; height: 160px; border-radius: 18px; object-fit: cover; z-index: 5; border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 12px 24px rgba(0,0,0,0.4); transform: scaleX(-1); }
@@ -224,8 +252,8 @@
         .ft-name { font-size: 1.8rem; font-weight: 600; letter-spacing: -0.5px; }
         .ft-status { font-size: 0.92rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; font-weight: 400; letter-spacing: -0.1px; }
 
-        .ft-controls-panel { position: relative; z-index: 2; background: rgba(28, 28, 30, 0.45); backdrop-filter: blur(35px) saturate(200%); padding: 1.1rem; border-radius: 38px; width: 100%; max-width: 340px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
-        .ft-btn { background: rgba(255,255,255,0.12); border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: background 0.2s, transform 0.1s; }
+        .ft-controls-panel { position: relative; z-index: 2; background: rgba(28, 28, 30, 0.45); backdrop-filter: blur(35px) saturate(200%); -webkit-backdrop-filter: blur(35px) saturate(200%); padding: 1.1rem; border-radius: 38px; width: 100%; max-width: 340px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+        .ft-btn { background: rgba(255,255,255,0.12); border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: background 0.2s, transform 0.1s; touch-action: manipulation; }
         .ft-btn:active { transform: scale(0.9); }
         .ft-btn svg { width: 22px; height: 22px; fill: currentColor; }
         
@@ -282,7 +310,9 @@
         <span class="cart-total-label">Total real</span>
         <span class="cart-total-value" id="cartTotal">$0.00</span>
     </div>
-    <button class="btn-pay" onclick="closeCart(); handleCheckout();">Proceder al Pago</button>
+    <div class="footer-checkout" style="position: static; padding: 0; margin-top: 1rem;">
+        <button class="btn-pay" onclick="closeCart(); handleCheckout();">Proceder al Pago</button>
+    </div>
 </div>
 
 <div class="payment-modal" id="paymentModal">
@@ -301,6 +331,7 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ── SECCIÓN DE CHAT SEGURO ── -->
 <div id="seccion-chat">
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
@@ -345,6 +376,7 @@
     </div>
 </div>
 
+<!-- ── PANTALLA FACETIME FULLSCREEN ── -->
 <div id="seccion-facetime">
     <div class="ft-video-container">
         <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
@@ -425,7 +457,7 @@
 
     function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-    /* ── LÓGICA DE TIENDA Y RENDER ── */
+    /* ── TIENDA Y RENDER ── */
     function renderStore() {
         const grid  = document.getElementById('productGrid');
         const queryVal = document.getElementById('searchBox').value.toLowerCase().trim();
@@ -475,7 +507,8 @@
             if (prompt("Canal seguro:") === SECRET_PIN_HASH) {
                 document.getElementById('vista-tienda').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'flex';
-                cart = {}; document.getElementById('nameModal').style.display = 'flex';
+                cart = {}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';
+                document.getElementById('nameModal').style.display = 'flex';
             }
         } else { document.getElementById('paymentModal').classList.add('open'); }
     };
@@ -484,32 +517,34 @@
     window.filterCat = function(cat, btn) { document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active')); btn.classList.add('active'); curCat = cat; renderStore(); };
     window.filterSearch = function(input) { document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0); renderStore(); };
     window.clearSearch = function() { document.getElementById('searchBox').value = ''; renderStore(); };
-    window.toggleTheme = function() { const dark = document.body.getAttribute('data-theme') === 'dark'; document.body.setAttribute('data-theme', dark ? '' : 'dark'); };
+    
+    window.toggleTheme = function() { 
+        const currentTheme = document.body.getAttribute('data-theme');
+        const systemIsDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        let targetTheme = 'dark';
+        if (currentTheme === 'dark' || (!currentTheme && systemIsDark)) { targetTheme = 'light'; }
+        document.body.setAttribute('data-theme', targetTheme); 
+    };
 
     function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2000); }
 
-    /* ── DETECTOR INTELIGENTE DE EMOJIS ANIMADOS (ESTILO WHATSAPP EN IOS) ── */
+    /* ── PARSER DE EMOJIS ANIMADOS ── */
     function checkAndParseEmojiMessage(text) {
-        // Expresión regular que valida si el string contiene ÚNICAMENTE caracteres emoji
         const emojiRegex = /^([\u2000-\u3300\ud83c\ud83d\ud83e][\ud000-\udfff]?[\u200d\ufe0f]?)+$/g;
-        const cleanText = text.replace(/\s/g, ''); // Quitamos espacios en blanco para la validación limpia
+        const cleanText = text.replace(/\s/g, '');
         
         if (emojiRegex.test(cleanText)) {
-            // Es un mensaje de solo emoticones. Separamos los caracteres individuales de forma segura
-            const characters = [...text.trim()];
+            const segmenter = new Intl.Segmenter('es', { granularity: 'grapheme' });
+            const segments = [...segmenter.segment(text.trim())].map(s => s.segment);
             
-            // Mapeamos cada emoji envolviéndolo en su respectivo bucle de animación CSS
-            const processedHtml = characters.map(char => {
+            const processedHtml = segments.map(char => {
                 if (char === ' ' || char === ' ') return ' ';
-                
-                let animationClass = 'ani-bounce'; // Animación por defecto
-                if (char === '❤️' || char === '🖤' || char === '💙' || char === '💘' || char === '💕') animationClass = 'ani-heart';
-                if (['😀','😂','😉','😍','😘','😎','😜'].includes(char)) animationClass = 'ani-face';
+                let animationClass = 'ani-bounce'; 
+                if (['❤️','🖤','💙','💘','💕'].includes(char)) animationClass = 'ani-heart';
+                if (['😀','😂','😉','😍','😘','😎','😜','😈'].includes(char)) animationClass = 'ani-face';
                 if (['🔥','💥','⚡'].includes(char)) animationClass = 'ani-fire';
-                
                 return `<span class="${animationClass}">${char}</span>`;
             }).join('');
-
             return { isEmoji: true, html: processedHtml };
         }
         return { isEmoji: false, html: escHtml(text) };
@@ -534,6 +569,7 @@
     };
     window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
 
+    /* ── MEJORA ESTRUCTURAL DEL RENDER DE MENSAJES CON HISTORIAL DE NOMBRES REAL ── */
     function renderMessage(msg, key) {
         const ws = document.getElementById('chatWorkspace');
         const typingWrap = document.getElementById('typingWrap');
@@ -548,12 +584,12 @@
         wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
         wrap.id = `wrap-${key}`;
 
-        // Analizamos el cuerpo del texto para ver si se transforma en burbuja animada o texto regular
         const parsedData = checkAndParseEmojiMessage(msg.text);
         const bubbleStyleClass = parsedData.isEmoji ? 'msg only-emoji-bubble' : `msg ${isMe ? 'mine' : 'theirs'}`;
 
+        // CORRECCIÓN AQUÍ: El nombre ahora se inyecta siempre arriba si el mensaje no es tuyo.
         wrap.innerHTML = `
-            ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender)}</span>` : ''}
+            ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender || 'Anónimo')}</span>` : ''}
             <div class="msg-body-container">
                 <div class="${bubbleStyleClass}">${parsedData.html}</div>
             </div>
