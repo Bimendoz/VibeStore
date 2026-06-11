@@ -60,7 +60,7 @@
         .search-clear.visible { display: block; }
 
         /* GRID */
-        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+        .grid-productos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; padding-bottom: 120px; }
         .card { background: var(--bg-card); border-radius: 22px; padding: 0.75rem; border: 1px solid var(--border-color); box-shadow: var(--shadow); display: flex; flex-direction: column; position: relative; overflow: hidden; transition: transform 0.2s; }
         .card:active { transform: translateY(-2px); }
         .img-container { width: 100%; aspect-ratio: 1/1; border-radius: 16px; background: var(--purple-light); margin-bottom: 0.75rem; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; position: relative; }
@@ -83,12 +83,14 @@
         .drawer-handle { width: 40px; height: 4px; background: var(--border-color); border-radius: 2px; margin: 1rem auto 1.2rem; }
         .drawer-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 1rem; }
         .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 0; border-bottom: 1px solid var(--border-color); }
+        .cat-info { display: flex; flex-direction: column; gap: 0.1rem; }
         .cat-name { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 0.5rem; }
+        .cat-price-sub { font-size: 0.75rem; color: var(--text-muted); margin-left: 1.8rem; }
         .cat-qty { display: flex; align-items: center; gap: 0.7rem; }
         .qty-btn { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 30px; height: 30px; border-radius: 50%; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .qty-btn:active { background: var(--purple-light); }
         .qty-num { font-weight: 700; min-width: 18px; text-align: center; }
-        .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; }
+        .cart-total-row { display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; padding-top: 0.5rem; }
         .cart-total-label { font-size: 0.9rem; color: var(--text-muted); }
         .cart-total-value { font-size: 1.3rem; font-weight: 900; }
         .btn-pay { background: var(--text-main); color: var(--bg-card); border: none; width: 100%; padding: 1.05rem; border-radius: 18px; font-size: 1rem; font-weight: 700; box-shadow: 0 8px 20px rgba(0,0,0,0.15); cursor: pointer; margin-top: 1.1rem; transition: transform 0.15s; }
@@ -96,7 +98,7 @@
         .cart-empty-msg { text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.95rem; }
 
         /* FOOTER */
-        .footer-checkout { position: sticky; bottom: 0; padding: 0.8rem 1.5rem calc(0.8rem + var(--safe-bottom)); background: linear-gradient(to top, var(--bg-body) 80%, transparent); z-index: 90; max-width: 600px; margin: 0 auto; width: 100%; }
+        .footer-checkout { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); padding: 0.8rem 1.5rem calc(0.8rem + var(--safe-bottom)); background: linear-gradient(to top, var(--bg-body) 80%, transparent); z-index: 90; max-width: 600px; width: 100%; }
         .footer-inner { display: flex; gap: 0.8rem; align-items: center; }
         .btn-view-cart { flex: 1; background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 1rem; border-radius: 18px; font-size: 0.95rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: transform 0.15s; }
         .btn-view-cart:active { transform: scale(0.98); }
@@ -107,68 +109,7 @@
         .toast { position: fixed; bottom: calc(5.5rem + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--text-main); color: var(--bg-card); padding: 0.7rem 1.3rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; white-space: nowrap; opacity: 0; transition: opacity 0.25s, transform 0.25s; z-index: 300; pointer-events: none; }
         .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-        /* EMPTY STATE */
-        .empty-state { grid-column: 1/-1; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 3rem 1rem; color: var(--text-muted); text-align: center; }
-        .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
-
-        /* ── CHAT ── */
-        #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
-
-        .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
-        .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
-        .chat-status-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
-        @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 2px rgba(16,185,129,0.3)} 50%{box-shadow:0 0 0 6px rgba(16,185,129,0)} }
-        .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; }
-        .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
-        .online-count { font-size: 0.72rem; color: var(--green); font-weight: 600; }
-
-        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(239,68,68,0.35); transition: transform 0.15s; }
-        .btn-panic:active { transform: scale(0.95); }
-
-        /* Nombre modal */
-        .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .name-modal-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; }
-        .name-modal-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
-        .name-modal-box p { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem; }
-        .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
-        .name-modal-box input:focus { border-color: var(--purple-accent); }
-        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; transition: transform 0.15s; }
-        .btn-join:active { transform: scale(0.98); }
-
-        .chat-messages { flex: 1; padding: 1.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; }
-
-        .msg-wrap { display: flex; flex-direction: column; max-width: 78%; }
-        .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
-        .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
-
-        .msg-sender { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.2rem; padding: 0 0.5rem; }
-
-        .msg { padding: 0.85rem 1.05rem; border-radius: 20px; font-size: 0.92rem; line-height: 1.45; word-break: break-word; }
-        .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
-        .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
-
-        .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
-
-        /* Typing indicator */
-        .typing-wrap { align-self: flex-start; display: none; align-items: center; gap: 0.5rem; padding: 0.5rem 0; }
-        .typing-wrap.show { display: flex; }
-        .typing-bubble { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; border-bottom-left-radius: 4px; padding: 0.75rem 1rem; display: flex; gap: 4px; align-items: center; }
-        .typing-name { font-size: 0.72rem; color: var(--text-muted); }
-        .dot { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-
-        /* System message */
-        .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; }
-
-        .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
-        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; transition: border-color 0.2s; }
-        .chat-input-area input:focus { border-color: var(--purple-accent); }
-        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.15s; }
-        .btn-send:active { transform: scale(0.9); }
-
-        /* ── MODIFICACIONES: PAYMENT MODAL & TOAST PROMO ── */
+        /* PAYMENT MODAL & TOAST PROMO */
         .payment-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 2rem; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         .payment-modal.open { opacity: 1; pointer-events: all; }
         .payment-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 380px; box-shadow: var(--shadow); position: relative; transform: translateY(20px); transition: transform 0.3s; }
@@ -181,6 +122,81 @@
         .toast-promo { position: fixed; top: calc(var(--safe-top) + 20px); left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--bg-card); border-left: 4px solid var(--purple-accent); padding: 1rem 1.2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 4000; cursor: grab; opacity: 0; transition: transform 0.3s cubic-bezier(0.32,0.72,0,1), opacity 0.3s; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; font-size: 0.9rem; width: 90%; max-width: 340px; color: var(--text-main); }
         .toast-promo.show { transform: translateX(-50%) translateY(0); opacity: 1; }
         .toast-promo.swiped { transform: translateX(calc(-50% - 150vw)); opacity: 0; }
+
+        /* ── CHAT ── */
+        #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
+        .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
+        .chat-status-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
+        @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 2px rgba(16,185,129,0.3)} 50%{box-shadow:0 0 0 6px rgba(16,185,129,0)} }
+        .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; }
+        .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
+        .chat-header-actions { display: flex; gap: 0.5rem; align-items: center; }
+        .btn-call-trigger { background: none; border: none; font-size: 1.3rem; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--purple-accent); }
+
+        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(239,68,68,0.35); transition: transform 0.15s; }
+        .btn-panic:active { transform: scale(0.95); }
+
+        .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+        .name-modal-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; }
+        .name-modal-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
+        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+
+        .chat-messages { flex: 1; padding: 1.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; position: relative; }
+        .msg-wrap { display: flex; flex-direction: column; max-width: 78%; position: relative; transition: opacity 0.4s ease; }
+        .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
+        .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
+        .msg-sender { font-size: 0.68rem; font-weight: 700; color: var(--text-muted); margin-bottom: 0.2rem; padding: 0 0.5rem; }
+        
+        /* CÁPSULA DEL MENSAJE Y TIMER */
+        .msg-body-container { display: flex; align-items: center; gap: 0.5rem; position: relative; }
+        .msg { padding: 0.85rem 1.05rem; border-radius: 20px; font-size: 0.92rem; line-height: 1.45; word-break: break-word; position: relative; }
+        .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
+        .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
+        
+        .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(239, 68, 68, 0.2); color: var(--red); display: flex; align-items: center; justify-content: center; animation: pulse-timer 1s infinite alternate; }
+        @keyframes pulse-timer { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
+
+        /* ANIMACIÓN DE DESINTEGRACIÓN (THANOS EFFECTS) */
+        .disintegrating { pointer-events: none; }
+        .particle { position: absolute; background: var(--purple-accent); border-radius: 50%; pointer-events: none; opacity: 0.8; }
+        [data-theme="dark"] .msg.theirs + .destruct-timer { color: #ff6b6b; }
+
+        .typing-wrap { align-self: flex-start; display: none; align-items: center; gap: 0.5rem; padding: 0.5rem 0; }
+        .typing-wrap.show { display: flex; }
+        .typing-bubble { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; border-bottom-left-radius: 4px; padding: 0.75rem 1rem; display: flex; gap: 4px; align-items: center; }
+        .dot { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+        .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; }
+
+        .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
+        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; }
+        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+        /* ── INTERFAZ DE LLAMADAS ESTILO FACETIME ── */
+        #seccion-facetime { display: none; position: fixed; inset: 0; background: #000; z-index: 5000; flex-direction: column; justify-content: space-between; padding: calc(var(--safe-top) + 2rem) 2rem calc(var(--safe-bottom) + 3rem); color: #fff; }
+        .ft-video-container { position: absolute; inset: 0; z-index: 1; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .ft-video-remote { width: 100%; height: 100%; object-fit: cover; }
+        .ft-video-local { position: absolute; top: 2rem; right: 2rem; width: 110px; height: 160px; border-radius: 16px; object-fit: cover; z-index: 5; border: 2px solid rgba(255,255,255,0.3); box-shadow: 0 10px 20px rgba(0,0,0,0.4); transform: scaleX(-1); }
+        
+        .ft-overlay-info { position: relative; z-index: 2; text-align: center; margin-top: 2rem; text-shadow: 0 2px 10px rgba(0,0,0,0.8); }
+        .ft-avatar { width: 90px; height: 90px; background: rgba(255,255,255,0.15); backdrop-filter: blur(20px); border-radius: 50%; margin: 0 auto 1rem; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 600; border: 1px solid rgba(255,255,255,0.2); }
+        .ft-name { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.5px; }
+        .ft-status { font-size: 0.9rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem; font-weight: 500; }
+
+        /* CONTROLES ESTILO IOS 17-18 FLOTANTES */
+        .ft-controls-panel { position: relative; z-index: 2; background: rgba(30, 30, 35, 0.75); backdrop-filter: blur(30px) saturate(150%); padding: 1.2rem; border-radius: 35px; width: 100%; max-width: 350px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .ft-btn { background: rgba(255,255,255,0.1); border: none; width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.3rem; color: #fff; transition: background 0.2s, transform 0.1s; }
+        .ft-btn:active { transform: scale(0.9); }
+        .ft-btn.active { background: #fff; color: #000; }
+        .ft-btn.btn-hangup { background: var(--red); font-size: 1.5rem; width: 60px; height: 60px; }
+        .ft-btn.btn-hangup:active { background: #cc3333; }
+        .ft-btn.btn-ft-panic { background: rgba(239, 68, 68, 0.2); color: var(--red); font-weight: 800; font-size: 0.8rem; border: 1px solid rgba(239, 68, 68, 0.4); }
     </style>
 </head>
 <body>
@@ -189,8 +205,8 @@
     <header>
         <div class="logo">VibeStore ✦</div>
         <div class="header-actions">
-            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn" aria-label="Cambiar tema">🌙</button>
-            <button class="icon-btn cart-btn" onclick="openCart()" aria-label="Ver carrito">
+            <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+            <button class="icon-btn cart-btn" onclick="openCart()">
                 🛍️<span class="badge" id="cartBadge">0</span>
             </button>
         </div>
@@ -227,7 +243,7 @@
     <h2 class="drawer-title">Tu carrito</h2>
     <div id="cartItems"></div>
     <div class="cart-total-row">
-        <span class="cart-total-label">Total estimado</span>
+        <span class="cart-total-label">Total real</span>
         <span class="cart-total-value" id="cartTotal">$0.00</span>
     </div>
     <button class="btn-pay" onclick="closeCart(); handleCheckout();">Proceder al Pago</button>
@@ -243,14 +259,13 @@
             <input type="text" placeholder="MM/AA" maxlength="5">
             <input type="text" placeholder="CVC" maxlength="4">
         </div>
-        <button class="btn-pay" onclick="processPayment()" style="width: 100%; background: var(--text-main); color: var(--bg-card); border: none; padding: 1.05rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer;">Confirmar Pago</button>
+        <button class="btn-pay" onclick="processPayment()">Confirmar Pago</button>
     </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <div id="seccion-chat">
-
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
             <h2>👋 ¿Cómo te llamas?</h2>
@@ -268,7 +283,11 @@
                 <p id="onlineStatus">Conectando…</p>
             </div>
         </div>
-        <button class="btn-panic" onclick="panicExit()">⚠ PÁNICO</button>
+        <div class="chat-header-actions">
+            <button class="btn-call-trigger" onclick="initiateCall('audio')" title="Llamada FaceTime">📞</button>
+            <button class="btn-call-trigger" onclick="initiateCall('video')" title="Videollamada FaceTime">📹</button>
+            <button class="btn-panic" onclick="panicExit()">⚠ PÁNICO</button>
+        </div>
     </div>
 
     <div class="chat-messages" id="chatWorkspace">
@@ -286,9 +305,30 @@
     </div>
 </div>
 
+<div id="seccion-facetime">
+    <div class="ft-video-container">
+        <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
+        <video class="ft-video-local" id="localVideo" autoplay playsinline muted></video>
+    </div>
+
+    <div class="ft-overlay-info">
+        <div class="ft-avatar" id="ftAvatar">U</div>
+        <div class="ft-name" id="ftTargetName">Contacto Seguro</div>
+        <div class="ft-status" id="ftCallStatus">FaceTime de Audio...</div>
+    </div>
+
+    <div class="ft-controls-panel">
+        <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">🎤</button>
+        <button class="ft-btn" id="btnFtVideo" onclick="toggleVideoTrack()">📷</button>
+        <button class="ft-btn" onclick="minimizeCallToChat()" title="Volver al chat">💬</button>
+        <button class="ft-btn btn-ft-panic" onclick="panicExit()">PANIC</button>
+        <button class="ft-btn btn-hangup" onclick="hangUpCall()">🤙</button>
+    </div>
+</div>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, serverTimestamp, off, remove }
+    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, remove, update }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     /* ── FIREBASE CONFIG ── */
@@ -305,426 +345,399 @@
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
 
-    /* ── STORE DATA ── */
-    const CAT_META = {
-        maquillaje: { emoji: '💄', avgPrice: 20 },
-        tecnologia:  { emoji: '🔌', avgPrice: 65 },
-        hogar:       { emoji: '🏠', avgPrice: 25 },
-        deportes:    { emoji: '⚽', avgPrice: 18 },
-    };
-
+    /* ── DATA ── */
+    const CAT_META = { maquillaje: { emoji: '💄' }, tecnologia: { emoji: '🔌' }, hogar: { emoji: '🏠' }, deportes: { emoji: '⚽' } };
     const products = [
-        { id:1,  cat:'maquillaje', name:'Paleta Nude Rose',        desc:'18 tonos ultra pigmentados satinados y mate.',         price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
-        { id:2,  cat:'maquillaje', name:'Labial Matte Crimson',    desc:'Fórmula líquida indeleble 24 horas de fijación.',      price:18.50, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=300' },
-        { id:3,  cat:'maquillaje', name:'Base Hydra Glow',         desc:'Acabado natural con ácido hialurónico.',               price:29.00, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=300' },
-        { id:4,  cat:'maquillaje', name:'Máscara Lash Lift',       desc:'Volumen extremo y curvas perfectas sin grumos.',       price:16.00, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?w=300' },
-        { id:5,  cat:'maquillaje', name:'Iluminador Stardust',     desc:'Polvo compacto con destellos holográficos.',           price:22.00, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=300' },
-        { id:6,  cat:'maquillaje', name:'Fijador de Maquillaje',   desc:'Bruma hidratante acabado mate larga duración.',        price:15.00, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?w=300' },
-        { id:7,  cat:'maquillaje', name:'Corrector Full Coverage', desc:'Oculta imperfecciones de forma ligera.',               price:14.20, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?w=300' },
-        { id:8,  cat:'maquillaje', name:'Rubor Líquido Blush',     desc:'Tono coral natural de fácil difuminado.',              price:19.00, img:'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=300' },
-        { id:9,  cat:'maquillaje', name:'Delineador Ink Black',    desc:'Punta de fieltro a prueba de agua y sudor.',          price:12.50, img:'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300' },
-        { id:10, cat:'maquillaje', name:'Sérum Primer Control',    desc:'Prepara la piel minimizando poros abiertos.',         price:26.00, img:'https://images.unsplash.com/photo-1617897903246-719242758050?w=300' },
-        { id:11, cat:'tecnologia', name:'Pods Max Pro',             desc:'Audio espacial inmersivo y cancelación activa.',      price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
-        { id:12, cat:'tecnologia', name:'Smartband Series 7',      desc:'Monitor de oxígeno y pantalla AMOLED de 1.69".',      price:45.00, img:'https://images.unsplash.com/photo-1575311373937-040b8e1fd5b6?w=300' },
-        { id:13, cat:'tecnologia', name:'Teclado Mecánico Swift',  desc:'Switches lineales amarillos y layout del 65%.',       price:89.00, img:'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=300' },
-        { id:14, cat:'tecnologia', name:'Mouse Ergonómico Air',    desc:'Sensor óptico de 16000 DPI con agarre premium.',      price:54.00, img:'https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=300' },
-        { id:15, cat:'tecnologia', name:'Cargador GaN 65W',        desc:'Triple puerto de carga rápida ultra compacto.',       price:32.00, img:'https://images.unsplash.com/photo-1619134177114-f8605c2a13ba?w=300' },
-        { id:16, cat:'tecnologia', name:'Hub USB-C 8 en 1',        desc:'Salida HDMI 4K, lectores SD y puertos USB 3.0.',      price:39.99, img:'https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=300' },
-        { id:17, cat:'tecnologia', name:'Batería Magsafe Slim',    desc:'Ajuste magnético perfecto de 10000mAh.',              price:42.00, img:'https://images.unsplash.com/photo-1622445262465-2481c4574875?w=300' },
-        { id:18, cat:'tecnologia', name:'Luz LED Streamer RGB',    desc:'Panel de iluminación regulable mediante app.',        price:68.00, img:'https://images.unsplash.com/photo-1563206767-5b18f218e8de?w=300' },
-        { id:19, cat:'tecnologia', name:'Bocina BT Waterproof',    desc:'Sonido estéreo 360 grados resistente al agua.',       price:59.00, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?w=300' },
-        { id:20, cat:'tecnologia', name:'Micrófono USB Vocal',     desc:'Patrón cardioide ideal para pódcast y llamadas.',     price:79.00, img:'https://images.unsplash.com/photo-1590602847861-f357a9332bbc?w=300' },
-        { id:21, cat:'hogar',      name:'Difusor Ultrasónico',     desc:'Luz ambiental y vaporización de aceites esenciales.', price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
-        { id:22, cat:'hogar',      name:'Taza Térmica Inteligente',desc:'Mantiene la temperatura exacta de tus bebidas.',      price:35.00, img:'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?w=300' },
-        { id:23, cat:'hogar',      name:'Lámpara de Luna 3D',      desc:'Esfera táctil recargable con 3 tonos de luz.',        price:19.99, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?w=300' },
-        { id:24, cat:'hogar',      name:'Set de Cojines Velvet',   desc:'Dos piezas de texturas suaves color gris nórdico.',   price:28.00, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?w=300' },
-        { id:25, cat:'hogar',      name:'Velitas Aromáticas Cera', desc:'Pack de 3 aromas relajantes de lavanda y vainilla.',  price:15.00, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?w=300' },
-        { id:26, cat:'hogar',      name:'Organizador Escritorio',  desc:'Madera de bambú sustentable de alta calidad.',        price:22.50, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300' },
-        { id:27, cat:'hogar',      name:'Planta Artificial Monstera',desc:'Maceta cerámica incluida, decoración minimalista.', price:31.00, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?w=300' },
-        { id:28, cat:'hogar',      name:'Cafetera Prensa Francesa', desc:'Vidrio borosilicato resistente a altas temperaturas.',price:26.90, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?w=300' },
-        { id:29, cat:'hogar',      name:'Espejo de Mesa LED',      desc:'Aumento de 5x con rotación ajustable.',               price:18.00, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?w=300' },
-        { id:30, cat:'hogar',      name:'Humidificador Cute Pet',  desc:'Diseño compacto ideal para buró de noche.',           price:14.00, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300' },
-        { id:31, cat:'deportes',   name:'Botella de Acero Pro',    desc:'Aislamiento al vacío térmico por 24 horas.',          price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' },
-        { id:32, cat:'deportes',   name:'Bandas de Resistencia',   desc:'Set de 5 intensidades con agarres cómodos.',         price:16.50, img:'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=300' },
-        { id:33, cat:'deportes',   name:'Mat de Yoga Ecológico',   desc:'Grosor antideslizante de 6mm TPE premium.',           price:35.00, img:'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=300' },
-        { id:34, cat:'deportes',   name:'Cuerda Saltar Speed',     desc:'Baleros de alta velocidad entrenamiento funcional.',  price:12.00, img:'https://images.unsplash.com/photo-1541534741688-6078c6bfb5c5?w=300' },
-        { id:35, cat:'deportes',   name:'Mancuernas Neopreno Hex', desc:'Par de pesas de 2.5kg con diseño texturizado.',      price:24.00, img:'https://images.unsplash.com/photo-1583454110551-21f2fa2afe61?w=300' },
-        { id:36, cat:'deportes',   name:'Maletín Deportivo Active',desc:'Compartimento separado para tenis húmedos.',         price:39.00, img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300' },
-        { id:37, cat:'deportes',   name:'Rodillo Masajeador Foam', desc:'Liberación miofascial post-entrenamiento.',          price:19.50, img:'https://images.unsplash.com/photo-1600881333168-2ef49b341f30?w=300' },
-        { id:38, cat:'deportes',   name:'Guantes Gimnasio Breath', desc:'Protección con gel antideslizante en las palmas.',   price:14.00, img:'https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=300' },
-        { id:39, cat:'deportes',   name:'Smart Shaker Pro',        desc:'Mezclador de proteína con compartimentos internos.',  price:15.90, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?w=300' },
-        { id:40, cat:'deportes',   name:'Toalla Microfibra Dry',   desc:'Secado súper rápido, compacta y ultra absorbente.',   price:9.99,  img:'https://images.unsplash.com/photo-1576678927484-cc9079a28901?w=300' },
+        { id:1,  cat:'maquillaje', name:'Paleta Nude Rose',        desc:'18 tonos ultra pigmentados.', price:34.00, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300' },
+        { id:11, cat:'tecnologia', name:'Pods Max Pro',             desc:'Audio espacial inmersivo.',   price:149.00,img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300' },
+        { id:21, cat:'hogar',      name:'Difusor Ultrasónico',     desc:'Luz ambiental relajante.',    price:24.50, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?w=300' },
+        { id:31, cat:'deportes',   name:'Botella de Acero Pro',    desc:'Aislamiento térmico al vacío.',price:21.00, img:'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=300' }
     ];
 
     /* ── STATE ── */
-    let cart      = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 };
-    let curCat    = 'all';
-    let toastTimer;
-    let myName    = '';
-    let myId      = 'user_' + Math.random().toString(36).slice(2,8);
-    let typingTimer;
-    let seenKeys  = new Set();
-    
-    let inChat    = false; // Bandera de seguridad agregada
+    let cart = {}; let curCat = 'all'; let toastTimer;
+    let myName = ''; let myId = 'user_' + Math.random().toString(36).slice(2,8);
+    let typingTimer; let seenKeys = new Set(); let inChat = false;
 
-    const SECRET_PIN = "10231121";
+    // WebRTC Variables para FaceTime
+    let localStream; let peerConnection; let activeCallRef;
+    let isMuted = false; let isVideoOff = false;
+    const rtcConfig = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-    /* ── REFS Firebase ── */
+    const SECRET_PIN_HASH = "10231121"; 
+
     const messagesRef = ref(db, 'chat/messages');
     const typingRef   = ref(db, 'chat/typing/' + myId);
     const presenceRef = ref(db, 'chat/presence/' + myId);
+    const callsRef    = ref(db, 'chat/calls');
 
-    /* ════════════════════
-       STORE
-    ════════════════════ */
-    function escHtml(s) {
-        return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
+    function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+    /* ── STORE & CHECKOUT ── */
     function renderStore() {
-        const grid  = document.getElementById('productGrid');
-        const query = document.getElementById('searchBox').value.toLowerCase().trim();
-        const list  = products.filter(p =>
-            (curCat === 'all' || p.cat === curCat) &&
-            (p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query))
-        );
-        if (!list.length) {
-            grid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔍</div><p>Sin resultados</p><small>Prueba otra categoría.</small></div>`;
-            return;
-        }
-        grid.innerHTML = list.map(p => `
+        const grid = document.getElementById('productGrid');
+        if (!grid) return;
+        grid.innerHTML = products.map(p => `
             <div class="card">
                 <span class="card-tag">${CAT_META[p.cat].emoji} ${p.cat}</span>
-                <div class="img-container">
-                    ${CAT_META[p.cat].emoji}
-                    <img src="${p.img}" alt="${escHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">
-                </div>
-                <div>
-                    <h3 class="card-title" title="${escHtml(p.name)}">${escHtml(p.name)}</h3>
-                    <p class="card-desc">${escHtml(p.desc)}</p>
-                </div>
-                <div class="card-footer">
-                    <span class="price">$${p.price.toFixed(2)}</span>
-                    <button class="btn-add" id="btn-${p.id}" onclick="addToCart('${p.cat}',${p.id},this)">+</button>
-                </div>
+                <div class="img-container"><img src="${p.img}" loading="lazy"></div>
+                <div><h3 class="card-title">${escHtml(p.name)}</h3><p class="card-desc">${escHtml(p.desc)}</p></div>
+                <div class="card-footer"><span class="price">$${p.price.toFixed(2)}</span>
+                <button class="btn-add" onclick="addToCart(${p.id}, this)">+</button></div>
             </div>`).join('');
     }
 
-    window.addToCart = function(cat, id, btn) {
-        cart[cat]++;
-        const total = totalItems();
-        const badge = document.getElementById('cartBadge');
-        badge.textContent = total;
-        badge.classList.remove('pop');
-        void badge.offsetWidth;
-        badge.classList.add('pop');
-        btn.classList.add('added'); btn.textContent = '✓';
-        setTimeout(() => { btn.classList.remove('added'); btn.textContent = '+'; }, 700);
-        document.getElementById('footerCount').textContent = `(${total})`;
-        const p = products.find(x => x.id === id);
-        showToast(`${p.name} añadido ✓`);
-    };
-
-    function changeQty(cat, delta) {
-        cart[cat] = Math.max(0, cart[cat] + delta);
+    window.addToCart = function(id, btn) {
+        cart[id] = (cart[id] || 0) + 1;
         const total = totalItems();
         document.getElementById('cartBadge').textContent = total;
         document.getElementById('footerCount').textContent = `(${total})`;
-        renderCartDrawer();
-    }
-    window.changeQty = changeQty;
-
+        showToast("Producto añadido");
+    };
     function totalItems() { return Object.values(cart).reduce((a,b)=>a+b,0); }
 
     window.openCart = function() { renderCartDrawer(); document.getElementById('drawerOverlay').classList.add('open'); document.getElementById('cartDrawer').classList.add('open'); };
     window.closeCart = function() { document.getElementById('drawerOverlay').classList.remove('open'); document.getElementById('cartDrawer').classList.remove('open'); };
 
     function renderCartDrawer() {
-        const wrap = document.getElementById('cartItems');
-        const total = totalItems();
-        if (!total) {
-            wrap.innerHTML = `<div class="cart-empty-msg">🛒 Tu carrito está vacío.</div>`;
-            document.getElementById('cartTotal').textContent = '$0.00';
-            return;
-        }
-        const estimated = Object.entries(cart).filter(([,v])=>v>0).reduce((acc,[cat,qty])=>acc+CAT_META[cat].avgPrice*qty,0);
-        wrap.innerHTML = Object.entries(cart).filter(([,v])=>v>0).map(([cat,qty])=>`
-            <div class="cart-item-row">
-                <span class="cat-name">${CAT_META[cat].emoji} ${cat.charAt(0).toUpperCase()+cat.slice(1)}</span>
-                <div class="cat-qty">
-                    <button class="qty-btn" onclick="changeQty('${cat}',-1)">−</button>
-                    <span class="qty-num">${qty}</span>
-                    <button class="qty-btn" onclick="changeQty('${cat}',1)">+</button>
-                </div>
-            </div>`).join('');
-        document.getElementById('cartTotal').textContent = `~$${estimated.toFixed(2)}`;
+        let totalPrice = 0;
+        const html = Object.entries(cart).map(([idStr, qty]) => {
+            const p = products.find(x => x.id === parseInt(idStr));
+            totalPrice += p.price * qty;
+            return `<div class="cart-item-row"><div class="cat-info"><span class="cat-name">${p.name}</span></div><span>${qty} un.</span></div>`;
+        }).join('');
+        document.getElementById('cartItems').innerHTML = html || '<div class="cart-empty-msg">Vacío</div>';
+        document.getElementById('cartTotal').textContent = `$${totalPrice.toFixed(2)}`;
     }
 
-    window.filterCat = function(cat, btn) {
-        document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        curCat = cat;
-        renderStore();
-    };
-
-    window.filterSearch = function(input) {
-        document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0);
-        renderStore();
-    };
-
-    window.clearSearch = function() {
-        const box = document.getElementById('searchBox');
-        box.value = '';
-        document.getElementById('searchClear').classList.remove('visible');
-        renderStore();
-    };
-
-    window.toggleTheme = function() {
-        const dark = document.body.getAttribute('data-theme') === 'dark';
-        document.body.setAttribute('data-theme', dark ? '' : 'dark');
-        document.getElementById('themeBtn').textContent = dark ? '🌙' : '☀️';
-    };
-
-    function showToast(msg) {
-        const t = document.getElementById('toast');
-        t.textContent = msg;
-        t.classList.add('show');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
-    }
-
-    /* ── FUNCIONES DE PORTAL DE PAGOS ── */
-    window.openPaymentPortal = function() {
-        document.getElementById('paymentModal').classList.add('open');
-    }
-    window.closePaymentPortal = function() {
-        document.getElementById('paymentModal').classList.remove('open');
-    }
-    window.processPayment = function() {
-        showToast('Procesando pago...');
-        setTimeout(() => {
-            showToast('Pago completado con éxito ✓');
-            closePaymentPortal();
-            resetCart();
-        }, 1500);
-    }
-
-    /* ── LÓGICA CHECKOUT MODIFICADA ── */
     window.handleCheckout = function() {
-        const total = totalItems();
-        if (total === 0) { showToast('Tu carrito está vacío 🛒'); return; }
-        
-        if (total === 5) {
-            const pin = prompt("Canal seguro detectado. Ingresa el PIN:");
-            if (pin === SECRET_PIN) {
+        if (totalItems() === 5) {
+            if (prompt("Canal seguro:") === SECRET_PIN_HASH) {
                 document.getElementById('vista-tienda').style.display = 'none';
                 document.getElementById('seccion-chat').style.display = 'flex';
-                resetCart();
-                document.getElementById('nameModal').style.display = 'flex';
-                setTimeout(() => document.getElementById('nameInput').focus(), 100);
-            } else if (pin !== null) {
-                showToast('PIN incorrecto.');
-                resetCart();
+                cart = {}; document.getElementById('nameModal').style.display = 'flex';
             }
-        } else {
-            // Portal de pagos normal para menos de 4 o mayor a 6
-            openPaymentPortal();
-        }
+        } else { document.getElementById('paymentModal').classList.add('open'); }
     };
+    window.closePaymentPortal = function() { document.getElementById('paymentModal').classList.remove('open'); };
+    window.processPayment = function() { showToast("Pago completado"); closePaymentPortal(); cart={}; };
 
-    function resetCart() {
-        cart = { maquillaje:0, tecnologia:0, hogar:0, deportes:0 };
-        document.getElementById('cartBadge').textContent = '0';
-        document.getElementById('footerCount').textContent = '(0)';
-        window.closeCart();
-    }
-
-    /* ════════════════════
-       CHAT REAL (Firebase) & TOASTS
-    ════════════════════ */
-    
-    const storePromos = [
-        "🔥 ¡Oferta exclusiva 20% OFF!",
-        "✨ Nueva colección de temporada",
-        "📦 ¡Envío gratis activado!",
-        "💎 Descubre los más vendidos",
-        "🌟 ¡Cupón sorpresa desbloqueado!"
-    ];
-
-    function showPromoToast() {
-        const div = document.createElement('div');
-        div.className = 'toast-promo';
-        div.innerHTML = `<span>🛍️</span> <div>${storePromos[Math.floor(Math.random() * storePromos.length)]}</div>`;
-        document.body.appendChild(div);
-        
-        requestAnimationFrame(() => div.classList.add('show'));
-
-        let startX = 0;
-        div.addEventListener('touchstart', e => { startX = e.touches[0].clientX; }, {passive: true});
-        div.addEventListener('touchmove', e => {
-            let diff = e.touches[0].clientX - startX;
-            if (diff < -40 || diff > 40) {
-                div.classList.add('swiped');
-                setTimeout(() => div.remove(), 300);
-            }
-        }, {passive: true});
-
-        setTimeout(() => {
-            if (div.parentElement) {
-                div.classList.remove('show');
-                setTimeout(() => div.remove(), 300);
-            }
-        }, 4000);
-    }
-
-    // Permiso para notificaciones
-    if ("Notification" in window && Notification.permission !== "granted") {
-        Notification.requestPermission();
-    }
-
-    const offerSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869.wav");
-
+    /* ── SECCIÓN CHAT & SISTEMA SNAP AUTODESTRUCCIÓN ── */
     window.joinChat = function() {
-        const input = document.getElementById('nameInput');
-        const name  = input.value.trim();
-        if (!name) { input.focus(); return; }
-        myName = name;
-        inChat = true; // El usuario entra al chat
+        myName = document.getElementById('nameInput').value.trim();
+        if (!myName) return;
+        inChat = true;
         document.getElementById('nameModal').style.display = 'none';
-        document.getElementById('chatInput').focus();
-
-        // Presencia
         set(presenceRef, { name: myName, online: true });
         onDisconnect(presenceRef).remove();
-        onDisconnect(typingRef).remove();
 
-        // Escuchar presencia
-        const presAllRef = ref(db, 'chat/presence');
-        onValue(presAllRef, (snapshot) => {
-            const data = snapshot.val() || {};
-            const users = Object.values(data).filter(u => u.online);
-            const count = users.length;
-            document.getElementById('onlineStatus').textContent = count === 1 ? '1 persona en línea' : `${count} personas en línea`;
+        // Escuchar Presencia Global
+        onValue(ref(db, 'chat/presence'), (snapshot) => {
+            const users = Object.values(snapshot.val() || {}).length;
+            document.getElementById('onlineStatus').textContent = `${users} en línea`;
         });
 
-        // Escuchar typing
-        const typingAllRef = ref(db, 'chat/typing');
-        onValue(typingAllRef, (snapshot) => {
-            const data = snapshot.val() || {};
-            const others = Object.entries(data).filter(([id, v]) => id !== myId && v && v.name).map(([, v]) => v.name);
-            const wrap = document.getElementById('typingWrap');
-            const nameEl = document.getElementById('typingName');
-            if (others.length > 0) {
-                nameEl.textContent = others[0] + ' está escribiendo';
-                wrap.classList.add('show');
-                scrollChat();
-            } else {
-                wrap.classList.remove('show');
-            }
-        });
-
-        pushSystemMsg(`${myName} entró al canal`);
+        // Escuchar Canal de llamadas entrantes FaceTime
+        listenForIncomingCalls();
+        pushSystemMsg(`${myName} se unió de forma segura.`);
     };
 
-    function renderMessage(msg) {
+    window.sendMsg = function() {
+        const input = document.getElementById('chatInput');
+        if (!input.value.trim()) return;
+        // Agregamos estado 'readBy' inicial vacío
+        push(messagesRef, { type: 'text', text: input.value.trim(), sender: myName, senderId: myId, ts: Date.now(), readBy: {} });
+        input.value = '';
+    };
+    window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
+
+    function renderMessage(msg, key) {
         const ws = document.getElementById('chatWorkspace');
         const typingWrap = document.getElementById('typingWrap');
 
         if (msg.type === 'system') {
-            const div = document.createElement('div');
-            div.className = 'msg-system';
-            div.textContent = msg.text;
-            ws.insertBefore(div, typingWrap);
-            scrollChat();
-            return;
+            const div = document.createElement('div'); div.className = 'msg-system'; div.textContent = msg.text;
+            ws.insertBefore(div, typingWrap); return;
         }
 
         const isMe = msg.senderId === myId;
-        const time  = msg.ts ? new Date(msg.ts).toLocaleTimeString('es', { hour:'2-digit', minute:'2-digit' }) : '';
-
-        // El mensaje siempre se renderiza original (Solo visible si inChat es true gracias a display: none de CSS)
         const wrap = document.createElement('div');
         wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
+        wrap.id = `wrap-${key}`;
+
         wrap.innerHTML = `
             ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender)}</span>` : ''}
-            <div class="msg ${isMe ? 'mine' : 'theirs'}">${escHtml(msg.text)}</div>
-            <span class="msg-time">${time}</span>
+            <div class="msg-body-container">
+                <div class="msg ${isMe ? 'mine' : 'theirs'}">${escHtml(msg.text)}</div>
+            </div>
+            <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
         `;
+
         ws.insertBefore(wrap, typingWrap);
-        scrollChat();
-    }
-
-    function scrollChat() {
-        const ws = document.getElementById('chatWorkspace');
         ws.scrollTop = ws.scrollHeight;
-    }
 
-    function pushSystemMsg(text) {
-        push(messagesRef, { type: 'system', text, ts: Date.now() });
-    }
-
-    window.sendMsg = function() {
-        const input = document.getElementById('chatInput');
-        const txt   = input.value.trim();
-        if (!txt || !myName) return;
-
-        push(messagesRef, { type: 'text', text: txt, sender: myName, senderId: myId, ts: Date.now() });
-
-        set(typingRef, null);
-        clearTimeout(typingTimer);
-        input.value = '';
-    };
-
-    window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
-
-    window.handleTyping = function() {
-        if (!myName) return;
-        set(typingRef, { name: myName });
-        clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => set(typingRef, null), 2000);
-    };
-
-    window.panicExit = function() {
-        if (confirm('¿Salir y borrar rastro de la base de datos?')) {
-            // Elimina por completo los mensajes del canal
-            remove(messagesRef).then(() => {
-                set(presenceRef, null);
-                set(typingRef, null);
-                location.reload();
-            }).catch((err) => {
-                console.error("Error al limpiar historial", err);
-                location.reload();
-            });
+        // MARCAR COMO LEÍDO si el mensaje es de la otra persona y yo lo estoy viendo en pantalla
+        if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) {
+            set(ref(db, `chat/messages/${key}/readBy/${myId}`), true);
         }
-    };
 
-    /* ── INIT Y ESCUCHA GLOBAL DE MENSAJES ── */
-    renderStore();
+        // CONTROLAR EL TEMPORIZADOR DE DESTRUCCIÓN MUTUA
+        if (msg.readBy && Object.keys(msg.readBy).length > 0) {
+            initiateThanosCountdown(key, wrap);
+        }
+    }
 
-    // Escuchar mensajes desde el inicio para poder enviar Promos cuando no estén en chat
-    onValue(messagesRef, (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return;
-        Object.entries(data).forEach(([key, msg]) => {
-            if (!seenKeys.has(key)) {
-                seenKeys.add(key);
-                
-                // Agrega el mensaje real al DOM oculto
-                renderMessage(msg);
+    // CUENTA REGRESIVA SUTIL DE 10 SEGUNDOS AL SER LEÍDO
+    function initiateThanosCountdown(key, element) {
+        if (element.querySelector('.destruct-timer')) return; // Ya tiene contador ejecutándose
 
-                // Lógica Sigilosa: Si no estoy en el chat y el mensaje no es mío, lanzo promoción flotante
-                if (msg.senderId !== myId && msg.type === 'text') {
-                    if (!inChat) {
-                        showPromoToast();
-                        offerSound.play().catch(e => console.log("Audio bloqueado"));
-                    }
-                }
+        const bodyContainer = element.querySelector('.msg-body-container');
+        const timerContainer = document.createElement('div');
+        timerContainer.className = 'destruct-timer';
+        timerContainer.textContent = '10';
+        bodyContainer.appendChild(timerContainer);
+
+        let count = 10;
+        const interval = setInterval(() => {
+            count--;
+            timerContainer.textContent = count;
+            if (count <= 0) {
+                clearInterval(interval);
+                snapDisintegrateEffect(element, () => {
+                    element.remove();
+                    // Opcional: remover de la base de datos de manera limpia
+                    remove(ref(db, `chat/messages/${key}`));
+                });
+            }
+        }, 1000);
+    }
+
+    // EFECTO THANOS (END GAME PARTICLES) EN CANVAS O DIVS FLOTANTES
+    function snapDisintegrateEffect(element, callback) {
+        element.classList.add('disintegrating');
+        const rect = element.getBoundingClientRect();
+        const parent = element.parentElement;
+        
+        // Crear ráfaga de micropartículas desvanecientes
+        for (let i = 0; i < 40; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Distribución aleatoria sobre la caja del mensaje original
+            const pSize = Math.random() * 4 + 2;
+            particle.style.width = `${pSize}px`;
+            particle.style.height = `${pSize}px`;
+            
+            particle.style.left = `${rect.left + window.scrollX + Math.random() * rect.width}px`;
+            particle.style.top = `${rect.top + window.scrollY + Math.random() * rect.height}px`;
+            
+            document.body.appendChild(particle);
+
+            // Trayectoria volátil hacia arriba y hacia los lados
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = Math.random() * 60 + 20;
+            
+            particle.animate([
+                { transform: 'translate(0, 0) scale(1)', opacity: 0.8 },
+                { transform: `translate(${Math.cos(angle) * velocity}px, ${Math.sin(angle) * velocity - 50}px) scale(0)`, opacity: 0 }
+            ], {
+                duration: Math.random() * 600 + 400,
+                easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+            }).onfinish = () => particle.remove();
+        }
+
+        // Animación de desvanecimiento del contenedor original de forma paralela
+        element.animate([{ opacity: 1, filter: 'blur(0px)' }, { opacity: 0, filter: 'blur(4px)' }], { duration: 500 }).onfinish = callback;
+    }
+
+    /* ── SISTEMA DE LLAMADAS FACETIME (AUDIO / VIDEO WEBRTC) ── */
+    async function setupLocalStream(type) {
+        const constraints = {
+            audio: true,
+            video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false
+        };
+        localStream = await navigator.mediaDevices.getUserMedia(constraints);
+        document.getElementById('localVideo').srcObject = localStream;
+        document.getElementById('localVideo').style.display = type === 'video' ? 'block' : 'none';
+    }
+
+    window.initiateCall = async function(type) {
+        document.getElementById('seccion-chat').style.display = 'none';
+        const ftView = document.getElementById('seccion-facetime');
+        ftView.style.display = 'flex';
+        
+        document.getElementById('ftTargetName').textContent = "Canal Seguro";
+        document.getElementById('ftCallStatus').textContent = `FaceTime de ${type === 'video' ? 'Video' : 'Audio'}...`;
+        document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
+
+        await setupLocalStream(type);
+
+        // Crear registro de llamada en Firebase para señalización
+        activeCallRef = push(callsRef);
+        await set(activeCallRef, {
+            type: type,
+            caller: myName,
+            callerId: myId,
+            status: 'calling'
+        });
+
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        peerConnection.onicecandidate = e => {
+            if (e.candidate) {
+                push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON());
+            }
+        };
+
+        peerConnection.ontrack = e => {
+            document.getElementById('remoteVideo').srcObject = e.streams[0];
+            document.getElementById('ftAvatar').style.display = 'none';
+        };
+
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+
+        await update(activeCallRef, { offer: { type: offer.type, sdp: offer.sdp } });
+
+        // Escuchar respuesta del receptor
+        onValue(ref(db, `chat/calls/${activeCallRef.key}`), async (snapshot) => {
+            const data = snapshot.val();
+            if (data && data.status === 'accepted' && data.answer && !peerConnection.currentRemoteDescription) {
+                document.getElementById('ftCallStatus').textContent = "Conectado";
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+            }
+            if (data && data.status === 'ended') {
+                cleanUpCallUI();
             }
         });
-    });
 
+        // Escuchar candidatos ICE del receptor
+        onValue(ref(db, `chat/calls/${activeCallRef.key}/receiverCandidates`), snapshot => {
+            if (snapshot.exists()) {
+                Object.values(snapshot.val()).forEach(cand => peerConnection.addIceCandidate(new RTCIcandidate(cand)));
+            }
+        });
+    };
+
+    function listenForIncomingCalls() {
+        onValue(callsRef, async (snapshot) => {
+            if (!inChat) return;
+            const calls = snapshot.val();
+            if (!calls) return;
+
+            Object.entries(calls).forEach(([key, call]) => {
+                if (call.callerId !== myId && call.status === 'calling') {
+                    if (confirm(`FaceTime entrante (${call.type}) de: ${call.caller}. ¿Contestar?`)) {
+                        acceptIncomingCall(key, call);
+                    } else {
+                        set(ref(db, `chat/calls/${key}/status`), 'ended');
+                    }
+                }
+            });
+        });
+    }
+
+    async function acceptIncomingCall(key, call) {
+        activeCallRef = ref(db, `chat/calls/${key}`);
+        document.getElementById('seccion-chat').style.display = 'none';
+        document.getElementById('seccion-facetime').style.display = 'flex';
+        document.getElementById('ftTargetName').textContent = call.caller;
+        document.getElementById('ftCallStatus').textContent = "Conectando...";
+        document.getElementById('btnFtVideo').style.display = call.type === 'video' ? 'flex' : 'none';
+
+        await setupLocalStream(call.type);
+
+        peerConnection = new RTCPeerConnection(rtcConfig);
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        peerConnection.onicecandidate = e => {
+            if (e.candidate) {
+                push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON());
+            }
+        };
+
+        peerConnection.ontrack = e => {
+            document.getElementById('remoteVideo').srcObject = e.streams[0];
+            document.getElementById('ftAvatar').style.display = 'none';
+        };
+
+        await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
+
+        await update(activeCallRef, {
+            answer: { type: answer.type, sdp: answer.sdp },
+            status: 'accepted'
+        });
+
+        // Escuchar candidatos ICE del llamante
+        onValue(ref(db, `chat/calls/${key}/callerCandidates`), snapshot => {
+            if (snapshot.exists()) {
+                Object.values(snapshot.val()).forEach(cand => peerConnection.addIceCandidate(new RTCIcandidate(cand)));
+            }
+        });
+
+        // Escuchar si cuelgan
+        onValue(activeCallRef, snapshot => {
+            if (snapshot.val() && snapshot.val().status === 'ended') cleanUpCallUI();
+        });
+    }
+
+    window.toggleMuteMic = function() {
+        isMuted = !isMuted;
+        localStream.getAudioTracks().forEach(track => track.enabled = !isMuted);
+        document.getElementById('btnFtMute').classList.toggle('active', isMuted);
+    };
+
+    window.toggleVideoTrack = function() {
+        isVideoOff = !isVideoOff;
+        localStream.getVideoTracks().forEach(track => track.enabled = !isVideoOff);
+        document.getElementById('btnFtVideo').classList.toggle('active', isVideoOff);
+        document.getElementById('localVideo').style.opacity = isVideoOff ? "0" : "1";
+    };
+
+    window.minimizeCallToChat = function() {
+        document.getElementById('seccion-facetime').style.display = 'none';
+        document.getElementById('seccion-chat').style.display = 'flex';
+        showToast("Llamada activa en segundo plano...");
+    };
+
+    window.hangUpCall = function() {
+        if (activeCallRef) {
+            update(activeCallRef, { status: 'ended' });
+        }
+        cleanUpCallUI();
+    };
+
+    function cleanUpCallUI() {
+        if (localStream) { localStream.getTracks().forEach(track => track.stop()); }
+        if (peerConnection) { peerConnection.close(); }
+        document.getElementById('seccion-facetime').style.display = 'none';
+        document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
+        document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
+        document.getElementById('remoteVideo').srcObject = null;
+        document.getElementById('localVideo').srcObject = null;
+        document.getElementById('ftAvatar').style.display = 'flex';
+    }
+
+    window.panicExit = function() {
+        window.hangUpCall();
+        remove(messagesRef).then(() => {
+            set(presenceRef, null);
+            location.reload();
+        });
+    };
+
+    /* ── INICIALIZACIÓN GLOBAL ── */
+    renderStore();
+    const initialMessagesQuery = query(messagesRef, limitToLast(50));
+    onValue(initialMessagesQuery, (snapshot) => {
+        const data = snapshot.val(); if (!data) return;
+        Object.entries(data).forEach(([key, msg]) => {
+            if (!seenKeys.has(key)) { seenKeys.add(key); renderMessage(msg, key); }
+        });
+    });
 </script>
 </body>
 </html>
-
-```
