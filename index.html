@@ -765,6 +765,37 @@
         { title: "¡Liquidación Flash!", desc: "Precios especiales activos en la categoría Hogar por tiempo limitado." }
     ];
 
+    /* ── LOCAL NOTIFICATIONS (camouflaged as offers — respects the rule) ── */
+    function notificationsSupported() { return ('Notification' in window); }
+
+    function requestNotificationPermission() {
+        if (!notificationsSupported()) return;
+        if (Notification.permission === 'default') {
+            try { Notification.requestPermission().catch(() => {}); } catch (e) {}
+        }
+    }
+
+    // Fires a system notification with OFFER text (never the real message).
+    // Works when the PWA/tab is open in the background (app not focused).
+    function showOfferNotification() {
+        if (!notificationsSupported() || Notification.permission !== 'granted') return;
+        // Only notify when the app is NOT the active foreground tab
+        if (document.visibilityState === 'visible') return;
+        const promo = promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)];
+        try {
+            const n = new Notification(promo.title, {
+                body: promo.desc,
+                tag: 'vibestore-offer',      // overwrites previous one, like a real app
+                renotify: true,
+                badge: undefined,
+                silent: false
+            });
+            n.onclick = () => { window.focus(); n.close(); };
+            // Auto-close after a few seconds
+            setTimeout(() => { try { n.close(); } catch (e) {} }, 6000);
+        } catch (e) {}
+    }
+
     function shuffleProducts(array) {
         let i = array.length, j;
         while (i !== 0) { j = Math.floor(Math.random() * i); i--; [array[i], array[j]] = [array[j], array[i]]; }
@@ -974,6 +1005,8 @@
         inChat = true; document.getElementById('nameModal').style.display = 'none';
         // Unlock audio on this user gesture so sounds/ringtone work later
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
+        // Ask for notification permission (iOS requires a user gesture)
+        requestNotificationPermission();
         set(presenceRef, { name: myName, online: true });
         onDisconnect(presenceRef).remove();
         onDisconnect(typingRef).remove();
@@ -1106,7 +1139,12 @@
         if (isMe || nearBottom) { ws.scrollTop = ws.scrollHeight; }
 
         // Sound + vibration when a NEW message arrives from the other person (after initial load)
-        if (!isMe && inChat && initialLoadDone) { playMessageSound(); vibrate(60); }
+        if (!isMe && inChat && initialLoadDone) {
+            playMessageSound();
+            vibrate(60);
+            // If the app is in the background, show a camouflaged OFFER notification (never the real text)
+            showOfferNotification();
+        }
 
         if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) {
             const u = {}; u[`chat/messages/${key}/readBy/${myId}`] = true; update(ref(db), u);
