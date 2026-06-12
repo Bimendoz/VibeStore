@@ -196,19 +196,23 @@
 
         /* CHAT */
         #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
-        .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+        .chat-header { padding: 1rem 1.5rem; background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: space-between; }
+        [data-theme="dark"] .chat-header, body:not([data-theme="light"]) .chat-header { background: rgba(28,28,30,0.55); }
+        @media (prefers-color-scheme: dark) { body:not([data-theme="light"]) .chat-header { background: rgba(28,28,30,0.55); } }
         .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
         .chat-status-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
         @keyframes pulse-dot { 0%,100%{box-shadow: 0 0 0 2px rgba(40,167,69,0.3)} 50%{box-shadow: 0 0 0 6px rgba(40,167,69,0)} }
-        .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; }
+        .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; }
         .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
         .chat-header-actions { display: flex; gap: 0.65rem; align-items: center; }
-        .btn-call-trigger { border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s; }
-        .btn-call-trigger:active { transform: scale(0.9); }
-        .btn-call-trigger.audio-style { background: linear-gradient(135deg, #34c759, #28a745); }
-        .btn-call-trigger.video-style { background: linear-gradient(135deg, #007aff, #0056b3); }
-        .btn-call-trigger svg { width: 18px; height: 18px; fill: currentColor; }
-        .btn-panic { background: var(--red); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; }
+        /* Glass call buttons (iOS 26 frosted look) */
+        .btn-call-trigger { border: none; width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s, box-shadow 0.2s; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 1px rgba(255,255,255,0.4); }
+        .btn-call-trigger::after { content: ''; position: absolute; inset: 0; border-radius: 12px; background: linear-gradient(160deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 50%); pointer-events: none; }
+        .btn-call-trigger:active { transform: scale(0.92); }
+        .btn-call-trigger.audio-style { background: linear-gradient(160deg, #5ee07a, #28a745); }
+        .btn-call-trigger.video-style { background: linear-gradient(160deg, #4da6ff, #0056b3); }
+        .btn-call-trigger svg { width: 18px; height: 18px; fill: currentColor; position: relative; z-index: 1; }
+        .btn-panic { background: linear-gradient(160deg, #ff5b52, #e0231a); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(255,59,48,0.3), inset 0 1px 1px rgba(255,255,255,0.3); }
 
         .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
         .name-modal-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; }
@@ -245,10 +249,9 @@
         @keyframes wa-generic { 0%,100%{transform:scale(1)} 50%{transform:scale(1.13)} }
 
         .typing-name { font-size: 0.72rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.2rem; padding: 0 0.4rem; display: block; }
-        .e2e-lock { font-size: 0.7rem; opacity: 0.9; }
-        .e2e-lock.secure::after { content: '🔒'; }
-        .e2e-lock.secure { font-size: 0; }
-        .e2e-lock.secure::after { font-size: 0.7rem; }
+        .e2e-lock { font-size: 0.62rem; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 7px; background: rgba(142,142,147,0.18); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.25); box-shadow: inset 0 1px 1px rgba(255,255,255,0.3); transition: background 0.4s; }
+        .e2e-lock.secure { background: rgba(40,167,69,0.22); border-color: rgba(40,167,69,0.4); font-size: 0; width: 20px; height: 20px; }
+        .e2e-lock.secure::after { content: '🔒'; font-size: 0.62rem; }
         
         .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
@@ -264,7 +267,9 @@
         @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
         .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; }
 
-        .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
+        .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); border-top: 1px solid rgba(255,255,255,0.18); display: flex; gap: 0.7rem; align-items: center; }
+        [data-theme="dark"] .chat-input-area { background: rgba(28,28,30,0.6); }
+        @media (prefers-color-scheme: dark) { body:not([data-theme="light"]) .chat-input-area { background: rgba(28,28,30,0.6); } }
         #seccion-chat.keyboard-open .chat-input-area { padding-bottom: 0.6rem; }
         #seccion-chat.keyboard-open .recording-bar { padding-bottom: 0.6rem; }
         .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
@@ -348,10 +353,10 @@
         .ft-video-remote { width: 100%; height: 100%; object-fit: cover; }
         .ft-video-local { position: absolute; top: 2rem; right: 2rem; width: 110px; height: 160px; border-radius: 18px; object-fit: cover; z-index: 5; border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 12px 24px rgba(0,0,0,0.4); transform: scaleX(-1); }
         .ft-overlay-info { position: relative; z-index: 2; text-align: center; margin-top: 1.5rem; }
-        .ft-avatar { width: 96px; height: 96px; background: rgba(255,255,255,0.11); backdrop-filter: blur(25px); border-radius: 50%; margin: 0 auto 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.18); color: #fff; text-transform: uppercase; }
+        .ft-avatar { width: 96px; height: 96px; background: rgba(255,255,255,0.11); -webkit-backdrop-filter: blur(25px); backdrop-filter: blur(25px); border-radius: 50%; margin: 0 auto 1.2rem; display: flex; align-items: center; justify-content: center; font-size: 2.4rem; font-weight: 500; border: 1px solid rgba(255,255,255,0.18); color: #fff; text-transform: uppercase; }
         .ft-name { font-size: 1.8rem; font-weight: 600; letter-spacing: -0.5px; }
         .ft-status { font-size: 0.92rem; color: rgba(255,255,255,0.55); margin-top: 0.4rem; font-weight: 400; }
-        .ft-controls-panel { position: relative; z-index: 2; background: rgba(28, 28, 30, 0.45); backdrop-filter: blur(35px) saturate(200%); padding: 1.1rem; border-radius: 38px; width: 100%; max-width: 340px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
+        .ft-controls-panel { position: relative; z-index: 2; background: rgba(28, 28, 30, 0.45); -webkit-backdrop-filter: blur(35px) saturate(200%); backdrop-filter: blur(35px) saturate(200%); padding: 1.1rem; border-radius: 38px; width: 100%; max-width: 340px; margin: 0 auto; display: flex; justify-content: space-around; align-items: center; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 24px 48px rgba(0,0,0,0.4); }
         .ft-btn { background: rgba(255,255,255,0.12); border: none; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: background 0.2s, transform 0.1s; touch-action: manipulation; }
         .ft-btn svg { width: 22px; height: 22px; fill: currentColor; }
         .ft-btn.active { background: #fff; color: #000; }
@@ -362,7 +367,7 @@
         #seccion-incoming { display: none; position: fixed; inset: 0; z-index: 5500; flex-direction: column; justify-content: space-between; align-items: center; padding: calc(var(--safe-top) + 5rem) 2rem calc(var(--safe-bottom) + 4rem); color: #fff; background: linear-gradient(160deg, #1c1c2e 0%, #0d0d18 100%); }
         #seccion-incoming.show { display: flex; }
         .incoming-info { text-align: center; margin-top: 2rem; }
-        .incoming-avatar { width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,0.12); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; font-weight: 500; margin: 0 auto 1.5rem; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.15); animation: incoming-pulse 1.8s infinite; }
+        .incoming-avatar { width: 110px; height: 110px; border-radius: 50%; background: rgba(255,255,255,0.12); -webkit-backdrop-filter: blur(20px); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; font-size: 2.8rem; font-weight: 500; margin: 0 auto 1.5rem; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.15); animation: incoming-pulse 1.8s infinite; }
         @keyframes incoming-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.15); } 50% { box-shadow: 0 0 0 18px rgba(255,255,255,0); } }
         .incoming-name { font-size: 1.9rem; font-weight: 600; letter-spacing: -0.5px; }
         .incoming-type { font-size: 0.95rem; color: rgba(255,255,255,0.55); margin-top: 0.5rem; }
@@ -671,7 +676,7 @@
     <div class="ft-overlay-info">
         <div class="ft-avatar" id="ftAvatar">U</div>
         <div class="ft-name" id="ftTargetName">Enlace Seguro</div>
-        <div class="ft-status" id="ftCallStatus">Estableciendo FaceTime...</div>
+        <div class="ft-status" id="ftCallStatus">Estableciendo VibeCall…</div>
     </div>
     <div class="ft-controls-panel">
         <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">
@@ -695,7 +700,7 @@
     <div class="incoming-info">
         <div class="incoming-avatar" id="incomingAvatar">U</div>
         <div class="incoming-name" id="incomingName">Llamada entrante</div>
-        <div class="incoming-type" id="incomingType">FaceTime…</div>
+        <div class="incoming-type" id="incomingType">VibeCall…</div>
     </div>
     <div class="incoming-actions">
         <div class="incoming-action-group">
@@ -715,7 +720,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off }
+    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -1841,7 +1846,7 @@
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftTargetName').textContent = "Canal Seguro";
-        document.getElementById('ftCallStatus').textContent = `FaceTime de ${type === 'video' ? 'Video' : 'Audio'}...`;
+        document.getElementById('ftCallStatus').textContent = `VibeCall de ${type === 'video' ? 'Video' : 'Audio'}…`;
         document.getElementById('ftAvatar').textContent = "C";
         document.getElementById('ftAvatar').style.display = 'flex';
         document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
@@ -1908,7 +1913,7 @@
 
     function showIncomingScreen(call) {
         document.getElementById('incomingName').textContent = call.caller || 'Llamada entrante';
-        document.getElementById('incomingType').textContent = `FaceTime de ${call.type === 'video' ? 'video' : 'audio'}…`;
+        document.getElementById('incomingType').textContent = `VibeCall de ${call.type === 'video' ? 'video' : 'audio'}…`;
         document.getElementById('incomingAvatar').textContent = (call.caller || 'U').charAt(0);
         document.getElementById('seccion-incoming').classList.add('show');
         startRingtone();
@@ -2045,9 +2050,10 @@
         // Register myself as online from the moment the app opens (not just in chat)
         set(presenceRef, { name: myName || 'Invitado', online: true, ts: Date.now() });
         onDisconnect(presenceRef).remove();
-        // On disconnect, also stamp my lastSeen so the other person sees "activo hace X"
-        onDisconnect(ref(db, 'chat/lastSeen/' + myId)).set({ name: myName || 'Invitado', ts: Date.now() });
-        // Refresh my lastSeen periodically while online
+        // On disconnect, stamp my lastSeen with the SERVER's time of disconnection
+        // (serverTimestamp resolves at the moment of disconnect, not now)
+        onDisconnect(ref(db, 'chat/lastSeen/' + myId)).set({ name: myName || 'Invitado', ts: serverTimestamp() });
+        // Keep my lastSeen fresh while online so the other side knows I'm active
         set(ref(db, 'chat/lastSeen/' + myId), { name: myName || 'Invitado', ts: Date.now() });
         if (window._lastSeenInterval) clearInterval(window._lastSeenInterval);
         window._lastSeenInterval = setInterval(() => {
@@ -2110,15 +2116,16 @@
 
     // Human-friendly "hace X" formatter
     function timeAgo(ts) {
-        if (!ts) return 'hace un momento';
+        if (!ts) return 'hace poco';
         const s = Math.floor((Date.now() - ts) / 1000);
-        if (s < 60) return 'hace un momento';
+        if (s < 10) return 'hace unos segundos';
+        if (s < 60) return `hace ${s} seg`;
         const m = Math.floor(s / 60);
-        if (m < 60) return `hace ${m} min`;
+        if (m < 60) return m === 1 ? 'hace 1 min' : `hace ${m} min`;
         const h = Math.floor(m / 60);
-        if (h < 24) return `hace ${h} h`;
+        if (h < 24) return h === 1 ? 'hace 1 hora' : `hace ${h} horas`;
         const d = Math.floor(h / 24);
-        return `hace ${d} d`;
+        return d === 1 ? 'ayer' : `hace ${d} días`;
     }
 
     // Camouflaged alert that the other person is connected — looks like a store/offer event.
