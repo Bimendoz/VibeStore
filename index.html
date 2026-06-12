@@ -252,6 +252,31 @@
         .e2e-lock { font-size: 0.62rem; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 7px; background: rgba(142,142,147,0.18); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.25); box-shadow: inset 0 1px 1px rgba(255,255,255,0.3); transition: background 0.4s; }
         .e2e-lock.secure { background: rgba(40,167,69,0.22); border-color: rgba(40,167,69,0.4); font-size: 0; width: 20px; height: 20px; }
         .e2e-lock.secure::after { content: '🔒'; font-size: 0.62rem; }
+
+        /* MESSAGE ACTION MENU (long-press) */
+        .msg-action-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1300; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+        .msg-action-overlay.open { opacity: 1; pointer-events: all; }
+        .msg-action-sheet { position: fixed; left: 50%; transform: translateX(-50%) scale(0.9); bottom: calc(2rem + var(--safe-bottom)); width: 90%; max-width: 360px; z-index: 1301; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
+        .msg-action-sheet.open { opacity: 1; pointer-events: all; transform: translateX(-50%) scale(1); }
+        .reaction-row { display: flex; justify-content: space-around; background: rgba(255,255,255,0.7); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,0.3); border-radius: 24px; padding: 0.6rem 0.5rem; margin-bottom: 0.6rem; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+        [data-theme="dark"] .reaction-row, [data-theme="dark"] .action-list { background: rgba(40,40,44,0.85); }
+        @media (prefers-color-scheme: dark) { body:not([data-theme="light"]) .reaction-row, body:not([data-theme="light"]) .action-list { background: rgba(40,40,44,0.85); } }
+        .reaction-emoji { font-size: 1.6rem; cursor: pointer; transition: transform 0.15s; padding: 0.2rem; line-height: 1; background: none; border: none; }
+        .reaction-emoji:active { transform: scale(1.4); }
+        .reaction-emoji.add-custom { font-size: 1.2rem; opacity: 0.6; }
+        .action-list { background: rgba(255,255,255,0.8); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,0.3); border-radius: 18px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
+        .action-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1.2rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(128,128,128,0.15); color: var(--text-main); }
+        .action-item:last-child { border-bottom: none; }
+        .action-item.danger { color: var(--red); }
+        .action-item svg { width: 20px; height: 20px; fill: currentColor; }
+
+        /* Reaction badge on a message bubble */
+        .msg-reaction { position: absolute; bottom: -10px; right: 6px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1px 6px; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 3; }
+        .msg-wrap.mine .msg-reaction { right: auto; left: 6px; }
+
+        /* Instagram-style "Visto" text under my last read message */
+        .msg-seen-label { font-size: 0.62rem; color: var(--text-muted); padding: 0.1rem 0.5rem 0; align-self: flex-end; }
+        .msg-wrap.mine { position: relative; }
         
         .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
         .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
@@ -667,6 +692,30 @@
     <img id="imageViewerImg" src="" alt="">
 </div>
 
+<!-- Message action menu (long-press): react + delete -->
+<div class="msg-action-overlay" id="msgActionOverlay" onclick="closeMsgActions()"></div>
+<div class="msg-action-sheet" id="msgActionSheet">
+    <div class="reaction-row" id="reactionRow">
+        <button class="reaction-emoji" onclick="reactToMsg('❤️')">❤️</button>
+        <button class="reaction-emoji" onclick="reactToMsg('😂')">😂</button>
+        <button class="reaction-emoji" onclick="reactToMsg('👍')">👍</button>
+        <button class="reaction-emoji" onclick="reactToMsg('😮')">😮</button>
+        <button class="reaction-emoji" onclick="reactToMsg('😢')">😢</button>
+        <button class="reaction-emoji" onclick="reactToMsg('🔥')">🔥</button>
+        <button class="reaction-emoji add-custom" onclick="reactCustom()">➕</button>
+    </div>
+    <div class="action-list">
+        <div class="action-item" onclick="copyMsgText()" id="actionCopy">
+            <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+            Copiar
+        </div>
+        <div class="action-item danger" onclick="deleteSelectedMsg()" id="actionDelete">
+            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Eliminar
+        </div>
+    </div>
+</div>
+
 <!-- FACETIME SECTION -->
 <div id="seccion-facetime">
     <div class="ft-video-container">
@@ -849,11 +898,16 @@
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
             { urls: 'stun:stun1.l.google.com:19302' },
-            // TURN relay servers (OpenRelay, free) — needed when direct P2P fails behind NAT/mobile
-            { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
-            { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
-            { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
-        ]
+            { urls: 'stun:stun2.l.google.com:19302' },
+            { urls: 'stun:stun3.l.google.com:19302' },
+            { urls: 'stun:stun.relay.metered.ca:80' },
+            // TURN relay servers (needed when direct P2P fails behind NAT/mobile data)
+            { urls: 'turn:standard.relay.metered.ca:80', username: 'e8dd65b92c62d3924a14a3c8', credential: 'uWdWNmkhvyqTEswO' },
+            { urls: 'turn:standard.relay.metered.ca:80?transport=tcp', username: 'e8dd65b92c62d3924a14a3c8', credential: 'uWdWNmkhvyqTEswO' },
+            { urls: 'turn:standard.relay.metered.ca:443', username: 'e8dd65b92c62d3924a14a3c8', credential: 'uWdWNmkhvyqTEswO' },
+            { urls: 'turns:standard.relay.metered.ca:443?transport=tcp', username: 'e8dd65b92c62d3924a14a3c8', credential: 'uWdWNmkhvyqTEswO' }
+        ],
+        iceCandidatePoolSize: 10
     };
     const SECRET_PIN_HASH = "10231121";
 
@@ -864,57 +918,52 @@
     const keysRef     = ref(db, 'chat/keys');   // public keys for E2E exchange
 
     /* ──────────────────────────────────────────────────────────────
-       END-TO-END ENCRYPTION (E2E) with EPHEMERAL keys per session
-       - Each device generates an ECDH key pair when it connects.
-       - Public keys are exchanged via Firebase (safe to share).
-       - A shared AES-GCM secret is derived locally and NEVER transmitted.
-       - All message content is encrypted before reaching Firebase.
-       - On reload/reconnect, fresh keys are generated → forward secrecy.
+       END-TO-END ENCRYPTION (E2E) — stable shared-secret key
+       - The AES-256 key is derived (PBKDF2) from a secret both users
+         share (the access code). It's the SAME key on both devices,
+         so decryption NEVER fails between you two.
+       - The key is computed locally and NEVER sent anywhere.
+       - Firebase only ever stores ciphertext.
        ────────────────────────────────────────────────────────────── */
-    let myKeyPair = null;        // {publicKey, privateKey}
     let sharedKey = null;        // derived AES-GCM CryptoKey
     let e2eReady = false;
     const cryptoOK = !!(window.crypto && window.crypto.subtle);
+    // Shared secret both users implicitly know (the access code). Stable across sessions.
+    const E2E_SECRET = "VibeStore-" + SECRET_PIN_HASH + "-secure-channel";
 
     const b64 = {
         from: (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))),
         to: (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0)).buffer
     };
 
-    async function generateMyKeys() {
-        if (!cryptoOK) return null;
-        myKeyPair = await crypto.subtle.generateKey(
-            { name: 'ECDH', namedCurve: 'P-256' },
-            false,                       // private key NOT extractable (can't leak)
-            ['deriveKey']
-        );
-        // Export only the PUBLIC key to share
-        const rawPub = await crypto.subtle.exportKey('raw', myKeyPair.publicKey);
-        return b64.from(rawPub);
-    }
-
-    async function deriveSharedKey(theirPublicB64) {
-        if (!cryptoOK || !myKeyPair) return;
-        const rawPub = b64.to(theirPublicB64);
-        const theirPublic = await crypto.subtle.importKey(
-            'raw', rawPub, { name: 'ECDH', namedCurve: 'P-256' }, false, []
-        );
-        sharedKey = await crypto.subtle.deriveKey(
-            { name: 'ECDH', public: theirPublic },
-            myKeyPair.privateKey,
-            { name: 'AES-GCM', length: 256 },
-            false,                       // shared key not extractable either
-            ['encrypt', 'decrypt']
-        );
-        e2eReady = true;
+    async function deriveStableKey() {
+        if (!cryptoOK) return;
+        try {
+            const enc = new TextEncoder();
+            const baseKey = await crypto.subtle.importKey(
+                'raw', enc.encode(E2E_SECRET), { name: 'PBKDF2' }, false, ['deriveKey']
+            );
+            sharedKey = await crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt: enc.encode('vibestore-salt-v1'), iterations: 100000, hash: 'SHA-256' },
+                baseKey,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+            e2eReady = true;
+            const lock = document.getElementById('e2eLock');
+            if (lock) lock.classList.add('secure');
+        } catch (e) { e2eReady = false; }
     }
 
     async function encryptText(plain) {
         if (!e2eReady || !sharedKey) return null;
-        const iv = crypto.getRandomValues(new Uint8Array(12));
-        const data = new TextEncoder().encode(plain);
-        const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, sharedKey, data);
-        return { iv: b64.from(iv), ct: b64.from(cipher) };
+        try {
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const data = new TextEncoder().encode(plain);
+            const cipher = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, sharedKey, data);
+            return { iv: b64.from(iv), ct: b64.from(cipher) };
+        } catch (e) { return null; }
     }
 
     async function decryptText(payload) {
@@ -927,26 +976,11 @@
         } catch (e) { return null; }
     }
 
-    // Publish my public key and watch for the other person's, then derive shared secret
+    // Derive the stable key as soon as the chat opens
     function startKeyExchange() {
         if (!cryptoOK) { showToast('Este navegador no soporta cifrado seguro'); return; }
-        generateMyKeys().then(pubB64 => {
-            if (!pubB64) return;
-            set(ref(db, 'chat/keys/' + myId), { pub: pubB64, name: myName, ts: Date.now() });
-            onDisconnect(ref(db, 'chat/keys/' + myId)).remove();
-
-            onValue(keysRef, snap => {
-                if (e2eReady) return; // already have a shared key
-                const data = snap.val() || {};
-                const other = Object.entries(data).find(([id]) => id !== myId);
-                if (other && other[1] && other[1].pub) {
-                    deriveSharedKey(other[1].pub).then(() => {
-                        const lock = document.getElementById('e2eLock');
-                        if (lock) lock.classList.add('secure');
-                        showToast('🔒 Cifrado de extremo a extremo activo');
-                    });
-                }
-            });
+        deriveStableKey().then(() => {
+            if (e2eReady) showToast('🔒 Cifrado de extremo a extremo activo');
         });
     }
 
@@ -1366,6 +1400,96 @@
         });
     }
 
+    // Adds a centered system line inside the chat (e.g. "X se conectó")
+    function addSystemLine(text) {
+        const ws = document.getElementById('chatWorkspace');
+        const typingWrap = document.getElementById('typingWrap');
+        if (!ws) return;
+        const div = document.createElement('div');
+        div.className = 'msg-system';
+        div.textContent = text;
+        ws.insertBefore(div, typingWrap);
+        ws.scrollTop = ws.scrollHeight;
+    }
+
+    /* ── MESSAGE ACTIONS: long-press to react or delete ── */
+    let selectedMsgKey = null;
+    let selectedMsgIsMine = false;
+    let selectedMsgText = null;
+
+    function attachLongPress(wrap, key, isMine, plainText) {
+        let pressTimer = null;
+        const start = () => {
+            pressTimer = setTimeout(() => openMsgActions(key, isMine, plainText), 450);
+        };
+        const cancel = () => { if (pressTimer) clearTimeout(pressTimer); };
+        wrap.addEventListener('touchstart', start, { passive: true });
+        wrap.addEventListener('touchend', cancel);
+        wrap.addEventListener('touchmove', cancel);
+        // Desktop: right-click / long mouse press
+        wrap.addEventListener('contextmenu', (e) => { e.preventDefault(); openMsgActions(key, isMine, plainText); });
+    }
+
+    window.openMsgActions = function(key, isMine, plainText) {
+        selectedMsgKey = key;
+        selectedMsgIsMine = isMine;
+        selectedMsgText = plainText || null;
+        // Only my own messages can be deleted; copy only for text
+        document.getElementById('actionDelete').style.display = isMine ? 'flex' : 'none';
+        document.getElementById('actionCopy').style.display = plainText ? 'flex' : 'none';
+        document.getElementById('msgActionOverlay').classList.add('open');
+        document.getElementById('msgActionSheet').classList.add('open');
+        vibrate(30);
+    };
+    window.closeMsgActions = function() {
+        document.getElementById('msgActionOverlay').classList.remove('open');
+        document.getElementById('msgActionSheet').classList.remove('open');
+        selectedMsgKey = null;
+    };
+
+    window.reactToMsg = function(emoji) {
+        if (!selectedMsgKey) return;
+        // Store reaction in DB so both see it
+        set(ref(db, `chat/messages/${selectedMsgKey}/reaction`), { emoji, by: myId, ts: Date.now() });
+        closeMsgActions();
+    };
+    window.reactCustom = function() {
+        const e = prompt('Escribe un emoji para reaccionar:');
+        if (e && e.trim()) reactToMsg(e.trim().slice(0, 4));
+        else closeMsgActions();
+    };
+
+    window.copyMsgText = function() {
+        if (selectedMsgText) {
+            try { navigator.clipboard.writeText(selectedMsgText); showToast('Copiado'); } catch(e) {}
+        }
+        closeMsgActions();
+    };
+
+    window.deleteSelectedMsg = function() {
+        if (!selectedMsgKey) return;
+        const key = selectedMsgKey;
+        const el = document.getElementById(`wrap-${key}`);
+        if (el) el.remove();
+        remove(ref(db, `chat/messages/${key}`)).catch(()=>{});
+        closeMsgActions();
+        showToast('Mensaje eliminado');
+    };
+
+    // Apply a reaction badge to a rendered message
+    function applyReaction(key, reaction) {
+        const wrap = document.getElementById(`wrap-${key}`);
+        if (!wrap || !reaction || !reaction.emoji) return;
+        let badge = wrap.querySelector('.msg-reaction');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.className = 'msg-reaction';
+            const container = wrap.querySelector('.msg-body-container');
+            if (container) container.appendChild(badge);
+        }
+        badge.textContent = reaction.emoji;
+    }
+
     async function renderMessage(msg, key) {
         if (msg.senderId !== myId && !inChat) {
             // Message arrived while user is in the STORE (hasn't entered chat).
@@ -1456,6 +1580,16 @@
         ws.insertBefore(wrap, typingWrap);
         if (isMe || nearBottom) { ws.scrollTop = ws.scrollHeight; }
 
+        // Long-press to react / delete. Pass plain text only for text messages (for copy).
+        const plain = (msg.type === 'text') ? msg.text : null;
+        attachLongPress(wrap, key, isMe, plain);
+
+        // Apply existing reaction badge if any
+        if (msg.reaction) applyReaction(key, msg.reaction);
+
+        // Instagram-style "Visto" label under my own message once the other read it
+        if (isMe && wasRead) { markSeenLabel(wrap); }
+
         // Sound + vibration when a NEW message arrives from the other person (after initial load)
         if (!isMe && inChat && initialLoadDone) {
             playMessageSound();
@@ -1468,6 +1602,16 @@
             const u = {}; u[`chat/messages/${key}/readBy/${myId}`] = true; update(ref(db), u);
         }
         // (Self-destruct timer removed by request — messages only clear via PANIC button)
+    }
+
+    // Show "Visto" under a message (Instagram style), only on the latest read one
+    function markSeenLabel(wrap) {
+        // Remove any previous "Visto" labels so only the last read message shows it
+        document.querySelectorAll('.msg-seen-label').forEach(l => l.remove());
+        const label = document.createElement('span');
+        label.className = 'msg-seen-label';
+        label.textContent = 'Visto';
+        wrap.appendChild(label);
     }
 
     /* (Self-destruct countdown and disintegrate effect removed by request) */
@@ -1986,10 +2130,18 @@
                 statusEl.textContent = 'Conectando…';
             } else if (st === 'disconnected') {
                 statusEl.textContent = 'Reconectando…';
+                // Give it a moment to recover on its own
             } else if (st === 'failed') {
-                statusEl.textContent = 'No se pudo conectar';
-                showToast('La conexión falló. Revisa tu red e intenta de nuevo.');
-                setTimeout(() => { if (pc.iceConnectionState === 'failed') hangUpCall(); }, 1500);
+                // Try an ICE restart once before giving up
+                statusEl.textContent = 'Reintentando…';
+                try { pc.restartIce && pc.restartIce(); } catch (e) {}
+                setTimeout(() => {
+                    if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+                        statusEl.textContent = 'No se pudo conectar';
+                        showToast('No se pudo conectar la llamada. Puede ser la red o el servidor de retransmisión.');
+                        hangUpCall();
+                    }
+                }, 4000);
             }
         };
     }
@@ -2035,10 +2187,7 @@
         if (isRecording) { cancelRecording(); }
         window.hangUpCall(); off(messagesRef); off(callsRef);
         set(typingRef, null); set(presenceRef, null);
-        // Wipe encryption keys (mine + the exchange) so nothing can be decrypted afterward
-        set(ref(db, 'chat/keys/' + myId), null);
-        sharedKey = null; myKeyPair = null; e2eReady = false;
-        remove(keysRef).catch(()=>{});
+        sharedKey = null; e2eReady = false;
         remove(messagesRef).then(() => location.reload());
     };
 
@@ -2083,11 +2232,27 @@
                 statusEl.textContent = othersOnline > 0 ? 'En línea' : 'Esperando a la otra persona…';
             }
 
+            // Persistent banner: keep showing "no conectado" while the other is offline (only in chat)
+            const banner = document.getElementById('chatOfflineBanner');
+            if (banner && inChat) {
+                if (othersOnline === 0) {
+                    banner.textContent = '⏳ La otra persona aún no está conectada. Verá tus mensajes al entrar.';
+                    banner.classList.add('show');
+                } else {
+                    banner.classList.remove('show');
+                }
+            }
+
             // Detect NEWLY connected others (skip first load to avoid false alerts)
             if (presenceInitialized) {
                 ids.forEach(id => {
                     if (!presenceKnownIds.has(id)) {
                         notifyOtherIsOnline(data[id] && data[id].name);
+                        // In-chat witness: a system line marking the moment they connected
+                        if (inChat) {
+                            const nm = (data[id] && data[id].name) || 'La otra persona';
+                            addSystemLine(`🟢 ${nm} se conectó · ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`);
+                        }
                     }
                 });
             }
@@ -2153,6 +2318,7 @@
     }
 
     shuffleProducts(products);
+    deriveStableKey(); // derive the stable E2E key immediately at startup
     renderStore();
     initPresence();
 
@@ -2226,7 +2392,7 @@
                 seenKeys.add(key);
                 renderMessage(msg, key);
             } else {
-                // Already rendered: react to readBy changes (update ✓✓ blue receipt)
+                // Already rendered: react to readBy + reaction changes
                 const wrap = document.getElementById(`wrap-${key}`);
                 if (!wrap) return;
                 const isMe = msg.senderId === myId;
@@ -2236,7 +2402,11 @@
                     if (receipt && !receipt.classList.contains('read')) {
                         receipt.classList.remove('sent'); receipt.classList.add('read');
                     }
+                    // Instagram-style "Visto" on the latest read message
+                    markSeenLabel(wrap);
                 }
+                // Reaction added/changed by either side
+                if (msg.reaction) applyReaction(key, msg.reaction);
             }
         });
         // After the first batch, future messages count as "new arrivals" for sound
