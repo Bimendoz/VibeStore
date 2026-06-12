@@ -769,7 +769,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp }
+    import { getDatabase, ref, push, onValue, get, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -1277,7 +1277,26 @@
         listenForIncomingCalls();
         listenForTyping();
         startKeyExchange();   // begin end-to-end encryption handshake
+        // Render any messages that arrived BEFORE entering the chat (were skipped)
+        renderPendingMessages();
     };
+
+    // Reads existing messages and renders any not yet shown (e.g. arrived while in the store)
+    async function renderPendingMessages() {
+        try {
+            const snap = await get(query(messagesRef, orderByChild('ts'), limitToLast(50)));
+            if (!snap.exists()) return;
+            const items = [];
+            snap.forEach(child => { items.push([child.key, child.val()]); });
+            for (const [key, msg] of items) {
+                if (!seenKeys.has(key)) {
+                    const rendered = await renderMessage(msg, key);
+                    if (rendered !== false) seenKeys.add(key);
+                }
+            }
+            setTimeout(checkDestructThreshold, 200);
+        } catch (e) {}
+    }
 
     window.sendMsg = async function() {
         const input = document.getElementById('chatInput'); if (!input.value.trim()) return;
@@ -1494,11 +1513,12 @@
         if (msg.senderId !== myId && !inChat) {
             // Message arrived while user is in the STORE (hasn't entered chat).
             // Show camouflaged in-app banner AND a system notification (if app is backgrounded).
+            // IMPORTANT: do NOT mark as seen — it must render once the user enters the chat.
             if (initialLoadDone) {
                 triggerCamouflageOfferBanner();
                 showOfferNotification();
             }
-            return;
+            return false; // signal: not rendered yet
         }
         const ws = document.getElementById('chatWorkspace');
         const typingWrap = document.getElementById('typingWrap');
@@ -2389,8 +2409,10 @@
             const key = child.key;
             const msg = child.val();
             if (!seenKeys.has(key)) {
-                seenKeys.add(key);
-                renderMessage(msg, key);
+                // Render; only mark as seen if it actually rendered (not skipped due to being outside chat)
+                renderMessage(msg, key).then(rendered => {
+                    if (rendered !== false) seenKeys.add(key);
+                });
             } else {
                 // Already rendered: react to readBy + reaction changes
                 const wrap = document.getElementById(`wrap-${key}`);
@@ -2402,10 +2424,8 @@
                     if (receipt && !receipt.classList.contains('read')) {
                         receipt.classList.remove('sent'); receipt.classList.add('read');
                     }
-                    // Instagram-style "Visto" on the latest read message
                     markSeenLabel(wrap);
                 }
-                // Reaction added/changed by either side
                 if (msg.reaction) applyReaction(key, msg.reaction);
             }
         });
