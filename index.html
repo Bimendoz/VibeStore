@@ -1138,27 +1138,42 @@
         return 'ani-bounce';
     }
 
-    /* ── TYPING INDICATOR ── */
+    /* ── TYPING / RECORDING INDICATOR ── */
     let typingTimer;
     window.handleTyping = function() {
         if (!inChat) return;
-        set(ref(db, 'chat/typing/' + myId), { name: myName, ts: Date.now() });
+        set(ref(db, 'chat/typing/' + myId), { name: myName, ts: Date.now(), kind: 'text' });
         clearTimeout(typingTimer);
         typingTimer = setTimeout(() => { set(ref(db, 'chat/typing/' + myId), null); }, 2500);
     };
+
+    // Broadcast "recording voice note" status to the other person
+    function setRecordingStatus(on) {
+        if (!inChat) return;
+        if (on) {
+            set(ref(db, 'chat/typing/' + myId), { name: myName, ts: Date.now(), kind: 'voice' });
+        } else {
+            set(ref(db, 'chat/typing/' + myId), null);
+        }
+    }
 
     function listenForTyping() {
         onValue(ref(db, 'chat/typing'), snap => {
             const data = snap.val() || {};
             const now = Date.now();
-            // Find someone (not me) typing within the last 4 seconds
+            // Find someone (not me) typing/recording within the last 5 seconds
             const other = Object.entries(data).find(([id, v]) =>
-                id !== myId && v && v.ts && (now - v.ts) < 4000
+                id !== myId && v && v.ts && (now - v.ts) < 5000
             );
             const typingWrap = document.getElementById('typingWrap');
             const typingName = document.getElementById('typingName');
             if (other) {
-                typingName.textContent = other[1].name || 'Alguien';
+                const v = other[1];
+                if (v.kind === 'voice') {
+                    typingName.textContent = `${v.name || 'Alguien'} está grabando una nota de voz…`;
+                } else {
+                    typingName.textContent = v.name || 'Alguien';
+                }
                 typingWrap.classList.add('show');
                 const ws = document.getElementById('chatWorkspace');
                 ws.scrollTop = ws.scrollHeight;
@@ -1256,6 +1271,11 @@
 
     window.toggleRecording = async function() {
         if (isRecording) { stopAndSendRecording(); return; }
+        // Block recording if a call is active (mic conflict on iOS)
+        if (activeCallRef || localStream) {
+            showToast('No puedes grabar durante una llamada 📞');
+            return;
+        }
         // Start recording
         try {
             recStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -1283,7 +1303,8 @@
         document.getElementById('chatInputArea').style.display = 'none';
         document.getElementById('recordingBar').classList.add('show');
         updateRecTime();
-        recTimerInterval = setInterval(updateRecTime, 200);
+        setRecordingStatus(true); // tell the other person
+        recTimerInterval = setInterval(() => { updateRecTime(); setRecordingStatus(true); }, 1000);
         // Auto-stop at max duration
         recMaxTimeout = setTimeout(() => { if (isRecording) stopAndSendRecording(); }, VOICE_MAX_SECONDS * 1000);
         vibrate(40);
@@ -1312,6 +1333,7 @@
         clearInterval(recTimerInterval);
         clearTimeout(recMaxTimeout);
         isRecording = false;
+        setRecordingStatus(false); // clear the "recording…" indicator for the other person
         document.getElementById('btnMic').classList.remove('recording');
         document.getElementById('recordingBar').classList.remove('show');
         document.getElementById('chatInputArea').style.display = 'flex';
@@ -1401,6 +1423,80 @@
         document.querySelectorAll('.vn-play').forEach(b => setPlayIcon(b, true));
     }
 
+    // Stop any voice note currently playing (used on hang up / panic / leaving)
+    function stopVoicePlayback() {
+        if (currentAudio) { try { currentAudio.pause(); } catch(e){} currentAudio = null; }
+        currentPlayingKey = null;
+        resetAllWaves();
+    }
+
+    /* ── AUTODESTRUCT WHEN 10 MESSAGES ARE REACHED ──
+       Rule: once the chat reaches 10 live messages, ALL of them start a 10s timer
+       at the same time. When timers hit 0, every message disintegrates and is removed. */
+    const DESTRUCT_THRESHOLD = 10;
+    const DESTRUCT_SECONDS = 10;
+    let destructArmed = false;   // becomes true once threshold is hit (stays armed)
+
+    function liveMessageKeys() {
+        return Array.from(document.querySelectorAll('.msg-wrap[id^="wrap-"]')).map(el => el.id.replace('wrap-', ''));
+    }
+
+    function checkDestructThreshold() {
+        const keys = liveMessageKeys();
+        // If everything has been cleared, disarm so the NEXT batch of 10 starts a fresh cycle
+        if (keys.length === 0) { destructArmed = false; return; }
+        if (keys.length >= DESTRUCT_THRESHOLD && !destructArmed) {
+            destructArmed = true;
+            // Arm every currently visible message at once
+            keys.forEach(k => {
+                const el = document.getElementById(`wrap-${k}`);
+                if (el) initiateThanosCountdown(k, el);
+            });
+        } else if (destructArmed) {
+            // Already armed: any newly arrived message also gets a timer immediately
+            keys.forEach(k => {
+                const el = document.getElementById(`wrap-${k}`);
+                if (el && !el.querySelector('.destruct-timer')) initiateThanosCountdown(k, el);
+            });
+        }
+    }
+
+    function initiateThanosCountdown(key, element) {
+        if (element.querySelector('.destruct-timer')) return; // already counting
+        const bodyContainer = element.querySelector('.msg-body-container');
+        if (!bodyContainer) return;
+        const timer = document.createElement('div');
+        timer.className = 'destruct-timer';
+        timer.textContent = DESTRUCT_SECONDS;
+        bodyContainer.appendChild(timer);
+        let count = DESTRUCT_SECONDS;
+        const iv = setInterval(() => {
+            count--; timer.textContent = count;
+            if (count <= 0) {
+                clearInterval(iv);
+                snapDisintegrateEffect(element, () => {
+                    element.remove();
+                    remove(ref(db, `chat/messages/${key}`)).catch(() => {});
+                });
+            }
+        }, 1000);
+    }
+
+    function snapDisintegrateEffect(element, callback) {
+        element.classList.add('disintegrating');
+        const rect = element.getBoundingClientRect();
+        for (let i = 0; i < 40; i++) {
+            const p = document.createElement('div'); p.className = 'particle';
+            const s = Math.random() * 4 + 2; p.style.width = `${s}px`; p.style.height = `${s}px`;
+            p.style.left = `${rect.left + Math.random() * rect.width}px`;
+            p.style.top = `${rect.top + window.scrollY + Math.random() * rect.height}px`;
+            document.body.appendChild(p);
+            const angle = Math.random() * Math.PI * 2, vel = Math.random() * 60 + 20;
+            p.animate([{transform:'translate(0,0) scale(1)',opacity:0.8},{transform:`translate(${Math.cos(angle)*vel}px,${Math.sin(angle)*vel-50}px) scale(0)`,opacity:0}],{duration:Math.random()*600+400}).onfinish=()=>p.remove();
+        }
+        element.animate([{opacity:1,filter:'blur(0px)'},{opacity:0,filter:'blur(4px)'}],{duration:500}).onfinish=callback;
+    }
+
     /* ── WEBRTC ── */
     async function setupLocalStream(type) {
         try {
@@ -1422,6 +1518,8 @@
     }
 
     window.initiateCall = async function(type) {
+        // Block calling while recording a voice note (mic conflict)
+        if (isRecording) { showToast('Termina la nota de voz antes de llamar 🎤'); return; }
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftTargetName').textContent = "Canal Seguro";
@@ -1518,6 +1616,8 @@
     };
 
     async function acceptIncomingCall(key, call) {
+        // If recording a voice note, cancel it to free the mic
+        if (isRecording) { cancelRecording(); }
         activeCallRef = ref(db, `chat/calls/${key}`);
         document.getElementById('seccion-chat').style.display = 'none'; document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftTargetName').textContent = call.caller; document.getElementById('ftAvatar').textContent = call.caller.charAt(0);
@@ -1608,6 +1708,8 @@
 
     window.panicExit = function() {
         stopRingtone();
+        stopVoicePlayback();
+        if (isRecording) { cancelRecording(); }
         window.hangUpCall(); off(messagesRef); off(callsRef);
         set(typingRef, null); set(presenceRef, null);
         remove(messagesRef).then(() => location.reload());
@@ -1621,6 +1723,20 @@
         // Register myself as online from the moment the app opens (not just in chat)
         set(presenceRef, { name: myName || 'Invitado', online: true, ts: Date.now() });
         onDisconnect(presenceRef).remove();
+
+        // Monitor internet/Firebase connection and warn the user
+        onValue(ref(db, '.info/connected'), snap => {
+            const connected = snap.val() === true;
+            const banner = document.getElementById('chatOfflineBanner');
+            if (!connected && inChat && banner) {
+                banner.textContent = 'Sin conexión. Reconectando…';
+                banner.classList.add('show');
+            } else if (connected && banner) {
+                // Restore default text and hide
+                banner.textContent = 'La otra persona no está conectada todavía. Verá tu mensaje al entrar.';
+                banner.classList.remove('show');
+            }
+        });
 
         onValue(ref(db, 'chat/presence'), snap => {
             const data = snap.val() || {};
@@ -1683,6 +1799,19 @@
     document.addEventListener('pointerdown', primeNotificationsOnce);
 
     onValue(query(messagesRef, orderByChild('ts'), limitToLast(50)), snap => {
+        // Build set of keys that currently exist in the DB
+        const existingKeys = new Set();
+        snap.forEach(child => { existingKeys.add(child.key); });
+
+        // Remove any rendered message that no longer exists in the DB (deleted elsewhere)
+        seenKeys.forEach(key => {
+            if (!existingKeys.has(key)) {
+                const el = document.getElementById(`wrap-${key}`);
+                if (el) el.remove();
+                seenKeys.delete(key);
+            }
+        });
+
         // snap.forEach() respects the orderByChild('ts') ordering
         snap.forEach(child => {
             const key = child.key;
@@ -1706,6 +1835,8 @@
         });
         // After the first batch, future messages count as "new arrivals" for sound
         if (!initialLoadDone) { setTimeout(() => { initialLoadDone = true; }, 600); }
+        // Check the 10-message autodestruct rule after any render pass
+        checkDestructThreshold();
     });
 </script>
 </body>
