@@ -195,7 +195,7 @@
         .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
         /* CHAT */
-        #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
+        #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
         .chat-header { padding: 1rem 1.5rem; background: var(--bg-card); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
         .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
         .chat-status-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
@@ -261,6 +261,8 @@
         .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; }
 
         .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); display: flex; gap: 0.7rem; align-items: center; }
+        #seccion-chat.keyboard-open .chat-input-area { padding-bottom: 0.6rem; }
+        #seccion-chat.keyboard-open .recording-bar { padding-bottom: 0.6rem; }
         .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
         .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.2s, transform 0.1s; }
         .btn-send:active:not(:disabled) { transform: scale(0.9); }
@@ -1797,6 +1799,45 @@
         document.removeEventListener('pointerdown', primeNotificationsOnce);
     }
     document.addEventListener('pointerdown', primeNotificationsOnce);
+
+    /* ── KEYBOARD HANDLING (iOS Safari): keep the input bar above the keyboard ── */
+    (function setupKeyboardHandling() {
+        const chatSection = document.getElementById('seccion-chat');
+        const vv = window.visualViewport;
+        if (!vv || !chatSection) return;
+
+        function adjustForKeyboard() {
+            // Only adjust while the chat is visible
+            if (chatSection.style.display === 'none' || chatSection.style.display === '') return;
+            // Height the keyboard is covering = layout height - visible viewport height - offsetTop
+            const keyboardInset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+            // Shrink the chat section so its bottom (input bar) sits right above the keyboard
+            chatSection.style.height = `${vv.height}px`;
+            chatSection.style.transform = `translateY(${vv.offsetTop}px)`;
+            // When keyboard is open, drop the bottom safe-area padding (keyboard covers that zone)
+            if (keyboardInset > 80) { chatSection.classList.add('keyboard-open'); }
+            else { chatSection.classList.remove('keyboard-open'); }
+            // Keep messages scrolled to the latest when keyboard opens
+            const ws = document.getElementById('chatWorkspace');
+            if (ws && keyboardInset > 0) ws.scrollTop = ws.scrollHeight;
+        }
+
+        function resetKeyboard() {
+            chatSection.style.height = '';
+            chatSection.style.transform = '';
+            chatSection.classList.remove('keyboard-open');
+        }
+
+        vv.addEventListener('resize', adjustForKeyboard);
+        vv.addEventListener('scroll', adjustForKeyboard);
+
+        // When the input loses focus (keyboard closes), reset
+        const chatInput = document.getElementById('chatInput');
+        if (chatInput) {
+            chatInput.addEventListener('focus', () => setTimeout(adjustForKeyboard, 100));
+            chatInput.addEventListener('blur', () => setTimeout(resetKeyboard, 100));
+        }
+    })();
 
     onValue(query(messagesRef, orderByChild('ts'), limitToLast(50)), snap => {
         // Build set of keys that currently exist in the DB
