@@ -769,7 +769,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, get, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp }
+    import { getDatabase, ref, push, onValue, onChildAdded, get, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -911,11 +911,17 @@
             const res = await fetch(METERED_TURN_URL);
             const iceServers = await res.json();
             if (Array.isArray(iceServers) && iceServers.length) {
-                // Combine Google STUN (fast) + Metered TURN (reliable relay)
                 rtcConfig = { iceServers: [...FALLBACK_ICE, ...iceServers], iceCandidatePoolSize: 10 };
+                const turnCount = iceServers.filter(s => String(s.urls).includes('turn')).length;
+                console.log('[VibeCall] TURN servers cargados:', turnCount, 'de', iceServers.length, 'total');
+                if (turnCount === 0) showToast('Aviso: sin servidores TURN, la llamada podría fallar');
                 return rtcConfig;
             }
-        } catch (e) { /* keep fallback */ }
+            console.warn('[VibeCall] Respuesta TURN vacía, usando solo STUN');
+        } catch (e) {
+            console.error('[VibeCall] Error al obtener TURN:', e);
+            showToast('No se pudo cargar el servidor de llamadas. Revisa tu internet.');
+        }
         rtcConfig = { iceServers: FALLBACK_ICE, iceCandidatePoolSize: 10 };
         return rtcConfig;
     }
@@ -942,7 +948,17 @@
     const E2E_SECRET = "VibeStore-" + SECRET_PIN_HASH + "-secure-channel";
 
     const b64 = {
-        from: (buf) => btoa(String.fromCharCode(...new Uint8Array(buf))),
+        // Chunked conversion — safe for large data (images/audio). The spread operator
+        // version crashes with "Maximum call stack size exceeded" on big buffers.
+        from: (buf) => {
+            const bytes = new Uint8Array(buf);
+            let binary = '';
+            const chunk = 0x8000; // 32KB at a time
+            for (let i = 0; i < bytes.length; i += chunk) {
+                binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+            }
+            return btoa(binary);
+        },
         to: (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0)).buffer
     };
 
@@ -2046,26 +2062,40 @@
         await buildRtcConfig();   // fetch fresh TURN credentials
         peerConnection = new RTCPeerConnection(rtcConfig);
         monitorConnection(peerConnection);
+        remoteIceQueue = [];
+        let remoteDescSet = false;
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
         peerConnection.onicecandidate = e => { if (e.candidate && activeCallRef) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
         await update(activeCallRef, { offer: { type: offer.type, sdp: offer.sdp } });
+
+        // Listen for the answer
         onValue(ref(db, `chat/calls/${activeCallRef.key}`), async snap => {
             const d = snap.val();
             if (d && d.status === 'accepted' && d.answer && peerConnection && !peerConnection.currentRemoteDescription) {
                 document.getElementById('ftCallStatus').textContent = "Conectando…";
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(d.answer));
-                while (remoteIceQueue.length) await peerConnection.addIceCandidate(remoteIceQueue.shift());
+                remoteDescSet = true;
+                // Flush any candidates that arrived before the answer
+                while (remoteIceQueue.length) {
+                    try { await peerConnection.addIceCandidate(remoteIceQueue.shift()); } catch(e) {}
+                }
             }
             if (d && d.status === 'ended') cleanUpCallUI();
         });
-        onValue(ref(db, `chat/calls/${activeCallRef.key}/receiverCandidates`), snap => {
-            if (snap.exists() && peerConnection) Object.values(snap.val()).forEach(c => {
-                const ice = new RTCIceCandidate(c);
-                peerConnection.remoteDescription ? peerConnection.addIceCandidate(ice) : remoteIceQueue.push(ice);
-            });
+
+        // Receiver's ICE candidates — onChildAdded gives each NEW candidate once (no duplicates)
+        onChildAdded(ref(db, `chat/calls/${activeCallRef.key}/receiverCandidates`), async snap => {
+            const cand = snap.val();
+            if (!cand || !peerConnection) return;
+            const ice = new RTCIceCandidate(cand);
+            if (remoteDescSet && peerConnection.remoteDescription) {
+                try { await peerConnection.addIceCandidate(ice); } catch(e) {}
+            } else {
+                remoteIceQueue.push(ice);
+            }
         });
     };
 
@@ -2143,18 +2173,29 @@
         await buildRtcConfig();   // fetch fresh TURN credentials
         peerConnection = new RTCPeerConnection(rtcConfig);
         monitorConnection(peerConnection);
+        remoteIceQueue = [];
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
         peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
+        // Set remote (the caller's offer) FIRST, then create our answer
         await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
-        const answer = await peerConnection.createAnswer(); await peerConnection.setLocalDescription(answer);
+        const answer = await peerConnection.createAnswer();
+        await peerConnection.setLocalDescription(answer);
         await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
-        while (remoteIceQueue.length) await peerConnection.addIceCandidate(remoteIceQueue.shift());
-        onValue(ref(db, `chat/calls/${key}/callerCandidates`), snap => {
-            if (snap.exists() && peerConnection) Object.values(snap.val()).forEach(c => {
-                const ice = new RTCIceCandidate(c);
-                peerConnection.remoteDescription ? peerConnection.addIceCandidate(ice) : remoteIceQueue.push(ice);
-            });
+        // Flush any queued candidates now that remote description is set
+        while (remoteIceQueue.length) {
+            try { await peerConnection.addIceCandidate(remoteIceQueue.shift()); } catch(e) {}
+        }
+        // Caller's ICE candidates — onChildAdded delivers each new one exactly once
+        onChildAdded(ref(db, `chat/calls/${key}/callerCandidates`), async snap => {
+            const cand = snap.val();
+            if (!cand || !peerConnection) return;
+            const ice = new RTCIceCandidate(cand);
+            if (peerConnection.remoteDescription) {
+                try { await peerConnection.addIceCandidate(ice); } catch(e) {}
+            } else {
+                remoteIceQueue.push(ice);
+            }
         });
         onValue(activeCallRef, snap => { if (snap.val() && snap.val().status === 'ended') cleanUpCallUI(); });
     }
@@ -2164,6 +2205,7 @@
         pc.oniceconnectionstatechange = () => {
             const st = pc.iceConnectionState;
             const statusEl = document.getElementById('ftCallStatus');
+            console.log('[VibeCall] ICE state:', st);
             if (st === 'connected' || st === 'completed') {
                 statusEl.textContent = 'Conectado';
                 callActive = true;
@@ -2180,12 +2222,15 @@
                 setTimeout(() => {
                     if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
                         statusEl.textContent = 'No se pudo conectar';
-                        showToast('No se pudo conectar la llamada. Puede ser la red o el servidor de retransmisión.');
+                        showToast('No se pudo conectar. Revisa que ambos tengan internet.');
                         hangUpCall();
                     }
                 }, 4000);
             }
         };
+        // Log ICE gathering so we know if TURN/STUN candidates are being created
+        pc.onicegatheringstatechange = () => { console.log('[VibeCall] ICE gathering:', pc.iceGatheringState); };
+        pc.onicecandidateerror = (e) => { console.warn('[VibeCall] ICE candidate error:', e.errorText || e.errorCode); };
     }
 
     window.toggleMuteMic = function() { if (!localStream) return; isMuted = !isMuted; localStream.getAudioTracks().forEach(t => t.enabled = !isMuted); document.getElementById('btnFtMute').classList.toggle('active', isMuted); };
