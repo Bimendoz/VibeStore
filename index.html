@@ -893,22 +893,32 @@
     let seenKeys = new Set(); let inChat = false;
     let localStream; let peerConnection; let activeCallRef;
     let isMuted = false; let isVideoOff = false;
+    let callActive = false; // true only during a genuine ongoing call
     let remoteIceQueue = [];
-    const rtcConfig = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' },
-            { urls: 'stun:stun3.l.google.com:19302' },
-            { urls: 'stun:stun.relay.metered.ca:80' },
-            // TURN relay servers (needed when direct P2P fails behind NAT/mobile data)
-            { urls: 'turn:standard.relay.metered.ca:80', username: 'e8dd65b92c62d3924a14a3c8', credential: 'uWdWNmkhvyqTEswO' },
-            { urls: 'turn:standard.relay.metered.ca:80?transport=tcp', username: 'e8dd65b92c62d3924a14a3c8', credential: 'uWdWNmkhvyqTEswO' },
-            { urls: 'turn:standard.relay.metered.ca:443', username: 'e8dd65b92c62d3924a14a3c8', credential: 'uWdWNmkhvyqTEswO' },
-            { urls: 'turns:standard.relay.metered.ca:443?transport=tcp', username: 'e8dd65b92c62d3924a14a3c8', credential: 'uWdWNmkhvyqTEswO' }
-        ],
-        iceCandidatePoolSize: 10
-    };
+    // Your Metered TURN account — credentials are fetched fresh before each call
+    const METERED_TURN_URL = "https://bimendoz.metered.live/api/v1/turn/credentials?apiKey=8516958be130740ee60612e58e3fd5bbf026";
+    // Fallback ICE servers (STUN only) in case the TURN fetch fails
+    const FALLBACK_ICE = [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' }
+    ];
+    let rtcConfig = { iceServers: FALLBACK_ICE, iceCandidatePoolSize: 10 };
+
+    // Fetch live TURN credentials from Metered and build the RTC config
+    async function buildRtcConfig() {
+        try {
+            const res = await fetch(METERED_TURN_URL);
+            const iceServers = await res.json();
+            if (Array.isArray(iceServers) && iceServers.length) {
+                // Combine Google STUN (fast) + Metered TURN (reliable relay)
+                rtcConfig = { iceServers: [...FALLBACK_ICE, ...iceServers], iceCandidatePoolSize: 10 };
+                return rtcConfig;
+            }
+        } catch (e) { /* keep fallback */ }
+        rtcConfig = { iceServers: FALLBACK_ICE, iceCandidatePoolSize: 10 };
+        return rtcConfig;
+    }
     const SECRET_PIN_HASH = "10231121";
 
     const messagesRef = ref(db, 'chat/messages');
@@ -967,7 +977,17 @@
     }
 
     async function decryptText(payload) {
-        if (!e2eReady || !sharedKey || !payload || !payload.iv || !payload.ct) return null;
+        if (!payload || !payload.iv || !payload.ct) return null;
+        // If the key isn't ready yet, wait for it (up to ~3s) instead of failing immediately
+        if (!e2eReady || !sharedKey) {
+            await deriveStableKey();
+            let waited = 0;
+            while ((!e2eReady || !sharedKey) && waited < 3000) {
+                await new Promise(r => setTimeout(r, 150));
+                waited += 150;
+            }
+            if (!e2eReady || !sharedKey) return null;
+        }
         try {
             const iv = new Uint8Array(b64.to(payload.iv));
             const cipher = b64.to(payload.ct);
@@ -1277,23 +1297,22 @@
         listenForIncomingCalls();
         listenForTyping();
         startKeyExchange();   // begin end-to-end encryption handshake
-        // Render any messages that arrived BEFORE entering the chat (were skipped)
-        renderPendingMessages();
+        // Re-render messages that arrived before entering chat (force listener re-evaluation)
+        rerenderAllMessages();
     };
 
-    // Reads existing messages and renders any not yet shown (e.g. arrived while in the store)
-    async function renderPendingMessages() {
+    // Renders any messages not yet shown (used when entering the chat)
+    async function rerenderAllMessages() {
         try {
             const snap = await get(query(messagesRef, orderByChild('ts'), limitToLast(50)));
             if (!snap.exists()) return;
-            const items = [];
-            snap.forEach(child => { items.push([child.key, child.val()]); });
-            for (const [key, msg] of items) {
+            snap.forEach(child => {
+                const key = child.key;
                 if (!seenKeys.has(key)) {
-                    const rendered = await renderMessage(msg, key);
-                    if (rendered !== false) seenKeys.add(key);
+                    seenKeys.add(key);
+                    renderMessage(child.val(), key);
                 }
-            }
+            });
             setTimeout(checkDestructThreshold, 200);
         } catch (e) {}
     }
@@ -1510,16 +1529,6 @@
     }
 
     async function renderMessage(msg, key) {
-        if (msg.senderId !== myId && !inChat) {
-            // Message arrived while user is in the STORE (hasn't entered chat).
-            // Show camouflaged in-app banner AND a system notification (if app is backgrounded).
-            // IMPORTANT: do NOT mark as seen — it must render once the user enters the chat.
-            if (initialLoadDone) {
-                triggerCamouflageOfferBanner();
-                showOfferNotification();
-            }
-            return false; // signal: not rendered yet
-        }
         const ws = document.getElementById('chatWorkspace');
         const typingWrap = document.getElementById('typingWrap');
         // BUZZ: not a bubble — trigger the shake/alert effect (only for the receiver, only when new)
@@ -1648,8 +1657,8 @@
 
     window.toggleRecording = async function() {
         if (isRecording) { stopAndSendRecording(); return; }
-        // Block recording if a call is active (mic conflict on iOS)
-        if (activeCallRef || localStream) {
+        // Block recording only if a call is genuinely active
+        if (callActive) {
             showToast('No puedes grabar durante una llamada 📞');
             return;
         }
@@ -1824,13 +1833,14 @@
         if (!file.type.startsWith('image/')) { showToast('Eso no es una imagen'); return; }
         compressImage(file, async (dataUrl) => {
             if (!dataUrl) { showToast('No se pudo procesar la imagen'); return; }
-            // Size guard for Realtime DB (base64). Keep under ~700KB.
-            if (dataUrl.length > 700 * 1024) {
+            // Size guard: after encryption base64 grows ~33%, keep raw under ~450KB
+            if (dataUrl.length > 450 * 1024) {
                 showToast('La imagen es muy pesada. Intenta otra.');
                 return;
             }
             if (e2eReady) {
                 const enc = await encryptText(dataUrl);
+                if (!enc) { showToast('No se pudo cifrar la imagen'); return; }
                 push(messagesRef, { type: 'image', enc, sender: myName, senderId: myId, ts: Date.now() });
             } else {
                 push(messagesRef, { type: 'image', image: dataUrl, sender: myName, senderId: myId, ts: Date.now() });
@@ -1844,7 +1854,7 @@
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                const maxDim = 1080;
+                const maxDim = 900;   // smaller so it still fits AFTER encryption (+33%)
                 let { width, height } = img;
                 if (width > height && width > maxDim) { height = height * maxDim / width; width = maxDim; }
                 else if (height > maxDim) { width = width * maxDim / height; height = maxDim; }
@@ -1852,12 +1862,20 @@
                 canvas.width = width; canvas.height = height;
                 const ctx = canvas.getContext('2d');
                 ctx.drawImage(img, 0, 0, width, height);
-                // Try decreasing quality until under target size
+                // Target ~330KB so that, once encrypted+base64 (~+33%), it stays well under DB limits
+                const TARGET = 330 * 1024;
                 let quality = 0.7;
                 let dataUrl = canvas.toDataURL('image/jpeg', quality);
-                while (dataUrl.length > 700 * 1024 && quality > 0.3) {
+                while (dataUrl.length > TARGET && quality > 0.25) {
                     quality -= 0.1;
                     dataUrl = canvas.toDataURL('image/jpeg', quality);
+                }
+                // If still too big, downscale once more
+                if (dataUrl.length > TARGET) {
+                    const c2 = document.createElement('canvas');
+                    c2.width = Math.round(width * 0.7); c2.height = Math.round(height * 0.7);
+                    c2.getContext('2d').drawImage(img, 0, 0, c2.width, c2.height);
+                    dataUrl = c2.toDataURL('image/jpeg', 0.6);
                 }
                 callback(dataUrl);
             };
@@ -2023,7 +2041,9 @@
             return;
         }
         activeCallRef = push(callsRef);
+        callActive = true;
         await set(activeCallRef, { type, caller: myName, callerId: myId, status: 'calling', ts: Date.now() });
+        await buildRtcConfig();   // fetch fresh TURN credentials
         peerConnection = new RTCPeerConnection(rtcConfig);
         monitorConnection(peerConnection);
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
@@ -2120,6 +2140,7 @@
             showToast(err.message);
             return;
         }
+        await buildRtcConfig();   // fetch fresh TURN credentials
         peerConnection = new RTCPeerConnection(rtcConfig);
         monitorConnection(peerConnection);
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
@@ -2145,6 +2166,7 @@
             const statusEl = document.getElementById('ftCallStatus');
             if (st === 'connected' || st === 'completed') {
                 statusEl.textContent = 'Conectado';
+                callActive = true;
                 stopRingtone();
             } else if (st === 'checking') {
                 statusEl.textContent = 'Conectando…';
@@ -2192,8 +2214,11 @@
         if (localStream) localStream.getTracks().forEach(t => t.stop());
         if (peerConnection) peerConnection.close();
         peerConnection = null;
+        localStream = null;
         remoteIceQueue = [];
         activeCallRef = null;
+        callActive = false;
+        isMuted = false; isVideoOff = false;
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-incoming').classList.remove('show');
         document.getElementById('returnCallBar').classList.remove('show');
@@ -2409,10 +2434,15 @@
             const key = child.key;
             const msg = child.val();
             if (!seenKeys.has(key)) {
-                // Render; only mark as seen if it actually rendered (not skipped due to being outside chat)
-                renderMessage(msg, key).then(rendered => {
-                    if (rendered !== false) seenKeys.add(key);
-                });
+                // Message from the other person while NOT in chat: show camouflage, don't render yet.
+                // Do NOT mark as seen, so it renders when the user enters the chat.
+                if (msg.senderId !== myId && !inChat && msg.type !== 'system') {
+                    if (initialLoadDone && msg.type !== 'buzz') { triggerCamouflageOfferBanner(); showOfferNotification(); }
+                    return;
+                }
+                // Mark seen synchronously BEFORE the async render to prevent any double-render
+                seenKeys.add(key);
+                renderMessage(msg, key);
             } else {
                 // Already rendered: react to readBy + reaction changes
                 const wrap = document.getElementById(`wrap-${key}`);
