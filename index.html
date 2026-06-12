@@ -294,6 +294,45 @@
         .vn-bar.played { opacity: 1; }
         .vn-dur { font-size: 0.72rem; opacity: 0.8; font-variant-numeric: tabular-nums; flex-shrink: 0; }
 
+        /* PHOTO + BUZZ BUTTONS */
+        .btn-attach { background: var(--bg-body); color: var(--purple-accent); border: 1px solid var(--border-color); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.1s; }
+        .btn-attach svg { width: 19px; height: 19px; fill: currentColor; }
+        .btn-attach:active { transform: scale(0.9); }
+        #btnBuzz { color: #ffb300; }
+
+        .photo-menu-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1200; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+        .photo-menu-overlay.open { opacity: 1; pointer-events: all; }
+        .photo-menu { position: fixed; bottom: 0; left: 0; right: 0; max-width: 600px; margin: 0 auto; background: var(--bg-card); border-radius: 22px 22px 0 0; z-index: 1201; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32,0.72,0,1); padding: 1rem 1rem calc(1rem + var(--safe-bottom)); display: flex; flex-direction: column; gap: 0.5rem; }
+        .photo-menu.open { transform: translateY(0); }
+        .photo-menu-btn { display: flex; align-items: center; gap: 0.8rem; background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); padding: 1rem 1.2rem; border-radius: 14px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
+        .photo-menu-btn svg { width: 22px; height: 22px; fill: var(--purple-accent); }
+        .photo-menu-btn.cancel { justify-content: center; color: var(--text-muted); font-weight: 700; }
+
+        /* IMAGE BUBBLE */
+        .msg-image { display: block; max-width: 220px; max-height: 280px; border-radius: 14px; cursor: pointer; object-fit: cover; }
+        .msg.has-image { padding: 0.3rem !important; overflow: hidden; }
+
+        /* Fullscreen image viewer */
+        .image-viewer { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 6000; display: none; align-items: center; justify-content: center; padding: 1rem; }
+        .image-viewer.open { display: flex; }
+        .image-viewer img { max-width: 100%; max-height: 90%; border-radius: 8px; }
+        .image-viewer-close { position: absolute; top: calc(var(--safe-top) + 1rem); right: 1.2rem; background: rgba(255,255,255,0.15); border: none; color: #fff; width: 40px; height: 40px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; }
+
+        /* BUZZ shake animation */
+        @keyframes buzz-shake {
+            0%,100% { transform: translate(0,0) rotate(0); }
+            10% { transform: translate(-6px,-4px) rotate(-1deg); }
+            20% { transform: translate(6px,4px) rotate(1deg); }
+            30% { transform: translate(-6px,2px) rotate(0deg); }
+            40% { transform: translate(6px,-2px) rotate(1deg); }
+            50% { transform: translate(-4px,4px) rotate(-1deg); }
+            60% { transform: translate(4px,-4px) rotate(0deg); }
+            70% { transform: translate(-4px,2px) rotate(-1deg); }
+            80% { transform: translate(4px,2px) rotate(1deg); }
+            90% { transform: translate(-2px,-2px) rotate(0deg); }
+        }
+        .buzzing { animation: buzz-shake 0.6s ease-in-out 2; }
+
         /* RETURN TO CALL BAR (shown when a call is minimized) */
         .return-call-bar { display: none; align-items: center; justify-content: center; gap: 0.5rem; background: #34c759; color: #fff; padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 700; cursor: pointer; }
         .return-call-bar.show { display: flex; }
@@ -348,7 +387,10 @@
 
 <div id="vista-tienda" style="display:flex;flex-direction:column;min-height:100vh;">
     <header>
-        <div class="logo">VibeStore</div>
+        <div style="display:flex;flex-direction:column;gap:1px;">
+            <div class="logo">VibeStore</div>
+            <span id="storeActivity" style="font-size:0.62rem;color:var(--green);font-weight:600;">Tienda activa ahora</span>
+        </div>
         <div class="header-actions">
             <button class="icon-btn" onclick="toggleTheme()" id="themeBtn">
                 <svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg>
@@ -567,11 +609,35 @@
     </div>
 
     <div class="chat-input-area" id="chatInputArea">
+        <button class="btn-attach" id="btnBuzz" onclick="sendBuzz()" aria-label="Enviar zumbido">
+            <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+        </button>
+        <button class="btn-attach" id="btnPhoto" onclick="openPhotoMenu()" aria-label="Enviar foto">
+            <svg viewBox="0 0 24 24"><path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.65 0-3 1.35-3 3s1.35 3 3 3 3-1.35 3-3-1.35-3-3-3z"/></svg>
+        </button>
         <input type="text" id="chatInput" placeholder="Escribe un mensaje seguro…" onkeypress="handleChatKey(event)" oninput="onChatInput()" maxlength="500" autocomplete="off">
         <button class="btn-mic" id="btnMic" onclick="toggleRecording()" aria-label="Grabar nota de voz">
             <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.2 6 6.6V21h2v-3.4c3.28-.4 6-3.18 6-6.6h-1.7z"/></svg>
         </button>
         <button class="btn-send" id="btnSend" onclick="sendMsg()" style="display:none;" disabled>➤</button>
+    </div>
+
+    <!-- Hidden file inputs: camera (selfie) and gallery -->
+    <input type="file" id="cameraInput" accept="image/*" capture="user" style="display:none;" onchange="handlePhotoSelected(this)">
+    <input type="file" id="galleryInput" accept="image/*" style="display:none;" onchange="handlePhotoSelected(this)">
+
+    <!-- Photo source chooser -->
+    <div class="photo-menu-overlay" id="photoMenuOverlay" onclick="closePhotoMenu()"></div>
+    <div class="photo-menu" id="photoMenu">
+        <button class="photo-menu-btn" onclick="pickCamera()">
+            <svg viewBox="0 0 24 24"><path d="M12 12m-3.2 0a3.2 3.2 0 1 0 6.4 0a3.2 3.2 0 1 0 -6.4 0M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9z"/></svg>
+            Tomar selfie / foto
+        </button>
+        <button class="photo-menu-btn" onclick="pickGallery()">
+            <svg viewBox="0 0 24 24"><path d="M22 16V4c0-1.1-.9-2-2-2H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2zm-11-4l2.03 2.71L16 11l4 5H8l3-4zM2 6v14c0 1.1.9 2 2 2h14v-2H4V6H2z"/></svg>
+            Elegir de la galería
+        </button>
+        <button class="photo-menu-btn cancel" onclick="closePhotoMenu()">Cancelar</button>
     </div>
 
     <!-- Recording bar (shown while recording a voice note) -->
@@ -584,6 +650,12 @@
         </div>
         <button class="rec-send" onclick="stopAndSendRecording()" aria-label="Enviar">➤</button>
     </div>
+</div>
+
+<!-- Fullscreen image viewer -->
+<div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
+    <button class="image-viewer-close" onclick="closeImageViewer()">✕</button>
+    <img id="imageViewerImg" src="" alt="">
 </div>
 
 <!-- FACETIME SECTION -->
@@ -1082,6 +1154,8 @@
         document.getElementById('btnSend').disabled = true;
         document.getElementById('btnSend').style.display = 'none';
         document.getElementById('btnMic').style.display = 'flex';
+        document.getElementById('btnPhoto').style.display = 'flex';
+        document.getElementById('btnBuzz').style.display = 'flex';
         input.focus(); // keep keyboard open for quick replies
         // Clear my typing status as soon as I send
         clearTimeout(typingTimer);
@@ -1100,9 +1174,11 @@
         const input = document.getElementById('chatInput');
         const hasText = input.value.trim().length > 0;
         document.getElementById('btnSend').disabled = !hasText;
-        // WhatsApp-style: show mic when empty, send when typing
+        // WhatsApp-style: show mic + attach buttons when empty, send when typing
         document.getElementById('btnSend').style.display = hasText ? 'flex' : 'none';
         document.getElementById('btnMic').style.display = hasText ? 'none' : 'flex';
+        document.getElementById('btnPhoto').style.display = hasText ? 'none' : 'flex';
+        document.getElementById('btnBuzz').style.display = hasText ? 'none' : 'flex';
     };
 
     /* ── EMOJI PARSING & ANIMATION (WhatsApp style) ── */
@@ -1197,6 +1273,13 @@
         }
         const ws = document.getElementById('chatWorkspace');
         const typingWrap = document.getElementById('typingWrap');
+        // BUZZ: not a bubble — trigger the shake/alert effect (only for the receiver, only when new)
+        if (msg.type === 'buzz') {
+            if (msg.senderId !== myId && initialLoadDone) { receiveBuzz(msg.sender); }
+            // Remove buzz from DB shortly after so it doesn't pile up or count as a real message
+            if (msg.senderId !== myId) setTimeout(() => remove(ref(db, `chat/messages/${key}`)).catch(()=>{}), 2000);
+            return;
+        }
         if (msg.type === 'system') {
             const div = document.createElement('div'); div.className = 'msg-system'; div.textContent = msg.text;
             ws.insertBefore(div, typingWrap); return;
@@ -1227,6 +1310,10 @@
                 <div class="vn-wave">${bars}</div>
                 <span class="vn-dur" id="vndur-${key}">${durStr}</span>
             </div>`;
+        } else if (msg.type === 'image') {
+            // Image bubble
+            bubbleClass = `msg has-image ${isMe ? 'mine' : 'theirs'}`;
+            bubbleInner = `<img class="msg-image" src="${escHtml(msg.image)}" alt="" onclick="openImageViewer(this.src)" loading="lazy">`;
         } else {
             // Text / emoji bubble
             const parsed = checkAndParseEmojiMessage(msg.text);
@@ -1430,6 +1517,119 @@
         if (currentAudio) { try { currentAudio.pause(); } catch(e){} currentAudio = null; }
         currentPlayingKey = null;
         resetAllWaves();
+    }
+
+    /* ── PHOTOS (camera selfie + gallery) ── */
+    window.openPhotoMenu = function() {
+        document.getElementById('photoMenuOverlay').classList.add('open');
+        document.getElementById('photoMenu').classList.add('open');
+    };
+    window.closePhotoMenu = function() {
+        document.getElementById('photoMenuOverlay').classList.remove('open');
+        document.getElementById('photoMenu').classList.remove('open');
+    };
+    window.pickCamera = function() { closePhotoMenu(); document.getElementById('cameraInput').click(); };
+    window.pickGallery = function() { closePhotoMenu(); document.getElementById('galleryInput').click(); };
+
+    window.handlePhotoSelected = function(input) {
+        const file = input.files && input.files[0];
+        input.value = ''; // reset so the same file can be picked again
+        if (!file) return;
+        if (!file.type.startsWith('image/')) { showToast('Eso no es una imagen'); return; }
+        compressImage(file, (dataUrl) => {
+            if (!dataUrl) { showToast('No se pudo procesar la imagen'); return; }
+            // Size guard for Realtime DB (base64). Keep under ~700KB.
+            if (dataUrl.length > 700 * 1024) {
+                showToast('La imagen es muy pesada. Intenta otra.');
+                return;
+            }
+            push(messagesRef, {
+                type: 'image',
+                image: dataUrl,
+                sender: myName,
+                senderId: myId,
+                ts: Date.now()
+            });
+        });
+    };
+
+    // Downscale + compress the image to a safe size before sending
+    function compressImage(file, callback) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                const maxDim = 1080;
+                let { width, height } = img;
+                if (width > height && width > maxDim) { height = height * maxDim / width; width = maxDim; }
+                else if (height > maxDim) { width = width * maxDim / height; height = maxDim; }
+                const canvas = document.createElement('canvas');
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                // Try decreasing quality until under target size
+                let quality = 0.7;
+                let dataUrl = canvas.toDataURL('image/jpeg', quality);
+                while (dataUrl.length > 700 * 1024 && quality > 0.3) {
+                    quality -= 0.1;
+                    dataUrl = canvas.toDataURL('image/jpeg', quality);
+                }
+                callback(dataUrl);
+            };
+            img.onerror = () => callback(null);
+            img.src = e.target.result;
+        };
+        reader.onerror = () => callback(null);
+        reader.readAsDataURL(file);
+    }
+
+    window.openImageViewer = function(src) {
+        document.getElementById('imageViewerImg').src = src;
+        document.getElementById('imageViewer').classList.add('open');
+    };
+    window.closeImageViewer = function() {
+        document.getElementById('imageViewer').classList.remove('open');
+        document.getElementById('imageViewerImg').src = '';
+    };
+
+    /* ── BUZZ (urgent nudge, camouflaged as insistent offer) ── */
+    window.sendBuzz = function() {
+        if (!inChat) return;
+        // Send a buzz message that the other side reacts to
+        push(messagesRef, { type: 'buzz', sender: myName, senderId: myId, ts: Date.now() });
+        // Local feedback
+        vibrate([100, 60, 100, 60, 200]);
+        showToast('Zumbido enviado ⚡');
+    };
+
+    function receiveBuzz(fromName) {
+        // Shake the whole chat
+        const chat = document.getElementById('seccion-chat');
+        if (chat) { chat.classList.add('buzzing'); setTimeout(() => chat.classList.remove('buzzing'), 1300); }
+        // Strong vibration
+        vibrate([200, 100, 200, 100, 300]);
+        // Insistent offer alert (camouflage) — banner + sound, repeated
+        const toastNode = document.getElementById('fakeOfferToast');
+        if (toastNode) {
+            document.getElementById('fakeOfferTitle').textContent = '🔥 ¡OFERTA URGENTE!';
+            document.getElementById('fakeOfferDesc').textContent = '¡Última oportunidad! Entra YA antes de que se acabe.';
+            toastNode.classList.add('show');
+            setTimeout(() => toastNode.classList.remove('show'), 6000);
+        }
+        // Insistent sound: several beeps
+        let beeps = 0;
+        const beepLoop = setInterval(() => { playMessageSound(); if (++beeps >= 4) clearInterval(beepLoop); }, 350);
+        // System notification if backgrounded
+        if (notificationsSupported() && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
+            try {
+                const n = new Notification('🔥 ¡OFERTA URGENTE!', {
+                    body: '¡Última oportunidad! Entra YA antes de que se acabe.',
+                    tag: 'vibestore-urgent', renotify: true
+                });
+                n.onclick = () => { window.focus(); n.close(); };
+                setTimeout(() => { try { n.close(); } catch(e){} }, 7000);
+            } catch (e) {}
+        }
     }
 
     /* ── AUTODESTRUCT WHEN 10 MESSAGES ARE REACHED ──
@@ -1725,6 +1925,14 @@
         // Register myself as online from the moment the app opens (not just in chat)
         set(presenceRef, { name: myName || 'Invitado', online: true, ts: Date.now() });
         onDisconnect(presenceRef).remove();
+        // On disconnect, also stamp my lastSeen so the other person sees "activo hace X"
+        onDisconnect(ref(db, 'chat/lastSeen/' + myId)).set({ name: myName || 'Invitado', ts: Date.now() });
+        // Refresh my lastSeen periodically while online
+        set(ref(db, 'chat/lastSeen/' + myId), { name: myName || 'Invitado', ts: Date.now() });
+        if (window._lastSeenInterval) clearInterval(window._lastSeenInterval);
+        window._lastSeenInterval = setInterval(() => {
+            set(ref(db, 'chat/lastSeen/' + myId), { name: myName || 'Invitado', ts: Date.now() });
+        }, 20000);
 
         // Monitor internet/Firebase connection and warn the user
         onValue(ref(db, '.info/connected'), snap => {
@@ -1734,7 +1942,6 @@
                 banner.textContent = 'Sin conexión. Reconectando…';
                 banner.classList.add('show');
             } else if (connected && banner) {
-                // Restore default text and hide
                 banner.textContent = 'La otra persona no está conectada todavía. Verá tu mensaje al entrar.';
                 banner.classList.remove('show');
             }
@@ -1761,6 +1968,37 @@
             presenceKnownIds = new Set(ids);
             if (!presenceInitialized) setTimeout(() => { presenceInitialized = true; }, 1500);
         });
+
+        // Watch the other person's lastSeen to show "activo hace X" (chat header + store badge)
+        onValue(ref(db, 'chat/lastSeen'), snap => {
+            const data = snap.val() || {};
+            const others = Object.entries(data).filter(([id]) => id !== myId);
+            if (!others.length) return;
+            // Most recent other person
+            const [, info] = others.sort((a,b) => (b[1].ts||0) - (a[1].ts||0))[0];
+            const isOnline = othersOnline > 0;
+            const label = isOnline ? 'Tienda activa ahora' : `Tienda activa ${timeAgo(info.ts)}`;
+            const storeBadge = document.getElementById('storeActivity');
+            if (storeBadge) storeBadge.textContent = label;
+            // Chat header subtitle when the other is offline
+            const statusEl = document.getElementById('onlineStatus');
+            if (statusEl && inChat && !isOnline) {
+                statusEl.textContent = `Activo ${timeAgo(info.ts)}`;
+            }
+        });
+    }
+
+    // Human-friendly "hace X" formatter
+    function timeAgo(ts) {
+        if (!ts) return 'hace un momento';
+        const s = Math.floor((Date.now() - ts) / 1000);
+        if (s < 60) return 'hace un momento';
+        const m = Math.floor(s / 60);
+        if (m < 60) return `hace ${m} min`;
+        const h = Math.floor(m / 60);
+        if (h < 24) return `hace ${h} h`;
+        const d = Math.floor(h / 24);
+        return `hace ${d} d`;
     }
 
     // Camouflaged alert that the other person is connected — looks like a store/offer event.
@@ -1800,42 +2038,42 @@
     }
     document.addEventListener('pointerdown', primeNotificationsOnce);
 
-    /* ── KEYBOARD HANDLING (iOS Safari): keep the input bar above the keyboard ── */
+    /* ── KEYBOARD HANDLING (iOS Safari): pin the input bar right above the keyboard ── */
     (function setupKeyboardHandling() {
         const chatSection = document.getElementById('seccion-chat');
         const vv = window.visualViewport;
         if (!vv || !chatSection) return;
 
-        function adjustForKeyboard() {
-            // Only adjust while the chat is visible
-            if (chatSection.style.display === 'none' || chatSection.style.display === '') return;
-            // Height the keyboard is covering = layout height - visible viewport height - offsetTop
-            const keyboardInset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-            // Shrink the chat section so its bottom (input bar) sits right above the keyboard
-            chatSection.style.height = `${vv.height}px`;
-            chatSection.style.transform = `translateY(${vv.offsetTop}px)`;
-            // When keyboard is open, drop the bottom safe-area padding (keyboard covers that zone)
-            if (keyboardInset > 80) { chatSection.classList.add('keyboard-open'); }
-            else { chatSection.classList.remove('keyboard-open'); }
-            // Keep messages scrolled to the latest when keyboard opens
+        let rafPending = false;
+        function apply() {
+            rafPending = false;
+            if (chatSection.style.display !== 'flex') return;
+            // How much of the layout viewport the keyboard (incl. its suggestion bar) is covering
+            const overlap = Math.max(0, (window.innerHeight - vv.height - vv.offsetTop));
+            if (overlap > 80) {
+                // Keyboard open: lift the whole chat content up by exactly the keyboard height
+                chatSection.style.paddingBottom = overlap + 'px';
+                chatSection.classList.add('keyboard-open');
+            } else {
+                chatSection.style.paddingBottom = '';
+                chatSection.classList.remove('keyboard-open');
+            }
             const ws = document.getElementById('chatWorkspace');
-            if (ws && keyboardInset > 0) ws.scrollTop = ws.scrollHeight;
+            if (ws) ws.scrollTop = ws.scrollHeight;
         }
-
-        function resetKeyboard() {
-            chatSection.style.height = '';
-            chatSection.style.transform = '';
-            chatSection.classList.remove('keyboard-open');
+        function adjustForKeyboard() {
+            if (rafPending) return;
+            rafPending = true;
+            requestAnimationFrame(apply);
         }
 
         vv.addEventListener('resize', adjustForKeyboard);
         vv.addEventListener('scroll', adjustForKeyboard);
 
-        // When the input loses focus (keyboard closes), reset
         const chatInput = document.getElementById('chatInput');
         if (chatInput) {
-            chatInput.addEventListener('focus', () => setTimeout(adjustForKeyboard, 100));
-            chatInput.addEventListener('blur', () => setTimeout(resetKeyboard, 100));
+            chatInput.addEventListener('focus', () => { setTimeout(adjustForKeyboard, 50); setTimeout(adjustForKeyboard, 300); });
+            chatInput.addEventListener('blur', () => setTimeout(adjustForKeyboard, 100));
         }
     })();
 
