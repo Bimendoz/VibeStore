@@ -195,108 +195,64 @@
         .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
         /* CHAT */
+        /* ── CHAT LAYOUT ── */
         #seccion-chat { display: none; flex-direction: column; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; background: var(--bg-body); z-index: 1000; padding-top: var(--safe-top); }
-        .chat-header { padding: 1rem 1.5rem; background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border-bottom: 1px solid rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: space-between; }
-        [data-theme="dark"] .chat-header, body:not([data-theme="light"]) .chat-header { background: rgba(28,28,30,0.55); }
-        @media (prefers-color-scheme: dark) { body:not([data-theme="light"]) .chat-header { background: rgba(28,28,30,0.55); } }
-        .chat-meta { display: flex; align-items: center; gap: 0.8rem; }
-        .chat-status-dot { width: 9px; height: 9px; background: var(--green); border-radius: 50%; animation: pulse-dot 2s infinite; }
-        @keyframes pulse-dot { 0%,100%{box-shadow: 0 0 0 2px rgba(40,167,69,0.3)} 50%{box-shadow: 0 0 0 6px rgba(40,167,69,0)} }
-        .chat-header-info p:first-child { font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem; }
-        .chat-header-info p:last-child { font-size: 0.72rem; color: var(--text-muted); }
-        .chat-header-actions { display: flex; gap: 0.65rem; align-items: center; }
-        /* Glass call buttons (iOS 26 frosted look) */
-        .btn-call-trigger { border: none; width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.15s, box-shadow 0.2s; position: relative; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.18), inset 0 1px 1px rgba(255,255,255,0.4); }
-        .btn-call-trigger::after { content: ''; position: absolute; inset: 0; border-radius: 12px; background: linear-gradient(160deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 50%); pointer-events: none; }
-        .btn-call-trigger:active { transform: scale(0.92); }
-        .btn-call-trigger.audio-style { background: linear-gradient(160deg, #5ee07a, #28a745); }
-        .btn-call-trigger.video-style { background: linear-gradient(160deg, #4da6ff, #0056b3); }
-        .btn-call-trigger.trash-style { background: linear-gradient(160deg, #8e8e93, #5a5a5e); }
-        .btn-call-trigger svg { width: 18px; height: 18px; fill: currentColor; position: relative; z-index: 1; }
-        .btn-panic { background: linear-gradient(160deg, #ff5b52, #e0231a); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(255,59,48,0.3), inset 0 1px 1px rgba(255,255,255,0.3); }
 
-        .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 2rem; }
-        .name-modal-box { background: var(--bg-card); border-radius: 24px; padding: 2rem; width: 100%; max-width: 340px; text-align: center; }
-        .name-modal-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 0.5rem; }
-        .name-modal-box input { width: 100%; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 0.95rem; margin-bottom: 1rem; }
-        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 0.95rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; }
+        .chat-header { padding: 0.85rem 1.2rem; background: rgba(255,255,255,0.78); -webkit-backdrop-filter: blur(24px) saturate(200%); backdrop-filter: blur(24px) saturate(200%); border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; align-items: center; justify-content: space-between; min-height: 66px; }
+        [data-theme="dark"] .chat-header { background: rgba(22,22,24,0.85); border-bottom-color: rgba(255,255,255,0.07); }
+        @media (prefers-color-scheme: dark) { body:not([data-theme="light"]) .chat-header { background: rgba(22,22,24,0.85); } }
 
-        .chat-messages { flex: 1; padding: 1.2rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; position: relative; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
-        .msg-wrap { display: flex; flex-direction: column; max-width: 78%; position: relative; transition: opacity 0.4s ease; }
-        .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
-        .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
-        .msg-sender { font-size: 0.72rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.25rem; padding: 0 0.4rem; display: block; width: 100%; }
-        .msg-body-container { display: flex; align-items: center; gap: 0.5rem; position: relative; width: 100%; }
-        .msg-wrap.theirs .msg-body-container { justify-content: flex-start; }
-        .msg-wrap.mine .msg-body-container { justify-content: flex-end; }
-        .msg { padding: 0.85rem 1.05rem; border-radius: 20px; font-size: 0.92rem; line-height: 1.45; word-break: break-word; position: relative; }
-        .msg.mine { background: var(--purple-accent); color: #fff; border-bottom-right-radius: 4px; }
-        .msg.theirs { background: var(--bg-card); color: var(--text-main); border-bottom-left-radius: 4px; border: 1px solid var(--border-color); }
-        .msg.only-emoji-bubble { background: transparent !important; border: none !important; font-size: 2.85rem; padding: 0.2rem 0.5rem; line-height: 1.2; display: inline-block; }
+        .chat-meta { display: flex; align-items: center; gap: 0.9rem; }
+        .chat-avatar-ring { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--purple-accent) 0%, #ff7f5c 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; box-shadow: 0 2px 10px rgba(255,68,31,0.35); }
+        .chat-status-dot { width: 11px; height: 11px; background: #30d158; border-radius: 50%; border: 2.5px solid var(--bg-card); position: absolute; bottom: 0; right: 0; animation: pulse-dot 2.5s infinite; }
+        @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(48,209,88,0.4)} 50%{box-shadow:0 0 0 5px rgba(48,209,88,0)} }
+        .chat-channel-name { font-weight: 700; font-size: 1rem; letter-spacing: -0.2px; line-height: 1.25; display: flex; align-items: center; gap: 0.4rem; color: var(--text-main); }
+        .chat-status-text { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
 
-        /* WhatsApp-style animated emojis */
-        .ani-emoji { display: inline-block; transform-origin: center; }
-        .ani-heart { animation: wa-heart 1s infinite cubic-bezier(0.215,0.61,0.355,1); }
-        .ani-face { animation: wa-face 1.4s infinite ease-in-out; }
-        .ani-fire { animation: wa-fire 1.8s infinite ease-in-out; transform-origin: bottom center; }
-        .ani-thumb { animation: wa-thumb 1.6s infinite ease-in-out; }
-        .ani-clap { animation: wa-clap 0.9s infinite ease-in-out; }
-        .ani-bounce { animation: wa-generic 2s infinite ease-in-out; }
-        @keyframes wa-heart { 0%{transform:scale(1)} 14%{transform:scale(1.25)} 28%{transform:scale(1)} 42%{transform:scale(1.18)} 70%{transform:scale(1)} }
-        @keyframes wa-face { 0%,100%{transform:translateY(0) scale(1)} 30%{transform:translateY(-8px) scale(1.05)} 50%{transform:translateY(2px) scale(0.95)} }
-        @keyframes wa-fire { 0%,100%{transform:scale(1) rotate(-2deg);filter:brightness(1)} 50%{transform:scale(1.12) rotate(3deg);filter:brightness(1.2)} }
-        @keyframes wa-thumb { 0%,100%{transform:rotate(0) scale(1)} 25%{transform:rotate(-12deg) scale(1.1)} 50%{transform:rotate(8deg) scale(1.05)} }
-        @keyframes wa-clap { 0%,100%{transform:scale(1) rotate(0)} 50%{transform:scale(1.15) rotate(-8deg)} }
-        @keyframes wa-generic { 0%,100%{transform:scale(1)} 50%{transform:scale(1.13)} }
+        .chat-header-actions { display: flex; align-items: center; gap: 0.55rem; }
+        .btn-call-trigger { border: none; width: 42px; height: 42px; border-radius: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: transform 0.12s, box-shadow 0.2s; position: relative; overflow: hidden; flex-shrink: 0; }
+        .btn-call-trigger::after { content:''; position:absolute; inset:0; background:linear-gradient(160deg,rgba(255,255,255,0.32) 0%,rgba(255,255,255,0) 55%); pointer-events:none; }
+        .btn-call-trigger:active { transform: scale(0.91); }
+        .btn-call-trigger svg { width: 20px; height: 20px; fill: currentColor; position: relative; z-index: 1; }
+        .btn-call-trigger.audio-style { background: linear-gradient(150deg,#34c759,#1a9e3f); box-shadow: 0 3px 12px rgba(52,199,89,0.45), inset 0 1px 0 rgba(255,255,255,0.3); }
+        .btn-call-trigger.video-style { background: linear-gradient(150deg,#007aff,#004fc4); box-shadow: 0 3px 12px rgba(0,122,255,0.45), inset 0 1px 0 rgba(255,255,255,0.3); }
+        .btn-header-more { width: 38px; height: 38px; border-radius: 50%; border: 1.5px solid var(--border-color); background: var(--bg-body); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-muted); flex-shrink: 0; transition: background 0.15s; }
+        .btn-header-more:active { background: var(--border-color); }
+        .btn-header-more svg { width: 20px; height: 20px; fill: currentColor; }
 
-        .typing-name { font-size: 0.72rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.2rem; padding: 0 0.4rem; display: block; }
-        .e2e-lock { font-size: 0.62rem; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 7px; background: rgba(142,142,147,0.18); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.25); box-shadow: inset 0 1px 1px rgba(255,255,255,0.3); transition: background 0.4s; }
-        .e2e-lock.secure { background: rgba(40,167,69,0.22); border-color: rgba(40,167,69,0.4); font-size: 0; width: 20px; height: 20px; }
-        .e2e-lock.secure::after { content: '🔒'; font-size: 0.62rem; }
+        .chat-menu-overlay { position:fixed; inset:0; z-index:1200; opacity:0; pointer-events:none; }
+        .chat-menu-overlay.open { opacity:1; pointer-events:all; }
+        .chat-menu { position:fixed; top:74px; right:1rem; background:var(--bg-card); border-radius:16px; z-index:1201; transform:scale(0.92) translateY(-6px); opacity:0; pointer-events:none; transition:transform 0.18s cubic-bezier(0.32,0.72,0,1),opacity 0.15s; min-width:225px; overflow:hidden; box-shadow:0 10px 36px rgba(0,0,0,0.16),0 0 0 1px rgba(0,0,0,0.06); }
+        .chat-menu.open { transform:scale(1) translateY(0); opacity:1; pointer-events:all; }
+        .chat-menu-item { display:flex; align-items:center; gap:0.9rem; padding:0.95rem 1.15rem; font-size:0.93rem; font-weight:600; cursor:pointer; border:none; background:none; width:100%; text-align:left; color:var(--text-main); border-bottom:1px solid var(--border-color); }
+        .chat-menu-item:last-child { border-bottom:none; }
+        .chat-menu-item svg { width:18px; height:18px; fill:currentColor; flex-shrink:0; }
+        .chat-menu-item.danger { color:var(--red); }
+        .chat-menu-item:active { background:var(--bg-body); }
 
-        /* MESSAGE ACTION MENU (long-press) */
-        .msg-action-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1300; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-        .msg-action-overlay.open { opacity: 1; pointer-events: all; }
-        .msg-action-sheet { position: fixed; left: 50%; transform: translateX(-50%) scale(0.9); bottom: calc(2rem + var(--safe-bottom)); width: 90%; max-width: 360px; z-index: 1301; opacity: 0; pointer-events: none; transition: opacity 0.2s, transform 0.2s; }
-        .msg-action-sheet.open { opacity: 1; pointer-events: all; transform: translateX(-50%) scale(1); }
-        .reaction-row { display: flex; justify-content: space-around; background: rgba(255,255,255,0.7); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,0.3); border-radius: 24px; padding: 0.6rem 0.5rem; margin-bottom: 0.6rem; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
-        [data-theme="dark"] .reaction-row, [data-theme="dark"] .action-list { background: rgba(40,40,44,0.85); }
-        @media (prefers-color-scheme: dark) { body:not([data-theme="light"]) .reaction-row, body:not([data-theme="light"]) .action-list { background: rgba(40,40,44,0.85); } }
-        .reaction-emoji { font-size: 1.6rem; cursor: pointer; transition: transform 0.15s; padding: 0.2rem; line-height: 1; background: none; border: none; }
-        .reaction-emoji:active { transform: scale(1.4); }
-        .reaction-emoji.add-custom { font-size: 1.2rem; opacity: 0.6; }
-        .action-list { background: rgba(255,255,255,0.8); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255,255,255,0.3); border-radius: 18px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.18); }
-        .action-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.9rem 1.2rem; font-size: 0.95rem; font-weight: 600; cursor: pointer; border-bottom: 1px solid rgba(128,128,128,0.15); color: var(--text-main); }
-        .action-item:last-child { border-bottom: none; }
-        .action-item.danger { color: var(--red); }
-        .action-item svg { width: 20px; height: 20px; fill: currentColor; }
+        .chat-messages { flex: 1; padding: 1rem 1rem 0.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.6rem; position: relative; -webkit-overflow-scrolling: touch; overscroll-behavior-y: contain; }
 
-        /* Reaction badge on a message bubble */
-        .msg-reaction { position: absolute; bottom: -10px; right: 6px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1px 6px; font-size: 0.85rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 3; }
-        .msg-wrap.mine .msg-reaction { right: auto; left: 6px; }
-
-        /* Instagram-style "Visto" text under my last read message */
-        .msg-seen-label { font-size: 0.62rem; color: var(--text-muted); padding: 0.1rem 0.5rem 0; align-self: flex-end; }
-        .msg-wrap.mine { position: relative; }
-        
-        .destruct-timer { font-size: 0.7rem; font-weight: 700; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 59, 48, 0.15); color: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-        .msg-time { font-size: 0.63rem; opacity: 0.5; margin-top: 0.25rem; padding: 0 0.5rem; }
-        .disintegrating { pointer-events: none; }
-        .particle { position: absolute; background: var(--purple-accent); border-radius: 50%; pointer-events: none; opacity: 0.8; }
-
-        .typing-wrap { align-self: flex-start; display: none; align-items: center; gap: 0.5rem; padding: 0.5rem 0; }
-        .typing-wrap.show { display: flex; }
-        .typing-bubble { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; border-bottom-left-radius: 4px; padding: 0.75rem 1rem; display: flex; gap: 4px; align-items: center; }
-        .dot { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
-        .dot:nth-child(2) { animation-delay: 0.2s; }
-        .dot:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
-        .msg-system { align-self: center; font-size: 0.75rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; }
-
-        .chat-input-area { padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: rgba(255,255,255,0.55); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); border-top: 1px solid rgba(255,255,255,0.18); display: flex; gap: 0.7rem; align-items: center; }
-        [data-theme="dark"] .chat-input-area { background: rgba(28,28,30,0.6); }
-        @media (prefers-color-scheme: dark) { body:not([data-theme="light"]) .chat-input-area { background: rgba(28,28,30,0.6); } }
+        .chat-input-area { padding: 0.75rem 1rem calc(0.85rem + var(--safe-bottom)); background: rgba(255,255,255,0.78); -webkit-backdrop-filter: blur(24px) saturate(200%); backdrop-filter: blur(24px) saturate(200%); border-top: 1px solid rgba(0,0,0,0.06); display: flex; gap: 0.55rem; align-items: center; }
+        [data-theme="dark"] .chat-input-area { background: rgba(22,22,24,0.85); border-top-color: rgba(255,255,255,0.07); }
+        @media (prefers-color-scheme: dark) { body:not([data-theme="light"]) .chat-input-area { background: rgba(22,22,24,0.85); } }
         #seccion-chat.keyboard-open .chat-input-area { padding-bottom: 0.6rem; }
+        #seccion-chat.keyboard-open .recording-bar { padding-bottom: 0.6rem; }
+
+        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1.5px solid var(--border-color); padding: 0.78rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.93rem; -webkit-appearance: none; transition: border-color 0.2s; }
+        .chat-input-area input:focus { border-color: var(--purple-accent); }
+
+        .btn-attach { background: var(--bg-body); color: var(--text-muted); border: 1.5px solid var(--border-color); width: 38px; height: 38px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.12s; }
+        .btn-attach:active { transform: scale(0.9); }
+        .btn-attach svg { width: 18px; height: 18px; fill: currentColor; }
+        #btnBuzz { color: #ff9f0a; border-color: rgba(255,159,10,0.3); background: rgba(255,159,10,0.08); }
+
+        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(255,68,31,0.4); transition: opacity 0.15s, transform 0.12s; }
+        .btn-send:active:not(:disabled) { transform: scale(0.9); }
+        .btn-send:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
+        .btn-mic { background: var(--bg-body); color: var(--purple-accent); border: 1.5px solid rgba(255,68,31,0.25); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.12s; }
+        .btn-mic svg { width: 20px; height: 20px; fill: currentColor; }
+        .btn-mic:active { transform: scale(0.9); }
+        .btn-mic.recording { background: var(--red); color: #fff; border-color: var(--red); animation: mic-pulse 1.2s infinite; }
         #seccion-chat.keyboard-open .recording-bar { padding-bottom: 0.6rem; }
         .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
         .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.2s, transform 0.1s; }
@@ -610,25 +566,41 @@
     </div>
 
     <div class="chat-header">
+        <!-- Left: status info -->
         <div class="chat-meta">
-            <div class="chat-status-dot"></div>
+            <div class="chat-avatar-ring">
+                <div class="chat-status-dot"></div>
+            </div>
             <div class="chat-header-info">
-                <p>SecureChannel <span id="e2eLock" class="e2e-lock" title="Cifrado de extremo a extremo">🔓</span></p>
-                <p id="onlineStatus">Sincronizando…</p>
+                <p class="chat-channel-name">SecureChannel <span id="e2eLock" class="e2e-lock" title="Cifrado de extremo a extremo">🔓</span></p>
+                <p id="onlineStatus" class="chat-status-text">Sincronizando…</p>
             </div>
         </div>
+        <!-- Right: call actions + overflow -->
         <div class="chat-header-actions">
-            <button class="btn-call-trigger audio-style" onclick="initiateCall('audio')">
+            <button class="btn-call-trigger audio-style" onclick="initiateCall('audio')" aria-label="Llamada de voz">
                 <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
             </button>
-            <button class="btn-call-trigger video-style" onclick="initiateCall('video')">
+            <button class="btn-call-trigger video-style" onclick="initiateCall('video')" aria-label="Videollamada">
                 <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
             </button>
-            <button class="btn-call-trigger trash-style" onclick="openTrashMenu()" aria-label="Vaciar chat">
-                <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            <button class="btn-header-more" onclick="openChatMenu()" aria-label="Más opciones">
+                <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
             </button>
-            <button class="btn-panic" onclick="panicExit()">⚠ PÁNICO</button>
         </div>
+    </div>
+
+    <!-- Chat overflow menu (trash + panic) -->
+    <div class="chat-menu-overlay" id="chatMenuOverlay" onclick="closeChatMenu()"></div>
+    <div class="chat-menu" id="chatMenu">
+        <button class="chat-menu-item" onclick="closeChatMenu(); openTrashMenu()">
+            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            Vaciar conversación
+        </button>
+        <button class="chat-menu-item danger" onclick="closeChatMenu(); panicExit()">
+            <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
+            ⚠ PÁNICO — Borrar todo
+        </button>
     </div>
 
     <div class="chat-messages" id="chatWorkspace">
@@ -1600,7 +1572,6 @@
 
         let bubbleInner, bubbleClass;
         if (msg.type === 'voice') {
-            // Voice note bubble
             bubbleClass = `msg ${isMe ? 'mine' : 'theirs'}`;
             const dur = msg.duration || 0;
             const durStr = `${Math.floor(dur/60)}:${String(dur%60).padStart(2,'0')}`;
@@ -1608,8 +1579,8 @@
                 const h = 20 + Math.floor(Math.random()*70);
                 return `<span class="vn-bar" style="height:${h}%"></span>`;
             }).join('');
-            const audioAttr = msg.audio ? escHtml(msg.audio) : '';
-            bubbleInner = `<div class="voice-note" data-audio="${audioAttr}" data-key="${key}">
+            const audioSrc = msg.audio || '';
+            bubbleInner = `<div class="voice-note" data-audio="${escHtml(audioSrc)}" data-key="${key}">
                 <button class="vn-play" onclick="toggleVoicePlay('${key}')">
                     <svg class="vn-icon-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                 </button>
@@ -1617,11 +1588,10 @@
                 <span class="vn-dur" id="vndur-${key}">${durStr}</span>
             </div>`;
         } else if (msg.type === 'image') {
-            // Image bubble
             bubbleClass = `msg has-image ${isMe ? 'mine' : 'theirs'}`;
             bubbleInner = msg.image
                 ? `<img class="msg-image" src="${escHtml(msg.image)}" alt="" onclick="openImageViewer(this.src)" loading="lazy">`
-                : `🔒 Imagen cifrada`;
+                : `<span style="opacity:0.6;font-size:0.8rem;">📷 Imagen</span>`;
         } else {
             // Text / emoji bubble
             const parsed = checkAndParseEmojiMessage(msg.text);
@@ -1767,21 +1737,12 @@
         const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
         recordedChunks = [];
 
-        // Size guard: base64 is ~33% bigger. Keep well under Realtime DB limits.
-        if (blob.size > 900 * 1024) {
-            showToast('La nota es muy larga para enviar. Intenta una más corta.');
-            return;
-        }
-        // Convert to base64 data URL, then encrypt
+        // Convert to base64 and store in Realtime DB
+        // Voice notes at 30s ≈ 90KB — well within DB limits for private chat
         const reader = new FileReader();
         reader.onloadend = async () => {
-            const dataUrl = reader.result; // "data:audio/webm;base64,...."
-            if (e2eReady) {
-                const enc = await encryptText(dataUrl);
-                push(messagesRef, { type: 'voice', enc, duration: duration, sender: myName, senderId: myId, ts: Date.now() });
-            } else {
-                push(messagesRef, { type: 'voice', audio: dataUrl, duration: duration, sender: myName, senderId: myId, ts: Date.now() });
-            }
+            const dataUrl = reader.result;
+            push(messagesRef, { type: 'voice', audio: dataUrl, duration, sender: myName, senderId: myId, ts: Date.now() });
         };
         reader.readAsDataURL(blob);
     }
@@ -1859,56 +1820,36 @@
 
     window.handlePhotoSelected = function(input) {
         const file = input.files && input.files[0];
-        input.value = ''; // reset so the same file can be picked again
+        input.value = '';
         if (!file) return;
         if (!file.type.startsWith('image/')) { showToast('Eso no es una imagen'); return; }
-        compressImage(file, async (dataUrl) => {
-            if (!dataUrl) { showToast('No se pudo procesar la imagen'); return; }
-            // Size guard: after encryption base64 grows ~33%, keep raw under ~450KB
-            if (dataUrl.length > 450 * 1024) {
-                showToast('La imagen es muy pesada. Intenta otra.');
-                return;
-            }
-            if (e2eReady) {
-                const enc = await encryptText(dataUrl);
-                if (!enc) { showToast('No se pudo cifrar la imagen'); return; }
-                push(messagesRef, { type: 'image', enc, sender: myName, senderId: myId, ts: Date.now() });
-            } else {
+        compressImageToBlob(file, async (blob) => {
+            if (!blob) { showToast('No se pudo procesar la imagen'); return; }
+            // Convert blob to base64 dataURL for Realtime DB
+            // (Firebase free tier = 1GB, ~4,000 photos before hitting it — fine for private chat)
+            const reader = new FileReader();
+            reader.onloadend = async () => {
+                const dataUrl = reader.result;
                 push(messagesRef, { type: 'image', image: dataUrl, sender: myName, senderId: myId, ts: Date.now() });
-            }
+            };
+            reader.readAsDataURL(blob);
         });
     };
 
-    // Downscale + compress the image to a safe size before sending
-    function compressImage(file, callback) {
+    // Compress image to a Blob (for Storage upload) instead of dataURL
+    function compressImageToBlob(file, callback) {
         const reader = new FileReader();
         reader.onload = (e) => {
             const img = new Image();
             img.onload = () => {
-                const maxDim = 900;   // smaller so it still fits AFTER encryption (+33%)
+                const maxDim = 1280;
                 let { width, height } = img;
-                if (width > height && width > maxDim) { height = height * maxDim / width; width = maxDim; }
-                else if (height > maxDim) { width = width * maxDim / height; height = maxDim; }
+                if (width > height && width > maxDim) { height = Math.round(height * maxDim / width); width = maxDim; }
+                else if (height > maxDim) { width = Math.round(width * maxDim / height); height = maxDim; }
                 const canvas = document.createElement('canvas');
                 canvas.width = width; canvas.height = height;
-                const ctx = canvas.getContext('2d');
-                ctx.drawImage(img, 0, 0, width, height);
-                // Target ~330KB so that, once encrypted+base64 (~+33%), it stays well under DB limits
-                const TARGET = 330 * 1024;
-                let quality = 0.7;
-                let dataUrl = canvas.toDataURL('image/jpeg', quality);
-                while (dataUrl.length > TARGET && quality > 0.25) {
-                    quality -= 0.1;
-                    dataUrl = canvas.toDataURL('image/jpeg', quality);
-                }
-                // If still too big, downscale once more
-                if (dataUrl.length > TARGET) {
-                    const c2 = document.createElement('canvas');
-                    c2.width = Math.round(width * 0.7); c2.height = Math.round(height * 0.7);
-                    c2.getContext('2d').drawImage(img, 0, 0, c2.width, c2.height);
-                    dataUrl = c2.toDataURL('image/jpeg', 0.6);
-                }
-                callback(dataUrl);
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                canvas.toBlob(callback, 'image/jpeg', 0.82);
             };
             img.onerror = () => callback(null);
             img.src = e.target.result;
@@ -1917,6 +1858,7 @@
         reader.readAsDataURL(file);
     }
 
+    // Downscale + compress the image to a safe size before sending
     window.openImageViewer = function(src) {
         document.getElementById('imageViewerImg').src = src;
         document.getElementById('imageViewer').classList.add('open');
@@ -2240,6 +2182,16 @@
         document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
     }
+
+    /* ── CHAT OVERFLOW MENU (⋮ button → trash + panic) ── */
+    window.openChatMenu = function() {
+        document.getElementById('chatMenuOverlay').classList.add('open');
+        document.getElementById('chatMenu').classList.add('open');
+    };
+    window.closeChatMenu = function() {
+        document.getElementById('chatMenuOverlay').classList.remove('open');
+        document.getElementById('chatMenu').classList.remove('open');
+    };
 
     /* ── TRASH: manually clear the whole conversation ── */
     window.openTrashMenu = function() {
