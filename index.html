@@ -2912,16 +2912,75 @@
     };
     window.clearChatForEveryone = function() {
         closeTrashMenu();
-        // Animate out every visible message, then wipe from DB
         const wraps = Array.from(document.querySelectorAll('.msg-wrap[id^="wrap-"]'));
-        wraps.forEach(el => snapDisintegrateEffect(el, () => el.remove()));
-        // Clear all messages from the database for both users
-        remove(messagesRef).then(() => {
-            seenKeys.clear();
-            showToast('Conversación borrada 🗑️');
-        }).catch(() => showToast('No se pudo borrar, intenta de nuevo'));
-        // Also clear system lines
-        document.querySelectorAll('.msg-system').forEach(el => el.remove());
+        if (wraps.length === 0) {
+            remove(messagesRef).then(() => seenKeys.clear()).catch(()=>{});
+            return;
+        }
+
+        // ── TELEGRAM-STYLE MASS EXPLOSION ──
+        // All messages burst into particles simultaneously from their own positions,
+        // then each element shrinks away. Looks exactly like Telegram's trash animation.
+        const colors = [
+            getComputedStyle(document.documentElement).getPropertyValue('--bubble-mine').trim() || '#ff441f',
+            '#ff9f0a','#30d158','#64d2ff','#bf5af2','#ff453a','#ffd60a','#ff6b6b','#34c8e8','#fff'
+        ];
+
+        wraps.forEach((el, idx) => {
+            const rect = el.getBoundingClientRect();
+            const cx   = rect.left + rect.width / 2;
+            const cy   = rect.top  + rect.height / 2;
+            // Stagger slightly so it feels like a cascade, not a single frame
+            const delay = idx * 28;
+            const count = Math.min(40, 16 + Math.floor(rect.width / 5));
+
+            setTimeout(() => {
+                // Particles burst from this message's center
+                for (let i = 0; i < count; i++) {
+                    const p      = document.createElement('div');
+                    const angle  = (Math.PI * 2 / count) * i + (Math.random() - .5) * .8;
+                    const speed  = 50 + Math.random() * 110;
+                    const size   = 3 + Math.random() * 6;
+                    const dur    = .4 + Math.random() * .55;
+                    const tx     = Math.cos(angle) * speed;
+                    const ty     = Math.sin(angle) * speed - Math.random() * 40;
+                    const color  = colors[Math.floor(Math.random() * colors.length)];
+                    const isRect = Math.random() > .5;
+
+                    p.className = 'tg-particle';
+                    p.style.cssText = [
+                        'position:fixed',
+                        `left:${cx + (Math.random()-.5)*rect.width*.9}px`,
+                        `top:${cy  + (Math.random()-.5)*rect.height*.6}px`,
+                        `width:${size}px`,
+                        `height:${isRect ? size*.45+'px' : size+'px'}`,
+                        `background:${color}`,
+                        `border-radius:${isRect ? '2px' : '50%'}`,
+                        `--tx:${tx}px`,`--ty:${ty}px`,`--dur:${dur}s`,
+                        `animation:tgParticle ${dur}s cubic-bezier(.25,.46,.45,.94) forwards`,
+                        'pointer-events:none','z-index:9999','will-change:transform,opacity'
+                    ].join(';');
+                    document.body.appendChild(p);
+                    setTimeout(() => p.remove(), dur * 1000 + 150);
+                }
+                // Message itself: squeeze → pop → gone
+                el.animate([
+                    { transform:'scale(1)',    opacity:1,   offset:0    },
+                    { transform:'scale(1.08)', opacity:.8,  offset:.12  },
+                    { transform:'scale(0)',    opacity:0,   offset:1    }
+                ], { duration:350, easing:'cubic-bezier(0.32,0.72,0,1)', fill:'forwards', delay:0 })
+                .onfinish = () => el.remove();
+            }, delay);
+        });
+
+        // Wipe DB after all animations (~800ms max)
+        setTimeout(() => {
+            remove(messagesRef).then(() => {
+                seenKeys.clear();
+                document.querySelectorAll('.msg-system').forEach(e => e.remove());
+                showToast('Conversación borrada 🗑️');
+            }).catch(() => showToast('No se pudo borrar, intenta de nuevo'));
+        }, wraps.length * 28 + 400);
     };
 
     window.panicExit = function() {
@@ -2990,17 +3049,37 @@
 
             // Detect NEWLY connected others (skip first load to avoid false alerts)
             if (presenceInitialized) {
+                // ── ARRIVED: new ID appeared ──
                 ids.forEach(id => {
                     if (!presenceKnownIds.has(id)) {
-                        notifyOtherIsOnline(data[id] && data[id].name);
-                        // In-chat witness: a system line marking the moment they connected
+                        const nm = (data[id] && data[id].name) || 'La otra persona';
+                        notifyOtherIsOnline(nm);
                         if (inChat) {
-                            const nm = (data[id] && data[id].name) || 'La otra persona';
-                            addSystemLine(`🟢 ${nm} se conectó · ${new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}`);
+                            const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                            // "volvió" if we saw them before, "se conectó" if first time this session
+                            const verb = (window._presenceNames && window._presenceNames[id]) ? 'volvió a conectarse' : 'se conectó';
+                            addSystemLine(`🟢 ${nm} ${verb} · ${time}`);
+                        }
+                    }
+                });
+                // ── LEFT: ID that was here is now gone ──
+                presenceKnownIds.forEach(id => {
+                    if (!ids.includes(id)) {
+                        // Find the name from the previous snapshot (stored in presenceNames)
+                        const nm = window._presenceNames && window._presenceNames[id]
+                            ? window._presenceNames[id]
+                            : 'La otra persona';
+                        if (inChat) {
+                            const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+                            addSystemLine(`⚪ ${nm} salió un momento · ${time}`);
                         }
                     }
                 });
             }
+            // Store names so we can reference them after they leave
+            window._presenceNames = {};
+            ids.forEach(id => { window._presenceNames[id] = data[id] && data[id].name; });
+
             presenceKnownIds = new Set(ids);
             if (!presenceInitialized) setTimeout(() => { presenceInitialized = true; }, 1500);
         });
