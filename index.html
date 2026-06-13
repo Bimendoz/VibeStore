@@ -236,6 +236,9 @@
             z-index:0; opacity:1;
         }
 
+        /* Color check indicator */
+        .color-check { font-size:0.7rem; color:#fff; line-height:1; }
+
         /* ── HEADER ── */
         .chat-header {
             position:relative; z-index:10;
@@ -582,9 +585,10 @@
         /* ── NAME / ALIAS MODAL ── */
         .name-modal {
             position:fixed; inset:0; background:rgba(0,0,0,0.7);
-            z-index:3000; display:flex; align-items:flex-end; justify-content:center;
+            z-index:3000; display:none; align-items:flex-end; justify-content:center;
             -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
         }
+        .name-modal.show { display:flex; }
         .name-modal-box {
             background:#1a1a2c; border-radius:26px 26px 0 0;
             padding:1.5rem 1.4rem calc(1.8rem + var(--safe-bottom)); width:100%; max-width:600px;
@@ -946,85 +950,97 @@
 <div id="seccion-chat">
 
     <!-- ══ ALIAS / SETUP MODAL (slides up from bottom, Telegram style) ══ -->
-    <div class="tg-setup-overlay" id="nameModal">
-        <div class="tg-setup-sheet">
-            <div class="tg-setup-handle"></div>
-            <h2 class="tg-setup-title">¡Bienvenido! 👋</h2>
-            <p class="tg-setup-sub">Elige cómo quieres aparecer en la conversación</p>
+    <div class="name-modal" id="nameModal">
+        <div class="name-modal-box">
+            
+            <h2>¡Bienvenido! 👋</h2>
+            <p class="subtitle">Elige cómo quieres aparecer en la conversación</p>
 
-            <p class="tg-picker-label">Tu avatar</p>
-            <div class="tg-avatar-grid" id="avatarPicker">
-                <button class="tg-av selected" data-av="🦊" onclick="selectAvatar(this)">🦊</button>
-                <button class="tg-av" data-av="🐺" onclick="selectAvatar(this)">🐺</button>
-                <button class="tg-av" data-av="🦁" onclick="selectAvatar(this)">🦁</button>
-                <button class="tg-av" data-av="🐯" onclick="selectAvatar(this)">🐯</button>
-                <button class="tg-av" data-av="🐻" onclick="selectAvatar(this)">🐻</button>
-                <button class="tg-av" data-av="🦋" onclick="selectAvatar(this)">🦋</button>
-                <button class="tg-av" data-av="🌙" onclick="selectAvatar(this)">🌙</button>
-                <button class="tg-av" data-av="⚡" onclick="selectAvatar(this)">⚡</button>
-                <button class="tg-av" data-av="🔮" onclick="selectAvatar(this)">🔮</button>
-                <button class="tg-av" data-av="🎭" onclick="selectAvatar(this)">🎭</button>
-                <button class="tg-av" data-av="🌊" onclick="selectAvatar(this)">🌊</button>
-                <button class="tg-av" data-av="🎯" onclick="selectAvatar(this)">🎯</button>
+            <p class="color-label">Tu avatar</p>
+            <div class="avatar-picker" id="avatarPicker">
+                <button class="avatar-opt selected" data-av="🦊" onclick="selectAvatar(this)">🦊</button>
+                <button class="avatar-opt" data-av="🐺" onclick="selectAvatar(this)">🐺</button>
+                <button class="avatar-opt" data-av="🦁" onclick="selectAvatar(this)">🦁</button>
+                <button class="avatar-opt" data-av="🐯" onclick="selectAvatar(this)">🐯</button>
+                <button class="avatar-opt" data-av="🐻" onclick="selectAvatar(this)">🐻</button>
+                <button class="avatar-opt" data-av="🦋" onclick="selectAvatar(this)">🦋</button>
+                <button class="avatar-opt" data-av="🌙" onclick="selectAvatar(this)">🌙</button>
+                <button class="avatar-opt" data-av="⚡" onclick="selectAvatar(this)">⚡</button>
+                <button class="avatar-opt" data-av="🔮" onclick="selectAvatar(this)">🔮</button>
+                <button class="avatar-opt" data-av="🎭" onclick="selectAvatar(this)">🎭</button>
+                <button class="avatar-opt" data-av="🌊" onclick="selectAvatar(this)">🌊</button>
+                <button class="avatar-opt" data-av="🎯" onclick="selectAvatar(this)">🎯</button>
             </div>
 
-            <p class="tg-picker-label">Color de tus mensajes</p>
-            <div class="tg-color-row" id="colorPicker">
-                <button class="tg-color selected" data-color="#ff441f" style="background:#ff441f" onclick="selectColor(this)"><span class="tg-color-check">✓</span></button>
-                <button class="tg-color" data-color="#2196f3" style="background:#2196f3" onclick="selectColor(this)"><span class="tg-color-check">✓</span></button>
-                <button class="tg-color" data-color="#4caf50" style="background:#4caf50" onclick="selectColor(this)"><span class="tg-color-check">✓</span></button>
-                <button class="tg-color" data-color="#9c27b0" style="background:#9c27b0" onclick="selectColor(this)"><span class="tg-color-check">✓</span></button>
-                <button class="tg-color" data-color="#ff9800" style="background:#ff9800" onclick="selectColor(this)"><span class="tg-color-check">✓</span></button>
-                <button class="tg-color" data-color="#e91e63" style="background:#e91e63" onclick="selectColor(this)"><span class="tg-color-check">✓</span></button>
-                <button class="tg-color" data-color="#3f51b5" style="background:#3f51b5" onclick="selectColor(this)"><span class="tg-color-check">✓</span></button>
-                <button class="tg-color" data-color="#009688" style="background:#009688" onclick="selectColor(this)"><span class="tg-color-check">✓</span></button>
+            <p class="color-label">Color de tus mensajes</p>
+            <div class="color-picker" id="colorPicker">
+                <button class="color-opt selected" data-color="#ff441f" style="background:#ff441f" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#2196f3" style="background:#2196f3" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#4caf50" style="background:#4caf50" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#9c27b0" style="background:#9c27b0" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ff9800" style="background:#ff9800" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#e91e63" style="background:#e91e63" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#3f51b5" style="background:#3f51b5" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#009688" style="background:#009688" onclick="selectColor(this)"><span class="color-check">✓</span></button>
             </div>
 
-            <input class="tg-name-input" type="text" id="nameInput"
+            <div class="name-input-wrap"><input type="text" id="nameInput"
                 placeholder="¿Cómo te llamamos?" maxlength="20"
-                onkeypress="if(event.key==='Enter') joinChat()" autocomplete="off">
-            <button class="tg-btn-enter" onclick="joinChat()">Entrar al canal seguro</button>
+                onkeypress="if(event.key==='Enter') joinChat()" autocomplete="off"></div>
+            <button class="btn-join" onclick="joinChat()">Entrar al canal seguro →</button>
         </div>
     </div>
 
-    <!-- ══ HEADER (Telegram: ← · [name+status centered] · [avatar]) ══ -->
-    <div class="tg-header">
-        <button class="tg-back-btn" onclick="panicExit()" aria-label="Salir">
-            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-        </button>
-        <div class="tg-header-center" onclick="openChatMenu()">
-            <span class="tg-header-name">SecureChannel <span id="e2eLock" class="e2e-lock" title="Cifrado E2E">🔓</span></span>
-            <span id="onlineStatus" class="tg-header-status">Sincronizando…</span>
+    <!-- ══ HEADER ══ -->
+    <div class="chat-header">
+        <!-- Left: back / panic -->
+        <div class="chat-meta">
+            <div class="chat-avatar-ring" id="headerAvatar">🦊</div>
+            <div class="chat-header-info">
+                <p class="chat-channel-name">SecureChannel <span id="e2eLock" class="e2e-lock" title="Cifrado E2E">🔓</span></p>
+                <p id="onlineStatus" class="chat-status-text">Sincronizando…</p>
+            </div>
         </div>
-        <div class="tg-header-avatar" id="headerAvatar">🦊</div>
+        <!-- Right: actions -->
+        <div class="chat-header-actions">
+            <button class="btn-call-trigger audio-style" onclick="initiateCall('audio')" aria-label="Llamada">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+            </button>
+            <button class="btn-call-trigger video-style" onclick="initiateCall('video')" aria-label="Video">
+                <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+            </button>
+            <button class="btn-header-more" onclick="openChatMenu()" aria-label="Más">
+                <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+        </div>
     </div>
 
     <!-- ══ OVERFLOW MENU ══ -->
-    <div class="tg-menu-overlay" id="chatMenuOverlay" onclick="closeChatMenu()"></div>
-    <div class="tg-menu" id="chatMenu">
-        <div class="tg-menu-item" onclick="closeChatMenu(); initiateCall('audio')">
+    <div class="chat-menu-overlay" id="chatMenuOverlay" onclick="closeChatMenu()"></div>
+    <div class="chat-menu" id="chatMenu">
+        <div class="chat-menu-item" onclick="closeChatMenu(); initiateCall('audio')">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
             Llamada de voz
         </div>
-        <div class="tg-menu-item" onclick="closeChatMenu(); initiateCall('video')">
+        <div class="chat-menu-item" onclick="closeChatMenu(); initiateCall('video')">
             <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
             Videollamada
         </div>
-        <div class="tg-menu-sep"></div>
-        <div class="tg-menu-item" onclick="closeChatMenu(); openTrashMenu()">
+        <div style="height:1px;background:rgba(255,255,255,.06);"></div>
+        <div class="chat-menu-item" onclick="closeChatMenu(); openTrashMenu()">
             <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
             Vaciar conversación
         </div>
-        <div class="tg-menu-item danger" onclick="closeChatMenu(); panicExit()">
+        <div class="chat-menu-item danger" onclick="closeChatMenu(); panicExit()">
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
     </div>
 
     <!-- ══ MESSAGES ══ -->
-    <div class="tg-messages" id="chatWorkspace">
+    <div class="chat-messages" id="chatWorkspace">
         <!-- Multi-color doodle wallpaper (Telegram authentic) -->
-        <div class="tg-wallpaper" aria-hidden="true">
+        <div class="chat-wallpaper" aria-hidden="true">
             <svg width="400" height="700" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
               <defs>
                 <pattern id="wp" width="200" height="200" patternUnits="userSpaceOnUse">
@@ -1050,51 +1066,50 @@
             </svg>
         </div>
 
-        <div class="tg-offline-notice" id="chatOfflineBanner">⏳ La otra persona aún no está conectada</div>
+        <div class="chat-offline-banner" id="chatOfflineBanner">⏳ La otra persona aún no está conectada</div>
 
-        <div class="tg-typing" id="typingWrap">
-            <div class="tg-typing-bubble">
-                <span class="tg-typing-name" id="typingName"></span>
-                <div class="tg-dots">
-                    <span class="tg-dot"></span><span class="tg-dot"></span><span class="tg-dot"></span>
+        <div class="typing-wrap" id="typingWrap">
+            <div class="typing-bubble">
+                <span class="typing-name" id="typingName"></span>
+                <div style="display:flex;gap:4px;">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- ══ RETURN TO CALL BAR ══ -->
-    <div class="tg-call-bar" id="returnCallBar" onclick="returnToCall()">
-        <span class="tg-call-dot"></span>
+    <div class="return-call-bar" id="returnCallBar" onclick="returnToCall()">
+        <span class="return-call-dot"></span>
         Llamada en curso · Toca para volver
     </div>
 
     <!-- ══ INPUT BAR (Telegram: clip · field · micro/send) ══ -->
-    <div class="tg-input-bar" id="chatInputArea">
-        <button class="tg-attach-btn" onclick="openPhotoMenu()" aria-label="Adjuntar">
+    <div class="chat-input-area" id="chatInputArea">
+        <button class="btn-attach" onclick="openPhotoMenu()" aria-label="Adjuntar">
             <svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5a2.5 2.5 0 0 1 5 0v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5a2.5 2.5 0 0 0 5 0V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
         </button>
-        <div class="tg-input-wrap">
-            <input class="tg-input" type="text" id="chatInput"
+        
+            <input type="text" id="chatInput"
                 placeholder="Mensaje"
                 onkeypress="handleChatKey(event)"
                 oninput="onChatInput()" maxlength="500" autocomplete="off">
-        </div>
-        <button class="tg-icon-btn tg-buzz" id="btnBuzz" onclick="sendBuzz()" aria-label="Zumbido" style="display:flex">
+        <button class="btn-attach" id="btnBuzz" onclick="sendBuzz()" aria-label="Zumbido" style="display:flex">
             <svg viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5S10 3.17 10 4v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
         </button>
-        <button class="tg-mic-btn" id="btnMic" onclick="toggleRecording()" aria-label="Grabar">
+        <button class="btn-mic" id="btnMic" onclick="toggleRecording()" aria-label="Grabar">
             <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.2 6 6.6V21h2v-3.4c3.28-.4 6-3.18 6-6.6h-1.7z"/></svg>
         </button>
-        <button class="tg-send-btn" id="btnSend" onclick="sendMsg()" style="display:none;" disabled aria-label="Enviar">
+        <button class="btn-send" id="btnSend" onclick="sendMsg()" style="display:none;" disabled aria-label="Enviar">
             <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
         </button>
     </div>
 
     <!-- ══ VOICE RECORDING BAR (Telegram authentic) ══ -->
-    <div class="tg-rec-bar" id="recordingBar">
-        <span class="tg-rec-dot"></span>
-        <span class="tg-rec-time" id="recTime">0:00</span>
-        <button class="tg-rec-cancel" onclick="cancelRecording()">‹ Cancelar</button>
+    <div class="recording-bar" id="recordingBar">
+        <div class="rec-dot"></div>
+        <span class="rec-timer" id="recTime">0:00</span>
+        <button class="rec-cancel" onclick="cancelRecording()">‹ Cancelar</button>
     </div>
 
     <!-- File inputs -->
@@ -1692,7 +1707,7 @@
             document.getElementById('vista-tienda').style.display = 'none';
             document.getElementById('seccion-chat').style.display = 'flex';
             cart = {}; document.getElementById('cartBadge').textContent = '0'; document.getElementById('footerCount').textContent = '(0)';
-            document.getElementById('nameModal').style.display = 'flex';
+            document.getElementById('nameModal').classList.add('show');
         } else {
             showToast('Código incorrecto ❌');
             document.getElementById('secretCodeInput').value = '';
@@ -1756,7 +1771,7 @@
 
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
-        inChat = true; document.getElementById('nameModal').style.display = 'none';
+        inChat = true; document.getElementById('nameModal').classList.remove('show');
         // Apply chosen avatar and bubble color
         document.getElementById('headerAvatar').textContent = myAvatar;
         document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
