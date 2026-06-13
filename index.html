@@ -211,6 +211,7 @@
         .btn-call-trigger:active { transform: scale(0.92); }
         .btn-call-trigger.audio-style { background: linear-gradient(160deg, #5ee07a, #28a745); }
         .btn-call-trigger.video-style { background: linear-gradient(160deg, #4da6ff, #0056b3); }
+        .btn-call-trigger.trash-style { background: linear-gradient(160deg, #8e8e93, #5a5a5e); }
         .btn-call-trigger svg { width: 18px; height: 18px; fill: currentColor; position: relative; z-index: 1; }
         .btn-panic { background: linear-gradient(160deg, #ff5b52, #e0231a); color: #fff; border: none; padding: 0.6rem 1.2rem; border-radius: 12px; font-size: 0.85rem; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(255,59,48,0.3), inset 0 1px 1px rgba(255,255,255,0.3); }
 
@@ -623,6 +624,9 @@
             <button class="btn-call-trigger video-style" onclick="initiateCall('video')">
                 <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
             </button>
+            <button class="btn-call-trigger trash-style" onclick="openTrashMenu()" aria-label="Vaciar chat">
+                <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+            </button>
             <button class="btn-panic" onclick="panicExit()">⚠ PÁNICO</button>
         </div>
     </div>
@@ -690,6 +694,17 @@
 <div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
     <button class="image-viewer-close" onclick="closeImageViewer()">✕</button>
     <img id="imageViewerImg" src="" alt="">
+</div>
+
+<!-- Trash menu: clear chat options -->
+<div class="photo-menu-overlay" id="trashOverlay" onclick="closeTrashMenu()"></div>
+<div class="photo-menu" id="trashMenu">
+    <div style="text-align:center; padding:0.4rem 0 0.8rem; color:var(--text-muted); font-size:0.82rem; font-weight:600;">¿Qué quieres borrar?</div>
+    <button class="photo-menu-btn" onclick="clearChatForEveryone()">
+        <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        Borrar toda la conversación
+    </button>
+    <button class="photo-menu-btn cancel" onclick="closeTrashMenu()">Cancelar</button>
 </div>
 
 <!-- Message action menu (long-press): react + delete -->
@@ -1951,57 +1966,9 @@
         }
     }
 
-    /* ── AUTODESTRUCT WHEN 10 MESSAGES ARE REACHED ──
-       Rule: once the chat reaches 10 live messages, ALL of them start a 10s timer
-       at the same time. When timers hit 0, every message disintegrates and is removed. */
-    const DESTRUCT_THRESHOLD = 10;
-    const DESTRUCT_SECONDS = 10;
-    let destructArmed = false;   // becomes true once threshold is hit (stays armed)
-
-    function liveMessageKeys() {
-        return Array.from(document.querySelectorAll('.msg-wrap[id^="wrap-"]')).map(el => el.id.replace('wrap-', ''));
-    }
-
-    function checkDestructThreshold() {
-        const keys = liveMessageKeys();
-        // If everything has been cleared, disarm so the NEXT batch of 10 starts a fresh cycle
-        if (keys.length === 0) { destructArmed = false; return; }
-        if (keys.length >= DESTRUCT_THRESHOLD && !destructArmed) {
-            destructArmed = true;
-            // Arm every currently visible message at once
-            keys.forEach(k => {
-                const el = document.getElementById(`wrap-${k}`);
-                if (el) initiateThanosCountdown(k, el);
-            });
-        } else if (destructArmed) {
-            // Already armed: any newly arrived message also gets a timer immediately
-            keys.forEach(k => {
-                const el = document.getElementById(`wrap-${k}`);
-                if (el && !el.querySelector('.destruct-timer')) initiateThanosCountdown(k, el);
-            });
-        }
-    }
-
-    function initiateThanosCountdown(key, element) {
-        if (element.querySelector('.destruct-timer')) return; // already counting
-        const bodyContainer = element.querySelector('.msg-body-container');
-        if (!bodyContainer) return;
-        const timer = document.createElement('div');
-        timer.className = 'destruct-timer';
-        timer.textContent = DESTRUCT_SECONDS;
-        bodyContainer.appendChild(timer);
-        let count = DESTRUCT_SECONDS;
-        const iv = setInterval(() => {
-            count--; timer.textContent = count;
-            if (count <= 0) {
-                clearInterval(iv);
-                snapDisintegrateEffect(element, () => {
-                    element.remove();
-                    remove(ref(db, `chat/messages/${key}`)).catch(() => {});
-                });
-            }
-        }, 1000);
-    }
+    /* (10-message autodestruct rule removed by request — messages now persist
+       until the user clears them with the trash button or PANIC.) */
+    function checkDestructThreshold() { /* no-op: rule removed */ }
 
     function snapDisintegrateEffect(element, callback) {
         element.classList.add('disintegrating');
@@ -2101,9 +2068,12 @@
 
     let pendingIncoming = null; // {key, call} waiting for user to accept/decline
 
+    let unsubIncoming = null;
     function listenForIncomingCalls() {
-        off(callsRef);
-        onValue(callsRef, async snap => {
+        if (unsubIncoming) { try { unsubIncoming(); } catch(e){} }
+        // onValue returns its own unsubscribe function — use it instead of off(callsRef),
+        // which would also kill the ICE candidate listeners living under chat/calls/*
+        unsubIncoming = onValue(callsRef, async snap => {
             if (!inChat) return;
             const calls = snap.val();
             if (!calls) { hideIncomingScreen(); return; }
@@ -2270,6 +2240,29 @@
         document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
     }
+
+    /* ── TRASH: manually clear the whole conversation ── */
+    window.openTrashMenu = function() {
+        document.getElementById('trashOverlay').classList.add('open');
+        document.getElementById('trashMenu').classList.add('open');
+    };
+    window.closeTrashMenu = function() {
+        document.getElementById('trashOverlay').classList.remove('open');
+        document.getElementById('trashMenu').classList.remove('open');
+    };
+    window.clearChatForEveryone = function() {
+        closeTrashMenu();
+        // Animate out every visible message, then wipe from DB
+        const wraps = Array.from(document.querySelectorAll('.msg-wrap[id^="wrap-"]'));
+        wraps.forEach(el => snapDisintegrateEffect(el, () => el.remove()));
+        // Clear all messages from the database for both users
+        remove(messagesRef).then(() => {
+            seenKeys.clear();
+            showToast('Conversación borrada 🗑️');
+        }).catch(() => showToast('No se pudo borrar, intenta de nuevo'));
+        // Also clear system lines
+        document.querySelectorAll('.msg-system').forEach(el => el.remove());
+    };
 
     window.panicExit = function() {
         stopRingtone();
