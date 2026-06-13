@@ -203,8 +203,8 @@
         @media (prefers-color-scheme: dark) { body:not([data-theme="light"]) .chat-header { background: rgba(22,22,24,0.85); } }
 
         .chat-meta { display: flex; align-items: center; gap: 0.9rem; }
-        .chat-avatar-ring { width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--purple-accent) 0%, #ff7f5c 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; box-shadow: 0 2px 10px rgba(255,68,31,0.35); }
-        .chat-status-dot { width: 11px; height: 11px; background: #30d158; border-radius: 50%; border: 2.5px solid var(--bg-card); position: absolute; bottom: 0; right: 0; animation: pulse-dot 2.5s infinite; }
+        .chat-avatar-ring { width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #2d2d44, #1a1a2e); display: flex; align-items: center; justify-content: center; flex-shrink: 0; position: relative; font-size: 1.35rem; line-height: 1; box-shadow: 0 2px 8px rgba(0,0,0,0.4); border: 2px solid rgba(255,255,255,0.08); }
+        .chat-avatar-ring::after { content: ''; width: 11px; height: 11px; background: #30d158; border-radius: 50%; border: 2.5px solid var(--bg-card); position: absolute; bottom: 0; right: 0; animation: pulse-dot 2.5s infinite; box-shadow: 0 0 0 0 rgba(48,209,88,0.4); }
         @keyframes pulse-dot { 0%,100%{box-shadow:0 0 0 0 rgba(48,209,88,0.4)} 50%{box-shadow:0 0 0 5px rgba(48,209,88,0)} }
         .chat-channel-name { font-weight: 700; font-size: 1rem; letter-spacing: -0.2px; line-height: 1.25; display: flex; align-items: center; gap: 0.4rem; color: var(--text-main); }
         .chat-status-text { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
@@ -251,19 +251,6 @@
         .btn-send:disabled { opacity: 0.35; cursor: default; box-shadow: none; }
         .btn-mic { background: var(--bg-body); color: var(--purple-accent); border: 1.5px solid rgba(255,68,31,0.25); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.12s; }
         .btn-mic svg { width: 20px; height: 20px; fill: currentColor; }
-        .btn-mic:active { transform: scale(0.9); }
-        .btn-mic.recording { background: var(--red); color: #fff; border-color: var(--red); animation: mic-pulse 1.2s infinite; }
-        #seccion-chat.keyboard-open .recording-bar { padding-bottom: 0.6rem; }
-        .chat-input-area input { flex: 1; background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.85rem 1.1rem; border-radius: 22px; color: var(--text-main); outline: none; font-size: 0.92rem; -webkit-appearance: none; }
-        .btn-send { background: var(--purple-accent); color: #fff; border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: opacity 0.2s, transform 0.1s; }
-        .btn-send:active:not(:disabled) { transform: scale(0.9); }
-        .btn-send:disabled { opacity: 0.4; cursor: default; }
-
-        /* VOICE NOTES */
-        .btn-mic { background: var(--bg-body); color: var(--purple-accent); border: 1px solid var(--border-color); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: transform 0.1s, background 0.2s; }
-        .btn-mic svg { width: 20px; height: 20px; fill: currentColor; }
-        .btn-mic:active { transform: scale(0.9); }
-        .btn-mic.recording { background: var(--red); color: #fff; border-color: var(--red); animation: mic-pulse 1.2s infinite; }
         @keyframes mic-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(255,59,48,0.4); } 50% { box-shadow: 0 0 0 8px rgba(255,59,48,0); } }
 
         .recording-bar { display: none; align-items: center; gap: 0.8rem; padding: 0.9rem 1.2rem calc(0.9rem + var(--safe-bottom)); background: var(--bg-card); border-top: 1px solid var(--border-color); }
@@ -372,6 +359,118 @@
         /* OFFLINE NOTICE */
         .chat-offline-banner { display: none; align-self: center; font-size: 0.72rem; color: var(--text-muted); background: var(--bg-body); border: 1px solid var(--border-color); padding: 0.35rem 0.9rem; border-radius: 20px; margin: 0.3rem auto; }
         .chat-offline-banner.show { display: block; }
+
+        /* ══════════════════════════════════════
+           CHAT — TELEGRAM-STYLE REDESIGN
+           ══════════════════════════════════════ */
+
+        /* Background pattern (Telegram-style doodle backdrop) */
+        #seccion-chat { background: var(--chat-bg, #0f0f13); }
+        :root { --chat-bg: #0f0f13; --bubble-mine: var(--purple-accent); --bubble-theirs: #212133; }
+        [data-theme="light"] { --chat-bg: #f0f2f5; --bubble-mine: var(--purple-accent); --bubble-theirs: #ffffff; }
+        @media (prefers-color-scheme: light) { body:not([data-theme="dark"]) { --chat-bg: #f0f2f5; --bubble-theirs: #ffffff; } }
+
+        .chat-wallpaper { position: absolute; inset: 0; pointer-events: none; overflow: hidden; opacity: 0.12; z-index: 0; }
+        .chat-messages { position: relative; z-index: 1; }
+
+        /* ── NAME / ALIAS MODAL (Telegram-style) ── */
+        .name-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 2000; display: flex; align-items: flex-end; justify-content: center; }
+        .name-modal-box { background: var(--bg-card); border-radius: 24px 24px 0 0; padding: 2rem 1.5rem calc(2rem + var(--safe-bottom)); width: 100%; max-width: 600px; }
+        .name-modal-box h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.3rem; text-align: center; }
+        .name-modal-box .subtitle { font-size: 0.85rem; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem; }
+
+        /* Avatar picker */
+        .avatar-picker { display: flex; justify-content: center; gap: 0.65rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+        .avatar-opt { width: 46px; height: 46px; border-radius: 50%; border: 2.5px solid transparent; font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s, border-color 0.15s; background: rgba(142,142,147,0.1); }
+        .avatar-opt.selected { border-color: var(--purple-accent); transform: scale(1.15); }
+        .avatar-opt:active { transform: scale(0.92); }
+
+        /* Color picker */
+        .color-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 0.55rem; text-align: center; }
+        .color-picker { display: flex; justify-content: center; gap: 0.6rem; margin-bottom: 1.2rem; }
+        .color-opt { width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid transparent; cursor: pointer; transition: transform 0.15s; flex-shrink: 0; }
+        .color-opt.selected { border-color: var(--text-main); transform: scale(1.2); }
+
+        .name-input-wrap { margin-bottom: 1rem; }
+        .name-input-wrap input { width: 100%; background: var(--bg-body); border: 1.5px solid var(--border-color); padding: 0.9rem 1.1rem; border-radius: 14px; color: var(--text-main); outline: none; font-size: 1rem; -webkit-appearance: none; transition: border-color 0.2s; }
+        .name-input-wrap input:focus { border-color: var(--purple-accent); }
+        .btn-join { width: 100%; background: var(--purple-accent); color: #fff; border: none; padding: 1rem; border-radius: 14px; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(255,68,31,0.35); }
+
+        /* ── MESSAGE BUBBLES ── */
+        .msg-wrap { display: flex; flex-direction: column; max-width: 78%; position: relative; animation: msgIn 0.2s cubic-bezier(0.32,0.72,0,1); }
+        @keyframes msgIn { from { opacity:0; transform: translateY(6px) scale(0.97); } to { opacity:1; transform: translateY(0) scale(1); } }
+        .msg-wrap.mine { align-self: flex-end; align-items: flex-end; }
+        .msg-wrap.theirs { align-self: flex-start; align-items: flex-start; }
+        .msg-sender { font-size: 0.72rem; font-weight: 700; margin-bottom: 0.2rem; padding: 0 0.5rem; display: block; }
+        .msg-body-container { display: flex; align-items: flex-end; gap: 0.4rem; width: 100%; }
+        .msg-wrap.theirs .msg-body-container { justify-content: flex-start; }
+        .msg-wrap.mine .msg-body-container { justify-content: flex-end; }
+        .msg { padding: 0.7rem 0.95rem; border-radius: 18px; font-size: 0.93rem; line-height: 1.48; word-break: break-word; position: relative; }
+        .msg.mine { background: var(--bubble-mine, var(--purple-accent)); color: #fff; border-bottom-right-radius: 5px; }
+        .msg.theirs { background: var(--bubble-theirs, #212133); color: var(--text-main); border-bottom-left-radius: 5px; border: 1px solid rgba(255,255,255,0.05); }
+        [data-theme="light"] .msg.theirs, body:not([data-theme="dark"]) .msg.theirs { border-color: rgba(0,0,0,0.06); }
+        .msg.only-emoji-bubble { background: transparent !important; border: none !important; font-size: 2.85rem; padding: 0.15rem 0.4rem; line-height: 1.2; display: inline-block; }
+        .msg-time { font-size: 0.62rem; opacity: 0.55; margin-top: 0.22rem; padding: 0 0.5rem; display: flex; align-items: center; gap: 0.25rem; }
+        .msg-wrap.mine .msg-time { justify-content: flex-end; }
+        .msg-seen-label { font-size: 0.62rem; color: var(--text-muted); padding: 0 0.5rem; align-self: flex-end; }
+
+        /* READ RECEIPTS */
+        .msg-receipt { display: inline-flex; align-items: center; margin-left: 0.2rem; }
+        .msg-receipt svg { width: 14px; height: 14px; }
+        .msg-receipt.read svg { fill: #64c8ff; }
+        .msg-receipt.sent svg { fill: rgba(255,255,255,0.55); }
+        [data-theme="light"] .msg-receipt.sent svg { fill: rgba(0,0,0,0.35); }
+
+        /* System line (date separator / connection witness) */
+        .msg-system { align-self: center; font-size: 0.73rem; color: rgba(255,255,255,0.6); background: rgba(0,0,0,0.3); padding: 0.28rem 0.85rem; border-radius: 10px; margin: 0.4rem auto; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+        [data-theme="light"] .msg-system { color: rgba(0,0,0,0.55); background: rgba(0,0,0,0.08); }
+
+        /* ── TYPING INDICATOR ── */
+        .typing-wrap { align-self: flex-start; display: none; align-items: flex-end; gap: 0.5rem; padding: 0.25rem 0; }
+        .typing-wrap.show { display: flex; }
+        .typing-name { font-size: 0.7rem; font-weight: 600; color: var(--purple-accent); margin-bottom: 0.2rem; display: block; }
+        .typing-bubble { background: var(--bubble-theirs, #212133); border-radius: 18px; border-bottom-left-radius: 5px; padding: 0.7rem 1rem; display: flex; gap: 4px; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
+        .dot { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.3s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.18s; }
+        .dot:nth-child(3) { animation-delay: 0.36s; }
+        @keyframes bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+        /* ── OFFLINE BANNER ── */
+        .chat-offline-banner { display: none; align-self: center; font-size: 0.73rem; color: rgba(255,255,255,0.6); background: rgba(0,0,0,0.3); padding: 0.3rem 0.9rem; border-radius: 12px; margin: 0.2rem auto; text-align: center; }
+        .chat-offline-banner.show { display: block; }
+
+        /* ── EMOJI ANIMATIONS ── */
+        .ani-emoji { display: inline-block; transform-origin: center; }
+        .ani-heart { animation: wa-heart 1s infinite cubic-bezier(0.215,0.61,0.355,1); }
+        .ani-face { animation: wa-face 1.4s infinite ease-in-out; }
+        .ani-fire { animation: wa-fire 1.8s infinite ease-in-out; transform-origin: bottom center; }
+        .ani-thumb { animation: wa-thumb 1.6s infinite ease-in-out; }
+        .ani-clap { animation: wa-clap 0.9s infinite ease-in-out; }
+        .ani-bounce { animation: wa-generic 2s infinite ease-in-out; }
+        @keyframes wa-heart { 0%{transform:scale(1)} 14%{transform:scale(1.25)} 28%{transform:scale(1)} 42%{transform:scale(1.18)} 70%{transform:scale(1)} }
+        @keyframes wa-face { 0%,100%{transform:translateY(0) scale(1)} 30%{transform:translateY(-8px) scale(1.05)} 50%{transform:translateY(2px) scale(0.95)} }
+        @keyframes wa-fire { 0%,100%{transform:scale(1) rotate(-2deg);filter:brightness(1)} 50%{transform:scale(1.12) rotate(3deg);filter:brightness(1.2)} }
+        @keyframes wa-thumb { 0%,100%{transform:rotate(0) scale(1)} 25%{transform:rotate(-12deg) scale(1.1)} 50%{transform:rotate(8deg) scale(1.05)} }
+        @keyframes wa-clap { 0%,100%{transform:scale(1) rotate(0)} 50%{transform:scale(1.15) rotate(-8deg)} }
+        @keyframes wa-generic { 0%,100%{transform:scale(1)} 50%{transform:scale(1.13)} }
+
+        /* ── E2E LOCK BADGE ── */
+        .e2e-lock { font-size: 0.6rem; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 6px; background: rgba(142,142,147,0.18); border: 1px solid rgba(255,255,255,0.15); transition: background 0.4s; }
+        .e2e-lock.secure { background: rgba(48,209,88,0.22); border-color: rgba(48,209,88,0.4); font-size: 0; }
+        .e2e-lock.secure::after { content: '🔒'; font-size: 0.6rem; }
+
+        /* ── REACTIONS ── */
+        .msg-reaction { position: absolute; bottom: -10px; right: 6px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 1px 5px; font-size: 0.82rem; box-shadow: 0 2px 6px rgba(0,0,0,0.15); z-index: 3; }
+        .msg-wrap.mine .msg-reaction { right: auto; left: 6px; }
+
+        /* ── MISC ── */
+        .disintegrating { pointer-events: none; }
+        .particle { position: absolute; background: var(--purple-accent); border-radius: 50%; pointer-events: none; opacity: 0.8; }
+        .destruct-timer { font-size: 0.68rem; font-weight: 700; width: 20px; height: 20px; border-radius: 50%; background: rgba(255,59,48,0.15); color: var(--red); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .return-call-bar { display: none; align-items: center; justify-content: center; gap: 0.5rem; background: #34c759; color: #fff; padding: 0.55rem 1rem; font-size: 0.84rem; font-weight: 700; cursor: pointer; position: relative; z-index: 2; }
+        .return-call-bar.show { display: flex; }
+        .return-call-dot { width: 9px; height: 9px; border-radius: 50%; background: #fff; animation: pulse-dot 1.5s infinite; }
+
     </style>
 </head>
 <body>
@@ -558,19 +657,49 @@
 <div id="seccion-chat">
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
-            <h2>👋 Conexión Segura</h2>
-            <p>Ingresa un pseudónimo cifrado</p>
-            <input type="text" id="nameInput" placeholder="Alias…" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()">
-            <button class="btn-join" onclick="joinChat()">Establecer Enlace →</button>
+            <h2>¡Bienvenido! 👋</h2>
+            <p class="subtitle">Elige cómo quieres aparecer en la conversación</p>
+
+            <!-- Avatar emoji picker -->
+            <div class="color-label">Tu avatar</div>
+            <div class="avatar-picker" id="avatarPicker">
+                <button class="avatar-opt selected" data-av="🦊" onclick="selectAvatar(this)">🦊</button>
+                <button class="avatar-opt" data-av="🐺" onclick="selectAvatar(this)">🐺</button>
+                <button class="avatar-opt" data-av="🦁" onclick="selectAvatar(this)">🦁</button>
+                <button class="avatar-opt" data-av="🐯" onclick="selectAvatar(this)">🐯</button>
+                <button class="avatar-opt" data-av="🐻" onclick="selectAvatar(this)">🐻</button>
+                <button class="avatar-opt" data-av="🦋" onclick="selectAvatar(this)">🦋</button>
+                <button class="avatar-opt" data-av="🌙" onclick="selectAvatar(this)">🌙</button>
+                <button class="avatar-opt" data-av="⚡" onclick="selectAvatar(this)">⚡</button>
+                <button class="avatar-opt" data-av="🔮" onclick="selectAvatar(this)">🔮</button>
+                <button class="avatar-opt" data-av="🎭" onclick="selectAvatar(this)">🎭</button>
+            </div>
+
+            <!-- Bubble color picker -->
+            <div class="color-label">Color de tus mensajes</div>
+            <div class="color-picker" id="colorPicker">
+                <button class="color-opt selected" data-color="#ff441f" style="background:#ff441f" onclick="selectColor(this)"></button>
+                <button class="color-opt" data-color="#007aff" style="background:#007aff" onclick="selectColor(this)"></button>
+                <button class="color-opt" data-color="#34c759" style="background:#34c759" onclick="selectColor(this)"></button>
+                <button class="color-opt" data-color="#af52de" style="background:#af52de" onclick="selectColor(this)"></button>
+                <button class="color-opt" data-color="#ff9f0a" style="background:#ff9f0a" onclick="selectColor(this)"></button>
+                <button class="color-opt" data-color="#ff2d55" style="background:#ff2d55" onclick="selectColor(this)"></button>
+                <button class="color-opt" data-color="#5856d6" style="background:#5856d6" onclick="selectColor(this)"></button>
+                <button class="color-opt" data-color="#00c7be" style="background:#00c7be" onclick="selectColor(this)"></button>
+            </div>
+
+            <!-- Alias input -->
+            <div class="name-input-wrap">
+                <input type="text" id="nameInput" placeholder="¿Cómo te llamamos?" maxlength="20" onkeypress="if(event.key==='Enter') joinChat()" autocomplete="off">
+            </div>
+            <button class="btn-join" onclick="joinChat()">Entrar al canal seguro →</button>
         </div>
     </div>
 
     <div class="chat-header">
-        <!-- Left: status info -->
+        <!-- Left: back + avatar + info (Telegram centered layout) -->
         <div class="chat-meta">
-            <div class="chat-avatar-ring">
-                <div class="chat-status-dot"></div>
-            </div>
+            <div class="chat-avatar-ring" id="headerAvatar">🦊</div>
             <div class="chat-header-info">
                 <p class="chat-channel-name">SecureChannel <span id="e2eLock" class="e2e-lock" title="Cifrado de extremo a extremo">🔓</span></p>
                 <p id="onlineStatus" class="chat-status-text">Sincronizando…</p>
@@ -604,7 +733,37 @@
     </div>
 
     <div class="chat-messages" id="chatWorkspace">
-        <div class="chat-offline-banner" id="chatOfflineBanner">La otra persona no está conectada todavía. Verá tu mensaje al entrar.</div>
+        <!-- Telegram-style doodle wallpaper -->
+        <div class="chat-wallpaper" aria-hidden="true">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;">
+                <defs><pattern id="doodle" x="0" y="0" width="180" height="180" patternUnits="userSpaceOnUse">
+                    <!-- Stars -->
+                    <path d="M20 15l2 6h6l-5 4 2 6-5-3-5 3 2-6-5-4h6z" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.6"/>
+                    <path d="M140 30l1.5 4.5h4.5l-3.5 2.8 1.5 4.5L140 39l-3.5 2.8 1.5-4.5L134.5 34.5h4.5z" fill="none" stroke="currentColor" stroke-width="1" opacity="0.5"/>
+                    <!-- Hearts -->
+                    <path d="M80 25c0-4 3-6 6-4s6-0 6 4c0 3-6 9-6 9s-6-6-6-9z" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55"/>
+                    <path d="M150 90c0-3 2.5-4.5 5-3s5 0 5 3c0 2.5-5 7-5 7s-5-4.5-5-7z" fill="none" stroke="currentColor" stroke-width="1" opacity="0.45"/>
+                    <!-- Circles / bubbles -->
+                    <circle cx="55" cy="60" r="12" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
+                    <circle cx="160" cy="55" r="8" fill="none" stroke="currentColor" stroke-width="1" opacity="0.35"/>
+                    <circle cx="30" cy="120" r="6" fill="none" stroke="currentColor" stroke-width="1" opacity="0.35"/>
+                    <!-- Leaf / teardrop -->
+                    <path d="M100 70 Q115 55 120 75 Q115 90 100 70z" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
+                    <!-- Lightning bolt -->
+                    <path d="M168 10l-5 10h4l-6 12 10-14h-4z" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.5"/>
+                    <!-- Wave line -->
+                    <path d="M0 145 Q22 135 45 145 Q68 155 90 145 Q112 135 135 145 Q158 155 180 145" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.3"/>
+                    <!-- Diamond -->
+                    <path d="M45 155l7-10 7 10-7 10z" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.4"/>
+                    <!-- Spiral dot cluster -->
+                    <circle cx="120" cy="130" r="2" fill="currentColor" opacity="0.3"/>
+                    <circle cx="128" cy="125" r="2" fill="currentColor" opacity="0.25"/>
+                    <circle cx="125" cy="140" r="2" fill="currentColor" opacity="0.2"/>
+                </pattern></defs>
+                <rect width="100%" height="100%" fill="url(#doodle)" color="white"/>
+            </svg>
+        </div>
+        <div class="chat-offline-banner" id="chatOfflineBanner">⏳ La otra persona aún no está conectada. Verá tus mensajes al entrar.</div>
         <div class="typing-wrap" id="typingWrap">
             <span class="typing-name" id="typingName"></span>
             <div class="typing-bubble">
@@ -1283,24 +1442,40 @@
     window.toggleTheme = function() { const c = document.body.getAttribute('data-theme'); const dark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-theme', (c === 'dark' || (!c && dark)) ? 'light' : 'dark'); };
 
     /* ── CHAT ── */
+    /* ── AVATAR & BUBBLE COLOR SELECTION ── */
+    let myAvatar = '🦊';
+    let myBubbleColor = '#ff441f';
+
+    window.selectAvatar = function(btn) {
+        document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        myAvatar = btn.getAttribute('data-av');
+    };
+
+    window.selectColor = function(btn) {
+        document.querySelectorAll('.color-opt').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        myBubbleColor = btn.getAttribute('data-color');
+        document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
+    };
+
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
         inChat = true; document.getElementById('nameModal').style.display = 'none';
-        // Unlock audio on this user gesture so sounds/ringtone work later
+        // Apply chosen avatar and bubble color
+        document.getElementById('headerAvatar').textContent = myAvatar;
+        document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
+        // Unlock audio
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
-        // Ask for notification permission (iOS requires a user gesture)
         requestNotificationPermission();
-        // Update my presence with the chosen name (presence already initialized at app start)
         set(presenceRef, { name: myName, online: true, ts: Date.now() });
         onDisconnect(presenceRef).remove();
         onDisconnect(typingRef).remove();
-        // Reflect current online state in the chat header
         const statusEl = document.getElementById('onlineStatus');
         if (statusEl) statusEl.textContent = othersOnline > 0 ? 'En línea' : 'Esperando a la otra persona…';
         listenForIncomingCalls();
         listenForTyping();
-        startKeyExchange();   // begin end-to-end encryption handshake
-        // Re-render messages that arrived before entering chat (force listener re-evaluation)
+        startKeyExchange();
         rerenderAllMessages();
     };
 
