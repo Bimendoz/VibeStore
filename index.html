@@ -476,11 +476,6 @@
         .msg-image { width:240px; max-width:100%; height:auto; display:block; border-radius:14px; }
 
         /* Tail SVG (Telegram-style bubble tail) */
-        .msg-tail {
-            width:10px; height:18px; flex-shrink:0; margin-bottom:2px;
-        }
-        .msg-tail.mine   { fill:var(--bubble-mine); }
-        .msg-tail.theirs { fill:var(--bubble-theirs); }
 
         /* Timestamp + receipt */
         .msg-time {
@@ -532,7 +527,7 @@
             background:rgba(18,18,28,0.88);
             -webkit-backdrop-filter:var(--tg-blur); backdrop-filter:var(--tg-blur);
             border-top:1px solid rgba(255,255,255,0.06);
-            display:flex; gap:0.5rem; align-items:center;
+            display:flex; gap:0.5rem; align-items:center; overflow:visible;
         }
         [data-theme="light"] .chat-input-area { background:rgba(242,242,247,0.95); border-top-color:rgba(0,0,0,.08); }
         @media (prefers-color-scheme:light){body:not([data-theme="dark"]) .chat-input-area{background:rgba(242,242,247,0.95);border-top-color:rgba(0,0,0,.08);}}
@@ -541,7 +536,7 @@
 
         /* Attach / clip button */
         .btn-attach {
-            width:36px; height:36px; border-radius:50%; flex-shrink:0; cursor:pointer;
+            width:34px; height:34px; border-radius:50%; flex-shrink:0; cursor:pointer;
             background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.1);
             color:rgba(255,255,255,0.6); display:flex; align-items:center; justify-content:center;
             transition:transform 0.12s, background 0.15s;
@@ -575,10 +570,10 @@
 
         /* Mic / Send */
         .btn-mic, .btn-send {
-            width:44px; height:44px; border-radius:50%; flex-shrink:0; cursor:pointer; border:none;
+            width:40px; height:40px; border-radius:50%; flex-shrink:0; cursor:pointer; border:none;
             display:flex; align-items:center; justify-content:center;
             background:var(--bubble-mine); color:#fff;
-            box-shadow:0 3px 12px rgba(0,0,0,.4);
+            box-shadow:0 2px 10px rgba(0,0,0,.35);
             transition:transform 0.12s, opacity 0.15s;
         }
         .btn-mic svg, .btn-send svg { width:20px; height:20px; fill:currentColor; }
@@ -831,8 +826,9 @@
         /* ── DISINTEGRATE / PARTICLE FX ── */
         .disintegrating { pointer-events:none; }
         .tg-particle {
-            position:fixed; border-radius:50%; pointer-events:none;
-            animation:tgParticle var(--dur,.6s) ease-out forwards;
+            position:fixed; border-radius:50%; pointer-events:none; z-index:9999;
+            animation:tgParticle var(--dur,.6s) cubic-bezier(.25,.46,.45,.94) forwards;
+            will-change:transform, opacity;
         }
         @keyframes tgParticle {
             0%   { opacity:0.9; transform:translate(0,0) scale(1); }
@@ -950,13 +946,16 @@
         .ft-video-container { position:absolute; inset:0; z-index:2; }
         .ft-video-remote    { width:100%; height:100%; object-fit:cover; }
         .ft-video-local {
-            position:absolute; bottom:9.5rem; right:1rem;
-            width:115px; height:165px; border-radius:20px; z-index:3;
+            position:absolute; bottom:9rem; right:1rem;
+            width:110px; height:155px; border-radius:18px; z-index:4;
             object-fit:cover; background:#111;
-            border:2px solid rgba(255,255,255,0.2);
-            box-shadow:0 8px 28px rgba(0,0,0,0.6);
-                    transform:scaleX(-1);
+            border:2px solid rgba(255,255,255,0.22);
+            box-shadow:0 6px 24px rgba(0,0,0,0.55);
+            cursor:grab; display:none;
+            transform:scaleX(-1); /* front camera mirror — JS overrides if rear */
+            touch-action:none;
         }
+        .ft-video-local:active { cursor:grabbing; }
 
         /* ── TOP BAR ── */
         .ft-topbar {
@@ -1189,8 +1188,9 @@
         /* ── DISINTEGRATE / PARTICLE FX ── */
         .disintegrating { pointer-events:none; }
         .tg-particle {
-            position:fixed; border-radius:50%; pointer-events:none;
-            animation:tgParticle var(--dur,.6s) ease-out forwards;
+            position:fixed; border-radius:50%; pointer-events:none; z-index:9999;
+            animation:tgParticle var(--dur,.6s) cubic-bezier(.25,.46,.45,.94) forwards;
+            will-change:transform, opacity;
         }
         @keyframes tgParticle {
             0%   { opacity:0.9; transform:translate(0,0) scale(1); }
@@ -1280,14 +1280,7 @@
         /* Video layer */
         .ft-video-container { position:absolute; inset:0; z-index:2; }
         .ft-video-remote { width:100%; height:100%; object-fit:cover; }
-        .ft-video-local {
-            position:absolute; bottom:10rem; right:1.2rem;
-            width:120px; height:170px; border-radius:18px; z-index:3;
-            object-fit:cover; background:#1a1a2e;
-            border:2.5px solid rgba(255,255,255,0.18);
-            box-shadow:0 6px 24px rgba(0,0,0,0.55);
-                    transform:scaleX(-1);
-        }
+        
 
         /* Top bar */
         .ft-topbar {
@@ -2354,21 +2347,28 @@
     // Works when the PWA/tab is open in the background (app not focused).
     function showOfferNotification() {
         if (!notificationsSupported() || Notification.permission !== 'granted') return;
-        // Only notify when the app is NOT the active foreground tab
         if (document.visibilityState === 'visible') return;
         const promo = promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)];
-        try {
-            const n = new Notification(promo.title, {
+
+        // Use Service Worker notification when available (survives background on Android/desktop)
+        if (window._swReg) {
+            window._swReg.showNotification(promo.title, {
                 body: promo.desc,
-                tag: 'vibestore-offer',      // overwrites previous one, like a real app
+                tag: 'vibestore-offer',
                 renotify: true,
-                badge: undefined,
-                silent: false
+                silent: false,
+                icon: '/icon-192.png'
+            }).catch(() => {
+                // Fallback to basic Notification API
+                try { new Notification(promo.title, { body: promo.desc, tag: 'vibestore-offer' }); } catch(e) {}
             });
-            n.onclick = () => { window.focus(); n.close(); };
-            // Auto-close after a few seconds
-            setTimeout(() => { try { n.close(); } catch (e) {} }, 6000);
-        } catch (e) {}
+        } else {
+            try {
+                const n = new Notification(promo.title, { body: promo.desc, tag: 'vibestore-offer', renotify: true, silent: false });
+                n.onclick = () => { window.focus(); n.close(); };
+                setTimeout(() => { try { n.close(); } catch(e){} }, 6000);
+            } catch(e) {}
+        }
     }
 
     function shuffleProducts(array) {
@@ -2955,9 +2955,7 @@
         wrap.innerHTML = `
             ${!isMe ? `<span class="msg-sender">${escHtml(msg.sender || 'Anónimo')}</span>` : ''}
             <div class="msg-body-container">
-                ${!isMe ? `<svg class="msg-tail theirs" viewBox="0 0 10 18"><path d="M10 18 Q0 18 0 8 L0 0 Q2 12 10 18z"/></svg>` : ''}
                 <div class="${bubbleClass}">${bubbleInner}</div>
-                ${isMe  ? `<svg class="msg-tail mine"   viewBox="0 0 10 18"><path d="M0 18 Q10 18 10 8 L10 0 Q8 12 0 18z"/></svg>` : ''}
             </div>
             <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}${receiptHtml}</span>`;
         // Smart scroll: measure BEFORE inserting; only jump to bottom if near it, or own message
@@ -3376,7 +3374,7 @@
         document.getElementById('ftTargetName').textContent = 'Enlace Seguro';
         document.getElementById('ftCallType').textContent   = type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Llamando…';
-        document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
+        document.getElementById('btnFtVideo').style.display = 'flex'; // always show — tap to add camera
         try {
             await setupLocalStream(type);
         } catch (err) {
@@ -3511,7 +3509,7 @@
         document.getElementById('ftMyAvatar').textContent   = myAvatar || '🦊';
         document.getElementById('ftCallType').textContent   = call.type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Conectando…';
-        document.getElementById('btnFtVideo').style.display = call.type === 'video' ? 'flex' : 'none';
+        document.getElementById('btnFtVideo').style.display = 'flex'; // always show — tap to add camera
         try {
             await setupLocalStream(call.type);
         } catch (err) {
@@ -3606,14 +3604,46 @@
         localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
         document.getElementById('btnFtMute').classList.toggle('muted', isMuted);
     };
-    window.toggleVideoTrack = function() {
+    window.toggleVideoTrack = async function() {
         if (!localStream) return;
-        isVideoOff = !isVideoOff;
-        localStream.getVideoTracks().forEach(t => t.enabled = !isVideoOff);
-        document.getElementById('btnFtVideo').classList.toggle('video-off', isVideoOff);
-        // Show/hide video layer
-        const vc = document.getElementById('ftVideoContainer');
+
+        if (isVideoOff) {
+            // Turn camera ON — if we only have audio tracks, add video
+            const hasVideo = localStream.getVideoTracks().length > 0;
+            if (!hasVideo) {
+                try {
+                    const vs = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: 'user', width:{ideal:1280}, height:{ideal:720} }
+                    });
+                    vs.getVideoTracks().forEach(t => {
+                        localStream.addTrack(t);
+                        if (peerConnection) peerConnection.addTrack(t, localStream);
+                    });
+                } catch(e) { showToast('No se pudo activar la cámara'); return; }
+            } else {
+                localStream.getVideoTracks().forEach(t => t.enabled = true);
+            }
+            isVideoOff = false;
+        } else {
+            // Turn camera OFF
+            localStream.getVideoTracks().forEach(t => t.enabled = false);
+            isVideoOff = true;
+        }
+
+        const lv  = document.getElementById('localVideo');
+        const vc  = document.getElementById('ftVideoContainer');
+        const btn = document.getElementById('btnFtVideo');
+        const lbl = document.getElementById('lblVideo');
+
+        if (lv) {
+            lv.srcObject = localStream;
+            lv.style.display = isVideoOff ? 'none' : 'block';
+            // Front camera should mirror (natural selfie view), rear should not
+            lv.style.transform = isVideoOff ? '' : 'scaleX(-1)'; // default front cam
+        }
         if (vc) vc.style.display = isVideoOff ? 'none' : 'block';
+        btn.classList.toggle('video-off', isVideoOff);
+        if (lbl) lbl.textContent = isVideoOff ? 'Cámara' : 'Apagar cam';
     };
 
     /* ── SPEAKER / EARPIECE TOGGLE ── */
@@ -3762,69 +3792,63 @@
             return;
         }
 
-        // ── TELEGRAM-STYLE MASS EXPLOSION ──
-        // All messages burst into particles simultaneously from their own positions,
-        // then each element shrinks away. Looks exactly like Telegram's trash animation.
         const colors = [
             getComputedStyle(document.documentElement).getPropertyValue('--bubble-mine').trim() || '#ff441f',
-            '#ff9f0a','#30d158','#64d2ff','#bf5af2','#ff453a','#ffd60a','#ff6b6b','#34c8e8','#fff'
+            '#ff9f0a','#30d158','#64d2ff','#bf5af2','#ff453a','#ffd60a','#ff6b6b','#fff'
         ];
 
         wraps.forEach((el, idx) => {
-            const rect = el.getBoundingClientRect();
-            const cx   = rect.left + rect.width / 2;
-            const cy   = rect.top  + rect.height / 2;
-            // Stagger slightly so it feels like a cascade, not a single frame
-            const delay = idx * 28;
-            const count = Math.min(40, 16 + Math.floor(rect.width / 5));
+            const rect  = el.getBoundingClientRect(); // viewport coordinates — correct for fixed
+            const cx    = rect.left + rect.width  / 2;
+            const cy    = rect.top  + rect.height / 2;
+            const count = Math.min(28, 12 + Math.floor(rect.width / 8));
+            const delay = idx * 35; // cascade
 
             setTimeout(() => {
-                // Particles burst from this message's center
                 for (let i = 0; i < count; i++) {
-                    const p      = document.createElement('div');
-                    const angle  = (Math.PI * 2 / count) * i + (Math.random() - .5) * .8;
-                    const speed  = 50 + Math.random() * 110;
-                    const size   = 3 + Math.random() * 6;
-                    const dur    = .4 + Math.random() * .55;
-                    const tx     = Math.cos(angle) * speed;
-                    const ty     = Math.sin(angle) * speed - Math.random() * 40;
-                    const color  = colors[Math.floor(Math.random() * colors.length)];
-                    const isRect = Math.random() > .5;
+                    const p     = document.createElement('div');
+                    const angle = (Math.PI * 2 / count) * i + (Math.random()-.5)*.7;
+                    const speed = 40 + Math.random() * 80;
+                    const size  = 3 + Math.random() * 5;
+                    const dur   = .35 + Math.random() * .45;
+                    const color = colors[i % colors.length];
 
+                    // Spawn at the message's viewport center, drift outward
                     p.className = 'tg-particle';
                     p.style.cssText = [
-                        'position:fixed',
-                        `left:${cx + (Math.random()-.5)*rect.width*.9}px`,
-                        `top:${cy  + (Math.random()-.5)*rect.height*.6}px`,
+                        `left:${cx + (Math.random()-.5)*rect.width*.6}px`,
+                        `top:${cy  + (Math.random()-.5)*rect.height*.5}px`,
                         `width:${size}px`,
-                        `height:${isRect ? size*.45+'px' : size+'px'}`,
+                        `height:${Math.random()>.5 ? size*.5 : size}px`,
                         `background:${color}`,
-                        `border-radius:${isRect ? '2px' : '50%'}`,
-                        `--tx:${tx}px`,`--ty:${ty}px`,`--dur:${dur}s`,
-                        `animation:tgParticle ${dur}s cubic-bezier(.25,.46,.45,.94) forwards`,
-                        'pointer-events:none','z-index:9999','will-change:transform,opacity'
+                        `border-radius:${Math.random()>.5 ? '2px' : '50%'}`,
+                        `--tx:${Math.cos(angle)*speed}px`,
+                        `--ty:${Math.sin(angle)*speed - Math.random()*30}px`,
+                        `--dur:${dur}s`,
+                        `animation-duration:${dur}s`
                     ].join(';');
                     document.body.appendChild(p);
-                    setTimeout(() => p.remove(), dur * 1000 + 150);
+                    setTimeout(() => p.remove(), dur*1000 + 100);
                 }
-                // Message itself: squeeze → pop → gone
+
                 el.animate([
-                    { transform:'scale(1)',    opacity:1,   offset:0    },
-                    { transform:'scale(1.08)', opacity:.8,  offset:.12  },
-                    { transform:'scale(0)',    opacity:0,   offset:1    }
-                ], { duration:350, easing:'cubic-bezier(0.32,0.72,0,1)', fill:'forwards', delay:0 })
+                    {transform:'scale(1)',    opacity:1,  offset:0},
+                    {transform:'scale(1.06)', opacity:.7, offset:.15},
+                    {transform:'scale(0)',    opacity:0,  offset:1}
+                ], {duration:320, easing:'cubic-bezier(0.32,0.72,0,1)', fill:'forwards'})
                 .onfinish = () => el.remove();
+
             }, delay);
         });
 
-        // Wipe DB after all animations (~800ms max)
+        const totalDuration = wraps.length * 35 + 380;
         setTimeout(() => {
             remove(messagesRef).then(() => {
                 seenKeys.clear();
                 document.querySelectorAll('.msg-system').forEach(e => e.remove());
                 showToast('Conversación borrada 🗑️');
-            }).catch(() => showToast('No se pudo borrar, intenta de nuevo'));
-        }, wraps.length * 28 + 400);
+            }).catch(() => showToast('Error al borrar'));
+        }, totalDuration);
     };
 
     window.panicExit = function() {
@@ -4060,7 +4084,44 @@
         remove(ref(db, `chat/pendingNotif/${myId}`));
     }
 
-    /* ── PANIC FAB DRAG ── */
+    /* ── DRAGGABLE LOCAL VIDEO PIP ── */
+    (function() {
+        const pip = document.getElementById('localVideo');
+        if (!pip) return;
+        let dragging = false, startX, startY, origRight, origBottom, moved = false;
+
+        const getPos = (e) => e.touches ? e.touches[0] : e;
+
+        pip.addEventListener('touchstart', (e) => {
+            dragging = true; moved = false;
+            const t = getPos(e);
+            startX = t.clientX; startY = t.clientY;
+            const r = pip.getBoundingClientRect();
+            origRight  = window.innerWidth  - r.right;
+            origBottom = window.innerHeight - r.bottom;
+            pip.style.transition = 'none';
+        }, { passive: true });
+
+        pip.addEventListener('touchmove', (e) => {
+            if (!dragging) return;
+            const t = getPos(e);
+            const dx = t.clientX - startX;
+            const dy = t.clientY - startY;
+            if (Math.abs(dx) > 4 || Math.abs(dy) > 4) moved = true;
+            const nr = Math.max(8, Math.min(window.innerWidth  - pip.offsetWidth  - 8, origRight  - dx));
+            const nb = Math.max(8, Math.min(window.innerHeight - pip.offsetHeight - 8, origBottom - dy));
+            pip.style.right  = nr + 'px';
+            pip.style.bottom = nb + 'px';
+            pip.style.left   = 'auto';
+            pip.style.top    = 'auto';
+            e.preventDefault();
+        }, { passive: false });
+
+        pip.addEventListener('touchend', () => {
+            dragging = false;
+            pip.style.transition = '';
+        });
+    })();
     (function() {
         const fab = document.getElementById('panicFab');
         let dragging = false, startX, startY, origX, origY, moved = false;
