@@ -236,8 +236,58 @@
             z-index:0; opacity:1;
         }
 
-        /* Color check indicator */
-        .color-check { font-size:0.7rem; color:#fff; line-height:1; }
+        /* ── SCROLL TO BOTTOM FAB ── */
+        .scroll-fab {
+            position:fixed; right:1rem; z-index:500;
+            width:42px; height:42px; border-radius:50%;
+            background:rgba(30,30,45,0.92);
+            -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+            border:1.5px solid rgba(255,255,255,0.12);
+            color:rgba(255,255,255,0.8); cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            box-shadow:0 4px 16px rgba(0,0,0,0.4);
+            transition:opacity 0.2s, transform 0.2s;
+            bottom:calc(5.5rem + var(--safe-bottom,0));
+        }
+        .scroll-fab.hidden { opacity:0; transform:scale(0.7); pointer-events:none; }
+        .scroll-fab-badge {
+            position:absolute; top:-4px; right:-4px;
+            background:var(--bubble-mine); color:#fff;
+            font-size:0.6rem; font-weight:800; border-radius:10px;
+            padding:1px 5px; min-width:16px; text-align:center;
+            display:none;
+        }
+        .scroll-fab-badge.show { display:block; }
+
+        /* ── REPLY QUOTE INSIDE BUBBLE ── */
+        .msg-reply-quote {
+            background:rgba(255,255,255,0.1); border-left:3px solid rgba(255,255,255,0.5);
+            border-radius:6px; padding:0.35rem 0.6rem;
+            margin-bottom:0.4rem; font-size:0.78rem; opacity:0.8;
+            overflow:hidden; max-height:60px; white-space:nowrap; text-overflow:ellipsis;
+        }
+        .msg.theirs .msg-reply-quote { background:rgba(0,0,0,0.15); border-color:var(--bubble-mine); }
+        .msg-reply-quote-name { font-weight:700; font-size:0.7rem; margin-bottom:2px; color:var(--bubble-mine); }
+
+        /* Reply bar above input */
+        .reply-bar {
+            display:none; align-items:center; gap:0.6rem;
+            padding:0.5rem 1rem 0.4rem;
+            background:rgba(18,18,28,0.9);
+            -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+            border-top:1px solid rgba(255,255,255,0.06);
+            border-left:3px solid var(--bubble-mine);
+            position:relative; z-index:10;
+        }
+        .reply-bar.show { display:flex; }
+        .reply-bar-content { flex:1; overflow:hidden; }
+        .reply-bar-name { font-size:0.7rem; font-weight:700; color:var(--bubble-mine); }
+        .reply-bar-text { font-size:0.78rem; color:rgba(255,255,255,0.55); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .reply-bar-close { background:none; border:none; color:rgba(255,255,255,0.4); font-size:1.2rem; cursor:pointer; padding:0 0.2rem; line-height:1; }
+        .reply-bar-close:active { color:#fff; }
+
+        /* Stroke icons in action list */
+        .action-item svg { stroke-linecap:round; stroke-linejoin:round; }
 
         /* ── HEADER ── */
         .chat-header {
@@ -712,17 +762,34 @@
 
         /* ── IMAGE VIEWER ── */
         .image-viewer {
-            position:fixed; inset:0; background:rgba(0,0,0,0.94);
-            z-index:4000; display:none; align-items:center; justify-content:center;
-            -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+            position:fixed; inset:0; background:rgba(0,0,0,0.96);
+            z-index:4000; display:none; flex-direction:column;
+            align-items:center; justify-content:center;
+            -webkit-backdrop-filter:blur(24px); backdrop-filter:blur(24px);
+            touch-action:none; user-select:none;
         }
         .image-viewer.open { display:flex; }
-        .image-viewer img   { max-width:95vw; max-height:90dvh; border-radius:8px; object-fit:contain; }
+        .image-viewer-img-wrap {
+            position:relative; display:flex; align-items:center; justify-content:center;
+            width:100%; height:100%; overflow:hidden;
+        }
+        .image-viewer img {
+            max-width:95vw; max-height:88dvh; border-radius:8px;
+            object-fit:contain; touch-action:none;
+            transition:transform 0.1s ease-out;
+            will-change:transform;
+        }
         .image-viewer-close {
-            position:absolute; top:calc(var(--safe-top)+0.8rem); right:1rem;
-            background:rgba(255,255,255,.12); border:none; border-radius:50%;
-            width:36px; height:36px; color:#fff; font-size:1rem; cursor:pointer;
+            position:absolute; top:calc(var(--safe-top, 44px) + 0.8rem); right:1rem;
+            background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.15);
+            border-radius:50%; width:38px; height:38px; color:#fff;
+            font-size:1rem; cursor:pointer; z-index:4001;
             display:flex; align-items:center; justify-content:center;
+            -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+        }
+        .image-viewer-hint {
+            position:absolute; bottom:calc(var(--safe-bottom,0) + 1.5rem);
+            font-size:0.7rem; color:rgba(255,255,255,0.3); letter-spacing:0.3px;
         }
 
         /* Return-to-call bar */
@@ -888,6 +955,7 @@
             object-fit:cover; background:#111;
             border:2px solid rgba(255,255,255,0.2);
             box-shadow:0 8px 28px rgba(0,0,0,0.6);
+                    transform:scaleX(-1);
         }
 
         /* ── TOP BAR ── */
@@ -1218,6 +1286,7 @@
             object-fit:cover; background:#1a1a2e;
             border:2.5px solid rgba(255,255,255,0.18);
             box-shadow:0 6px 24px rgba(0,0,0,0.55);
+                    transform:scaleX(-1);
         }
 
         /* Top bar */
@@ -1374,6 +1443,37 @@
         }
         .return-call-bar.show { display:flex; }
         .return-call-dot { width:8px; height:8px; border-radius:50%; background:#fff; animation:pulse-presence 1.5s infinite; }
+
+
+        /* ── REPLY QUOTE inside bubble ── */
+        .msg-reply-quote {
+            display:flex; flex-direction:column; gap:1px;
+            background:rgba(0,0,0,0.18); border-radius:8px;
+            padding:0.4rem 0.65rem; margin-bottom:0.4rem;
+            border-left:3px solid rgba(255,255,255,0.55);
+            cursor:pointer;
+        }
+        .msg.theirs .msg-reply-quote { background:rgba(255,255,255,0.08); }
+        .msg-reply-author { font-size:0.68rem; font-weight:700; opacity:0.8; }
+        .msg-reply-text   { font-size:0.78rem; opacity:0.65; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
+        /* Reply input preview bar */
+        .reply-bar {
+            display:none; align-items:center; gap:0.6rem;
+            padding:0.5rem 0.85rem; margin:0 0 0;
+            background:rgba(255,255,255,0.06); border-top:1px solid rgba(255,255,255,0.08);
+            position:relative; z-index:11;
+        }
+        .reply-bar.show { display:flex; }
+        .reply-bar-line  { width:3px; height:36px; border-radius:2px; background:var(--bubble-mine); flex-shrink:0; }
+        .reply-bar-info  { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+        .reply-bar-name  { font-size:0.68rem; font-weight:700; color:var(--bubble-mine); }
+        .reply-bar-text  { font-size:0.78rem; color:rgba(255,255,255,0.55); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .reply-bar-close { background:none; border:none; color:rgba(255,255,255,0.45); font-size:1.2rem; cursor:pointer; padding:0.2rem; flex-shrink:0; }
+
+        /* ── PINCH ZOOM image viewer ── */
+        .image-viewer img { touch-action:none; transition:transform 0.1s; }
+
+        /* ── SCROLL TO BOTTOM already exists, ensure visibility ── */
 
     </style>
 </head>
@@ -1700,6 +1800,16 @@
         Llamada en curso · Toca para volver
     </div>
 
+    <!-- Reply preview bar -->
+    <div class="reply-bar" id="replyBar">
+        <div class="reply-bar-line"></div>
+        <div class="reply-bar-info">
+            <span class="reply-bar-name" id="replyBarName"></span>
+            <span class="reply-bar-text" id="replyBarText"></span>
+        </div>
+        <button class="reply-bar-close" onclick="cancelReply()">✕</button>
+    </div>
+
     <!-- ══ INPUT BAR (Telegram: clip · field · micro/send) ══ -->
     <div class="chat-input-area" id="chatInputArea">
         <button class="btn-attach" id="btnPhoto" onclick="openPhotoMenu()" aria-label="Adjuntar">
@@ -1747,11 +1857,24 @@
     </div>
 </div>
 
-<!-- Fullscreen image viewer -->
-<div class="image-viewer" id="imageViewer" onclick="closeImageViewer()">
-    <button class="image-viewer-close" onclick="closeImageViewer()">✕</button>
-    <img id="imageViewerImg" src="" alt="">
+<!-- Fullscreen image viewer with pinch-zoom -->
+<div class="image-viewer" id="imageViewer">
+    <button class="image-viewer-close" onclick="closeImageViewer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="image-viewer-img-wrap" id="imageViewerWrap">
+        <img id="imageViewerImg" src="" alt="">
+    </div>
+    <span class="image-viewer-hint">Pellizca para zoom · Desliza para cerrar</span>
 </div>
+
+<!-- Scroll to bottom FAB -->
+<button class="scroll-fab" id="scrollFab" onclick="scrollToBottom()" aria-label="Ir al fondo" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
+        <polyline points="6 9 12 15 18 9"/>
+    </svg>
+    <span class="scroll-fab-badge" id="scrollBadge"></span>
+</button>
 
 <!-- Trash menu: clear chat options -->
 <div class="photo-menu-overlay" id="trashOverlay" onclick="closeTrashMenu()"></div>
@@ -1777,6 +1900,10 @@
         <button class="reaction-emoji add-custom" onclick="reactCustom()">➕</button>
     </div>
     <div class="action-list">
+        <div class="action-item" onclick="replyToMsg()" id="actionReply">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg>
+            Responder
+        </div>
         <div class="action-item" onclick="copyMsgText()" id="actionCopy">
             <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
             Copiar
@@ -2485,6 +2612,8 @@
         listenForTyping();
         startKeyExchange();
         rerenderAllMessages();
+        subscribeToPush();
+        checkPendingNotification();
     };
 
     // Renders any messages not yet shown (used when entering the chat)
@@ -2522,11 +2651,13 @@
             if (banner) { banner.classList.add('show'); setTimeout(() => banner.classList.remove('show'), 3500); }
         }
         // Encrypt before sending (falls back to plaintext only if E2E unavailable)
+        const msgData = { type:'text', sender:myName, senderId:myId, ts:Date.now() };
+        if (replyData) { msgData.replyTo = replyData; cancelReply(); }
         if (e2eReady) {
             const enc = await encryptText(text);
-            push(messagesRef, { type: 'text', enc, sender: myName, senderId: myId, ts: Date.now() });
+            push(messagesRef, { ...msgData, enc });
         } else {
-            push(messagesRef, { type: 'text', text, sender: myName, senderId: myId, ts: Date.now() });
+            push(messagesRef, { ...msgData, text });
         }
     };
     window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
@@ -2641,26 +2772,27 @@
     let selectedMsgIsMine = false;
     let selectedMsgText = null;
 
-    function attachLongPress(wrap, key, isMine, plainText) {
+    function attachLongPress(wrap, key, isMine, plainText, senderName) {
         let pressTimer = null;
         const start = () => {
-            pressTimer = setTimeout(() => openMsgActions(key, isMine, plainText), 450);
+            pressTimer = setTimeout(() => openMsgActions(key, isMine, plainText, senderName), 450);
         };
         const cancel = () => { if (pressTimer) clearTimeout(pressTimer); };
         wrap.addEventListener('touchstart', start, { passive: true });
         wrap.addEventListener('touchend', cancel);
         wrap.addEventListener('touchmove', cancel);
-        // Desktop: right-click / long mouse press
-        wrap.addEventListener('contextmenu', (e) => { e.preventDefault(); openMsgActions(key, isMine, plainText); });
+        wrap.addEventListener('contextmenu', (e) => { e.preventDefault(); openMsgActions(key, isMine, plainText, senderName); });
     }
 
-    window.openMsgActions = function(key, isMine, plainText) {
-        selectedMsgKey = key;
+    window.openMsgActions = function(key, isMine, plainText, senderName) {
+        selectedMsgKey    = key;
         selectedMsgIsMine = isMine;
-        selectedMsgText = plainText || null;
-        // Only my own messages can be deleted; copy only for text
+        selectedMsgText   = plainText || null;
+        // Store sender for reply
+        window._selectedMsgSender = senderName || (isMine ? myName : 'Otro');
         document.getElementById('actionDelete').style.display = isMine ? 'flex' : 'none';
-        document.getElementById('actionCopy').style.display = plainText ? 'flex' : 'none';
+        document.getElementById('actionCopy').style.display   = plainText ? 'flex' : 'none';
+        document.getElementById('actionReply').style.display  = 'flex';
         document.getElementById('msgActionOverlay').classList.add('open');
         document.getElementById('msgActionSheet').classList.add('open');
         vibrate(30);
@@ -2669,6 +2801,42 @@
         document.getElementById('msgActionOverlay').classList.remove('open');
         document.getElementById('msgActionSheet').classList.remove('open');
         selectedMsgKey = null;
+    };
+
+    /* ── REPLY TO MESSAGE ── */
+    let replyData = null; // { key, sender, text }
+
+    window.replyToMsg = function() {
+        if (!selectedMsgKey) { closeMsgActions(); return; }
+        replyData = {
+            key:    selectedMsgKey,
+            sender: window._selectedMsgSender || 'Mensaje',
+            text:   selectedMsgText || '📎 Archivo adjunto'
+        };
+        document.getElementById('replyBarName').textContent = replyData.sender;
+        document.getElementById('replyBarText').textContent = replyData.text;
+        document.getElementById('replyBar').classList.add('show');
+        document.getElementById('chatInput').focus();
+        closeMsgActions();
+    };
+    window.cancelReply = function() {
+        replyData = null;
+        document.getElementById('replyBar').classList.remove('show');
+    };
+
+    // Render reply quote inside a bubble
+    function buildReplyQuote(reply) {
+        if (!reply) return '';
+        const safeText   = escHtml(reply.text.slice(0, 80));
+        const safeSender = escHtml(reply.sender);
+        return `<div class="msg-reply-quote" onclick="scrollToMessage('${reply.key}')">
+            <span class="msg-reply-author">${safeSender}</span>
+            <span class="msg-reply-text">${safeText}</span>
+        </div>`;
+    }
+    window.scrollToMessage = function(key) {
+        const el = document.getElementById(`wrap-${key}`);
+        if (el) { el.scrollIntoView({ behavior:'smooth', block:'center' }); el.style.animation='none'; setTimeout(()=>el.style.animation='',50); }
     };
 
     window.reactToMsg = function(emoji) {
@@ -2779,7 +2947,9 @@
             // Text / emoji bubble
             const parsed = checkAndParseEmojiMessage(msg.text);
             bubbleClass = parsed.isEmoji ? 'msg only-emoji-bubble' : `msg ${isMe ? 'mine' : 'theirs'}`;
-            bubbleInner = parsed.html;
+            // Prepend reply quote if this message is a reply
+            const quoteHtml = msg.replyTo ? buildReplyQuote(msg.replyTo) : '';
+            bubbleInner = quoteHtml + parsed.html;
         }
 
         wrap.innerHTML = `
@@ -2797,7 +2967,7 @@
 
         // Long-press to react / delete. Pass plain text only for text messages (for copy).
         const plain = (msg.type === 'text') ? msg.text : null;
-        attachLongPress(wrap, key, isMe, plain);
+        attachLongPress(wrap, key, isMe, plain, msg.sender);
 
         // Apply existing reaction badge if any
         if (msg.reaction) applyReaction(key, msg.reaction);
@@ -3045,12 +3215,43 @@
 
     // Downscale + compress the image to a safe size before sending
     window.openImageViewer = function(src) {
-        document.getElementById('imageViewerImg').src = src;
+        const img = document.getElementById('imageViewerImg');
+        img.src = src;
+        img.style.transform = 'scale(1)';
         document.getElementById('imageViewer').classList.add('open');
+        // Pinch-zoom setup
+        let scale = 1, startDist = 0, startScale = 1;
+        img.ontouchstart = e => {
+            if (e.touches.length === 2) {
+                startDist  = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                startScale = scale;
+                e.preventDefault();
+            }
+        };
+        img.ontouchmove = e => {
+            if (e.touches.length === 2) {
+                const dist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                scale = Math.min(4, Math.max(1, startScale * dist / startDist));
+                img.style.transform = `scale(${scale})`;
+                e.preventDefault();
+            }
+        };
+        img.ontouchend = e => {
+            if (e.touches.length < 2 && scale < 1.1) {
+                scale = 1; img.style.transform = 'scale(1)';
+            }
+        };
     };
     window.closeImageViewer = function() {
         document.getElementById('imageViewer').classList.remove('open');
-        document.getElementById('imageViewerImg').src = '';
+        const img = document.getElementById('imageViewerImg');
+        img.src = ''; img.style.transform = 'scale(1)';
     };
 
     /* ── BUZZ (urgent nudge, camouflaged as insistent offer) ── */
@@ -3194,7 +3395,18 @@
         let remoteDescSet = false;
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
         peerConnection.onicecandidate = e => { if (e.candidate && activeCallRef) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
-        peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
+        peerConnection.ontrack = e => {
+            const rv = document.getElementById('remoteVideo');
+            if (rv) rv.srcObject = e.streams[0];
+            const vc = document.getElementById('ftVideoContainer');
+            if (vc) vc.style.display = 'block';
+            // Hide center avatar overlay during video
+            const center = document.querySelector('.ft-center');
+            if (center) center.style.opacity = '0';
+            // Show local video
+            const lv = document.getElementById('localVideo');
+            if (localStream && lv) lv.srcObject = localStream;
+        };
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
         await update(activeCallRef, { offer: { type: offer.type, sdp: offer.sdp } });
@@ -3315,7 +3527,18 @@
         remoteIceQueue = [];
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
         peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
-        peerConnection.ontrack = e => { document.getElementById('remoteVideo').srcObject = e.streams[0]; document.getElementById('ftAvatar').style.display = 'none'; };
+        peerConnection.ontrack = e => {
+            const rv = document.getElementById('remoteVideo');
+            if (rv) rv.srcObject = e.streams[0];
+            const vc = document.getElementById('ftVideoContainer');
+            if (vc) vc.style.display = 'block';
+            // Hide center avatar overlay during video
+            const center = document.querySelector('.ft-center');
+            if (center) center.style.opacity = '0';
+            // Show local video
+            const lv = document.getElementById('localVideo');
+            if (localStream && lv) lv.srcObject = localStream;
+        };
         // Set remote (the caller's offer) FIRST, then create our answer
         await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
         const answer = await peerConnection.createAnswer();
@@ -3764,6 +3987,78 @@
 
     shuffleProducts(products);
     deriveStableKey();
+
+    /* ══════════════════════════════════════════════════
+       SERVICE WORKER + PUSH NOTIFICATIONS
+       Real push (like WhatsApp) when app is background.
+       Requires HTTPS (Cloudflare Pages) to work.
+       ══════════════════════════════════════════════════ */
+    const VAPID_PUBLIC_KEY = 'BCxTwZxDIsp3ODLjAgI3M_VMUPGxymhf8B4MQ_fMi9QmzBZIZ3Q9xtUC1LHPexEBvp11B2w6gFfcVpRe2G60Chk';
+
+    async function registerServiceWorker() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+        try {
+            const reg = await navigator.serviceWorker.register('/sw.js');
+            window._swReg = reg;
+            console.log('[SW] Registered');
+        } catch(e) { console.log('[SW] Registration failed:', e.message); }
+    }
+    registerServiceWorker();
+
+    async function subscribeToPush() {
+        if (!window._swReg) return;
+        try {
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') return;
+
+            const existing = await window._swReg.pushManager.getSubscription();
+            if (existing) { window._pushSub = existing; return; }
+
+            const sub = await window._swReg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: VAPID_PUBLIC_KEY
+            });
+            window._pushSub = sub;
+            // Store in Firebase so the other user can trigger notifications
+            if (myId) set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
+            console.log('[Push] Subscribed');
+        } catch(e) { console.log('[Push] Subscribe error:', e.message); }
+    }
+
+    // Show a real push notification to the other person via Firebase trigger
+    // (In a full setup this goes through a server; here we store the message
+    //  and the recipient's SW picks it up next time they open the app)
+    function triggerPushForOther(text) {
+        // Store a pending notification in Firebase for the other user
+        // Their service worker will display it when they open the app
+        onValue(ref(db, 'chat/push'), snap => {
+            const subs = snap.val() || {};
+            Object.entries(subs).forEach(([id, subJson]) => {
+                if (id !== myId) {
+                    // Store pending notification (recipient's app will read this)
+                    set(ref(db, `chat/pendingNotif/${id}`), {
+                        title: '📦 Nueva oferta VibeStore',
+                        body: 'Tienes una oferta especial esperándote',
+                        ts: Date.now()
+                    });
+                }
+            });
+        }, { onlyOnce: true });
+    }
+
+    // Check for pending notifications on load
+    async function checkPendingNotification() {
+        if (!myId || !window._swReg) return;
+        const snap = await get(ref(db, `chat/pendingNotif/${myId}`));
+        if (!snap.exists()) return;
+        const data = snap.val();
+        if (Date.now() - data.ts < 60000) { // Only show if less than 1 min old
+            window._swReg.showNotification(data.title, {
+                body: data.body, tag: 'vibestore-push'
+            }).catch(()=>{});
+        }
+        remove(ref(db, `chat/pendingNotif/${myId}`));
+    }
 
     /* ── PANIC FAB DRAG ── */
     (function() {
