@@ -223,7 +223,8 @@
         /* ── SCREEN ── */
         #seccion-chat {
             display:none; flex-direction:column;
-            position:fixed; inset:0; width:100vw; height:100dvh;
+            position:fixed; top:0; left:0; right:0;
+            width:100vw; height:100svh;
             background:var(--chat-bg);
             z-index:1000; padding-top:var(--safe-top);
             overflow:hidden;
@@ -291,9 +292,9 @@
 
         /* ── HEADER ── */
         .chat-header {
-            position:relative; z-index:10;
+            flex-shrink:0; z-index:10;
             padding:0.7rem 1rem 0.7rem 0.85rem;
-            background:rgba(18,18,28,0.82);
+            background:rgba(18,18,28,0.92);
             -webkit-backdrop-filter:var(--tg-blur);
             backdrop-filter:var(--tg-blur);
             border-bottom:1px solid rgba(255,255,255,0.06);
@@ -335,9 +336,9 @@
         [data-theme="light"] .chat-status-text { color:rgba(0,0,0,0.45); }
 
         /* Header actions */
-        .chat-header-actions { display:flex; align-items:center; gap:0.5rem; }
+        .chat-header-actions { display:flex; align-items:center; gap:0.35rem; }
         .btn-call-trigger {
-            border:none; width:40px; height:40px; border-radius:13px;
+            border:none; width:38px; height:38px; border-radius:12px;
             display:flex; align-items:center; justify-content:center;
             cursor:pointer; color:#fff;
             transition:transform 0.11s, opacity 0.15s;
@@ -353,7 +354,7 @@
         .btn-call-trigger.audio-style { background:linear-gradient(145deg,#34c759,#1e9e3c); box-shadow:0 3px 10px rgba(52,199,89,.45),inset 0 1px 0 rgba(255,255,255,.25); }
         .btn-call-trigger.video-style { background:linear-gradient(145deg,#007aff,#004fc4); box-shadow:0 3px 10px rgba(0,122,255,.45),inset 0 1px 0 rgba(255,255,255,.25); }
         .btn-header-more {
-            width:36px; height:36px; border-radius:50%;
+            width:38px; height:38px; border-radius:50%;
             border:1.5px solid rgba(255,255,255,0.12);
             background:rgba(255,255,255,0.06);
             display:flex; align-items:center; justify-content:center;
@@ -1818,8 +1819,6 @@
         </div>
     </div>
 
-    <!-- ══ FLOATING PANIC BUTTON (draggable) ══ -->
-    <button id="floatingPanic" class="floating-panic" onclick="panicExit()" aria-label="PÁNICO">⚠</button>
 
     <!-- ══ OVERFLOW MENU ══ -->
     <div class="chat-menu-overlay" id="chatMenuOverlay" onclick="closeChatMenu()"></div>
@@ -4315,21 +4314,26 @@
             const inputArea = document.getElementById('chatInputArea');
             const replyBar  = document.getElementById('replyBar');
             const recBar    = document.getElementById('recordingBar');
+            const ws        = document.getElementById('chatWorkspace');
             if (overlap > 80) {
-                // Keyboard open: only lift the INPUT BAR — header stays fixed at top
-                chatSection.style.paddingBottom = '';  // do NOT push whole section
-                if (inputArea) inputArea.style.paddingBottom = (overlap + 10) + 'px';
-                if (replyBar)  replyBar.style.paddingBottom  = '';
-                if (recBar)    recBar.style.paddingBottom     = (overlap + 8) + 'px';
+                // Move ONLY the input bar up — header is unaffected (flex-shrink:0)
+                const lift = overlap + 'px';
+                if (inputArea) inputArea.style.transform = `translateY(-${lift})`;
+                if (replyBar && replyBar.classList.contains('show'))
+                    replyBar.style.transform = `translateY(-${lift})`;
+                if (recBar && recBar.classList.contains('show'))
+                    recBar.style.transform = `translateY(-${lift})`;
+                // Shrink the messages area so content doesn't hide behind input
+                if (ws) ws.style.paddingBottom = lift;
                 chatSection.classList.add('keyboard-open');
             } else {
+                if (inputArea) inputArea.style.transform = '';
+                if (replyBar)  replyBar.style.transform  = '';
+                if (recBar)    recBar.style.transform     = '';
+                if (ws) ws.style.paddingBottom = '';
                 chatSection.style.paddingBottom = '';
-                if (inputArea) inputArea.style.paddingBottom = '';
-                if (replyBar)  replyBar.style.paddingBottom  = '';
-                if (recBar)    recBar.style.paddingBottom     = '';
                 chatSection.classList.remove('keyboard-open');
             }
-            const ws = document.getElementById('chatWorkspace');
             if (ws) ws.scrollTop = ws.scrollHeight;
         }
         function adjustForKeyboard() {
