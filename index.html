@@ -817,6 +817,363 @@
 
 
         /* ══════════════════════════════════════
+           CALL SCREENS — VibeCall  v2 pro
+           ══════════════════════════════════════ */
+
+        /* ── SCREEN ── */
+        #seccion-facetime {
+            display:none; position:fixed; inset:0; z-index:2000;
+            flex-direction:column; align-items:stretch;
+            overflow:hidden;
+            padding:env(safe-area-inset-top,44px) 0 env(safe-area-inset-bottom,0);
+            background:#0a0a12;
+        }
+
+        /* ── MESH GRADIENT BACKGROUND ── */
+        .ft-bg { position:absolute; inset:0; z-index:0; overflow:hidden; }
+        .ft-blob {
+            position:absolute; border-radius:50%;
+            filter:blur(70px); opacity:0.55;
+            animation:blobDrift 12s ease-in-out infinite alternate;
+        }
+        .ft-blob1 {
+            width:320px; height:320px;
+            background:var(--bubble-mine);
+            top:-80px; left:-80px;
+            animation-delay:0s;
+        }
+        .ft-blob2 {
+            width:280px; height:280px;
+            background:#1a0a3e;
+            bottom:-60px; right:-60px;
+            animation-delay:-4s;
+        }
+        .ft-blob3 {
+            width:240px; height:240px;
+            background:#0a1a3e;
+            top:40%; left:30%;
+            animation-delay:-8s;
+        }
+        @keyframes blobDrift {
+            0%   { transform:translate(0,0) scale(1); }
+            33%  { transform:translate(30px,-20px) scale(1.08); }
+            66%  { transform:translate(-20px,30px) scale(0.95); }
+            100% { transform:translate(20px,10px) scale(1.04); }
+        }
+        /* Dark overlay so text is always readable */
+        .ft-bg::after {
+            content:''; position:absolute; inset:0;
+            background:rgba(5,5,12,0.52);
+        }
+
+        /* ── PARTICLES ── */
+        .ft-particles { position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+        .ft-particle-dot {
+            position:absolute; border-radius:50%; pointer-events:none;
+            animation:ftFloat linear infinite; opacity:0;
+        }
+        @keyframes ftFloat {
+            0%   { transform:translateY(110vh) scale(0); opacity:0; }
+            8%   { opacity:0.55; }
+            90%  { opacity:0.2; }
+            100% { transform:translateY(-15vh) scale(1.1); opacity:0; }
+        }
+
+        /* ── VIDEO ── */
+        .ft-video-container { position:absolute; inset:0; z-index:2; }
+        .ft-video-remote    { width:100%; height:100%; object-fit:cover; }
+        .ft-video-local {
+            position:absolute; bottom:9.5rem; right:1rem;
+            width:115px; height:165px; border-radius:20px; z-index:3;
+            object-fit:cover; background:#111;
+            border:2px solid rgba(255,255,255,0.2);
+            box-shadow:0 8px 28px rgba(0,0,0,0.6);
+        }
+
+        /* ── TOP BAR ── */
+        .ft-topbar {
+            position:relative; z-index:5;
+            padding:0.9rem 1.4rem 0;
+            display:flex; align-items:center;
+        }
+        .ft-my-pill {
+            display:flex; align-items:center; gap:0.65rem;
+            background:rgba(255,255,255,0.08);
+            -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+            border:1px solid rgba(255,255,255,0.1);
+            border-radius:50px; padding:0.4rem 0.9rem 0.4rem 0.4rem;
+        }
+        .ft-my-avatar {
+            width:34px; height:34px; border-radius:50%; flex-shrink:0;
+            background:linear-gradient(135deg, var(--bubble-mine), rgba(255,127,92,0.8));
+            display:flex; align-items:center; justify-content:center;
+            font-size:1.1rem; line-height:1;
+            box-shadow:0 2px 8px rgba(0,0,0,0.35);
+        }
+        .ft-my-info { display:flex; flex-direction:column; }
+        .ft-call-type {
+            font-size:0.68rem; font-weight:700; color:rgba(255,255,255,0.55);
+            letter-spacing:0.5px; text-transform:uppercase; line-height:1.2;
+        }
+        .ft-timer {
+            font-size:0.92rem; font-weight:700; color:#fff;
+            font-variant-numeric:tabular-nums; line-height:1.3;
+        }
+
+        /* ── CENTER SECTION (their avatar) ── */
+        .ft-center {
+            position:relative; z-index:5;
+            flex:1; display:flex; flex-direction:column;
+            align-items:center; justify-content:center; gap:1.1rem;
+        }
+        /* Rings */
+        .ft-rings { position:absolute; display:flex; align-items:center; justify-content:center; }
+        .ft-ring {
+            position:absolute; border-radius:50%;
+            border:1.5px solid rgba(255,255,255,0.1);
+            animation:ringPulse 3.2s ease-out infinite;
+        }
+        .ft-ring.r1 { width:152px; height:152px; animation-delay:0s; }
+        .ft-ring.r2 { width:208px; height:208px; animation-delay:0.9s; }
+        .ft-ring.r3 { width:264px; height:264px; animation-delay:1.8s; }
+        @keyframes ringPulse {
+            0%  { transform:scale(0.85); opacity:0.7; }
+            70% { transform:scale(1.12); opacity:0; }
+            100%{ transform:scale(1.12); opacity:0; }
+        }
+        /* THEIR big avatar */
+        .ft-avatar {
+            width:128px; height:128px; border-radius:50%; position:relative; z-index:2;
+            display:flex; align-items:center; justify-content:center;
+            font-size:4.2rem; line-height:1;
+            background:linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+            -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+            border:2.5px solid rgba(255,255,255,0.2);
+            box-shadow:
+                0 0 0 8px  rgba(255,255,255,0.04),
+                0 0 0 16px rgba(255,255,255,0.02),
+                0 20px 50px rgba(0,0,0,0.5),
+                inset 0 1px 0 rgba(255,255,255,0.15);
+            animation:avatarBreath 4s ease-in-out infinite alternate;
+        }
+        @keyframes avatarBreath {
+            from { box-shadow:0 0 0 8px rgba(255,255,255,0.04),0 0 0 16px rgba(255,255,255,0.02),0 20px 50px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.15); }
+            to   { box-shadow:0 0 0 10px rgba(255,255,255,0.07),0 0 0 22px rgba(255,255,255,0.03),0 24px 60px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.2); }
+        }
+        .ft-name {
+            font-size:1.65rem; font-weight:800; color:#fff;
+            letter-spacing:-0.5px; text-align:center;
+            text-shadow:0 2px 12px rgba(0,0,0,0.4);
+        }
+        .ft-status {
+            font-size:0.88rem; color:rgba(255,255,255,0.5);
+            text-align:center;
+        }
+
+        /* ── CONTROLS PANEL ── */
+        .ft-controls-panel {
+            position:relative; z-index:5;
+            display:flex; flex-direction:column; align-items:center;
+            gap:1.4rem; padding:0 1.5rem calc(1.6rem);
+            /* Frosted bottom gradient */
+            background:linear-gradient(0deg, rgba(5,5,12,0.75) 0%, transparent 100%);
+            padding-top:2rem;
+        }
+        .ft-ctrl-row {
+            display:flex; justify-content:center; align-items:flex-end; gap:1.6rem; width:100%;
+        }
+        .ft-ctrl-group {
+            display:flex; flex-direction:column; align-items:center; gap:0.55rem;
+        }
+        .ft-ctrl-label {
+            font-size:0.7rem; font-weight:600; color:rgba(255,255,255,0.6);
+            letter-spacing:0.1px; white-space:nowrap;
+        }
+
+        /* Glass circular button — the professional pill */
+        .ft-btn {
+            width:62px; height:62px; border-radius:50%; border:none; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            color:#fff;
+            background:rgba(255,255,255,0.12);
+            -webkit-backdrop-filter:blur(20px) saturate(180%);
+            backdrop-filter:blur(20px) saturate(180%);
+            border:1.5px solid rgba(255,255,255,0.15);
+            box-shadow:
+                0 4px 16px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.18),
+                inset 0 -1px 0 rgba(0,0,0,0.15);
+            transition:transform 0.12s, background 0.18s, box-shadow 0.18s;
+        }
+        .ft-btn:active { transform:scale(0.88); }
+        .ft-btn svg    { width:22px; height:22px; }
+
+        /* Active states */
+        .ft-btn.muted {
+            background:rgba(255,69,58,0.28);
+            border-color:rgba(255,69,58,0.45);
+            color:#ff453a;
+            box-shadow:0 4px 16px rgba(255,59,48,0.25),inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+        .ft-btn.video-off {
+            background:rgba(255,69,58,0.22);
+            border-color:rgba(255,69,58,0.35);
+            color:#ff6961;
+        }
+        .ft-btn.speaker-on {
+            background:rgba(48,209,88,0.22);
+            border-color:rgba(48,209,88,0.4);
+            color:#30d158;
+            box-shadow:0 4px 16px rgba(48,209,88,0.2),inset 0 1px 0 rgba(255,255,255,0.1);
+        }
+
+        /* Hang-up button — large, centered, distinct */
+        .ft-hangup-row { display:flex; justify-content:center; }
+        .ft-btn-hangup {
+            width:74px; height:74px; border-radius:50%; border:none; cursor:pointer;
+            display:flex; align-items:center; justify-content:center; color:#fff;
+            background:linear-gradient(145deg, #ff453a, #c0180e);
+            box-shadow:0 8px 28px rgba(255,59,48,0.6), inset 0 1px 0 rgba(255,255,255,0.2);
+            transition:transform 0.12s, box-shadow 0.15s;
+        }
+        .ft-btn-hangup:active {
+            transform:scale(0.88);
+            box-shadow:0 4px 14px rgba(255,59,48,0.4);
+        }
+        .ft-btn-hangup svg { width:28px; height:28px; transform:rotate(135deg); }
+
+        /* ── INCOMING CALL ── */
+        #seccion-incoming {
+            display:none; position:fixed; inset:0; z-index:2100;
+            flex-direction:column; align-items:center; justify-content:space-between;
+            overflow:hidden;
+            padding:calc(env(safe-area-inset-top,44px) + 2.5rem) 2rem
+                    calc(4.5rem + env(safe-area-inset-bottom,0));
+        }
+        #seccion-incoming::before {
+            content:''; position:absolute; inset:0; z-index:0;
+            background:linear-gradient(180deg, #0a0a14 0%, #14082a 50%, #0a0a14 100%);
+        }
+        /* Same color blob in the background */
+        #seccion-incoming::after {
+            content:''; position:absolute; z-index:0;
+            width:340px; height:340px; border-radius:50%;
+            background:var(--bubble-mine); filter:blur(90px); opacity:0.35;
+            top:-80px; left:50%; transform:translateX(-50%);
+        }
+        #seccion-incoming.show {
+            display:flex;
+            animation:incomingIn 0.3s cubic-bezier(0.34,1.2,0.64,1);
+        }
+        @keyframes incomingIn {
+            from{ opacity:0; transform:translateY(24px) scale(0.97); }
+            to  { opacity:1; transform:none; }
+        }
+        .incoming-info {
+            position:relative; z-index:1;
+            display:flex; flex-direction:column; align-items:center; gap:1.1rem;
+        }
+        .incoming-avatar {
+            width:112px; height:112px; border-radius:50%; position:relative;
+            display:flex; align-items:center; justify-content:center;
+            font-size:3.6rem; line-height:1;
+            background:linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04));
+            -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+            border:2.5px solid rgba(255,255,255,0.2);
+            box-shadow:0 0 0 0 rgba(255,255,255,0.3);
+            animation:inPulse 2s ease-out infinite;
+        }
+        @keyframes inPulse {
+            0%  { box-shadow:0 0 0 0   rgba(255,255,255,0.35); }
+            70% { box-shadow:0 0 0 26px rgba(255,255,255,0); }
+            100%{ box-shadow:0 0 0 0   rgba(255,255,255,0); }
+        }
+        .incoming-name { position:relative; z-index:1; font-size:1.75rem; font-weight:800; color:#fff; letter-spacing:-0.5px; }
+        .incoming-type { position:relative; z-index:1; font-size:0.9rem; color:rgba(255,255,255,0.45); }
+        .incoming-actions { position:relative; z-index:1; display:flex; justify-content:center; gap:4.5rem; }
+        .incoming-action-group { display:flex; flex-direction:column; align-items:center; gap:0.7rem; }
+        .incoming-btn {
+            width:74px; height:74px; border-radius:50%; border:none; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            transition:transform 0.12s;
+        }
+        .incoming-btn:active { transform:scale(0.88); }
+        .incoming-btn svg   { width:28px; height:28px; fill:#fff; transform:rotate(135deg); }
+        .incoming-btn.decline {
+            background:linear-gradient(145deg,#ff453a,#c0180e);
+            box-shadow:0 8px 24px rgba(255,59,48,0.5);
+        }
+        .incoming-btn.accept {
+            background:linear-gradient(145deg,#30d158,#1a9e3f);
+            box-shadow:0 8px 24px rgba(48,209,88,0.5);
+        }
+        .incoming-label { font-size:0.84rem; color:rgba(255,255,255,0.65); font-weight:600; }
+
+        /* Return-to-call bar */
+        .return-call-bar {
+            display:none; align-items:center; justify-content:center; gap:0.5rem;
+            background:#1e7e34; color:#fff; flex-shrink:0;
+            padding:0.5rem 1rem; font-size:0.83rem; font-weight:700; cursor:pointer;
+        }
+        .return-call-bar.show { display:flex; }
+        .return-call-dot { width:8px; height:8px; border-radius:50%; background:#fff; animation:pulse-presence 1.5s infinite; }
+
+        /* ── DISINTEGRATE / PARTICLE FX ── */
+        .disintegrating { pointer-events:none; }
+        .tg-particle {
+            position:fixed; border-radius:50%; pointer-events:none;
+            animation:tgParticle var(--dur,.6s) ease-out forwards;
+        }
+        @keyframes tgParticle {
+            0%   { opacity:0.9; transform:translate(0,0) scale(1); }
+            100% { opacity:0;   transform:translate(var(--tx,0),var(--ty,0)) scale(0.1); }
+        }
+
+        /* ── EMOJI ANIMATIONS ── */
+        .ani-emoji  { display:inline-block; transform-origin:center; }
+        .ani-heart  { animation:waHeart 1s infinite cubic-bezier(.215,.61,.355,1); }
+        .ani-face   { animation:waFace  1.4s infinite ease-in-out; }
+        .ani-fire   { animation:waFire  1.8s infinite ease-in-out; transform-origin:bottom center; }
+        .ani-thumb  { animation:waThumb 1.6s infinite ease-in-out; }
+        .ani-clap   { animation:waClap  .9s infinite ease-in-out; }
+        .ani-bounce { animation:waGeneric 2s infinite ease-in-out; }
+        @keyframes waHeart  { 0%{transform:scale(1)} 14%{transform:scale(1.28)} 28%{transform:scale(1)} 42%{transform:scale(1.18)} 70%{transform:scale(1)} }
+        @keyframes waFace   { 0%,100%{transform:translateY(0) scale(1)} 30%{transform:translateY(-8px) scale(1.06)} 50%{transform:translateY(2px) scale(0.95)} }
+        @keyframes waFire   { 0%,100%{transform:scale(1) rotate(-2deg);filter:brightness(1)} 50%{transform:scale(1.12) rotate(3deg);filter:brightness(1.22)} }
+        @keyframes waThumb  { 0%,100%{transform:rotate(0) scale(1)} 25%{transform:rotate(-12deg) scale(1.1)} 50%{transform:rotate(8deg) scale(1.05)} }
+        @keyframes waClap   { 0%,100%{transform:scale(1) rotate(0)} 50%{transform:scale(1.16) rotate(-8deg)} }
+        @keyframes waGeneric{ 0%,100%{transform:scale(1)} 50%{transform:scale(1.14)} }
+
+        /* ── FLOATING PANIC BUTTON ── */
+        .panic-fab {
+            position:fixed; z-index:1500;
+            right:1.2rem; bottom:calc(6rem + var(--safe-bottom));
+            width:52px; height:52px; border-radius:50%;
+            background:linear-gradient(145deg,#ff453a,#c0180e);
+            color:#fff; border:none; cursor:grab;
+            display:none; align-items:center; justify-content:center;
+            box-shadow:0 4px 18px rgba(255,59,48,.55), inset 0 1px 0 rgba(255,255,255,.25);
+            touch-action:none; user-select:none;
+            transition:transform 0.12s, box-shadow 0.2s;
+        }
+        .panic-fab.visible { display:flex; }
+        .panic-fab:active  { transform:scale(0.9); cursor:grabbing; }
+        .panic-fab svg { width:24px; height:24px; fill:currentColor; pointer-events:none; }
+
+        /* Pulse ring to draw attention */
+        .panic-fab::before {
+            content:''; position:absolute; inset:-6px; border-radius:50%;
+            border:2px solid rgba(255,59,48,.4);
+            animation:panicRing 2s ease-out infinite;
+        }
+        @keyframes panicRing {
+            0%   { transform:scale(0.9); opacity:.8; }
+            70%  { transform:scale(1.25); opacity:0; }
+            100% { transform:scale(0.9); opacity:0; }
+        }
+
+
+        /* ══════════════════════════════════════
            CALL SCREENS — VibeCall redesign
            ══════════════════════════════════════ */
         #seccion-facetime {
@@ -1434,74 +1791,110 @@
 <!-- FACETIME SECTION -->
 <div id="seccion-facetime">
 
-    <!-- Animated background gradient -->
-    <div class="ft-bg" id="ftBg"></div>
+    <!-- Mesh gradient blobs (take user's bubble color) -->
+    <div class="ft-bg">
+        <div class="ft-blob ft-blob1"></div>
+        <div class="ft-blob ft-blob2"></div>
+        <div class="ft-blob ft-blob3"></div>
+    </div>
 
-    <!-- Floating particles (ambient) -->
+    <!-- Ambient particles -->
     <div class="ft-particles" id="ftParticles" aria-hidden="true"></div>
 
-    <!-- Video (hidden until video call connects) -->
+    <!-- Video layer -->
     <div class="ft-video-container" id="ftVideoContainer" style="display:none">
         <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
         <video class="ft-video-local"  id="localVideo"  autoplay playsinline muted></video>
     </div>
 
-    <!-- Top bar: timer + call type -->
+    <!-- Top bar: MY small avatar (I know who I am) + type + timer -->
     <div class="ft-topbar">
-        <div class="ft-call-type" id="ftCallType">VibeCall</div>
-        <div class="ft-timer" id="ftTimer">0:00</div>
+        <div class="ft-my-pill">
+            <div class="ft-my-avatar" id="ftMyAvatar">🦊</div>
+            <div class="ft-my-info">
+                <span class="ft-call-type" id="ftCallType">VibeCall · Audio</span>
+                <span class="ft-timer" id="ftTimer">0:00</span>
+            </div>
+        </div>
     </div>
 
-    <!-- Center: avatar with pulse rings -->
+    <!-- Center: THEIR avatar (the person I'm talking to) -->
     <div class="ft-center">
-        <div class="ft-ring ft-ring-3"></div>
-        <div class="ft-ring ft-ring-2"></div>
-        <div class="ft-ring ft-ring-1"></div>
-        <div class="ft-avatar-wrap">
-            <div class="ft-avatar" id="ftAvatar">🦊</div>
+        <div class="ft-rings" aria-hidden="true">
+            <div class="ft-ring r3"></div>
+            <div class="ft-ring r2"></div>
+            <div class="ft-ring r1"></div>
         </div>
+        <div class="ft-avatar" id="ftAvatar">🦊</div>
         <div class="ft-name"   id="ftTargetName">Enlace Seguro</div>
         <div class="ft-status" id="ftCallStatus">Estableciendo VibeCall…</div>
     </div>
 
-    <!-- Controls grid -->
+    <!-- Controls: 4 glass pills + red hangup -->
     <div class="ft-controls-panel">
-        <!-- Row 1: secondary controls -->
         <div class="ft-ctrl-row">
+
             <div class="ft-ctrl-group">
                 <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">
-                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.2 6 6.6V21h2v-3.4c3.28-.4 6-3.18 6-6.6h-1.7z"/></svg>
+                    <!-- Microphone off — stroke style (professional) -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 1a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"/>
+                        <path d="M19 10a7 7 0 0 1-14 0"/>
+                        <line x1="12" y1="19" x2="12" y2="23"/>
+                        <line x1="8"  y1="23" x2="16" y2="23"/>
+                    </svg>
                 </button>
-                <span class="ft-ctrl-label">Silenciar</span>
+                <span class="ft-ctrl-label" id="lblMute">Silencio</span>
             </div>
+
             <div class="ft-ctrl-group">
                 <button class="ft-btn" id="btnFtSpeaker" onclick="toggleSpeaker()">
-                    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                    <!-- Speaker / volume — stroke style -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                        <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                        <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                    </svg>
                 </button>
                 <span class="ft-ctrl-label" id="lblSpeaker">Altavoz</span>
             </div>
+
             <div class="ft-ctrl-group">
                 <button class="ft-btn" id="btnFtVideo" onclick="toggleVideoTrack()">
-                    <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                    <!-- Camera — stroke style -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="23 7 16 12 23 17 23 7"/>
+                        <rect x="1" y="5" width="15" height="14" rx="2"/>
+                    </svg>
                 </button>
-                <span class="ft-ctrl-label">Cámara</span>
+                <span class="ft-ctrl-label" id="lblVideo">Cámara</span>
             </div>
+
             <div class="ft-ctrl-group">
                 <button class="ft-btn" onclick="minimizeCallToChat()">
-                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                    <!-- Chat bubble — stroke style -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
                 </button>
                 <span class="ft-ctrl-label">Chat</span>
             </div>
+
         </div>
-        <!-- Row 2: hang up -->
+
+        <!-- Hang up: large red circle, centered, prominent -->
         <div class="ft-hangup-row">
-            <button class="ft-btn btn-hangup" onclick="hangUpCall()">
-                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+            <button class="ft-btn-hangup" onclick="hangUpCall()" aria-label="Colgar">
+                <!-- Phone with slash — filled, rotated for "end call" -->
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.28-.27.67-.36 1.02-.25 1.12.38 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02L6.62 10.79z"/>
+                </svg>
             </button>
         </div>
     </div>
 
 </div>
+
 
 <!-- INCOMING CALL SCREEN -->
 <div id="seccion-incoming">
@@ -2774,17 +3167,14 @@
     }
 
     window.initiateCall = async function(type) {
-        // Block calling while recording a voice note (mic conflict)
         if (isRecording) { showToast('Termina la nota de voz antes de llamar 🎤'); return; }
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
-        document.getElementById('ftTargetName').textContent = "Canal Seguro";
-        document.getElementById('ftCallType').textContent = type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
+        document.getElementById('ftMyAvatar').textContent   = myAvatar || '🦊';  // MY emoji in the pill
+        document.getElementById('ftAvatar').textContent     = '…';               // THEIR avatar — appears when answered
         document.getElementById('ftTargetName').textContent = 'Enlace Seguro';
-        document.getElementById('ftAvatar').textContent = myAvatar || '🦊';
-        document.getElementById('ftCallStatus').textContent = `Estableciendo VibeCall de ${type === 'video' ? 'Video' : 'Audio'}…`;
-        document.getElementById('ftAvatar').textContent = "C";
-        document.getElementById('ftAvatar').style.display = 'flex';
+        document.getElementById('ftCallType').textContent   = type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
+        document.getElementById('ftCallStatus').textContent = 'Llamando…';
         document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
         try {
             await setupLocalStream(type);
@@ -2814,9 +3204,11 @@
             const d = snap.val();
             if (d && d.status === 'accepted' && d.answer && peerConnection && !peerConnection.currentRemoteDescription) {
                 document.getElementById('ftCallStatus').textContent = "Conectando…";
+                // Show the receiver's avatar in our center circle — now we know who they are
+                if (d.receiverAvatar) document.getElementById('ftAvatar').textContent = d.receiverAvatar;
+                if (d.receiverName)   document.getElementById('ftTargetName').textContent = d.receiverName;
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(d.answer));
                 remoteDescSet = true;
-                // Flush any candidates that arrived before the answer
                 while (remoteIceQueue.length) {
                     try { await peerConnection.addIceCandidate(remoteIceQueue.shift()); } catch(e) {}
                 }
@@ -2896,12 +3288,16 @@
     };
 
     async function acceptIncomingCall(key, call) {
-        // If recording a voice note, cancel it to free the mic
         if (isRecording) { cancelRecording(); }
         activeCallRef = ref(db, `chat/calls/${key}`);
-        document.getElementById('seccion-chat').style.display = 'none'; document.getElementById('seccion-facetime').style.display = 'flex';
-        document.getElementById('ftTargetName').textContent = call.caller; document.getElementById('ftAvatar').textContent = call.caller.charAt(0);
-        document.getElementById('ftAvatar').style.display = 'flex';
+        document.getElementById('seccion-chat').style.display = 'none';
+        document.getElementById('seccion-facetime').style.display = 'flex';
+        // THEIR avatar (caller) goes in the big center circle
+        document.getElementById('ftAvatar').textContent     = call.avatar || (call.caller ? call.caller.slice(0,2) : '📞');
+        document.getElementById('ftTargetName').textContent = call.caller || 'Llamada';
+        // MY avatar goes in the small pill top-left
+        document.getElementById('ftMyAvatar').textContent   = myAvatar || '🦊';
+        document.getElementById('ftCallType').textContent   = call.type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Conectando…';
         document.getElementById('btnFtVideo').style.display = call.type === 'video' ? 'flex' : 'none';
         try {
@@ -2924,7 +3320,7 @@
         await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
-        await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted' });
+        await update(activeCallRef, { answer: { type: answer.type, sdp: answer.sdp }, status: 'accepted', receiverAvatar: myAvatar || '🦊', receiverName: myName });
         // Flush any queued candidates now that remote description is set
         while (remoteIceQueue.length) {
             try { await peerConnection.addIceCandidate(remoteIceQueue.shift()); } catch(e) {}
