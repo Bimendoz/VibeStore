@@ -1526,6 +1526,7 @@
 
         /* ── SCROLL TO BOTTOM already exists, ensure visibility ── */
 
+        .panic-fab { display:none !important; }
     </style>
 </head>
 <body>
@@ -1810,6 +1811,9 @@
             </button>
             <button class="btn-header-more" onclick="openChatMenu()" aria-label="Más">
                 <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </button>
+            <button class="btn-panic-header" onclick="panicExit()" aria-label="Pánico">
+                <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             </button>
         </div>
     </div>
@@ -2715,8 +2719,6 @@
         // Apply chosen avatar and bubble color
         document.getElementById('headerAvatar').textContent = myAvatar;
         document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
-        // Show floating panic button
-        document.getElementById('panicFab').classList.add('visible');
         // Unlock audio
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
         requestNotificationPermission();
@@ -4309,14 +4311,22 @@
         function apply() {
             rafPending = false;
             if (chatSection.style.display !== 'flex') return;
-            // How much of the layout viewport the keyboard (incl. its suggestion bar) is covering
             const overlap = Math.max(0, (window.innerHeight - vv.height - vv.offsetTop));
+            const inputArea = document.getElementById('chatInputArea');
+            const replyBar  = document.getElementById('replyBar');
+            const recBar    = document.getElementById('recordingBar');
             if (overlap > 80) {
-                // Keyboard open: lift the whole chat content up by exactly the keyboard height
-                chatSection.style.paddingBottom = overlap + 'px';
+                // Keyboard open: only lift the INPUT BAR — header stays fixed at top
+                chatSection.style.paddingBottom = '';  // do NOT push whole section
+                if (inputArea) inputArea.style.paddingBottom = (overlap + 10) + 'px';
+                if (replyBar)  replyBar.style.paddingBottom  = '';
+                if (recBar)    recBar.style.paddingBottom     = (overlap + 8) + 'px';
                 chatSection.classList.add('keyboard-open');
             } else {
                 chatSection.style.paddingBottom = '';
+                if (inputArea) inputArea.style.paddingBottom = '';
+                if (replyBar)  replyBar.style.paddingBottom  = '';
+                if (recBar)    recBar.style.paddingBottom     = '';
                 chatSection.classList.remove('keyboard-open');
             }
             const ws = document.getElementById('chatWorkspace');
