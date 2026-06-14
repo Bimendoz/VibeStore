@@ -946,14 +946,13 @@
         .ft-video-container { position:absolute; inset:0; z-index:2; }
         .ft-video-remote    { width:100%; height:100%; object-fit:cover; }
         .ft-video-local {
-            position:absolute; bottom:9rem; right:1rem;
-            width:110px; height:155px; border-radius:18px; z-index:4;
+            width:110px; height:155px; border-radius:18px; display:block;
             object-fit:cover; background:#111;
             border:2px solid rgba(255,255,255,0.22);
             box-shadow:0 6px 24px rgba(0,0,0,0.55);
-            cursor:grab; display:none;
-            transform:scaleX(-1); /* front camera mirror — JS overrides if rear */
-            touch-action:none;
+            transform:scaleX(-1);
+            touch-action:none; cursor:grab;
+            transition:all 0.2s ease;
         }
         .ft-video-local:active { cursor:grabbing; }
 
@@ -1438,7 +1437,65 @@
         .return-call-dot { width:8px; height:8px; border-radius:50%; background:#fff; animation:pulse-presence 1.5s infinite; }
 
 
-        /* ── REPLY QUOTE inside bubble ── */
+        /* ── ALIAS PRESETS ── */
+        .alias-presets {
+            display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem;
+            margin-bottom:1rem;
+        }
+        .alias-preset {
+            display:flex; flex-direction:column; align-items:center; gap:0.25rem;
+            background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.1);
+            border-radius:14px; padding:0.6rem 0.3rem; cursor:pointer;
+            transition:transform 0.12s, border-color 0.15s, background 0.15s;
+        }
+        .alias-preset:active { transform:scale(0.92); }
+        .alias-preset.selected {
+            border-color:var(--bubble-mine);
+            background:rgba(255,255,255,0.14);
+            transform:scale(1.05);
+        }
+        .preset-av   { font-size:1.5rem; line-height:1; }
+        .preset-name { font-size:0.65rem; font-weight:600; color:rgba(255,255,255,0.65); }
+        [data-theme="light"] .preset-name { color:rgba(0,0,0,0.55); }
+        .preset-divider {
+            display:flex; align-items:center; gap:0.7rem; margin:0.6rem 0;
+            color:rgba(255,255,255,0.25); font-size:0.72rem;
+        }
+        .preset-divider::before,.preset-divider::after {
+            content:''; flex:1; height:1px; background:rgba(255,255,255,0.1);
+        }
+        [data-theme="light"] .preset-divider { color:rgba(0,0,0,0.3); }
+        [data-theme="light"] .preset-divider::before,
+        [data-theme="light"] .preset-divider::after { background:rgba(0,0,0,0.1); }
+
+        /* ── COLOR PICKER expanded ── */
+        .color-picker { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem; }
+        .color-opt    { width:28px; height:28px; }
+
+        /* ── FT-AVATAR: big emoji centered, no text bleed ── */
+        .ft-avatar {
+            display:flex !important; align-items:center !important;
+            justify-content:center !important; text-align:center;
+            font-size:4.5rem !important; line-height:1 !important;
+            overflow:hidden;
+        }
+
+        .ft-video-local-wrap {
+            position:absolute; bottom:9rem; right:1rem; z-index:4;
+            transition:all 0.2s ease;
+        }
+        .ft-video-local-wrap .pip-minimize { display:flex; }
+        .ft-video-local-wrap.minimized .ft-video-local {
+            width:56px; height:56px; border-radius:50%;
+        }
+        .pip-minimize {
+            position:absolute; top:4px; left:4px;
+            width:24px; height:24px; border-radius:50%;
+            background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.2);
+            color:#fff; font-size:0.7rem; cursor:pointer;
+            display:flex; align-items:center; justify-content:center;
+            z-index:5; line-height:1; font-style:normal;
+        }
         .msg-reply-quote {
             display:flex; flex-direction:column; gap:1px;
             background:rgba(0,0,0,0.18); border-radius:8px;
@@ -1656,41 +1713,78 @@
     <!-- ══ ALIAS / SETUP MODAL (slides up from bottom, Telegram style) ══ -->
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
-            
             <h2>¡Bienvenido! 👋</h2>
-            <p class="subtitle">Elige cómo quieres aparecer en la conversación</p>
+            <p class="subtitle">Elige tu identidad en el canal seguro</p>
 
-            <p class="color-label">Tu avatar</p>
+            <!-- Quick presets — tap and enter instantly -->
+            <p class="color-label">Acceso rápido</p>
+            <div class="alias-presets">
+                <button class="alias-preset" onclick="selectPreset(this,'🦊','Zorro','#ff441f')">
+                    <span class="preset-av">🦊</span><span class="preset-name">Zorro</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🐻','Oso','#ff9800')">
+                    <span class="preset-av">🐻</span><span class="preset-name">Oso</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🐺','Lobo','#9c27b0')">
+                    <span class="preset-av">🐺</span><span class="preset-name">Lobo</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🦋','Mariposa','#e91e63')">
+                    <span class="preset-av">🦋</span><span class="preset-name">Mariposa</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🌙','Luna','#3f51b5')">
+                    <span class="preset-av">🌙</span><span class="preset-name">Luna</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'⚡','Rayo','#ffc107')">
+                    <span class="preset-av">⚡</span><span class="preset-name">Rayo</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🔮','Mago','#00bcd4')">
+                    <span class="preset-av">🔮</span><span class="preset-name">Mago</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🦁','León','#ff5722')">
+                    <span class="preset-av">🦁</span><span class="preset-name">León</span>
+                </button>
+            </div>
+
+            <div class="preset-divider"><span>o personaliza</span></div>
+
+            <!-- Avatar picker -->
+            <p class="color-label">Avatar</p>
             <div class="avatar-picker" id="avatarPicker">
                 <button class="avatar-opt selected" data-av="🦊" onclick="selectAvatar(this)">🦊</button>
                 <button class="avatar-opt" data-av="🐺" onclick="selectAvatar(this)">🐺</button>
                 <button class="avatar-opt" data-av="🦁" onclick="selectAvatar(this)">🦁</button>
                 <button class="avatar-opt" data-av="🐯" onclick="selectAvatar(this)">🐯</button>
                 <button class="avatar-opt" data-av="🐻" onclick="selectAvatar(this)">🐻</button>
+                <button class="avatar-opt" data-av="🐼" onclick="selectAvatar(this)">🐼</button>
                 <button class="avatar-opt" data-av="🦋" onclick="selectAvatar(this)">🦋</button>
                 <button class="avatar-opt" data-av="🌙" onclick="selectAvatar(this)">🌙</button>
                 <button class="avatar-opt" data-av="⚡" onclick="selectAvatar(this)">⚡</button>
                 <button class="avatar-opt" data-av="🔮" onclick="selectAvatar(this)">🔮</button>
                 <button class="avatar-opt" data-av="🎭" onclick="selectAvatar(this)">🎭</button>
                 <button class="avatar-opt" data-av="🌊" onclick="selectAvatar(this)">🌊</button>
-                <button class="avatar-opt" data-av="🎯" onclick="selectAvatar(this)">🎯</button>
             </div>
 
-            <p class="color-label">Color de tus mensajes</p>
+            <!-- Colors — 12 including pinks -->
+            <p class="color-label">Color de mensajes</p>
             <div class="color-picker" id="colorPicker">
                 <button class="color-opt selected" data-color="#ff441f" style="background:#ff441f" onclick="selectColor(this)"><span class="color-check">✓</span></button>
-                <button class="color-opt" data-color="#2196f3" style="background:#2196f3" onclick="selectColor(this)"><span class="color-check">✓</span></button>
-                <button class="color-opt" data-color="#4caf50" style="background:#4caf50" onclick="selectColor(this)"><span class="color-check">✓</span></button>
-                <button class="color-opt" data-color="#9c27b0" style="background:#9c27b0" onclick="selectColor(this)"><span class="color-check">✓</span></button>
-                <button class="color-opt" data-color="#ff9800" style="background:#ff9800" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#e91e63" style="background:#e91e63" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ff69b4" style="background:#ff69b4" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#9c27b0" style="background:#9c27b0" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#3f51b5" style="background:#3f51b5" onclick="selectColor(this)"><span class="color-check">✓</span></button>
-                <button class="color-opt" data-color="#009688" style="background:#009688" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#2196f3" style="background:#2196f3" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#00bcd4" style="background:#00bcd4" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#4caf50" style="background:#4caf50" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ff9800" style="background:#ff9800" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ffc107" style="background:#ffc107" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ff5722" style="background:#ff5722" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#607d8b" style="background:#607d8b" onclick="selectColor(this)"><span class="color-check">✓</span></button>
             </div>
 
-            <div class="name-input-wrap"><input type="text" id="nameInput"
-                placeholder="¿Cómo te llamamos?" maxlength="20"
-                onkeypress="if(event.key==='Enter') joinChat()" autocomplete="off"></div>
+            <div class="name-input-wrap">
+                <input type="text" id="nameInput" placeholder="O escribe tu alias…"
+                    maxlength="20" onkeypress="if(event.key==='Enter') joinChat()" autocomplete="off">
+            </div>
             <button class="btn-join" onclick="joinChat()">Entrar al canal seguro →</button>
         </div>
     </div>
@@ -1924,7 +2018,10 @@
     <!-- Video layer -->
     <div class="ft-video-container" id="ftVideoContainer" style="display:none">
         <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
-        <video class="ft-video-local"  id="localVideo"  autoplay playsinline muted></video>
+        <div class="ft-video-local-wrap" id="pipWrap">
+            <video class="ft-video-local" id="localVideo" autoplay playsinline muted></video>
+            <button class="pip-minimize" id="pipMinBtn" onclick="togglePipMinimize()" title="Minimizar/expandir">⤡</button>
+        </div>
     </div>
 
     <!-- Top bar: MY small avatar (I know who I am) + type + timer -->
@@ -2575,6 +2672,25 @@
     window.toggleTheme = function() { const c = document.body.getAttribute('data-theme'); const dark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-theme', (c === 'dark' || (!c && dark)) ? 'light' : 'dark'); };
 
     /* ── CHAT ── */
+    /* ── QUICK PRESET SELECTION ── */
+    window.selectPreset = function(btn, av, name, color) {
+        // Deselect all presets
+        document.querySelectorAll('.alias-preset').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        // Apply avatar, color, and name
+        myAvatar = av;
+        myBubbleColor = color;
+        document.documentElement.style.setProperty('--bubble-mine', color);
+        document.getElementById('nameInput').value = name;
+        // Sync avatar picker and color picker visually
+        document.querySelectorAll('.avatar-opt').forEach(b => {
+            b.classList.toggle('selected', b.getAttribute('data-av') === av);
+        });
+        document.querySelectorAll('.color-opt').forEach(b => {
+            b.classList.toggle('selected', b.getAttribute('data-color') === color);
+        });
+    };
+
     /* ── AVATAR & BUBBLE COLOR SELECTION ── */
     let myAvatar = '🦊';
     let myBubbleColor = '#ff441f';
@@ -3370,7 +3486,7 @@
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftMyAvatar').textContent   = myAvatar || '🦊';  // MY emoji in the pill
-        document.getElementById('ftAvatar').textContent     = '…';               // THEIR avatar — appears when answered
+        document.getElementById('ftAvatar').textContent     = '📱'; // placeholder while ringing — replaced when answered
         document.getElementById('ftTargetName').textContent = 'Enlace Seguro';
         document.getElementById('ftCallType').textContent   = type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Llamando…';
@@ -4084,15 +4200,24 @@
         remove(ref(db, `chat/pendingNotif/${myId}`));
     }
 
-    /* ── DRAGGABLE LOCAL VIDEO PIP ── */
+    /* ── DRAGGABLE LOCAL VIDEO PIP + MINIMIZE ── */
+    window.togglePipMinimize = function() {
+        const wrap = document.getElementById('pipWrap');
+        if (wrap) {
+            wrap.classList.toggle('minimized');
+            const btn = document.getElementById('pipMinBtn');
+            if (btn) btn.textContent = wrap.classList.contains('minimized') ? '⤢' : '⤡';
+        }
+    };
+
     (function() {
-        const pip = document.getElementById('localVideo');
+        const pip = document.getElementById('pipWrap'); // drag the wrapper
         if (!pip) return;
         let dragging = false, startX, startY, origRight, origBottom, moved = false;
-
         const getPos = (e) => e.touches ? e.touches[0] : e;
 
         pip.addEventListener('touchstart', (e) => {
+            if (e.target.id === 'pipMinBtn') return; // don't drag on button tap
             dragging = true; moved = false;
             const t = getPos(e);
             startX = t.clientX; startY = t.clientY;
@@ -4119,7 +4244,7 @@
 
         pip.addEventListener('touchend', () => {
             dragging = false;
-            pip.style.transition = '';
+            pip.style.transition = 'all 0.2s ease';
         });
     })();
     (function() {
