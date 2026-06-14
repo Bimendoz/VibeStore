@@ -817,78 +817,153 @@
 
 
         /* ══════════════════════════════════════
-           CALL SCREENS — VibeCall
+           CALL SCREENS — VibeCall redesign
            ══════════════════════════════════════ */
         #seccion-facetime {
             display:none; position:fixed; inset:0; z-index:2000;
             flex-direction:column; align-items:center; justify-content:space-between;
-            background:linear-gradient(180deg,#0d1117 0%,#1a1a2e 100%);
-            padding:var(--safe-top,44px) 0 0;
+            overflow:hidden;
+            padding:var(--safe-top,44px) 0 calc(var(--safe-bottom,0) + 1rem);
         }
-        .ft-video-container { position:absolute; inset:0; z-index:0; }
-        .ft-video-remote { width:100%; height:100%; object-fit:cover; background:#0d1117; }
+
+        /* Animated gradient background */
+        .ft-bg {
+            position:absolute; inset:0; z-index:0;
+            background:linear-gradient(135deg, #0d1117 0%, #1a0a2e 40%, #0a1a2e 70%, #0d1117 100%);
+            animation:ftBgShift 8s ease-in-out infinite alternate;
+        }
+        @keyframes ftBgShift {
+            0%  { filter:hue-rotate(0deg)   brightness(1); }
+            50% { filter:hue-rotate(20deg)  brightness(1.08); }
+            100%{ filter:hue-rotate(-15deg) brightness(1.04); }
+        }
+
+        /* Floating ambient particles */
+        .ft-particles { position:absolute; inset:0; z-index:1; pointer-events:none; overflow:hidden; }
+        .ft-particle-dot {
+            position:absolute; border-radius:50%;
+            animation:ftFloat linear infinite;
+            opacity:0;
+        }
+        @keyframes ftFloat {
+            0%   { transform:translateY(100vh) scale(0); opacity:0; }
+            10%  { opacity:0.6; }
+            90%  { opacity:0.3; }
+            100% { transform:translateY(-20vh) scale(1.2); opacity:0; }
+        }
+
+        /* Video layer */
+        .ft-video-container { position:absolute; inset:0; z-index:2; }
+        .ft-video-remote { width:100%; height:100%; object-fit:cover; }
         .ft-video-local {
-            position:absolute; bottom:8rem; right:1.2rem;
-            width:110px; height:160px; border-radius:16px;
-            object-fit:cover; background:#1a1a2e; z-index:2;
-            border:2.5px solid rgba(255,255,255,0.15);
-            box-shadow:0 4px 20px rgba(0,0,0,0.5);
+            position:absolute; bottom:10rem; right:1.2rem;
+            width:120px; height:170px; border-radius:18px; z-index:3;
+            object-fit:cover; background:#1a1a2e;
+            border:2.5px solid rgba(255,255,255,0.18);
+            box-shadow:0 6px 24px rgba(0,0,0,0.55);
         }
-        .ft-overlay-info {
-            position:relative; z-index:3;
-            display:flex; flex-direction:column; align-items:center;
-            padding-top:2.5rem; gap:0.6rem;
+
+        /* Top bar */
+        .ft-topbar {
+            position:relative; z-index:5; width:100%;
+            display:flex; flex-direction:column; align-items:center; gap:0.2rem;
+            padding:0.5rem 1.5rem 0;
         }
+        .ft-call-type { font-size:0.78rem; font-weight:600; color:rgba(255,255,255,0.45); letter-spacing:1px; text-transform:uppercase; }
+        .ft-timer     { font-size:1rem; font-weight:700; color:rgba(255,255,255,0.85); font-variant-numeric:tabular-nums; }
+
+        /* Center: rings + avatar + name */
+        .ft-center {
+            position:relative; z-index:5;
+            display:flex; flex-direction:column; align-items:center; gap:1rem;
+            flex:1; justify-content:center; padding:0 2rem;
+        }
+        /* Pulse rings */
+        .ft-ring {
+            position:absolute; border-radius:50%;
+            border:1.5px solid rgba(255,255,255,0.12);
+            animation:ftRingPulse 3s ease-out infinite;
+        }
+        .ft-ring-1 { width:160px; height:160px; animation-delay:0s; }
+        .ft-ring-2 { width:210px; height:210px; animation-delay:0.8s; }
+        .ft-ring-3 { width:260px; height:260px; animation-delay:1.6s; }
+        @keyframes ftRingPulse {
+            0%   { transform:scale(0.85); opacity:0.7; }
+            70%  { transform:scale(1.15); opacity:0; }
+            100% { transform:scale(1.15); opacity:0; }
+        }
+        .ft-avatar-wrap { position:relative; z-index:2; }
         .ft-avatar {
-            width:88px; height:88px; border-radius:50%;
-            background:linear-gradient(135deg,var(--bubble-mine),#ff7f5c);
+            width:118px; height:118px; border-radius:50%;
+            background:linear-gradient(145deg, var(--bubble-mine), rgba(255,127,92,0.8));
             display:flex; align-items:center; justify-content:center;
-            font-size:2.8rem; line-height:1; color:#fff;
-            box-shadow:0 4px 24px rgba(0,0,0,0.4);
-            border:3px solid rgba(255,255,255,0.1);
-            animation:ftPulse 2.5s ease-in-out infinite;
+            font-size:3.8rem; line-height:1;
+            box-shadow:
+                0 0 0 6px rgba(255,255,255,0.06),
+                0 0 0 12px rgba(255,255,255,0.03),
+                0 12px 40px rgba(0,0,0,0.5);
+            border:3px solid rgba(255,255,255,0.12);
+            animation:ftAvatarGlow 3s ease-in-out infinite alternate;
         }
-        @keyframes ftPulse {
-            0%,100%{ box-shadow:0 4px 24px rgba(0,0,0,0.4),0 0 0 0 rgba(255,255,255,0.15); }
-            50%    { box-shadow:0 4px 24px rgba(0,0,0,0.4),0 0 0 16px rgba(255,255,255,0); }
+        @keyframes ftAvatarGlow {
+            from { box-shadow:0 0 0 6px rgba(255,255,255,0.06),0 0 0 12px rgba(255,255,255,0.03),0 12px 40px rgba(0,0,0,0.5),0 0 30px rgba(255,255,255,0.04); }
+            to   { box-shadow:0 0 0 6px rgba(255,255,255,0.1), 0 0 0 14px rgba(255,255,255,0.04),0 12px 40px rgba(0,0,0,0.5),0 0 50px rgba(255,255,255,0.08); }
         }
-        .ft-name   { font-size:1.4rem; font-weight:700; color:#fff; letter-spacing:-0.3px; }
-        .ft-status { font-size:0.85rem; color:rgba(255,255,255,0.5); }
+        .ft-name   { font-size:1.6rem; font-weight:800; color:#fff; letter-spacing:-0.5px; text-align:center; }
+        .ft-status { font-size:0.88rem; color:rgba(255,255,255,0.5); text-align:center; }
+
+        /* Controls */
         .ft-controls-panel {
-            position:relative; z-index:3; width:100%;
-            display:flex; justify-content:center; align-items:center; gap:1.2rem;
-            padding:1.5rem 2rem calc(1.8rem + var(--safe-bottom,0));
-            background:linear-gradient(0deg,rgba(0,0,0,0.65) 0%,transparent 100%);
+            position:relative; z-index:5; width:100%;
+            display:flex; flex-direction:column; align-items:center; gap:1.6rem;
+            padding:0 2rem;
+        }
+        .ft-ctrl-row {
+            display:flex; justify-content:center; gap:1.5rem; width:100%;
+        }
+        .ft-ctrl-group {
+            display:flex; flex-direction:column; align-items:center; gap:0.5rem;
+        }
+        .ft-ctrl-label {
+            font-size:0.72rem; color:rgba(255,255,255,0.55); font-weight:600;
+            white-space:nowrap;
         }
         .ft-btn {
-            width:58px; height:58px; border-radius:50%; border:none;
+            width:60px; height:60px; border-radius:50%; border:none;
             display:flex; align-items:center; justify-content:center;
             cursor:pointer; color:#fff; font-weight:800; font-size:0.7rem;
-            background:rgba(255,255,255,0.16);
-            -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+            background:rgba(255,255,255,0.14);
+            -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
             transition:transform 0.12s, background 0.15s;
-            box-shadow:0 2px 12px rgba(0,0,0,0.3);
+            box-shadow:0 2px 14px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.12);
         }
-        .ft-btn:active { transform:scale(0.88); }
-        .ft-btn svg    { width:24px; height:24px; fill:currentColor; }
-        .ft-btn.muted, .ft-btn.video-off { background:rgba(255,255,255,0.32); }
+        .ft-btn:active    { transform:scale(0.88); }
+        .ft-btn svg       { width:24px; height:24px; fill:currentColor; }
+        .ft-btn.active    { background:rgba(255,255,255,0.9); color:#111; }
+        .ft-btn.muted     { background:rgba(255,69,58,0.35); color:#ff453a; }
+        .ft-btn.video-off { background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.4); }
+
+        /* Speaker active state */
+        #btnFtSpeaker.speaker-on { background:rgba(48,209,88,0.25); color:#30d158; }
+
+        /* Hang up */
+        .ft-hangup-row { display:flex; justify-content:center; }
         .btn-hangup {
-            width:68px; height:68px;
-            background:linear-gradient(145deg,#ff453a,#c0180e) !important;
-            box-shadow:0 4px 18px rgba(255,59,48,0.55) !important;
-        }
-        .btn-ft-panic {
-            font-size:0.62rem; letter-spacing:0.5px;
-            background:rgba(255,69,58,0.2) !important;
-            border:1.5px solid rgba(255,69,58,0.4); color:#ff453a;
+            width:72px !important; height:72px !important;
+            background:linear-gradient(145deg, #ff453a, #c0180e) !important;
+            box-shadow:0 6px 22px rgba(255,59,48,0.55), inset 0 1px 0 rgba(255,255,255,0.2) !important;
         }
 
         /* ── INCOMING CALL ── */
         #seccion-incoming {
             display:none; position:fixed; inset:0; z-index:2100;
             flex-direction:column; align-items:center; justify-content:space-between;
-            background:linear-gradient(180deg,#0a0a14 0%,#1a1a2e 60%,#0d1117 100%);
-            padding:calc(var(--safe-top,44px) + 3rem) 2rem calc(4rem + var(--safe-bottom,0));
+            overflow:hidden;
+            padding:calc(var(--safe-top,44px) + 2.5rem) 2rem calc(4rem + var(--safe-bottom,0));
+        }
+        #seccion-incoming::before {
+            content:''; position:absolute; inset:0; z-index:0;
+            background:linear-gradient(180deg,#0a0a14 0%,#1a0a2e 50%,#0d1117 100%);
         }
         #seccion-incoming.show {
             display:flex;
@@ -898,42 +973,41 @@
             from{ opacity:0; transform:translateY(28px) scale(0.96); }
             to  { opacity:1; transform:translateY(0)    scale(1); }
         }
-        .incoming-info { display:flex; flex-direction:column; align-items:center; gap:1rem; }
+        .incoming-info { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:1.1rem; }
         .incoming-avatar {
-            width:100px; height:100px; border-radius:50%;
-            background:linear-gradient(135deg,var(--bubble-mine),#ff7f5c);
+            width:108px; height:108px; border-radius:50%;
+            background:linear-gradient(135deg, var(--bubble-mine), #ff7f5c);
             display:flex; align-items:center; justify-content:center;
-            font-size:3rem; line-height:1; color:#fff;
-            border:3px solid rgba(255,255,255,0.08);
+            font-size:3.4rem; line-height:1; color:#fff;
+            border:3px solid rgba(255,255,255,0.1);
+            box-shadow:0 8px 30px rgba(0,0,0,0.4);
             animation:incomingPulse 2s ease-out infinite;
         }
         @keyframes incomingPulse {
-            0%  { box-shadow:0 0 0 0   rgba(255,255,255,0.3); }
-            70% { box-shadow:0 0 0 22px rgba(255,255,255,0);   }
-            100%{ box-shadow:0 0 0 0   rgba(255,255,255,0);   }
+            0%  { box-shadow:0 8px 30px rgba(0,0,0,0.4),0 0 0 0   rgba(255,255,255,0.3); }
+            70% { box-shadow:0 8px 30px rgba(0,0,0,0.4),0 0 0 24px rgba(255,255,255,0);  }
+            100%{ box-shadow:0 8px 30px rgba(0,0,0,0.4),0 0 0 0   rgba(255,255,255,0);  }
         }
-        .incoming-name { font-size:1.6rem; font-weight:700; color:#fff; letter-spacing:-0.4px; }
-        .incoming-type { font-size:0.9rem; color:rgba(255,255,255,0.45); }
-        .incoming-actions {
-            display:flex; justify-content:center; gap:4rem; width:100%;
-        }
-        .incoming-action-group { display:flex; flex-direction:column; align-items:center; gap:0.65rem; }
+        .incoming-name { position:relative; z-index:1; font-size:1.7rem; font-weight:800; color:#fff; letter-spacing:-0.4px; }
+        .incoming-type { position:relative; z-index:1; font-size:0.9rem; color:rgba(255,255,255,0.45); }
+        .incoming-actions { position:relative; z-index:1; display:flex; justify-content:center; gap:4rem; width:100%; }
+        .incoming-action-group { display:flex; flex-direction:column; align-items:center; gap:0.7rem; }
         .incoming-btn {
-            width:68px; height:68px; border-radius:50%; border:none;
+            width:72px; height:72px; border-radius:50%; border:none;
             display:flex; align-items:center; justify-content:center;
             cursor:pointer; transition:transform 0.12s;
         }
         .incoming-btn:active { transform:scale(0.88); }
-        .incoming-btn svg { width:26px; height:26px; fill:#fff; transform:rotate(135deg); }
+        .incoming-btn svg   { width:28px; height:28px; fill:#fff; transform:rotate(135deg); }
         .incoming-btn.decline {
             background:linear-gradient(145deg,#ff453a,#c0180e);
-            box-shadow:0 4px 18px rgba(255,59,48,0.5);
+            box-shadow:0 6px 22px rgba(255,59,48,0.5);
         }
         .incoming-btn.accept {
             background:linear-gradient(145deg,#30d158,#1a9e3f);
-            box-shadow:0 4px 18px rgba(48,209,88,0.5);
+            box-shadow:0 6px 22px rgba(48,209,88,0.5);
         }
-        .incoming-label { font-size:0.82rem; color:rgba(255,255,255,0.6); font-weight:600; }
+        .incoming-label { font-size:0.84rem; color:rgba(255,255,255,0.65); font-weight:600; }
 
         /* Return-to-call bar */
         .return-call-bar {
@@ -1359,30 +1433,74 @@
 
 <!-- FACETIME SECTION -->
 <div id="seccion-facetime">
-    <div class="ft-video-container">
+
+    <!-- Animated background gradient -->
+    <div class="ft-bg" id="ftBg"></div>
+
+    <!-- Floating particles (ambient) -->
+    <div class="ft-particles" id="ftParticles" aria-hidden="true"></div>
+
+    <!-- Video (hidden until video call connects) -->
+    <div class="ft-video-container" id="ftVideoContainer" style="display:none">
         <video class="ft-video-remote" id="remoteVideo" autoplay playsinline></video>
-        <video class="ft-video-local" id="localVideo" autoplay playsinline muted></video>
+        <video class="ft-video-local"  id="localVideo"  autoplay playsinline muted></video>
     </div>
-    <div class="ft-overlay-info">
-        <div class="ft-avatar" id="ftAvatar">U</div>
-        <div class="ft-name" id="ftTargetName">Enlace Seguro</div>
+
+    <!-- Top bar: timer + call type -->
+    <div class="ft-topbar">
+        <div class="ft-call-type" id="ftCallType">VibeCall</div>
+        <div class="ft-timer" id="ftTimer">0:00</div>
+    </div>
+
+    <!-- Center: avatar with pulse rings -->
+    <div class="ft-center">
+        <div class="ft-ring ft-ring-3"></div>
+        <div class="ft-ring ft-ring-2"></div>
+        <div class="ft-ring ft-ring-1"></div>
+        <div class="ft-avatar-wrap">
+            <div class="ft-avatar" id="ftAvatar">🦊</div>
+        </div>
+        <div class="ft-name"   id="ftTargetName">Enlace Seguro</div>
         <div class="ft-status" id="ftCallStatus">Estableciendo VibeCall…</div>
     </div>
+
+    <!-- Controls grid -->
     <div class="ft-controls-panel">
-        <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">
-            <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.2 6 6.6V21h2v-3.4c3.28-.4 6-3.18 6-6.6h-1.7z"/></svg>
-        </button>
-        <button class="ft-btn" id="btnFtVideo" onclick="toggleVideoTrack()">
-            <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
-        </button>
-        <button class="ft-btn" onclick="minimizeCallToChat()">
-            <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
-        </button>
-        <button class="ft-btn btn-ft-panic" onclick="panicExit()">PANIC</button>
-        <button class="ft-btn btn-hangup" onclick="hangUpCall()">
-            <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
-        </button>
+        <!-- Row 1: secondary controls -->
+        <div class="ft-ctrl-row">
+            <div class="ft-ctrl-group">
+                <button class="ft-btn" id="btnFtMute" onclick="toggleMuteMic()">
+                    <svg viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.42 2.72 6.2 6 6.6V21h2v-3.4c3.28-.4 6-3.18 6-6.6h-1.7z"/></svg>
+                </button>
+                <span class="ft-ctrl-label">Silenciar</span>
+            </div>
+            <div class="ft-ctrl-group">
+                <button class="ft-btn" id="btnFtSpeaker" onclick="toggleSpeaker()">
+                    <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                </button>
+                <span class="ft-ctrl-label" id="lblSpeaker">Altavoz</span>
+            </div>
+            <div class="ft-ctrl-group">
+                <button class="ft-btn" id="btnFtVideo" onclick="toggleVideoTrack()">
+                    <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+                </button>
+                <span class="ft-ctrl-label">Cámara</span>
+            </div>
+            <div class="ft-ctrl-group">
+                <button class="ft-btn" onclick="minimizeCallToChat()">
+                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                </button>
+                <span class="ft-ctrl-label">Chat</span>
+            </div>
+        </div>
+        <!-- Row 2: hang up -->
+        <div class="ft-hangup-row">
+            <button class="ft-btn btn-hangup" onclick="hangUpCall()">
+                <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
+            </button>
+        </div>
     </div>
+
 </div>
 
 <!-- INCOMING CALL SCREEN -->
@@ -2661,7 +2779,10 @@
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftTargetName').textContent = "Canal Seguro";
-        document.getElementById('ftCallStatus').textContent = `VibeCall de ${type === 'video' ? 'Video' : 'Audio'}…`;
+        document.getElementById('ftCallType').textContent = type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
+        document.getElementById('ftTargetName').textContent = 'Enlace Seguro';
+        document.getElementById('ftAvatar').textContent = myAvatar || '🦊';
+        document.getElementById('ftCallStatus').textContent = `Estableciendo VibeCall de ${type === 'video' ? 'Video' : 'Audio'}…`;
         document.getElementById('ftAvatar').textContent = "C";
         document.getElementById('ftAvatar').style.display = 'flex';
         document.getElementById('btnFtVideo').style.display = type === 'video' ? 'flex' : 'none';
@@ -2675,7 +2796,7 @@
         }
         activeCallRef = push(callsRef);
         callActive = true;
-        await set(activeCallRef, { type, caller: myName, callerId: myId, status: 'calling', ts: Date.now() });
+        await set(activeCallRef, { type, caller: myName, callerId: myId, avatar: myAvatar || '📞', status: 'calling', ts: Date.now() });
         await buildRtcConfig();   // fetch fresh TURN credentials
         peerConnection = new RTCPeerConnection(rtcConfig);
         monitorConnection(peerConnection);
@@ -2746,9 +2867,11 @@
     }
 
     function showIncomingScreen(call) {
-        document.getElementById('incomingName').textContent = call.caller || 'Llamada entrante';
-        document.getElementById('incomingType').textContent = `VibeCall de ${call.type === 'video' ? 'video' : 'audio'}…`;
-        document.getElementById('incomingAvatar').textContent = (call.caller || 'U').charAt(0);
+        document.getElementById('incomingName').textContent   = call.caller || 'Llamada entrante';
+        document.getElementById('incomingType').textContent   = `VibeCall de ${call.type === 'video' ? 'video' : 'audio'}…`;
+        // Show caller's emoji avatar if available (sent with the call), else first letter
+        const av = call.avatar || (call.caller ? call.caller.charAt(0) : '📞');
+        document.getElementById('incomingAvatar').textContent = av;
         document.getElementById('seccion-incoming').classList.add('show');
         startRingtone();
     }
@@ -2830,6 +2953,11 @@
                 statusEl.textContent = 'Conectado';
                 callActive = true;
                 stopRingtone();
+                startCallTimer();
+                startCallParticles();
+                // Show video container if it's a video call
+                const vc = document.getElementById('ftVideoContainer');
+                if (vc && document.getElementById('remoteVideo').srcObject) vc.style.display = 'block';
             } else if (st === 'checking') {
                 statusEl.textContent = 'Conectando…';
             } else if (st === 'disconnected') {
@@ -2853,8 +2981,99 @@
         pc.onicecandidateerror = (e) => { console.warn('[VibeCall] ICE candidate error:', e.errorText || e.errorCode); };
     }
 
-    window.toggleMuteMic = function() { if (!localStream) return; isMuted = !isMuted; localStream.getAudioTracks().forEach(t => t.enabled = !isMuted); document.getElementById('btnFtMute').classList.toggle('active', isMuted); };
-    window.toggleVideoTrack = function() { if (!localStream) return; isVideoOff = !isVideoOff; localStream.getVideoTracks().forEach(t => t.enabled = !isVideoOff); document.getElementById('btnFtVideo').classList.toggle('active', isVideoOff); };
+    window.toggleMuteMic = function() {
+        if (!localStream) return;
+        isMuted = !isMuted;
+        localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
+        document.getElementById('btnFtMute').classList.toggle('muted', isMuted);
+    };
+    window.toggleVideoTrack = function() {
+        if (!localStream) return;
+        isVideoOff = !isVideoOff;
+        localStream.getVideoTracks().forEach(t => t.enabled = !isVideoOff);
+        document.getElementById('btnFtVideo').classList.toggle('video-off', isVideoOff);
+        // Show/hide video layer
+        const vc = document.getElementById('ftVideoContainer');
+        if (vc) vc.style.display = isVideoOff ? 'none' : 'block';
+    };
+
+    /* ── SPEAKER / EARPIECE TOGGLE ── */
+    let speakerOn = false;
+    window.toggleSpeaker = async function() {
+        speakerOn = !speakerOn;
+        const btn = document.getElementById('btnFtSpeaker');
+        const lbl = document.getElementById('lblSpeaker');
+        btn.classList.toggle('speaker-on', speakerOn);
+        if (lbl) lbl.textContent = speakerOn ? 'Auricular' : 'Altavoz';
+
+        // On iOS Safari: we can route audio by creating/resuming an AudioContext
+        // with the right output. Best effort — iOS controls the final output.
+        const remoteVid = document.getElementById('remoteVideo');
+        if (remoteVid && remoteVid.setSinkId) {
+            // Chrome/Edge desktop: setSinkId to 'default' routes to speaker
+            try {
+                await remoteVid.setSinkId(speakerOn ? 'default' : '');
+            } catch(e) { /* not supported */ }
+        }
+        // iOS fallback: play a silent audio context to trigger speaker mode
+        if (speakerOn && audioCtx) {
+            try { await audioCtx.resume(); } catch(e) {}
+        }
+        showToast(speakerOn ? '🔊 Auricular activo' : '📢 Altavoz activo');
+    };
+
+    /* ── CALL TIMER ── */
+    let callTimerInterval = null;
+    let callStartTime = 0;
+    function startCallTimer() {
+        callStartTime = Date.now();
+        callTimerInterval = setInterval(() => {
+            const s = Math.floor((Date.now() - callStartTime) / 1000);
+            const m = Math.floor(s / 60);
+            const ss = String(s % 60).padStart(2,'0');
+            const el = document.getElementById('ftTimer');
+            if (el) el.textContent = `${m}:${ss}`;
+        }, 1000);
+    }
+    function stopCallTimer() {
+        clearInterval(callTimerInterval);
+        callTimerInterval = null;
+        const el = document.getElementById('ftTimer');
+        if (el) el.textContent = '0:00';
+    }
+
+    /* ── AMBIENT FLOATING PARTICLES (on call screen) ── */
+    let particleInterval = null;
+    function startCallParticles() {
+        const container = document.getElementById('ftParticles');
+        if (!container) return;
+        const colors = [
+            getComputedStyle(document.documentElement).getPropertyValue('--bubble-mine').trim() || '#ff441f',
+            '#64d2ff','#bf5af2','#30d158','#ffd60a','#ff9f0a'
+        ];
+        particleInterval = setInterval(() => {
+            const p = document.createElement('div');
+            p.className = 'ft-particle-dot';
+            const size = 3 + Math.random() * 5;
+            const dur  = 6 + Math.random() * 8;
+            p.style.cssText = `
+                left:${5 + Math.random()*90}%;
+                width:${size}px; height:${size}px;
+                background:${colors[Math.floor(Math.random()*colors.length)]};
+                animation-duration:${dur}s;
+                animation-delay:${Math.random()*2}s;
+            `;
+            container.appendChild(p);
+            setTimeout(() => p.remove(), (dur + 2) * 1000);
+        }, 400);
+    }
+    function stopCallParticles() {
+        clearInterval(particleInterval);
+        particleInterval = null;
+        const c = document.getElementById('ftParticles');
+        if (c) c.innerHTML = '';
+    }
+
     window.minimizeCallToChat = function() {
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-chat').style.display = 'flex';
@@ -2869,7 +3088,6 @@
         if (activeCallRef) {
             const refToEnd = activeCallRef;
             update(refToEnd, { status: 'ended' });
-            // Clean up the call node from DB shortly after so they don't accumulate (1-to-1)
             setTimeout(() => remove(refToEnd).catch(() => {}), 1500);
         }
         cleanUpCallUI();
@@ -2884,6 +3102,13 @@
         activeCallRef = null;
         callActive = false;
         isMuted = false; isVideoOff = false;
+        speakerOn = false;
+        const sb = document.getElementById('btnFtSpeaker');
+        if (sb) { sb.classList.remove('speaker-on'); }
+        const lbl = document.getElementById('lblSpeaker');
+        if (lbl) lbl.textContent = 'Altavoz';
+        stopCallTimer();
+        stopCallParticles();
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-incoming').classList.remove('show');
         document.getElementById('returnCallBar').classList.remove('show');
