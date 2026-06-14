@@ -15,6 +15,26 @@
     <meta name="theme-color" content="#0a0a0c">
 
     <style>
+        /* ─── HEADER: absolutely fixed, never moves ─── */
+        .chat-header {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            z-index: 1010 !important;
+            padding: env(safe-area-inset-top, 44px) 1rem 0.65rem 0.85rem;
+            background: rgba(18,18,28,0.97);
+            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 58px;
+            transform: none !important;
+            will-change: auto;
+        }
+
         :root {
             --bg-body: #f7f8fa;
             --bg-card: #ffffff;
@@ -44,23 +64,7 @@
             z-index: 1000;
         }
         /* HEADER — always visible, never moves */
-        .chat-header {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            z-index: 1010;
-            padding-top: var(--safe-top, 44px);
-            padding-bottom: 0.7rem;
-            padding-left: 0.85rem;
-            padding-right: 1rem;
-            background: rgba(18,18,28,0.97);
-            -webkit-backdrop-filter: blur(20px);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            min-height: 62px;
-        }
+        
         /* MESSAGES — fills space between header and input */
         .chat-messages {
             position: fixed;
@@ -601,18 +605,24 @@
 
         /* Attach / clip button */
         .btn-attach {
-            width:34px; height:34px; border-radius:50%; flex-shrink:0; cursor:pointer;
+            width:36px; height:36px; border-radius:50%; flex-shrink:0; cursor:pointer;
             background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.1);
             color:rgba(255,255,255,0.6); display:flex; align-items:center; justify-content:center;
             transition:transform 0.12s, background 0.15s;
         }
         .btn-attach:active { transform:scale(0.88); background:rgba(255,255,255,0.12); }
         .btn-attach svg    { width:18px; height:18px; fill:currentColor; }
-        [data-theme="light"] .btn-attach { background:rgba(0,0,0,.05); border-color:rgba(0,0,0,.1); color:rgba(0,0,0,.5); }
+        [data-theme="light"] .btn-attach {
+            width:36px; height:36px; border-radius:50%; flex-shrink:0; cursor:pointer;
+            background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.1);
+            color:rgba(255,255,255,0.6); display:flex; align-items:center; justify-content:center;
+            transition:transform 0.12s, background 0.15s;
+        }
 
         /* Buzz button */
         #btnBuzz {
-            background:rgba(255,159,10,0.12); border-color:rgba(255,159,10,0.3);
+            background:rgba(255,159,10,0.15);
+            border-color:rgba(255,159,10,0.35);
             color:#ff9f0a;
         }
 
@@ -2211,106 +2221,106 @@
     const db  = getDatabase(app);
 
     const products = [
-        { id:1,  cat:'tecnologia', name:'Apple iPhone 16 Pro Max 256GB', desc:'Titanio de grado aeroespacial, chip M-Series avanzado y pantalla Super Retina XDR.', price:6499000, img:'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=300&q=80' },
-        { id:2,  cat:'tecnologia', name:'Apple iPhone 16 128GB Black', desc:'Control de cámara avanzado, chip A18, carcasa de aluminio premium reciclado.', price:3849000, img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=300&q=80' },
-        { id:3,  cat:'tecnologia', name:'Apple AirPods 4 Inalámbricos', desc:'Cancelación activa de ruido con ajuste ergonómico acústico renovado.', price:899900, img:'https://images.unsplash.com/photo-1613040809024-b4ef7ba99bc3?auto=format&fit=crop&w=300&q=80' },
-        { id:4,  cat:'tecnologia', name:'Apple Watch Series 10 GPS 46mm', desc:'Carcasa de aluminio, pantalla OLED Always-On y sensores de salud integrados.', price:2149900, img:'https://images.unsplash.com/photo-1517502884422-41eacef01689?auto=format&fit=crop&w=300&q=80' },
-        { id:5,  cat:'tecnologia', name:'Apple MacBook Air 13" M3 256GB SSD', desc:'Procesador Apple Silicon M3, diseño ultradelgado en aluminio anodizado.', price:5499000, img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=300&q=80' },
-        { id:6,  cat:'tecnologia', name:'Sony PlayStation 5 Slim 1TB', desc:'Carga veloz con SSD de alta velocidad y soporte para gatillos adaptativos.', price:2399000, img:'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&w=300&q=80' },
-        { id:7,  cat:'tecnologia', name:'Televisor LG Smart TV 55" 4K', desc:'Pantalla UHD con inteligencia artificial ThinQ y colores nítidos.', price:1999900, img:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=300&q=80' },
-        { id:8,  cat:'tecnologia', name:'Parlante Bluetooth JBL Charge 5', desc:'Sonido pro potente e impermeable IP67 con batería de larga duración.', price:649900, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=300&q=80' },
-        { id:9,  cat:'tecnologia', name:'Samsung Galaxy Tab S9 128GB', desc:'Pantalla AMOLED fluida de alto rendimiento, incluye lápiz óptico S-Pen.', price:2499900, img:'https://images.unsplash.com/photo-1611532736597-de2d4265fba3?auto=format&fit=crop&w=300&q=80' },
-        { id:10, cat:'tecnologia', name:'Cámara Mirrorless Sony Alpha 6400', desc:'Lente 16-50mm, enfoque automático ultrarrápido para fotografía y vlogs.', price:3999000, img:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=300&q=80' },
-        { id:11, cat:'tecnologia', name:'Nintendo Switch OLED Modelo', desc:'Pantalla de 7 pulgadas con contraste definido y base con puerto LAN.', price:1649900, img:'https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?auto=format&fit=crop&w=300&q=80' },
-        { id:12, cat:'tecnologia', name:'Monitor Gamer ASUS 27" 165Hz', desc:'Panel IPS plano, tiempo de respuesta de 1ms, ideal para eSports.', price:1149900, img:'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=300&q=80' },
-        { id:13, cat:'comida', name:'Combo de Alitas Picantes Tradicionales', desc:'6 Alitas crujientes con salsa de la casa, papas medianas y gaseosa.', price:29900, img:'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=300&q=80' },
-        { id:14, cat:'comida', name:'Hamburguesa Artesanal Doble Carne', desc:'Doble carne artesanal de res, queso cheddar, tocineta ahumada y vegetales.', price:38900, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=300&q=80' },
-        { id:15, cat:'comida', name:'Pizza Familiar de Pepperoni', desc:'Masa tradicional delgada, pepperoni de la casa y abundante queso mozzarella.', price:45900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=300&q=80' },
-        { id:16, cat:'comida', name:'Picada Criolla Mixta Mediana', desc:'Chicharrón carnudo, chorizo santandereano, papa criolla y arepitas.', price:54000, img:'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=300&q=80' },
-        { id:17, cat:'comida', name:'Combo Sushi Rama Variado x10u', desc:'Cortes variados con salmón, aguacate, queso crema y ajonjolí tostado.', price:32900, img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=300&q=80' },
-        { id:18, cat:'comida', name:'Arroz Especial con Pollo y Verduras', desc:'Receta típica casera con pollo desmechado, verdura fresca y papas fritas.', price:24900, img:'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=300&q=80' },
-        { id:19, cat:'comida', name:'Burrito Extremo de Carne Asada', desc:'Tortilla de trigo rellena de lomo, frijoles negros, guacamole y queso.', price:26900, img:'https://images.unsplash.com/photo-1626700051175-6518c4793f4f?auto=format&fit=crop&w=300&q=80' },
-        { id:20, cat:'comida', name:'Malteada Espesa de Chocolate Fino', desc:'Hecha con helado artesanal, salsa premium y crema chantilly.', price:14900, img:'https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=300&q=80' },
-        { id:21, cat:'comida', name:'Ensalada César con Pechuga', desc:'Mix de lechugas frescas, crutones crujientes, queso parmesano y pollo.', price:23500, img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=300&q=80' },
-        { id:22, cat:'comida', name:'Tacos Mexicanos al Pastor x3', desc:'Carne de cerdo adobada, piña fresca, cebolla picada y cilantro fino.', price:18900, img:'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?auto=format&fit=crop&w=300&q=80' },
-        { id:23, cat:'comida', name:'Lasaña Casera de Carne Bolognesa', desc:'Pasta artesanal por capas con carne picada de res, salsa y queso fundido.', price:29900, img:'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?auto=format&fit=crop&w=300&q=80' },
-        { id:24, cat:'comida', name:'Porción Empanadas Crujientes x5', desc:'Masa de maíz frita rellena de carne aliñada, incluye ají casero.', price:11500, img:'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=300&q=80' },
-        { id:25, cat:'mercado', name:'Whisky Escocés Blended 12 Años', desc:'Botella original de 750ml, blend premium añejado en roble.', price:187100, img:'https://images.unsplash.com/photo-1527281400683-1aae777175f8?auto=format&fit=crop&w=300&q=80' },
-        { id:26, cat:'mercado', name:'Arándanos Azules Frescos Caja 125g', desc:'Fruta fresca seleccionada de alta calidad rica en antioxidantes.', price:11900, img:'https://images.unsplash.com/photo-1601004890684-d8cbf643f5f2?auto=format&fit=crop&w=300&q=80' },
-        { id:27, cat:'mercado', name:'Café Molido Premium Tostado 500g', desc:'Café de origen 100% colombiano seleccionado de aroma intenso.', price:15900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=300&q=80' },
-        { id:28, cat:'mercado', name:'Aceite Puro de Girasol Botella 1L', desc:'Ideal para freír y cocinar de manera saludable, libre de grasas trans.', price:13900, img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=300&q=80' },
-        { id:29, cat:'mercado', name:'Leche Entera Larga Vida Pack x6', desc:'Bolsas de 900ml de leche entera higienizada fortificada.', price:26400, img:'https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=300&q=80' },
-        { id:30, cat:'mercado', name:'Arroz Blanco Extrafino Bolsa 5kg', desc:'Grano largo seleccionado, no se pega, ideal para preparaciones diarias.', price:21900, img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=300&q=80' },
-        { id:31, cat:'mercado', name:'Cerveza Nacional Rubia Latas Pack x6', desc:'Lager refrescante tradicional colombiana de 330ml por lata.', price:16800, img:'https://images.unsplash.com/photo-1608270586620-248524c67de9?auto=format&fit=crop&w=300&q=80' },
-        { id:32, cat:'mercado', name:'Filete de Salmón Premium Fresco 500g', desc:'Corte limpio empacado al vacío con piel listo para asar.', price:46900, img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=300&q=80' },
-        { id:33, cat:'mercado', name:'Chocolate en Pastillas para Desayuno', desc:'Pastillas de cacao tradicional colombiano endulzado de 500g.', price:9400, img:'https://images.unsplash.com/photo-1544967082-d9d25d867d66?auto=format&fit=crop&w=300&q=80' },
-        { id:34, cat:'mercado', name:'Detergente Líquido Concentrado 3L', desc:'Fórmula avanzada para el cuidado de ropa blanca y de color.', price:42900, img:'https://images.unsplash.com/photo-1610557892470-55d9e80e0bce?auto=format&fit=crop&w=300&q=80' },
-        { id:35, cat:'mercado', name:'Papel Higiénico Hoja Doble x12 Rollos', desc:'Rollos de doble hoja acolchada de máxima suavidad y resistencia.', price:23500, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=300&q=80' },
-        { id:36, cat:'mercado', name:'Queso Crema Tajado Colanta 400g', desc:'Textura cremosa ideal para derretir o acompañar comidas.', price:15800, img:'https://images.unsplash.com/photo-1486297678162-92e19b662883?auto=format&fit=crop&w=300&q=80' },
-        { id:37, cat:'maquillaje', name:'M·A·C Cosmetics Labial Matte', desc:'Labial clásico icónico acabado mate de ultra larga duración.', price:109900, img:'https://images.unsplash.com/photo-1586495777744-4413f21062fa?auto=format&fit=crop&w=300&q=80' },
-        { id:38, cat:'maquillaje', name:'Benefit Tinta Líquida Labios Benetint', desc:'Fórmula fluida roja translúcida para dar color a mejillas y labios 6ml.', price:144900, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=300&q=80' },
-        { id:39, cat:'maquillaje', name:'Clinique Bálsamo Labial Honey', desc:'Se adapta al tono natural de la piel ofreciendo un brillo ciruela sutil.', price:109900, img:'https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=300&q=80' },
-        { id:40, cat:'maquillaje', name:'Base L\'Oréal Infallible Fresh Wear', desc:'Textura ultra ligera, acabado natural mate con protección solar SPF.', price:84900, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=300&q=80' },
-        { id:41, cat:'maquillaje', name:'Pestañina Maybelline Sky High Xl', desc:'Aporta longitud definida y volumen sin dejar grumos pesados.', price:59900, img:'https://images.unsplash.com/photo-1631214524020-5e18d974dd33?auto=format&fit=crop&w=300&q=80' },
-        { id:42, cat:'maquillaje', name:'Paleta de Sombras Neutras 12 Tonos', desc:'Sombras compactas profesionales mate y satinadas de alta pigmentación.', price:229900, img:'https://images.unsplash.com/photo-1599733589046-10c005739ef9?auto=format&fit=crop&w=300&q=80' },
-        { id:43, cat:'maquillaje', name:'Bruma Fijadora Prep Prime Matte', desc:'Fijador de maquillaje translúcido hidrata y prolonga la duración.', price:149900, img:'https://images.unsplash.com/photo-1608248597481-496100c8c836?auto=format&fit=crop&w=300&q=80' },
-        { id:44, cat:'maquillaje', name:'Rubor Líquido Soft Peach Glow', desc:'Textura fluida ligera de fácil difuminado acabado natural.', price:145000, img:'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&w=300&q=80' },
-        { id:45, cat:'maquillaje', name:'Corrector Líquido High Coverage', desc:'Oculta imperfecciones de forma ligera sin cuartear la piel.', price:129000, img:'https://images.unsplash.com/photo-1631730486784-65b7a9f1f0b2?auto=format&fit=crop&w=300&q=80' },
-        { id:46, cat:'maquillaje', name:'Iluminador Compacto Velvet Mineral', desc:'Aporta destellos de luz satinados para pómulos y rostro.', price:169900, img:'https://images.unsplash.com/photo-1503236823255-94609f598e71?auto=format&fit=crop&w=300&q=80' },
-        { id:47, cat:'maquillaje', name:'Polvo Traslúcido Suelto Antibrillo', desc:'Matifica de forma invisible sellando bases de maquillaje líquidas.', price:189900, img:'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?auto=format&fit=crop&w=300&q=80' },
-        { id:48, cat:'maquillaje', name:'Delineador de Ojos Plumón Negro', desc:'Punta de fieltro ultra fina trazo continuo a prueba de agua.', price:105000, img:'https://images.unsplash.com/photo-1583241800698-9c2e0c5b9b76?auto=format&fit=crop&w=300&q=80' },
-        { id:49, cat:'moda', name:'Chaqueta de Jean Slim Fit Clásica', desc:'Denim de alta resistencia con botones metálicos y bolsillos frontales.', price:169900, img:'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=300&q=80' },
-        { id:50, cat:'moda', name:'Camisa Casual de Lino Confort', desc:'Material fresco transpirable de corte moderno manga larga.', price:129900, img:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=300&q=80' },
-        { id:51, cat:'moda', name:'Vestido Largo de Flores Veraniego', desc:'Diseño suelto liviano con tirantes delgados regulables.', price:179900, img:'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=300&q=80' },
-        { id:52, cat:'moda', name:'Pantalón Cargo Jogger de Dril', desc:'Corte urbano con elástico en tobillos y amplios bolsillos laterales.', price:119900, img:'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=300&q=80' },
-        { id:53, cat:'moda', name:'Tenis Casuales Cuero Blanco Urbano', desc:'Suela de goma plana cosida, diseño minimalista unisex.', price:149900, img:'https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=300&q=80' },
-        { id:54, cat:'moda', name:'Blusa Satinada Elegante Corta', desc:'Textura lisa brillante ideal para oficina o ropa casual formal.', price:89900, img:'https://images.unsplash.com/photo-1548624149-f9b1859aa7d0?auto=format&fit=crop&w=300&q=80' },
-        { id:55, cat:'moda', name:'Saco de Lana Tejido Trenzado', desc:'Buso abrigado cuello redondo para clima frío de alta calidad.', price:139900, img:'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=300&q=80' },
-        { id:56, cat:'moda', name:'Jean Mom Fit Tiro Alto Azul', desc:'Mezclilla rígida duradera estilo retro bota semi recta.', price:139900, img:'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=300&q=80' },
-        { id:57, cat:'moda', name:'Bermuda de Dril Confort Masculina', desc:'Corte regular fresco arriba de la rodilla con bolsillos traseros.', price:79900, img:'https://images.unsplash.com/photo-1591195853828-11db59a44f6b?auto=format&fit=crop&w=300&q=80' },
-        { id:58, cat:'moda', name:'Camiseta Básica de Algodón Suave', desc:'Tejido peinado fresco cuello redondo ideal para uso diario.', price:45900, img:'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80' },
-        { id:59, cat:'moda', name:'Gafas de Sol Estilo Aviador UV400', desc:'Lentes con filtro de protección UV400 y marco metálico ligero.', price:64900, img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=300&q=80' },
-        { id:60, cat:'moda', name:'Bolso Cruzado Manos Libres Cuero', desc:'Correa ajustable con herrajes y cremalleras de seguridad.', price:179900, img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=300&q=80' },
-        { id:61, cat:'futbol', name:'Camiseta Oficial Selección Colombia', desc:'Indumentaria local amarilla de competencia con hilos transpirables.', price:349900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=300&q=80' },
-        { id:62, cat:'futbol', name:'Camiseta Real Madrid Blanca Home', desc:'Equipación oficial blanca de local con escudo bordado premium.', price:399900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=300&q=80' },
-        { id:63, cat:'futbol', name:'Camiseta FC Barcelona Azulgrana', desc:'Modelo local a franjas tradicionales con tecnología deportiva fit.', price:399900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?auto=format&fit=crop&w=300&q=80' },
-        { id:64, cat:'futbol', name:'Camiseta Argentina Campeón Mundial', desc:'Diseño albiceleste oficial con los tres parches dorados de la FIFA.', price:379900, img:'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&q=80&w=300' },
-        { id:65, cat:'futbol', name:'Camiseta Manchester City Sky Blue', desc:'Color celeste clásico con fibras ultralivianas de alto rendimiento.', price:349900, img:'https://images.unsplash.com/photo-1551958219-acbc608c6377?auto=format&fit=crop&q=80&w=300' },
-        { id:66, cat:'futbol', name:'Camiseta Atlético Nacional Verde Home', desc:'Franjas verdes y blancas de local de la escuadra verdolaga.', price:279900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&q=80&w=300' },
-        { id:67, cat:'futbol', name:'Camiseta Millonarios FC Azul Local', desc:'Diseño local azul del conjunto embajador con telas premium.', price:279900, img:'https://images.unsplash.com/photo-1577471488278-16eec37ffcc7?auto=format&fit=crop&q=80&w=300' },
-        { id:68, cat:'futbol', name:'Camiseta Inter de Miami Rosa Oficial', desc:'Modelo oficial color rosado pastel con costuras reforzadas.', price:349900, img:'https://images.unsplash.com/photo-1551854326-7fd7fe8fa275?auto=format&fit=crop&q=80&w=300' },
-        { id:69, cat:'futbol', name:'Camiseta Liverpool FC Classic Red', desc:'Color rojo tradicional liso con el ave fénix tejido en el pecho.', price:399900, img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&q=80&w=300' },
-        { id:70, cat:'futbol', name:'Camiseta Arsenal FC Home Red/White', desc:'Torso rojo con mangas blancas y cuello redondo de colección.', price:349900, img:'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&q=80&w=300' },
-        { id:71, cat:'futbol', name:'Camiseta Juventus Black and White', desc:'Franjas verticales blancas y negras del club de Turín clásicas.', price:349900, img:'https://images.unsplash.com/photo-1556906781-9a412961c28c?auto=format&fit=crop&q=80&w=300' },
-        { id:72, cat:'futbol', name:'Camiseta Bayern Múnich Red Club', desc:'Tonalidad roja oficial con paneles transpirables para juego.', price:349900, img:'https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&q=80&w=300' },
-        { id:73, cat:'hogar', name:'Difusor de Aromas Ultrasónico White', desc:'Esfera cerámica de 200ml vaporiza aceites de forma silenciosa.', price:119900, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?auto=format&fit=crop&q=80&w=300' },
-        { id:74, cat:'hogar', name:'Mesa Auxiliar Redonda Nórdica', desc:'Superficie lacada lisa con tres soportes de madera maciza.', price:189900, img:'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?auto=format&fit=crop&q=80&w=300' },
-        { id:75, cat:'hogar', name:'Lámpara de Escritorio LED Táctil', desc:'Brazo móvil ajustable con 3 niveles de temperatura de luz.', price:74900, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&q=80&w=300' },
-        { id:76, cat:'hogar', name:'Espejo Circular con Marco Dorado', desc:'Diseño flotante moderno ideal para sala o pasillo 60cm.', price:145000, img:'https://images.unsplash.com/photo-1616627547584-bf28cee262db?auto=format&fit=crop&q=80&w=300' },
-        { id:77, cat:'hogar', name:'Juego Sábanas Microfibra Matrimonial', desc:'Tela suave lavable, incluye sábana ajustable y fundas.', price:89900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&q=80&w=300' },
-        { id:78, cat:'hogar', name:'Cojines de Terciopelo Gris Decorativos', desc:'Set de 2 fundas con relleno blando siliconado mullido.', price:59900, img:'https://images.unsplash.com/photo-1540574163026-643ea20ade25?auto=format&fit=crop&q=80&w=300' },
-        { id:79, cat:'hogar', name:'Planta Artificial Monstera Hogar', desc:'Hojas de aspecto real con maceta cerámica minimalista.', price:129900, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&q=80&w=300' },
-        { id:80, cat:'hogar', name:'Tapete de Sala Pelo Largo Beige', desc:'Material denso de pelo largo suave 120x170cm acogedor.', price:199900, img:'https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&q=80&w=300' },
-        { id:81, cat:'hogar', name:'Cafetera de Prensa Francesa Vidrio', desc:'Cuerpo de borosilicato térmico con émbolo de acero inoxidable.', price:64900, img:'https://images.unsplash.com/photo-1577968897966-3d4325b36b61?auto=format&fit=crop&q=80&w=300' },
-        { id:82, cat:'hogar', name:'Organizador Vajilla Modular Bambú', desc:'Bandeja expandible con compartimentos para cajones.', price:49900, img:'https://images.unsplash.com/photo-1594224457860-23f1c5f37b8a?auto=format&fit=crop&q=80&w=300' },
-        { id:83, cat:'hogar', name:'Organizador Metálico Multiusos', desc:'Malla metálica rígida con separadores para documentos.', price:39900, img:'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&q=80&w=300' },
-        { id:84, cat:'hogar', name:'Velas Aromáticas Relajantes Soya', desc:'Tres frascos de vidrio con esencias florales relajantes.', price:42900, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&q=80&w=300' },
-        { id:85, cat:'drogueria', name:'Bloqueador Facial Isdin Fusion Water', desc:'Protector solar fluido facial base agua absorción inmediata FPS50.', price:124900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=300' },
-        { id:86, cat:'drogueria', name:'Sérum Hidratante Ácido Hialurónico', desc:'Concentrado restaurador de hidratación profunda frasco de 30ml.', price:94900, img:'https://images.unsplash.com/photo-1620916297397-a4a5402a3c6c?auto=format&fit=crop&q=80&w=300' },
-        { id:87, cat:'drogueria', name:'Gel Limpiador Purificante Face', desc:'Dermolimpiador purificante suave para pieles sensibles 400ml.', price:119900, img:'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&q=80&w=300' },
-        { id:88, cat:'drogueria', name:'Vitaminas Complete Complex x60', desc:'Fórmula completa desde la A al Zinc para vitalidad e inmunidad.', price:68900, img:'https://images.unsplash.com/photo-1584017911766-d451b3d0e843?auto=format&fit=crop&q=80&w=300' },
-        { id:89, cat:'drogueria', name:'Colágeno Hidrolizado Biotina Polvo', desc:'Suplemento soluble con biotina y vitamina C para articulaciones.', price:79900, img:'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&q=80&w=300' },
-        { id:90, cat:'drogueria', name:'Enjuague Bucal Mentol Refrescante 1L', desc:'Elimina bacterias orales causantes del mal aliento de forma segura.', price:34500, img:'https://images.unsplash.com/photo-1559591935-c6c92c6c4d3a?auto=format&fit=crop&q=80&w=300' },
-        { id:91, cat:'drogueria', name:'Crema Dental Protección Total x3u', desc:'Pack familiar de tres tubos con flúor para cuidado total.', price:28900, img:'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&q=80&w=300' },
-        { id:92, cat:'drogueria', name:'Shampoo Anticaspa Purificante Mentol', desc:'Limpieza profunda del cuero cabelludo con frescura de menta.', price:32900, img:'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?auto=format&fit=crop&q=80&w=300' },
-        { id:93, cat:'drogueria', name:'Jabón Líquido Hidratante Corporal', desc:'Fórmula cremosa humectante con dosificador para baño.', price:21900, img:'https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&q=80&w=300' },
-        { id:94, cat:'drogueria', name:'Suero Rehidratante Iones Coco', desc:'Bebida de hidratación de rápida absorción con electrolitos.', price:9500, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=300' },
-        { id:95, cat:'drogueria', name:'Geles Alcohol Desinfectantes Kit', desc:'Pack de bolsillo de alcohol en gel con aloe vera humectante.', price:14900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&q=80&w=300' },
-        { id:96, cat:'drogueria', name:'Proteína Aislada Whey Isolate Shake', desc:'Suplemento deportivo de suero purificado cero carbohidratos.', price:165000, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?auto=format&fit=crop&q=80&w=300' },
-        { id:97, cat:'comida', name:'Pizza Mediana Tradicional Crispy', desc:'Masa delgada crujiente, salsa artesanal y pepperoni.', price:34900, img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&q=80&w=300' },
-        { id:98, cat:'tecnologia', name:'Apple AirTag Localizador Oficial', desc:'Dispositivo magnético de rastreo de alta precisión para objetos.', price:169900, img:'https://images.unsplash.com/photo-1588444837495-c6cfcb537c22?auto=format&fit=crop&q=80&w=300' },
-        { id:99, cat:'mercado', name:'Café Tostado Grano Molido 500g', desc:'Tradicional grano molido con el sabor intenso de la mata.', price:14900, img:'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&q=80&w=300' },
-        { id:100,cat:'futbol', name:'Camiseta Selección Argentina Away', desc:'Diseño de visitante color azul oscuro Adidas campeones del mundo.', price:349900, img:'https://images.unsplash.com/photo-1518091043644-c1d4457512c6?auto=format&fit=crop&q=80&w=300' }
+        { id:1,  cat:'tecnologia', name:'Apple iPhone 16 Pro Max 256GB', desc:'Titanio de grado aeroespacial, chip M-Series avanzado y pantalla Super Retina XDR.', price:6499000, img:'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=400&q=80' },
+        { id:2,  cat:'tecnologia', name:'Apple iPhone 16 128GB Black', desc:'Control de cámara avanzado, chip A18, carcasa de aluminio premium reciclado.', price:3849000, img:'https://images.unsplash.com/photo-1510557880182-3d4d3cba35a5?auto=format&fit=crop&w=400&q=80' },
+        { id:3,  cat:'tecnologia', name:'Apple AirPods 4 Inalámbricos', desc:'Cancelación activa de ruido con ajuste ergonómico acústico renovado.', price:899900, img:'https://images.unsplash.com/photo-1588423771073-b8903fead714?auto=format&fit=crop&w=400&q=80' },
+        { id:4,  cat:'tecnologia', name:'Apple Watch Series 10 GPS 46mm', desc:'Carcasa de aluminio, pantalla OLED Always-On y sensores de salud integrados.', price:2149900, img:'https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?auto=format&fit=crop&w=400&q=80' },
+        { id:5,  cat:'tecnologia', name:'Apple MacBook Air 13" M3 256GB SSD', desc:'Procesador Apple Silicon M3, diseño ultradelgado en aluminio anodizado.', price:5499000, img:'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=80' },
+        { id:6,  cat:'tecnologia', name:'Sony PlayStation 5 Slim 1TB', desc:'Carga veloz con SSD de alta velocidad y soporte para gatillos adaptativos.', price:2399000, img:'https://images.unsplash.com/photo-1606813907291-d86eff9d8392?auto=format&fit=crop&w=400&q=80' },
+        { id:7,  cat:'tecnologia', name:'Televisor LG Smart TV 55" 4K', desc:'Pantalla UHD con inteligencia artificial ThinQ y colores nítidos.', price:1999900, img:'https://images.unsplash.com/photo-1593305841991-05c297ba4575?auto=format&fit=crop&w=400&q=80' },
+        { id:8,  cat:'tecnologia', name:'Parlante Bluetooth JBL Charge 5', desc:'Sonido pro potente e impermeable IP67 con batería de larga duración.', price:649900, img:'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=400&q=80' },
+        { id:9,  cat:'tecnologia', name:'Samsung Galaxy Tab S9 128GB', desc:'Pantalla AMOLED fluida de alto rendimiento, incluye lápiz óptico S-Pen.', price:2499900, img:'https://images.unsplash.com/photo-1632322779756-cd1b8948e524?auto=format&fit=crop&w=400&q=80' },
+        { id:10, cat:'tecnologia', name:'Cámara Mirrorless Sony Alpha 6400', desc:'Lente 16-50mm, enfoque automático ultrarrápido para fotografía y vlogs.', price:3999000, img:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&w=400&q=80' },
+        { id:11, cat:'tecnologia', name:'Nintendo Switch OLED Modelo', desc:'Pantalla de 7 pulgadas con contraste definido y base con puerto LAN.', price:1649900, img:'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?auto=format&fit=crop&w=400&q=80' },
+        { id:12, cat:'tecnologia', name:'Monitor Gamer ASUS 27" 165Hz', desc:'Panel IPS plano, tiempo de respuesta de 1ms, ideal para eSports.', price:1149900, img:'https://images.unsplash.com/photo-1527443224154-c4a573d5b1e0?auto=format&fit=crop&w=400&q=80' },
+        { id:13, cat:'comida', name:'Combo de Alitas Picantes Tradicionales', desc:'6 Alitas crujientes con salsa de la casa, papas medianas y gaseosa.', price:29900, img:'https://images.unsplash.com/photo-1569058242253-92a9c755a0ec?auto=format&fit=crop&w=400&q=80' },
+        { id:14, cat:'comida', name:'Hamburguesa Artesanal Doble Carne', desc:'Doble carne artesanal de res, queso cheddar, tocineta ahumada y vegetales.', price:38900, img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=400&q=80' },
+        { id:15, cat:'comida', name:'Pizza Familiar de Pepperoni', desc:'Masa tradicional delgada, pepperoni de la casa y abundante queso mozzarella.', price:45900, img:'https://images.unsplash.com/photo-1534308983496-4fabb1a015ee?auto=format&fit=crop&w=400&q=80' },
+        { id:16, cat:'comida', name:'Picada Criolla Mixta Mediana', desc:'Chicharrón carnudo, chorizo santandereano, papa criolla y arepitas.', price:54000, img:'https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=400&q=80' },
+        { id:17, cat:'comida', name:'Combo Sushi Rama Variado x10u', desc:'Cortes variados con salmón, aguacate, queso crema y ajonjolí tostado.', price:32900, img:'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?auto=format&fit=crop&w=400&q=80' },
+        { id:18, cat:'comida', name:'Arroz Especial con Pollo y Verduras', desc:'Receta típica casera con pollo desmechado, verdura fresca y papas fritas.', price:24900, img:'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&w=400&q=80' },
+        { id:19, cat:'comida', name:'Burrito Extremo de Carne Asada', desc:'Tortilla de trigo rellena de lomo, frijoles negros, guacamole y queso.', price:26900, img:'https://images.unsplash.com/photo-1626700051175-6818013e1d4f?auto=format&fit=crop&w=400&q=80' },
+        { id:20, cat:'comida', name:'Malteada Espesa de Chocolate Fino', desc:'Hecha con helado artesanal, salsa premium y crema chantilly.', price:14900, img:'https://images.unsplash.com/photo-1572490122747-3a9f2b92fe0b?auto=format&fit=crop&w=400&q=80' },
+        { id:21, cat:'comida', name:'Ensalada César con Pechuga', desc:'Mix de lechugas frescas, crutones crujientes, queso parmesano y pollo.', price:23500, img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=400&q=80' },
+        { id:22, cat:'comida', name:'Tacos Mexicanos al Pastor x3', desc:'Carne de cerdo adobada, piña fresca, cebolla picada y cilantro fino.', price:18900, img:'https://images.unsplash.com/photo-1551504734-5ee1c4a1479b?auto=format&fit=crop&w=400&q=80' },
+        { id:23, cat:'comida', name:'Lasaña Casera de Carne Bolognesa', desc:'Pasta artesanal por capas con carne picada de res, salsa y queso fundido.', price:29900, img:'https://images.unsplash.com/photo-1574894709920-11b28e7367e3?auto=format&fit=crop&w=400&q=80' },
+        { id:24, cat:'comida', name:'Porción Empanadas Crujientes x5', desc:'Masa de maíz frita rellena de carne aliñada, incluye ají casero.', price:11500, img:'https://images.unsplash.com/photo-1565557623262-b51c2513a641?auto=format&fit=crop&w=400&q=80' },
+        { id:25, cat:'mercado', name:'Whisky Escocés Blended 12 Años', desc:'Botella original de 750ml, blend premium añejado en roble.', price:187100, img:'https://images.unsplash.com/photo-1527281400683-1aefee6bcd90?auto=format&fit=crop&w=400&q=80' },
+        { id:26, cat:'mercado', name:'Arándanos Azules Frescos Caja 125g', desc:'Fruta fresca seleccionada de alta calidad rica en antioxidantes.', price:11900, img:'https://images.unsplash.com/photo-1606913550932-f5abbd06feab?auto=format&fit=crop&w=400&q=80' },
+        { id:27, cat:'mercado', name:'Café Molido Premium Tostado 500g', desc:'Café de origen 100% colombiano seleccionado de aroma intenso.', price:15900, img:'https://images.unsplash.com/photo-1559056199-641a0ac8b55e?auto=format&fit=crop&w=400&q=80' },
+        { id:28, cat:'mercado', name:'Aceite Puro de Girasol Botella 1L', desc:'Ideal para freír y cocinar de manera saludable, libre de grasas trans.', price:13900, img:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=400&q=80' },
+        { id:29, cat:'mercado', name:'Leche Entera Larga Vida Pack x6', desc:'Bolsas de 900ml de leche entera higienizada fortificada.', price:26400, img:'https://images.unsplash.com/photo-1563636619-e9143da7973b?auto=format&fit=crop&w=400&q=80' },
+        { id:30, cat:'mercado', name:'Arroz Blanco Extrafino Bolsa 5kg', desc:'Grano largo seleccionado, no se pega, ideal para preparaciones diarias.', price:21900, img:'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=400&q=80' },
+        { id:31, cat:'mercado', name:'Cerveza Nacional Rubia Latas Pack x6', desc:'Lager refrescante tradicional colombiana de 330ml por lata.', price:16800, img:'https://images.unsplash.com/photo-1608270586620-248524c67de9?auto=format&fit=crop&w=400&q=80' },
+        { id:32, cat:'mercado', name:'Filete de Salmón Premium Fresco 500g', desc:'Corte limpio empacado al vacío con piel listo para asar.', price:46900, img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?auto=format&fit=crop&w=400&q=80' },
+        { id:33, cat:'mercado', name:'Chocolate en Pastillas para Desayuno', desc:'Pastillas de cacao tradicional colombiano endulzado de 500g.', price:9400, img:'https://images.unsplash.com/photo-1481391319762-47dff72954d9?auto=format&fit=crop&w=400&q=80' },
+        { id:34, cat:'mercado', name:'Detergente Líquido Concentrado 3L', desc:'Fórmula avanzada para el cuidado de ropa blanca y de color.', price:42900, img:'https://images.unsplash.com/photo-1610557892470-455c9e37ab32?auto=format&fit=crop&w=400&q=80' },
+        { id:35, cat:'mercado', name:'Papel Higiénico Hoja Doble x12 Rollos', desc:'Rollos de doble hoja acolchada de máxima suavidad y resistencia.', price:23500, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80' },
+        { id:36, cat:'mercado', name:'Queso Crema Tajado Colanta 400g', desc:'Textura cremosa ideal para derretir o acompañar comidas.', price:15800, img:'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?auto=format&fit=crop&w=400&q=80' },
+        { id:37, cat:'maquillaje', name:'M·A·C Cosmetics Labial Matte', desc:'Labial clásico icónico acabado mate de ultra larga duración.', price:109900, img:'https://images.unsplash.com/photo-1586495777744-4e6b03b4e1ab?auto=format&fit=crop&w=400&q=80' },
+        { id:38, cat:'maquillaje', name:'Benefit Tinta Líquida Labios Benetint', desc:'Fórmula fluida roja translúcida para dar color a mejillas y labios 6ml.', price:144900, img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?auto=format&fit=crop&w=400&q=80' },
+        { id:39, cat:'maquillaje', name:'Clinique Bálsamo Labial Honey', desc:'Se adapta al tono natural de la piel ofreciendo un brillo ciruela sutil.', price:109900, img:'https://images.unsplash.com/photo-1512496015851-f90fb0806572?auto=format&fit=crop&w=400&q=80' },
+        { id:40, cat:'maquillaje', name:'Base L\'Oréal Infallible Fresh Wear', desc:'Textura ultra ligera, acabado natural mate con protección solar SPF.', price:84900, img:'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=400&q=80' },
+        { id:41, cat:'maquillaje', name:'Pestañina Maybelline Sky High Xl', desc:'Aporta longitud definida y volumen sin dejar grumos pesados.', price:59900, img:'https://images.unsplash.com/photo-1631214524020-3c69fc32ef39?auto=format&fit=crop&w=400&q=80' },
+        { id:42, cat:'maquillaje', name:'Paleta de Sombras Neutras 12 Tonos', desc:'Sombras compactas profesionales mate y satinadas de alta pigmentación.', price:229900, img:'https://images.unsplash.com/photo-1599733589046-10b0dc5d2706?auto=format&fit=crop&w=400&q=80' },
+        { id:43, cat:'maquillaje', name:'Bruma Fijadora Prep Prime Matte', desc:'Fijador de maquillaje translúcido hidrata y prolonga la duración.', price:149900, img:'https://images.unsplash.com/photo-1608248597481-12e7f79bf2f2?auto=format&fit=crop&w=400&q=80' },
+        { id:44, cat:'maquillaje', name:'Rubor Líquido Soft Peach Glow', desc:'Textura fluida ligera de fácil difuminado acabado natural.', price:145000, img:'https://images.unsplash.com/photo-1610992015732-2449b76344bc?auto=format&fit=crop&w=400&q=80' },
+        { id:45, cat:'maquillaje', name:'Corrector Líquido High Coverage', desc:'Oculta imperfecciones de forma ligera sin cuartear la piel.', price:129000, img:'https://images.unsplash.com/photo-1631730486784-e6b15e340a4c?auto=format&fit=crop&w=400&q=80' },
+        { id:46, cat:'maquillaje', name:'Iluminador Compacto Velvet Mineral', desc:'Aporta destellos de luz satinados para pómulos y rostro.', price:169900, img:'https://images.unsplash.com/photo-1503236823255-cb8b7d75a657?auto=format&fit=crop&w=400&q=80' },
+        { id:47, cat:'maquillaje', name:'Polvo Traslúcido Suelto Antibrillo', desc:'Matifica de forma invisible sellando bases de maquillaje líquidas.', price:189900, img:'https://images.unsplash.com/photo-1571781926291-c45a6f60d5f1?auto=format&fit=crop&w=400&q=80' },
+        { id:48, cat:'maquillaje', name:'Delineador de Ojos Plumón Negro', desc:'Punta de fieltro ultra fina trazo continuo a prueba de agua.', price:105000, img:'https://images.unsplash.com/photo-1583241800698-e8ab01830a23?auto=format&fit=crop&w=400&q=80' },
+        { id:49, cat:'moda', name:'Chaqueta de Jean Slim Fit Clásica', desc:'Denim de alta resistencia con botones metálicos y bolsillos frontales.', price:169900, img:'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?auto=format&fit=crop&w=400&q=80' },
+        { id:50, cat:'moda', name:'Camisa Casual de Lino Confort', desc:'Material fresco transpirable de corte moderno manga larga.', price:129900, img:'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=400&q=80' },
+        { id:51, cat:'moda', name:'Vestido Largo de Flores Veraniego', desc:'Diseño suelto liviano con tirantes delgados regulables.', price:179900, img:'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?auto=format&fit=crop&w=400&q=80' },
+        { id:52, cat:'moda', name:'Pantalón Cargo Jogger de Dril', desc:'Corte urbano con elástico en tobillos y amplios bolsillos laterales.', price:119900, img:'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=400&q=80' },
+        { id:53, cat:'moda', name:'Tenis Casuales Cuero Blanco Urbano', desc:'Suela de goma plana cosida, diseño minimalista unisex.', price:149900, img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80' },
+        { id:54, cat:'moda', name:'Blusa Satinada Elegante Corta', desc:'Textura lisa brillante ideal para oficina o ropa casual formal.', price:89900, img:'https://images.unsplash.com/photo-1548624149-f9c4d47a17c7?auto=format&fit=crop&w=400&q=80' },
+        { id:55, cat:'moda', name:'Saco de Lana Tejido Trenzado', desc:'Buso abrigado cuello redondo para clima frío de alta calidad.', price:139900, img:'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=400&q=80' },
+        { id:56, cat:'moda', name:'Jean Mom Fit Tiro Alto Azul', desc:'Mezclilla rígida duradera estilo retro bota semi recta.', price:139900, img:'https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=400&q=80' },
+        { id:57, cat:'moda', name:'Bermuda de Dril Confort Masculina', desc:'Corte regular fresco arriba de la rodilla con bolsillos traseros.', price:79900, img:'https://images.unsplash.com/photo-1591195853828-11db59a44f43?auto=format&fit=crop&w=400&q=80' },
+        { id:58, cat:'moda', name:'Camiseta Básica de Algodón Suave', desc:'Tejido peinado fresco cuello redondo ideal para uso diario.', price:45900, img:'https://images.unsplash.com/photo-1521572267360-ee0c2909d5a6?auto=format&fit=crop&w=400&q=80' },
+        { id:59, cat:'moda', name:'Gafas de Sol Estilo Aviador UV400', desc:'Lentes con filtro de protección UV400 y marco metálico ligero.', price:64900, img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=400&q=80' },
+        { id:60, cat:'moda', name:'Bolso Cruzado Manos Libres Cuero', desc:'Correa ajustable con herrajes y cremalleras de seguridad.', price:179900, img:'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=400&q=80' },
+        { id:61, cat:'futbol', name:'Camiseta Oficial Selección Colombia', desc:'Indumentaria local amarilla de competencia con hilos transpirables.', price:349900, img:'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=400&q=80' },
+        { id:62, cat:'futbol', name:'Camiseta Real Madrid Blanca Home', desc:'Equipación oficial blanca de local con escudo bordado premium.', price:399900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=400&q=80' },
+        { id:63, cat:'futbol', name:'Camiseta FC Barcelona Azulgrana', desc:'Modelo local a franjas tradicionales con tecnología deportiva fit.', price:399900, img:'https://images.unsplash.com/photo-1551854326-a5c57da0d7b5?auto=format&fit=crop&w=400&q=80' },
+        { id:64, cat:'futbol', name:'Camiseta Argentina Campeón Mundial', desc:'Diseño albiceleste oficial con los tres parches dorados de la FIFA.', price:379900, img:'https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&fit=crop&w=400&q=80' },
+        { id:65, cat:'futbol', name:'Camiseta Manchester City Sky Blue', desc:'Color celeste clásico con fibras ultralivianas de alto rendimiento.', price:349900, img:'https://images.unsplash.com/photo-1551958219-acbc595d4d52?auto=format&fit=crop&w=400&q=80' },
+        { id:66, cat:'futbol', name:'Camiseta Atlético Nacional Verde Home', desc:'Franjas verdes y blancas de local de la escuadra verdolaga.', price:279900, img:'https://images.unsplash.com/photo-1517466787929-bc90951d0974?auto=format&fit=crop&w=400&q=80' },
+        { id:67, cat:'futbol', name:'Camiseta Millonarios FC Azul Local', desc:'Diseño local azul del conjunto embajador con telas premium.', price:279900, img:'https://images.unsplash.com/photo-1577471488278-9df68574f8be?auto=format&fit=crop&w=400&q=80' },
+        { id:68, cat:'futbol', name:'Camiseta Inter de Miami Rosa Oficial', desc:'Modelo oficial color rosado pastel con costuras reforzadas.', price:349900, img:'https://images.unsplash.com/photo-1551854326-a5c57da0d7b5?auto=format&fit=crop&w=400&q=80' },
+        { id:69, cat:'futbol', name:'Camiseta Liverpool FC Classic Red', desc:'Color rojo tradicional liso con el ave fénix tejido en el pecho.', price:399900, img:'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=400&q=80' },
+        { id:70, cat:'futbol', name:'Camiseta Arsenal FC Home Red/White', desc:'Torso rojo con mangas blancas y cuello redondo de colección.', price:349900, img:'https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=400&q=80' },
+        { id:71, cat:'futbol', name:'Camiseta Juventus Black and White', desc:'Franjas verticales blancas y negras del club de Turín clásicas.', price:349900, img:'https://images.unsplash.com/photo-1556906781-9f9fd4d0f2c6?auto=format&fit=crop&w=400&q=80' },
+        { id:72, cat:'futbol', name:'Camiseta Bayern Múnich Red Club', desc:'Tonalidad roja oficial con paneles transpirables para juego.', price:349900, img:'https://images.unsplash.com/photo-1606107557195-0ebc338f4b77?auto=format&fit=crop&w=400&q=80' },
+        { id:73, cat:'hogar', name:'Difusor de Aromas Ultrasónico White', desc:'Esfera cerámica de 200ml vaporiza aceites de forma silenciosa.', price:119900, img:'https://images.unsplash.com/photo-1602928321679-560bb453f190?auto=format&fit=crop&w=400&q=80' },
+        { id:74, cat:'hogar', name:'Mesa Auxiliar Redonda Nórdica', desc:'Superficie lacada lisa con tres soportes de madera maciza.', price:189900, img:'https://images.unsplash.com/photo-1593642632823-8f9ef09e0ae1?auto=format&fit=crop&w=400&q=80' },
+        { id:75, cat:'hogar', name:'Lámpara de Escritorio LED Táctil', desc:'Brazo móvil ajustable con 3 niveles de temperatura de luz.', price:74900, img:'https://images.unsplash.com/photo-1532550907401-a500c9a57435?auto=format&fit=crop&w=400&q=80' },
+        { id:76, cat:'hogar', name:'Espejo Circular con Marco Dorado', desc:'Diseño flotante moderno ideal para sala o pasillo 60cm.', price:145000, img:'https://images.unsplash.com/photo-1616627547584-bf3cad8b80af?auto=format&fit=crop&w=400&q=80' },
+        { id:77, cat:'hogar', name:'Juego Sábanas Microfibra Matrimonial', desc:'Tela suave lavable, incluye sábana ajustable y fundas.', price:89900, img:'https://images.unsplash.com/photo-1584100936595-c0654b55a2e2?auto=format&fit=crop&w=400&q=80' },
+        { id:78, cat:'hogar', name:'Cojines de Terciopelo Gris Decorativos', desc:'Set de 2 fundas con relleno blando siliconado mullido.', price:59900, img:'https://images.unsplash.com/photo-1540574163026-643ea20ade25?auto=format&fit=crop&w=400&q=80' },
+        { id:79, cat:'hogar', name:'Planta Artificial Monstera Hogar', desc:'Hojas de aspecto real con maceta cerámica minimalista.', price:129900, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=400&q=80' },
+        { id:80, cat:'hogar', name:'Tapete de Sala Pelo Largo Beige', desc:'Material denso de pelo largo suave 120x170cm acogedor.', price:199900, img:'https://images.unsplash.com/photo-1600121848594-d8ee72416255?auto=format&fit=crop&w=400&q=80' },
+        { id:81, cat:'hogar', name:'Cafetera de Prensa Francesa Vidrio', desc:'Cuerpo de borosilicato térmico con émbolo de acero inoxidable.', price:64900, img:'https://images.unsplash.com/photo-1577968897966-c53ac47c33f1?auto=format&fit=crop&w=400&q=80' },
+        { id:82, cat:'hogar', name:'Organizador Vajilla Modular Bambú', desc:'Bandeja expandible con compartimentos para cajones.', price:49900, img:'https://images.unsplash.com/photo-1594224457860-1d39db5e9f91?auto=format&fit=crop&w=400&q=80' },
+        { id:83, cat:'hogar', name:'Organizador Metálico Multiusos', desc:'Malla metálica rígida con separadores para documentos.', price:39900, img:'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=400&q=80' },
+        { id:84, cat:'hogar', name:'Velas Aromáticas Relajantes Soya', desc:'Tres frascos de vidrio con esencias florales relajantes.', price:42900, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=400&q=80' },
+        { id:85, cat:'drogueria', name:'Bloqueador Facial Isdin Fusion Water', desc:'Protector solar fluido facial base agua absorción inmediata FPS50.', price:124900, img:'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=400&q=80' },
+        { id:86, cat:'drogueria', name:'Sérum Hidratante Ácido Hialurónico', desc:'Concentrado restaurador de hidratación profunda frasco de 30ml.', price:94900, img:'https://images.unsplash.com/photo-1620916297397-a4a5402a3c6c?auto=format&fit=crop&w=400&q=80' },
+        { id:87, cat:'drogueria', name:'Gel Limpiador Purificante Face', desc:'Dermolimpiador purificante suave para pieles sensibles 400ml.', price:119900, img:'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80' },
+        { id:88, cat:'drogueria', name:'Vitaminas Complete Complex x60', desc:'Fórmula completa desde la A al Zinc para vitalidad e inmunidad.', price:68900, img:'https://images.unsplash.com/photo-1584017911766-d67eb1d1b2fb?auto=format&fit=crop&w=400&q=80' },
+        { id:89, cat:'drogueria', name:'Colágeno Hidrolizado Biotina Polvo', desc:'Suplemento soluble con biotina y vitamina C para articulaciones.', price:79900, img:'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?auto=format&fit=crop&w=400&q=80' },
+        { id:90, cat:'drogueria', name:'Enjuague Bucal Mentol Refrescante 1L', desc:'Elimina bacterias orales causantes del mal aliento de forma segura.', price:34500, img:'https://images.unsplash.com/photo-1559591935-c4fa39527dad?auto=format&fit=crop&w=400&q=80' },
+        { id:91, cat:'drogueria', name:'Crema Dental Protección Total x3u', desc:'Pack familiar de tres tubos con flúor para cuidado total.', price:28900, img:'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=400&q=80' },
+        { id:92, cat:'drogueria', name:'Shampoo Anticaspa Purificante Mentol', desc:'Limpieza profunda del cuero cabelludo con frescura de menta.', price:32900, img:'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?auto=format&fit=crop&w=400&q=80' },
+        { id:93, cat:'drogueria', name:'Jabón Líquido Hidratante Corporal', desc:'Fórmula cremosa humectante con dosificador para baño.', price:21900, img:'https://images.unsplash.com/photo-1556228578-b98e50516a65?auto=format&fit=crop&w=400&q=80' },
+        { id:94, cat:'drogueria', name:'Suero Rehidratante Iones Coco', desc:'Bebida de hidratación de rápida absorción con electrolitos.', price:9500, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=400&q=80' },
+        { id:95, cat:'drogueria', name:'Geles Alcohol Desinfectantes Kit', desc:'Pack de bolsillo de alcohol en gel con aloe vera humectante.', price:14900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80' },
+        { id:96, cat:'drogueria', name:'Proteína Aislada Whey Isolate Shake', desc:'Suplemento deportivo de suero purificado cero carbohidratos.', price:165000, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?auto=format&fit=crop&w=400&q=80' },
+        { id:97, cat:'comida', name:'Pizza Mediana Tradicional Crispy', desc:'Masa delgada crujiente, salsa artesanal y pepperoni.', price:34900, img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80' },
+        { id:98, cat:'tecnologia', name:'Apple AirTag Localizador Oficial', desc:'Dispositivo magnético de rastreo de alta precisión para objetos.', price:169900, img:'https://images.unsplash.com/photo-1615735487485-e52b9af610c1?auto=format&fit=crop&w=400&q=80' },
+        { id:99, cat:'mercado', name:'Café Tostado Grano Molido 500g', desc:'Tradicional grano molido con el sabor intenso de la mata.', price:14900, img:'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&q=80' },
+        { id:100,cat:'futbol', name:'Camiseta Selección Argentina Away', desc:'Diseño de visitante color azul oscuro Adidas campeones del mundo.', price:349900, img:'https://images.unsplash.com/photo-1518091043644-c1d4457512aa?auto=format&fit=crop&w=400&q=80' }
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
