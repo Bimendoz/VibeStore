@@ -4485,35 +4485,6 @@
         vv.addEventListener('resize', update);
     })();
 
-    /* ═══ iOS KEYBOARD FIX ═══
-       visualViewport resizes when keyboard opens on iOS.
-       We ONLY move the input bar up — header is untouched.
-    ═══════════════════════════ */
-    (function iosKbFix() {
-        const vv = window.visualViewport;
-        if (!vv) return;
-
-        function onResize() {
-            const kbH = Math.max(0, window.innerHeight - vv.height);
-            
-            const input  = document.getElementById('chatInputArea');
-            const msgs   = document.getElementById('chatWorkspace');
-            const recBar = document.getElementById('recordingBar');
-            const reply  = document.getElementById('replyBar');
-
-            if (input)  input.style.bottom  = kbH + 'px';
-            if (recBar) recBar.style.bottom  = kbH + 'px';
-            if (reply && reply.classList.contains('show'))
-                        reply.style.bottom   = (kbH + 64) + 'px';
-
-            if (msgs) {
-                msgs.style.bottom = (kbH + 64) + 'px';
-                requestAnimationFrame(() => { msgs.scrollTop = msgs.scrollHeight; });
-            }
-        }
-
-        vv.addEventListener('resize', onResize, { passive: true });
-    })();
 
 </script>
 </body>
