@@ -2795,21 +2795,14 @@
     /* ── CHAT ── */
     /* ── QUICK PRESET SELECTION ── */
     window.selectPreset = function(btn, av, name, color) {
-        // Deselect all presets
         document.querySelectorAll('.alias-preset').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
-        // Apply avatar, color, and name
-        myAvatar = av;
-        myBubbleColor = color;
+        myAvatar = av; myBubbleColor = color;
         document.documentElement.style.setProperty('--bubble-mine', color);
         document.getElementById('nameInput').value = name;
-        // Sync avatar picker and color picker visually
-        document.querySelectorAll('.avatar-opt').forEach(b => {
-            b.classList.toggle('selected', b.getAttribute('data-av') === av);
-        });
-        document.querySelectorAll('.color-opt').forEach(b => {
-            b.classList.toggle('selected', b.getAttribute('data-color') === color);
-        });
+        document.querySelectorAll('.avatar-opt').forEach(b => b.classList.toggle('selected', b.getAttribute('data-av') === av));
+        document.querySelectorAll('.color-opt').forEach(b => b.classList.toggle('selected', b.getAttribute('data-color') === color));
+        setTimeout(() => joinChat(), 120);
     };
 
     /* ── AVATAR & BUBBLE COLOR SELECTION ── */
