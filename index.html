@@ -4468,48 +4468,24 @@
         // Check the 10-message autodestruct rule AFTER async decryption/render settles
         setTimeout(checkDestructThreshold, 300);
     });
-
-    /* ══ iOS KEYBOARD HANDLER ══
-       visualViewport tells us exactly how much the keyboard covers.
-       We move ONLY the input and messages bottom — header stays fixed always.
-    ══════════════════════════════ */
-    (function iosKeyboard() {
-        if (!window.visualViewport) return;
+    /* iOS keyboard: move input up, keep header fixed */
+    (function() {
         const vv = window.visualViewport;
-
-        function onViewportChange() {
-            const kbHeight = Math.max(0,
-                window.innerHeight - vv.height - vv.offsetTop
-            );
-            const inputEl = document.getElementById('chatInputArea');
-            const recEl   = document.getElementById('recordingBar');
-            const replyEl = document.getElementById('replyBar');
-            const msgsEl  = document.getElementById('chatWorkspace');
-
-            if (inputEl) inputEl.style.bottom  = kbHeight + 'px';
-            if (recEl)   recEl.style.bottom    = kbHeight + 'px';
-
-            // Move messages bottom up so last message stays visible
-            if (msgsEl) {
-                const inputH = parseInt(
-                    getComputedStyle(document.documentElement)
-                        .getPropertyValue('--input-h')
-                ) || 64;
-                msgsEl.style.bottom = (kbHeight + inputH) + 'px';
-                // Scroll to bottom
-                setTimeout(() => { msgsEl.scrollTop = msgsEl.scrollHeight; }, 50);
-            }
-
-            // Move reply bar too
-            if (replyEl && replyEl.classList.contains('show')) {
-                replyEl.style.bottom = (kbHeight + 64) + 'px';
+        if (!vv) return;
+        function update() {
+            const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+            const input = document.getElementById('chatInputArea');
+            const msgs  = document.getElementById('chatWorkspace');
+            const rec   = document.getElementById('recordingBar');
+            if (input) input.style.bottom = kb + 'px';
+            if (rec)   rec.style.bottom   = kb + 'px';
+            if (msgs)  {
+                msgs.style.bottom = (kb + 64) + 'px';
+                msgs.scrollTop = msgs.scrollHeight;
             }
         }
-
-        vv.addEventListener('resize', onViewportChange);
-        vv.addEventListener('scroll', onViewportChange);
+        vv.addEventListener('resize', update);
     })();
-
 </script>
 </body>
 </html>
