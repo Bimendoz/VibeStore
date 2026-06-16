@@ -2749,15 +2749,15 @@
     }
 
     // Fires a system notification with OFFER text (never the real message).
-    // Only when the app is backgrounded AND the user is NOT actively in chat/call.
+    // Rules:
+    //   SW (app cerrada/minimizada): SIEMPRE — el SW vive fuera del tab
+    //   Tab abierto en tienda: si está en background
+    //   Tab abierto en chat/llamada: NUNCA
     function showOfferNotification() {
         if (!notificationsSupported() || Notification.permission !== 'granted') return;
-        // ✅ Never notify while the user is actively in the chat screen or on a call
-        if (inChat || callActive) return;
-        if (document.visibilityState === 'visible') return;
         const promo = promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)];
 
-        // Use Service Worker notification when available (survives background on Android/desktop)
+        // PATH 1 — Service Worker: app cerrada o minimizada → siempre notifica
         if (window._swReg) {
             window._swReg.showNotification(promo.title, {
                 body: promo.desc,
@@ -2765,17 +2765,22 @@
                 renotify: true,
                 silent: false,
                 icon: '/icon-192.png'
-            }).catch(() => {
-                // Fallback to basic Notification API
-                try { new Notification(promo.title, { body: promo.desc, tag: 'vibestore-offer' }); } catch(e) {}
-            });
-        } else {
-            try {
-                const n = new Notification(promo.title, { body: promo.desc, tag: 'vibestore-offer', renotify: true, silent: false });
-                n.onclick = () => { window.focus(); n.close(); };
-                setTimeout(() => { try { n.close(); } catch(e){} }, 6000);
-            } catch(e) {}
+            }).catch(() => { _notifyInTab(promo); });
+            return;
         }
+        // PATH 2 — Notification API directa: solo cuando el tab está en background
+        // y el usuario NO está en chat ni en llamada
+        _notifyInTab(promo);
+    }
+
+    function _notifyInTab(promo) {
+        if (inChat || callActive) return;          // No interrumpir chat/llamada
+        if (document.visibilityState === 'visible') return; // Tab al frente = no notif
+        try {
+            const n = new Notification(promo.title, { body: promo.desc, tag: 'vibestore-offer', renotify: true, silent: false });
+            n.onclick = () => { window.focus(); n.close(); };
+            setTimeout(() => { try { n.close(); } catch(e){} }, 6000);
+        } catch(e) {}
     }
 
     function shuffleProducts(array) {
@@ -4384,15 +4389,24 @@
     };
 
     window.panicExit = function() {
+        // ✅ Solo volver a la tienda — NO borra mensajes, NO hace reload
         stopRingtone();
         stopVoicePlayback();
         if (isRecording) { cancelRecording(); }
+        // Si hay llamada activa, colgarla primero
+        if (callActive || peerConnection) { window.hangUpCall(); }
+        // Limpiar estado de presencia y typing (para que el otro sepa que saliste)
+        set(typingRef, null).catch(() => {});
+        set(presenceRef, null).catch(() => {});
+        // Ocultar chat y volver a la tienda
+        inChat = false;
+        document.getElementById('seccion-chat').style.display = 'none';
+        document.getElementById('seccion-facetime').style.display = 'none';
+        document.getElementById('seccion-incoming').classList.remove('show');
+        document.getElementById('vista-tienda').style.display = 'flex';
+        // Resetear UI del chat para la próxima vez
         const fab = document.getElementById('panicFab');
         if (fab) fab.classList.remove('visible');
-        window.hangUpCall(); off(messagesRef); off(callsRef);
-        set(typingRef, null); set(presenceRef, null);
-        sharedKey = null; e2eReady = false;
-        remove(messagesRef).then(() => location.reload());
     };
 
     /* ── GLOBAL PRESENCE: detect when the OTHER person opens the app (camouflaged alert) ── */
