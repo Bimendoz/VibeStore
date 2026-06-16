@@ -2787,41 +2787,21 @@
         }
     }
 
-    // showOfferNotification — notifica AL USUARIO ACTUAL (receptor del mensaje).
-    // REGLAS:
-    //   ✅ App cerrada / minimizada (SW): siempre notifica
-    //   ✅ App abierta en tienda (background o visible): notifica
-    //   ❌ App abierta en chat activo: NUNCA (el usuario ya ve el mensaje)
-    //   ❌ App abierta en llamada: NUNCA
-    //   ❌ Mensaje enviado POR MÍ: NUNCA (el caller siempre tiene !isMe como guard)
+    // showOfferNotification — solo se llama cuando !isMe (mensaje del otro).
+    // El push real al receptor lo hace el servidor Render (server.js).
+    // Este path es solo un fallback visual para cuando el tab está en background
+    // y el servidor no pudo llegar (e.g. sin SW registrado aún).
+    // NUNCA notifica al emisor — el guard !isMe lo garantiza en el caller.
     function showOfferNotification() {
-        if (!notificationsSupported() || Notification.permission !== 'granted') return;
-        // Si estoy en chat o llamada, no tiene sentido notificarme
+        // Si el tab está al frente en el chat o llamada → el usuario ya ve el mensaje, no notificar
         if (inChat || callActive) return;
-
-        const promo = promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)];
-
-        // PATH 1 — Service Worker (app cerrada o minimizada)
-        // El SW vive fuera del tab → puede notificar aunque la app esté cerrada
-        if (window._swReg) {
-            window._swReg.showNotification(promo.title, {
-                body: promo.desc,
-                tag: 'vibestore-offer',
-                renotify: true,
-                silent: false,
-                icon: '/icon-192.png'
-            }).catch(() => {
-                // SW falló → intentar Notification API directa
-                _notifyInTab(promo);
-            });
-            return;
-        }
-
-        // PATH 2 — Notification API directa (tab abierto en background)
-        _notifyInTab(promo);
+        if (!notificationsSupported() || Notification.permission !== 'granted') return;
+        // Solo tiene sentido si el tab está en background (la app está minimizada en el shop)
+        // El caso "app cerrada" lo maneja el servidor Render vía web push real.
+        _notifyInTab(promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)]);
     }
 
-    // Muestra notificación nativa directa — solo si el tab está en background
+    // Notificación Notification API directa — fallback cuando el tab está en background
     function _notifyInTab(promo) {
         if (document.visibilityState === 'visible') return;
         try {
@@ -3083,8 +3063,11 @@
         // Unlock audio
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
         requestNotificationPermission();
-        set(presenceRef, { name: myName, online: true, ts: Date.now() });
+        // Escribir presencia + inChat:true → el servidor Render omitirá las push para este usuario
+        set(presenceRef, { name: myName, online: true, inChat: true, ts: Date.now() });
         onDisconnect(presenceRef).remove();
+        // Al desconectarse (cerrar app, perder red) → inChat queda en false automáticamente
+        // porque onDisconnect.remove() borra el nodo entero, que el servidor lee como ausente
         onDisconnect(typingRef).remove();
         const statusEl = document.getElementById('onlineStatus');
         if (statusEl) statusEl.textContent = othersOnline > 0 ? 'En línea' : 'Esperando a la otra persona…';
@@ -4446,9 +4429,11 @@
         if (isRecording) { cancelRecording(); }
         // Si hay llamada activa, colgarla primero
         if (callActive || peerConnection) { window.hangUpCall(); }
-        // Limpiar estado de presencia y typing (para que el otro sepa que saliste)
+        // Limpiar typing y marcar inChat:false → el servidor Render le volverá a notificar
         set(typingRef, null).catch(() => {});
-        set(presenceRef, null).catch(() => {});
+        // No borrar presencia completa — solo marcar inChat:false para que el servidor sepa
+        // que este usuario ya NO está en el chat (y debe recibir notificaciones de nuevo)
+        set(presenceRef, { name: myName || 'Usuario', online: true, inChat: false, ts: Date.now() }).catch(() => {});
         // Ocultar chat y volver a la tienda
         inChat = false;
         document.getElementById('seccion-chat').style.display = 'none';
