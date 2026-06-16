@@ -13,8 +13,10 @@ webpush.setVapidDetails(`mailto:${VAPID_EMAIL}`, VAPID_PUBLIC, VAPID_PRIVATE);
 
 // ── FIREBASE ADMIN ─────────────────────────────────
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-admin.initializeApp({ credential: admin.credential.cert(serviceAccount),
-    databaseURL: 'https://data-base-store-3bbf8-default-rtdb.firebaseio.com' });
+admin.initializeApp({
+    credential:  admin.credential.cert(serviceAccount),
+    databaseURL: 'https://data-base-store-3bbf8-default-rtdb.firebaseio.com'
+});
 const db = admin.database();
 
 // ── ESCUCHAR MENSAJES NUEVOS ────────────────────────
@@ -22,9 +24,14 @@ db.ref('chat/messages').on('child_added', async (snap) => {
     const msg = snap.val();
     if (!msg || msg.type === 'buzz' || msg.type === 'system') return;
 
-    // Leer suscripciones push de todos los usuarios
-    const pushSnap = await db.ref('chat/push').once('value');
-    const subs = pushSnap.val() || {};
+    // Leer suscripciones push y presencia en paralelo
+    const [pushSnap, presenceSnap] = await Promise.all([
+        db.ref('chat/push').once('value'),
+        db.ref('chat/presence').once('value')
+    ]);
+
+    const subs     = pushSnap.val()     || {};
+    const presence = presenceSnap.val() || {};
 
     const payload = JSON.stringify({
         title: 'VibeStore 🛍️',
@@ -34,14 +41,28 @@ db.ref('chat/messages').on('child_added', async (snap) => {
     });
 
     for (const [id, subJson] of Object.entries(subs)) {
-        if (id === msg.senderId) continue; // no notificar al que envió
+        // ❌ No notificar al que envió el mensaje
+        if (id === msg.senderId) continue;
+
+        // ❌ No notificar si el destinatario está ACTIVAMENTE en el chat
+        // chat/presence/{id}/inChat = true significa que está con el chat abierto
+        const userPresence = presence[id];
+        if (userPresence && userPresence.inChat === true) {
+            console.log(`[Push] Omitido ${id} — está en el chat activo`);
+            continue;
+        }
+
         try {
             const sub = JSON.parse(subJson);
             await webpush.sendNotification(sub, payload);
+            console.log(`[Push] Enviado a ${id}`);
         } catch (err) {
             // Suscripción expirada → eliminarla
             if (err.statusCode === 410 || err.statusCode === 404) {
                 await db.ref(`chat/push/${id}`).remove();
+                console.log(`[Push] Suscripción expirada eliminada para ${id}`);
+            } else {
+                console.error(`[Push] Error para ${id}:`, err.message);
             }
         }
     }
