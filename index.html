@@ -745,6 +745,10 @@
         }
         .color-opt.selected { border-color:#fff; transform:scale(1.2); box-shadow:0 0 0 2px var(--bubble-mine); }
         [data-theme="light"] .color-opt.selected { border-color:#111; }
+        /* FIX 10: checkmark visible en color seleccionado */
+        .color-check { display:none; font-size:0.65rem; color:#fff; font-weight:900; pointer-events:none; line-height:1; }
+        .color-opt   { position:relative; display:flex; align-items:center; justify-content:center; }
+        .color-opt.selected .color-check { display:block; position:absolute; }
 
         .name-input-wrap { margin-bottom:0.85rem; }
         .name-input-wrap input {
@@ -2383,9 +2387,11 @@
         { urls: 'stun:stun2.l.google.com:19302' }
     ];
     let rtcConfig = { iceServers: FALLBACK_ICE, iceCandidatePoolSize: 10 };
+    let rtcConfigFetched = false; // FIX 3: evitar doble fetch al servidor TURN
 
     // Fetch live TURN credentials from Metered and build the RTC config
     async function buildRtcConfig() {
+        if (rtcConfigFetched) return rtcConfig; // FIX 3: reusar config cacheado
         try {
             const res = await fetch(METERED_TURN_URL);
             const iceServers = await res.json();
@@ -2394,6 +2400,7 @@
                 const turnCount = iceServers.filter(s => String(s.urls).includes('turn')).length;
                 console.log('[VibeCall] TURN servers cargados:', turnCount, 'de', iceServers.length, 'total');
                 if (turnCount === 0) showToast('Aviso: sin servidores TURN, la llamada podría fallar');
+                rtcConfigFetched = true; // FIX 3
                 return rtcConfig;
             }
             console.warn('[VibeCall] Respuesta TURN vacía, usando solo STUN');
@@ -2402,6 +2409,7 @@
             showToast('No se pudo cargar el servidor de llamadas. Revisa tu internet.');
         }
         rtcConfig = { iceServers: FALLBACK_ICE, iceCandidatePoolSize: 10 };
+        rtcConfigFetched = true; // FIX 3
         return rtcConfig;
     }
     const SECRET_PIN_HASH = "10231121";
@@ -2782,6 +2790,11 @@
     window.toggleTheme = function() { const c = document.body.getAttribute('data-theme'); const dark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-theme', (c === 'dark' || (!c && dark)) ? 'light' : 'dark'); };
 
     /* ── CHAT ── */
+    // FIX 1: activar Send al pegar con Ctrl+V / paste
+    document.addEventListener('DOMContentLoaded', () => {
+        const ci = document.getElementById('chatInput');
+        if (ci) ci.addEventListener('paste', () => setTimeout(window.onChatInput, 0));
+    });
     /* ── QUICK PRESET SELECTION ── */
     window.selectPreset = function(btn, av, name, color) {
         // Deselect all presets
@@ -2852,7 +2865,7 @@
                     renderMessage(child.val(), key);
                 }
             });
-            setTimeout(checkDestructThreshold, 200);
+            // FIX 2: checkDestructThreshold es no-op, eliminado (200ms)
         } catch (e) {}
     }
 
@@ -3201,6 +3214,7 @@
         if (!isMe && inChat && initialLoadDone) {
             playMessageSound();
             vibrate(60);
+            if (window._notifyScrollBadge) window._notifyScrollBadge(); // FIX 8: badge mensajes no leídos
             // If the app is in the background, show a camouflaged OFFER notification (never the real text)
             showOfferNotification();
         }
@@ -3284,6 +3298,7 @@
     window.cancelRecording = function() {
         if (!isRecording) return;
         cancelFlag = true;
+        clearTimeout(recMaxTimeout); // FIX 9: evitar envío automático al cancelar
         stopRecorderTracks();
     };
 
@@ -3400,14 +3415,12 @@
         input.value = '';
         if (!file) return;
         if (!file.type.startsWith('image/')) { showToast('Eso no es una imagen'); return; }
-        compressImageToBlob(file, async (blob) => {
+        // FIX 6: una sola lectura FileReader, sin async innecesario
+        compressImageToBlob(file, (blob) => {
             if (!blob) { showToast('No se pudo procesar la imagen'); return; }
-            // Convert blob to base64 dataURL for Realtime DB
-            // (Firebase free tier = 1GB, ~4,000 photos before hitting it — fine for private chat)
             const reader = new FileReader();
-            reader.onloadend = async () => {
-                const dataUrl = reader.result;
-                push(messagesRef, { type: 'image', image: dataUrl, sender: myName, senderId: myId, ts: Date.now() });
+            reader.onloadend = () => {
+                push(messagesRef, { type: 'image', image: reader.result, sender: myName, senderId: myId, ts: Date.now() });
             };
             reader.readAsDataURL(blob);
         });
@@ -3667,7 +3680,7 @@
 
     let unsubIncoming = null;
     function listenForIncomingCalls() {
-        if (unsubIncoming) { try { unsubIncoming(); } catch(e){} }
+        if (unsubIncoming) { try { unsubIncoming(); } catch(e){} unsubIncoming = null; } // FIX 5
         // onValue returns its own unsubscribe function — use it instead of off(callsRef),
         // which would also kill the ICE candidate listeners living under chat/calls/*
         unsubIncoming = onValue(callsRef, async snap => {
@@ -4081,7 +4094,11 @@
         if (isRecording) { cancelRecording(); }
         const fab = document.getElementById('panicFab');
         if (fab) fab.classList.remove('visible');
-        window.hangUpCall(); off(messagesRef); off(callsRef);
+        window.hangUpCall();
+        off(messagesRef); off(callsRef);
+        off(ref(db,'chat/typing')); off(ref(db,'chat/presence'));
+        off(ref(db,'chat/lastSeen')); off(ref(db,'chat/push'));
+        if (unsubIncoming) { try { unsubIncoming(); } catch(e){} unsubIncoming = null; } // FIX 4
         set(typingRef, null); set(presenceRef, null);
         sharedKey = null; e2eReady = false;
         remove(messagesRef).then(() => location.reload());
@@ -4232,6 +4249,26 @@
         playMessageSound();
         vibrate([80, 50, 80]);
     }
+
+    // FIX 8: activar scrollFab con listener de scroll y badge de mensajes no leídos
+    (function() {
+        const ws    = document.getElementById('chatWorkspace');
+        const fab   = document.getElementById('scrollFab');
+        const badge = document.getElementById('scrollBadge');
+        if (!ws || !fab) return;
+        let unreadCount = 0;
+        ws.addEventListener('scroll', () => {
+            const atBottom = ws.scrollHeight - ws.scrollTop - ws.clientHeight < 100;
+            fab.classList.toggle('hidden', atBottom);
+            if (atBottom) { unreadCount = 0; badge.textContent = ''; badge.classList.remove('show'); }
+        }, { passive: true });
+        window._notifyScrollBadge = function() {
+            const atBottom = ws.scrollHeight - ws.scrollTop - ws.clientHeight < 100;
+            if (!atBottom) { unreadCount++; badge.textContent = unreadCount; badge.classList.add('show'); }
+        };
+        fab.classList.add('hidden');
+        fab.style.display = 'flex';
+    })();
 
     shuffleProducts(products);
     deriveStableKey();
@@ -4432,22 +4469,30 @@
             }
         });
 
-        // snap.forEach() respects the orderByChild('ts') ordering
+        // FIX 7: recolectar primero, renderizar secuencialmente para preservar orden con decrypt async
+        const pendingRender = [];
         snap.forEach(child => {
             const key = child.key;
             const msg = child.val();
             if (!seenKeys.has(key)) {
-                // Message from the other person while NOT in chat: show camouflage, don't render yet.
-                // Do NOT mark as seen, so it renders when the user enters the chat.
                 if (msg.senderId !== myId && !inChat && msg.type !== 'system') {
                     if (initialLoadDone && msg.type !== 'buzz') { triggerCamouflageOfferBanner(); showOfferNotification(); }
                     return;
                 }
-                // Mark seen synchronously BEFORE the async render to prevent any double-render
                 seenKeys.add(key);
-                renderMessage(msg, key);
-            } else {
-                // Already rendered: react to readBy + reaction changes
+                pendingRender.push({ key, msg });
+            }
+        });
+        (async () => {
+            for (const { key, msg } of pendingRender) {
+                await renderMessage(msg, key);
+            }
+        })();
+        // Actualizar mensajes ya renderizados (readBy + reaction)
+        snap.forEach(child => {
+            const key = child.key;
+            const msg = child.val();
+            if (seenKeys.has(key) && !pendingRender.find(p => p.key === key)) {
                 const wrap = document.getElementById(`wrap-${key}`);
                 if (!wrap) return;
                 const isMe = msg.senderId === myId;
@@ -4464,8 +4509,7 @@
         });
         // After the first batch, future messages count as "new arrivals" for sound
         if (!initialLoadDone) { setTimeout(() => { initialLoadDone = true; }, 600); }
-        // Check the 10-message autodestruct rule AFTER async decryption/render settles
-        setTimeout(checkDestructThreshold, 300);
+        // FIX 2: checkDestructThreshold es no-op, eliminado
     });
 </script>
 </body>
