@@ -1643,7 +1643,105 @@
         }
         .panic-fab { display:none !important; }
 
-        /* ══ CHAT FLOATING CAMERAS (circular bubbles while chatting during a call) ══ */
+        /* ══════════════════════════════════════════════════
+           CONNECTING ANIMATION — "Marcando" skeleton
+           Shown while ICE/TURN is negotiating (can take 5-30s).
+           Hides automatically when ICE reaches "connected".
+        ══════════════════════════════════════════════════ */
+        .ft-connecting-overlay {
+            position: absolute; inset: 0; z-index: 10;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 1.8rem;
+            background: rgba(5,5,12,0.65);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            pointer-events: none;
+        }
+        .ft-connecting-overlay.show { display: flex; }
+
+        /* Sonar rings — big, dramatic, FaceTime-style */
+        .ft-sonar {
+            position: relative; width: 160px; height: 160px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .ft-sonar-ring {
+            position: absolute; border-radius: 50%;
+            border: 2px solid var(--bubble-mine, #ff441f);
+            opacity: 0;
+            animation: sonarPulse 2.4s ease-out infinite;
+        }
+        .ft-sonar-ring:nth-child(1) { width:80px;  height:80px;  animation-delay: 0s;    }
+        .ft-sonar-ring:nth-child(2) { width:120px; height:120px; animation-delay: 0.55s; }
+        .ft-sonar-ring:nth-child(3) { width:160px; height:160px; animation-delay: 1.1s;  }
+        .ft-sonar-ring:nth-child(4) { width:200px; height:200px; animation-delay: 1.65s; }
+        @keyframes sonarPulse {
+            0%   { transform: scale(0.5); opacity: 0.85; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+        /* Center dot — beating heart */
+        .ft-sonar-dot {
+            width: 48px; height: 48px; border-radius: 50%;
+            background: var(--bubble-mine, #ff441f);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; line-height: 1;
+            box-shadow: 0 0 24px rgba(255,68,31,0.6);
+            animation: sonarDot 1.2s ease-in-out infinite alternate;
+            position: relative; z-index: 2;
+        }
+        @keyframes sonarDot {
+            from { transform: scale(0.88); box-shadow: 0 0 14px rgba(255,68,31,0.5); }
+            to   { transform: scale(1.08); box-shadow: 0 0 32px rgba(255,68,31,0.8); }
+        }
+
+        /* Skeleton text rows that shimmer while waiting */
+        .ft-connecting-texts {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 0.6rem;
+        }
+        .ft-connecting-title {
+            font-size: 1.1rem; font-weight: 800; color: #fff;
+            letter-spacing: -0.3px;
+        }
+        /* Animated ellipsis dots */
+        .ft-connecting-dots span {
+            display: inline-block;
+            width: 7px; height: 7px; border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            margin: 0 3px;
+            animation: dotBounce 1.4s ease-in-out infinite;
+        }
+        .ft-connecting-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .ft-connecting-dots span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes dotBounce {
+            0%,80%,100% { transform: translateY(0); opacity:0.5; }
+            40%         { transform: translateY(-7px); opacity:1; }
+        }
+        /* Step labels that cycle while waiting */
+        .ft-connecting-step {
+            font-size: 0.72rem; color: rgba(255,255,255,0.4);
+            font-weight: 600; letter-spacing: 0.4px;
+            min-height: 1.2em;
+            transition: opacity 0.4s;
+        }
+
+        /* Shimmer bar for visual candy */
+        .ft-connecting-bar {
+            width: 160px; height: 3px; border-radius: 3px;
+            background: rgba(255,255,255,0.1); overflow: hidden; position: relative;
+        }
+        .ft-connecting-bar::after {
+            content: ''; position: absolute; inset-block: 0;
+            width: 60%; border-radius: 3px;
+            background: linear-gradient(90deg, transparent, var(--bubble-mine,#ff441f), transparent);
+            animation: shimBar 1.8s ease-in-out infinite;
+        }
+        @keyframes shimBar {
+            0%   { left: -60%; }
+            100% { left: 110%; }
+        }
+
+        /* ── CHAT FLOATING CAMERAS (circular bubbles while chatting during a call) ══ */
         .chat-cam-bubbles {
             display: none;
             position: absolute;
@@ -2193,6 +2291,25 @@
 <!-- FACETIME SECTION -->
 <div id="seccion-facetime">
 
+    <!-- ══ CONNECTING ANIMATION OVERLAY (shown while ICE negotiates) ══ -->
+    <div class="ft-connecting-overlay" id="ftConnectingOverlay">
+        <div class="ft-sonar">
+            <div class="ft-sonar-ring"></div>
+            <div class="ft-sonar-ring"></div>
+            <div class="ft-sonar-ring"></div>
+            <div class="ft-sonar-ring"></div>
+            <div class="ft-sonar-dot" id="ftSonarDot">📞</div>
+        </div>
+        <div class="ft-connecting-texts">
+            <div class="ft-connecting-title" id="ftConnectingTitle">Estableciendo conexión</div>
+            <div class="ft-connecting-dots">
+                <span></span><span></span><span></span>
+            </div>
+            <div class="ft-connecting-step" id="ftConnectingStep">Localizando servidores…</div>
+            <div class="ft-connecting-bar"></div>
+        </div>
+    </div>
+
     <!-- Mesh gradient blobs (take user's bubble color) -->
     <div class="ft-bg">
         <div class="ft-blob ft-blob1"></div>
@@ -2632,9 +2749,11 @@
     }
 
     // Fires a system notification with OFFER text (never the real message).
-    // Works when the PWA/tab is open in the background (app not focused).
+    // Only when the app is backgrounded AND the user is NOT actively in chat/call.
     function showOfferNotification() {
         if (!notificationsSupported() || Notification.permission !== 'granted') return;
+        // ✅ Never notify while the user is actively in the chat screen or on a call
+        if (inChat || callActive) return;
         if (document.visibilityState === 'visible') return;
         const promo = promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)];
 
@@ -3585,8 +3704,8 @@
         // Insistent sound: several beeps
         let beeps = 0;
         const beepLoop = setInterval(() => { playMessageSound(); if (++beeps >= 4) clearInterval(beepLoop); }, 350);
-        // System notification if backgrounded
-        if (notificationsSupported() && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
+        // System notification if backgrounded AND not actively chatting/calling
+        if (notificationsSupported() && Notification.permission === 'granted' && document.visibilityState !== 'visible' && !inChat && !callActive) {
             try {
                 const n = new Notification('🔥 ¡OFERTA URGENTE!', {
                     body: '¡Última oportunidad! Entra YA antes de que se acabe.',
@@ -3651,7 +3770,47 @@
         .onfinish = callback;
     }
 
-    /* ── WEBRTC ── */
+    /* ── CONNECTING ANIMATION CONTROLLER ── */
+    let connectingStepInterval = null;
+    const CONNECTING_STEPS = [
+        'Localizando servidores…',
+        'Solicitando permisos de red…',
+        'Intercambiando claves…',
+        'Probando rutas de conexión…',
+        'Optimizando canal seguro…',
+        'Casi listo…',
+    ];
+
+    function showConnectingAnimation(callType) {
+        const overlay = document.getElementById('ftConnectingOverlay');
+        const dot     = document.getElementById('ftSonarDot');
+        const title   = document.getElementById('ftConnectingTitle');
+        if (!overlay) return;
+        dot.textContent   = callType === 'video' ? '🎥' : '📞';
+        title.textContent = callType === 'video' ? 'Estableciendo videollamada' : 'Estableciendo llamada de voz';
+        overlay.classList.add('show');
+
+        let stepIdx = 0;
+        const stepEl = document.getElementById('ftConnectingStep');
+        if (stepEl) stepEl.textContent = CONNECTING_STEPS[0];
+        clearInterval(connectingStepInterval);
+        connectingStepInterval = setInterval(() => {
+            stepIdx = (stepIdx + 1) % CONNECTING_STEPS.length;
+            if (stepEl) {
+                stepEl.style.opacity = '0';
+                setTimeout(() => {
+                    stepEl.textContent = CONNECTING_STEPS[stepIdx];
+                    stepEl.style.opacity = '1';
+                }, 200);
+            }
+        }, 2800);
+    }
+
+    function hideConnectingAnimation() {
+        clearInterval(connectingStepInterval);
+        const overlay = document.getElementById('ftConnectingOverlay');
+        if (overlay) overlay.classList.remove('show');
+    }
     async function setupLocalStream(type) {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: type === 'video' ? { facingMode: 'user', width: 480, height: 640 } : false });
@@ -3681,6 +3840,8 @@
         document.getElementById('ftCallType').textContent   = type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Llamando…';
         document.getElementById('btnFtVideo').style.display = 'flex'; // always show — tap to add camera
+        // ✅ Show connecting animation immediately so the user has something to watch
+        showConnectingAnimation(type);
         try {
             await setupLocalStream(type);
         } catch (err) {
@@ -3819,6 +3980,8 @@
         document.getElementById('ftCallType').textContent   = call.type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Conectando…';
         document.getElementById('btnFtVideo').style.display = 'flex'; // always show — tap to add camera
+        // ✅ Show connecting animation while ICE negotiates
+        showConnectingAnimation(call.type);
         try {
             await setupLocalStream(call.type);
         } catch (err) {
@@ -3882,6 +4045,8 @@
                 statusEl.textContent = 'Conectado';
                 callActive = true;
                 stopRingtone();
+                // ✅ Hide the connecting animation — we're live
+                hideConnectingAnimation();
                 startCallTimer();
                 startCallParticles();
                 // Show video container if it's a video call
@@ -4101,6 +4266,8 @@
         callActive = false;
         isMuted = false; isVideoOff = false;
         speakerOn = false;
+        // ✅ Always hide the connecting animation on cleanup
+        hideConnectingAnimation();
         // Reset video elements
         const rv = document.getElementById('remoteVideo');
         const lv = document.getElementById('localVideo');
@@ -4351,15 +4518,16 @@
     }
 
     // Camouflaged alert that the other person is connected — looks like a store/offer event.
+    // Only fires when the user is in the STORE, never during chat or call.
     function notifyOtherIsOnline(name) {
         const toastNode = document.getElementById('fakeOfferToast');
-        if (toastNode) {
+        if (toastNode && !inChat && !callActive) {
             document.getElementById('fakeOfferTitle').textContent = '🟢 ¡VibeStore está abierto!';
             document.getElementById('fakeOfferDesc').textContent = 'Ofertas en vivo disponibles ahora mismo. ¡Entra ya!';
             toastNode.classList.add('show');
             setTimeout(() => toastNode.classList.remove('show'), 5000);
         }
-        if (notificationsSupported() && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
+        if (notificationsSupported() && Notification.permission === 'granted' && document.visibilityState !== 'visible' && !inChat && !callActive) {
             try {
                 const n = new Notification('🟢 ¡VibeStore está abierto!', {
                     body: 'Ofertas en vivo disponibles ahora mismo. ¡Entra ya!',
