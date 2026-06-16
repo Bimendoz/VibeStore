@@ -1022,15 +1022,17 @@
 
         /* ── VIDEO ── */
         .ft-video-container { position:absolute; inset:0; z-index:2; }
-        .ft-video-remote    { width:100%; height:100%; object-fit:cover; }
+        /* Remote video fills the whole screen — object-fit:cover is correct here */
+        .ft-video-remote    { width:100%; height:100%; object-fit:cover; display:block; }
+        /* Local (selfie) PIP — starts at a comfortable 120x160 size */
         .ft-video-local {
-            width:110px; height:155px; border-radius:18px; display:block;
+            width:120px; height:160px; border-radius:18px; display:block;
             object-fit:cover; background:#111;
-            border:2px solid rgba(255,255,255,0.22);
-            box-shadow:0 6px 24px rgba(0,0,0,0.55);
-            transform:scaleX(-1);
+            border:2.5px solid rgba(255,255,255,0.28);
+            box-shadow:0 6px 24px rgba(0,0,0,0.6);
+            transform:scaleX(-1); /* mirror front cam */
             touch-action:none; cursor:grab;
-            transition:all 0.2s ease;
+            transition:width 0.2s ease, height 0.2s ease, border-radius 0.2s ease;
         }
         .ft-video-local:active { cursor:grabbing; }
 
@@ -1356,8 +1358,7 @@
 
         /* Video layer */
         .ft-video-container { position:absolute; inset:0; z-index:2; }
-        .ft-video-remote { width:100%; height:100%; object-fit:cover; }
-        
+        /* NOTE: ft-video-remote and ft-video-local styles are defined above (first block) */
 
         /* Top bar */
         .ft-topbar {
@@ -1559,22 +1560,29 @@
         }
 
         .ft-video-local-wrap {
-            position:absolute; bottom:9rem; right:1rem; z-index:4;
-            transition:all 0.2s ease;
+            position:absolute; bottom:9.5rem; right:1rem; z-index:4;
+            transition:all 0.22s cubic-bezier(0.32,0.72,0,1);
+            /* expanded by default — user taps ⤡ to shrink */
         }
-        .ft-video-local-wrap .pip-minimize { display:flex; }
+        /* Minimized: small circle */
         .ft-video-local-wrap.minimized .ft-video-local {
-            width:56px; height:56px; border-radius:50%;
+            width:64px; height:64px; border-radius:50%;
+        }
+        /* Expanded: restore full size */
+        .ft-video-local-wrap:not(.minimized) .ft-video-local {
+            width:120px; height:160px; border-radius:18px;
         }
         .pip-minimize {
-            position:absolute; top:5px; left:5px;
-            width:26px; height:26px; border-radius:50%;
-            background:rgba(0,0,0,0.65); border:1.5px solid rgba(255,255,255,0.25);
-            color:#fff; font-size:0.75rem; cursor:pointer;
+            position:absolute; top:6px; left:6px;
+            width:28px; height:28px; border-radius:50%;
+            background:rgba(0,0,0,0.72); border:1.5px solid rgba(255,255,255,0.3);
+            color:#fff; font-size:0.8rem; cursor:pointer;
             display:flex; align-items:center; justify-content:center;
             z-index:5; line-height:1;
-            box-shadow:0 2px 6px rgba(0,0,0,0.4);
+            box-shadow:0 2px 6px rgba(0,0,0,0.5);
+            transition:background 0.15s;
         }
+        .pip-minimize:active { background:rgba(255,255,255,0.25); }
         .msg-reply-quote {
             display:flex; flex-direction:column; gap:1px;
             background:rgba(0,0,0,0.18); border-radius:8px;
@@ -1634,6 +1642,56 @@
             50%    { box-shadow: 0 0 0 8px rgba(255,59,48,0), 0 2px 10px rgba(0,0,0,.35); }
         }
         .panic-fab { display:none !important; }
+
+        /* ══ CHAT FLOATING CAMERAS (circular bubbles while chatting during a call) ══ */
+        .chat-cam-bubbles {
+            display: none;
+            position: absolute;
+            top: calc(env(safe-area-inset-top, 44px) + 65px);
+            right: 0.85rem;
+            z-index: 600;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.55rem;
+            pointer-events: none;
+        }
+        .chat-cam-bubbles.visible { display: flex; pointer-events: all; }
+        .cam-bubble {
+            width: 82px; height: 82px; border-radius: 50%;
+            overflow: hidden; border: 3px solid rgba(255,255,255,0.28);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.55);
+            background: #111;
+            cursor: grab; touch-action: none;
+            position: relative; flex-shrink: 0;
+        }
+        .cam-bubble:active { cursor: grabbing; }
+        .cam-bubble video { width:100%; height:100%; object-fit:cover; display:block; }
+        .cam-bubble.local-bubble video { transform: scaleX(-1); }
+        .cam-bubble-label {
+            position:absolute; bottom:4px; left:0; right:0;
+            text-align:center; font-size:0.48rem; font-weight:700;
+            color:rgba(255,255,255,0.8); text-shadow:0 1px 3px rgba(0,0,0,0.9);
+            pointer-events:none; letter-spacing:0.3px;
+        }
+        .chat-call-pill {
+            display: none;
+            position: absolute;
+            top: calc(env(safe-area-inset-top, 44px) + 65px);
+            left: 0.85rem;
+            z-index: 600;
+            background: linear-gradient(135deg,#1e7e34,#34c759);
+            color: #fff; border-radius: 20px;
+            padding: 0.38rem 0.85rem;
+            font-size: 0.72rem; font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(52,199,89,0.4);
+            align-items: center; gap: 0.4rem;
+        }
+        .chat-call-pill.visible { display: flex; }
+        .chat-call-pill-dot {
+            width:7px; height:7px; border-radius:50%;
+            background:#fff; animation:pulse-presence 1.5s infinite;
+        }
     </style>
 </head>
 <body>
@@ -1819,7 +1877,27 @@
 <!-- CHAT SECTION -->
 <div id="seccion-chat">
 
-    <!-- ══ ALIAS / SETUP MODAL (slides up from bottom, Telegram style) ══ -->
+    <!-- ══ FLOATING CAMERA BUBBLES (visible while a call is active + user is in chat) ══ -->
+    <div class="chat-cam-bubbles" id="chatCamBubbles">
+        <!-- Remote camera (the other person) -->
+        <div class="cam-bubble" id="chatRemoteBubble">
+            <video id="chatRemoteVideo" autoplay playsinline></video>
+            <span class="cam-bubble-label">Ellos</span>
+        </div>
+        <!-- Local camera (selfie) -->
+        <div class="cam-bubble local-bubble" id="chatLocalBubble">
+            <video id="chatLocalVideo" autoplay playsinline muted></video>
+            <span class="cam-bubble-label">Tú</span>
+        </div>
+    </div>
+
+    <!-- Return-to-call pill (left side, while in chat during a call) -->
+    <div class="chat-call-pill" id="chatCallPill" onclick="returnToCall()">
+        <span class="chat-call-pill-dot"></span>
+        Volver a llamada
+    </div>
+
+    <!-- ══ ALIAS / SETUP MODAL ══ -->
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
             <h2>¡Bienvenido! 👋</h2>
@@ -2370,6 +2448,9 @@
     let cart = {}; let curCat = 'all'; let toastTimer;
     let myName = ''; let myId = 'user_' + Math.random().toString(36).slice(2,8);
     let seenKeys = new Set(); let inChat = false;
+    // Timestamp at which this session started — messages older than this are "history",
+    // not new arrivals, so they never trigger sound/vibration/notification
+    const sessionStartTs = Date.now();
     let localStream; let peerConnection; let activeCallRef;
     let isMuted = false; let isVideoOff = false;
     let callActive = false; // true only during a genuine ongoing call
@@ -3198,7 +3279,8 @@
         if (isMe && wasRead) { markSeenLabel(wrap); }
 
         // Sound + vibration when a NEW message arrives from the other person (after initial load)
-        if (!isMe && inChat && initialLoadDone) {
+        // Also guard with sessionStartTs so old messages loaded at startup never trigger sound
+        if (!isMe && inChat && initialLoadDone && msg.ts && msg.ts > sessionStartTs) {
             playMessageSound();
             vibrate(60);
             // If the app is in the background, show a camouflaged OFFER notification (never the real text)
@@ -3610,7 +3692,8 @@
         activeCallRef = push(callsRef);
         callActive = true;
         await set(activeCallRef, { type, caller: myName, callerId: myId, avatar: myAvatar || '📞', status: 'calling', ts: Date.now() });
-        await buildRtcConfig();   // fetch fresh TURN credentials
+        // ✅ Fetch TURN BEFORE creating RTCPeerConnection — critical for iOS
+        await buildRtcConfig();
         peerConnection = new RTCPeerConnection(rtcConfig);
         monitorConnection(peerConnection);
         remoteIceQueue = [];
@@ -3625,9 +3708,11 @@
             // Hide center avatar overlay during video
             const center = document.querySelector('.ft-center');
             if (center) center.style.opacity = '0';
-            // Show local video
+            // Show local video in call screen
             const lv = document.getElementById('localVideo');
-            if (localStream && lv) lv.srcObject = localStream;
+            if (localStream && lv) { lv.srcObject = localStream; lv.style.display = 'block'; }
+            // Also sync the chat camera bubbles if the user is currently in chat
+            syncChatCamBubbles();
         };
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
@@ -3743,7 +3828,8 @@
             showToast(err.message);
             return;
         }
-        await buildRtcConfig();   // fetch fresh TURN credentials
+        // ✅ Fetch TURN BEFORE creating RTCPeerConnection — critical for iOS
+        await buildRtcConfig();
         peerConnection = new RTCPeerConnection(rtcConfig);
         monitorConnection(peerConnection);
         remoteIceQueue = [];
@@ -3757,9 +3843,11 @@
             // Hide center avatar overlay during video
             const center = document.querySelector('.ft-center');
             if (center) center.style.opacity = '0';
-            // Show local video
+            // Show local video in call screen
             const lv = document.getElementById('localVideo');
-            if (localStream && lv) lv.srcObject = localStream;
+            if (localStream && lv) { lv.srcObject = localStream; lv.style.display = 'block'; }
+            // Also sync chat camera bubbles
+            syncChatCamBubbles();
         };
         // Set remote (the caller's offer) FIRST, then create our answer
         await peerConnection.setRemoteDescription(new RTCSessionDescription(call.offer));
@@ -3825,14 +3913,19 @@
     window.toggleMuteMic = function() {
         if (!localStream) return;
         isMuted = !isMuted;
-        localStream.getAudioTracks().forEach(t => t.enabled = !isMuted);
-        document.getElementById('btnFtMute').classList.toggle('muted', isMuted);
+        // Set enabled on all audio tracks (works on most platforms)
+        localStream.getAudioTracks().forEach(t => { t.enabled = !isMuted; });
+        const btn = document.getElementById('btnFtMute');
+        const lbl = document.getElementById('lblMute');
+        btn.classList.toggle('muted', isMuted);
+        if (lbl) lbl.textContent = isMuted ? 'Activar mic' : 'Silencio';
+        showToast(isMuted ? '🔇 Micrófono silenciado' : '🎤 Micrófono activo');
     };
     window.toggleVideoTrack = async function() {
         if (!localStream) return;
 
         if (isVideoOff) {
-            // Turn camera ON — if we only have audio tracks, add video
+            // Turn camera ON — if we only have audio tracks, request video
             const hasVideo = localStream.getVideoTracks().length > 0;
             if (!hasVideo) {
                 try {
@@ -3841,7 +3934,11 @@
                     });
                     vs.getVideoTracks().forEach(t => {
                         localStream.addTrack(t);
-                        if (peerConnection) peerConnection.addTrack(t, localStream);
+                        if (peerConnection) {
+                            const sender = peerConnection.getSenders().find(s => s.track && s.track.kind === 'video');
+                            if (sender) sender.replaceTrack(t);
+                            else peerConnection.addTrack(t, localStream);
+                        }
                     });
                 } catch(e) { showToast('No se pudo activar la cámara'); return; }
             } else {
@@ -3849,25 +3946,27 @@
             }
             isVideoOff = false;
         } else {
-            // Turn camera OFF
-            localStream.getVideoTracks().forEach(t => t.enabled = false);
+            // Turn camera OFF — only disable local video track, never touch remote
+            localStream.getVideoTracks().forEach(t => { t.enabled = false; });
             isVideoOff = true;
         }
 
         const lv  = document.getElementById('localVideo');
-        const vc  = document.getElementById('ftVideoContainer');
         const btn = document.getElementById('btnFtVideo');
         const lbl = document.getElementById('lblVideo');
 
+        // ⚠️ ONLY hide/show the LOCAL video element — NEVER the whole container
         if (lv) {
             lv.srcObject = localStream;
             lv.style.display = isVideoOff ? 'none' : 'block';
-            // Front camera should mirror (natural selfie view), rear should not
-            lv.style.transform = isVideoOff ? '' : 'scaleX(-1)'; // default front cam
+            lv.style.transform = isVideoOff ? '' : 'scaleX(-1)';
         }
-        if (vc) vc.style.display = isVideoOff ? 'none' : 'block';
+        const pipWrap = document.getElementById('pipWrap');
+        if (pipWrap) pipWrap.style.display = isVideoOff ? 'none' : 'block';
+
         btn.classList.toggle('video-off', isVideoOff);
         if (lbl) lbl.textContent = isVideoOff ? 'Cámara' : 'Apagar cam';
+        showToast(isVideoOff ? '📵 Cámara apagada' : '📷 Cámara activa');
     };
 
     /* ── SPEAKER / EARPIECE TOGGLE ── */
@@ -3950,13 +4049,39 @@
     window.minimizeCallToChat = function() {
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-chat').style.display = 'flex';
-        document.getElementById('returnCallBar').classList.add('show');
+        document.getElementById('returnCallBar').classList.remove('show');
+        // Show floating camera bubbles in chat
+        syncChatCamBubbles();
     };
     window.returnToCall = function() {
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('returnCallBar').classList.remove('show');
+        // Hide floating camera bubbles (not needed in call screen)
+        document.getElementById('chatCamBubbles').classList.remove('visible');
+        document.getElementById('chatCallPill').classList.remove('visible');
     };
+
+    // Sync the chat camera bubbles with the current call streams
+    function syncChatCamBubbles() {
+        const bubbles = document.getElementById('chatCamBubbles');
+        const pill    = document.getElementById('chatCallPill');
+        if (!callActive) {
+            bubbles.classList.remove('visible');
+            pill.classList.remove('visible');
+            return;
+        }
+        // Attach streams to the small chat bubbles
+        const chatLocal  = document.getElementById('chatLocalVideo');
+        const chatRemote = document.getElementById('chatRemoteVideo');
+        if (chatLocal && localStream) chatLocal.srcObject = localStream;
+        if (chatRemote) {
+            const remoteVid = document.getElementById('remoteVideo');
+            if (remoteVid && remoteVid.srcObject) chatRemote.srcObject = remoteVid.srcObject;
+        }
+        bubbles.classList.add('visible');
+        pill.classList.add('visible');
+    }
     window.hangUpCall = function() {
         if (activeCallRef) {
             const refToEnd = activeCallRef;
@@ -3976,6 +4101,22 @@
         callActive = false;
         isMuted = false; isVideoOff = false;
         speakerOn = false;
+        // Reset video elements
+        const rv = document.getElementById('remoteVideo');
+        const lv = document.getElementById('localVideo');
+        if (rv) { rv.srcObject = null; }
+        if (lv) { lv.srcObject = null; lv.style.display = 'none'; }
+        const ftVc = document.getElementById('ftVideoContainer');
+        if (ftVc) ftVc.style.display = 'none';
+        const ftCenter = document.querySelector('.ft-center');
+        if (ftCenter) ftCenter.style.opacity = '1';
+        // Clean up chat camera bubbles
+        const chatLocal  = document.getElementById('chatLocalVideo');
+        const chatRemote = document.getElementById('chatRemoteVideo');
+        if (chatLocal)  chatLocal.srcObject = null;
+        if (chatRemote) chatRemote.srcObject = null;
+        document.getElementById('chatCamBubbles').classList.remove('visible');
+        document.getElementById('chatCallPill').classList.remove('visible');
         const sb = document.getElementById('btnFtSpeaker');
         if (sb) { sb.classList.remove('speaker-on'); }
         const lbl = document.getElementById('lblSpeaker');
@@ -4308,14 +4449,16 @@
         remove(ref(db, `chat/pendingNotif/${myId}`));
     }
 
-    /* ── DRAGGABLE LOCAL VIDEO PIP + MINIMIZE ── */
+    /* ── DRAGGABLE LOCAL VIDEO PIP + MINIMIZE/MAXIMIZE ── */
     window.togglePipMinimize = function() {
         const wrap = document.getElementById('pipWrap');
-        if (wrap) {
-            wrap.classList.toggle('minimized');
-            const btn = document.getElementById('pipMinBtn');
-            if (btn) btn.textContent = wrap.classList.contains('minimized') ? '⤢' : '⤡';
-        }
+        const btn  = document.getElementById('pipMinBtn');
+        if (!wrap) return;
+        const isMin = wrap.classList.toggle('minimized');
+        if (btn) btn.textContent = isMin ? '⤢' : '⤡';
+        // Keep the video stream alive after resize
+        const lv = document.getElementById('localVideo');
+        if (lv && localStream && !lv.srcObject) lv.srcObject = localStream;
     };
 
     (function() {
