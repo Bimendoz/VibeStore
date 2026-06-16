@@ -184,8 +184,44 @@
         .badge.pop { animation: pop 0.3s cubic-bezier(0.36,0.07,0.19,0.97); }
         @keyframes pop { 0%,100%{transform:scale(1)} 40%{transform:scale(1.3)} 70%{transform:scale(0.95)} }
 
-        .promo-banner-top { background: #ffe600; color: #000; padding: 0.6rem 1rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.78rem; font-weight: 700; cursor: pointer; margin-bottom: 0.2rem; }
-        .promo-banner-top p { max-width: 85%; line-height: 1.3; }
+        /* ── PROMO TICKER (barra amarilla rotativa) ── */
+        .promo-banner-top {
+            background: #ffe600; color: #000;
+            padding: 0 1rem;
+            display: flex; align-items: center; justify-content: space-between;
+            font-size: 0.78rem; font-weight: 700; cursor: pointer;
+            margin-bottom: 0.2rem;
+            height: 44px; overflow: hidden; position: relative;
+        }
+        .promo-ticker-track {
+            flex: 1; overflow: hidden; position: relative; height: 100%;
+            display: flex; align-items: center;
+        }
+        .promo-ticker-item {
+            position: absolute; left: 0; right: 0;
+            display: flex; align-items: center; gap: 0.5rem;
+            line-height: 1.3; padding-right: 0.5rem;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: transform 0.45s cubic-bezier(0.32,0.72,0,1), opacity 0.35s ease;
+            pointer-events: none;
+        }
+        .promo-ticker-item.active {
+            opacity: 1; transform: translateY(0);
+            pointer-events: all;
+        }
+        .promo-ticker-item.exit {
+            opacity: 0; transform: translateY(-100%);
+        }
+        .promo-ticker-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #000; flex-shrink: 0; opacity: 0.4;
+        }
+        .promo-ticker-counter {
+            font-size: 0.65rem; font-weight: 800; opacity: 0.45;
+            white-space: nowrap; flex-shrink: 0; letter-spacing: 0.3px;
+        }
+        .promo-ticker-arrow { flex-shrink: 0; font-size: 0.9rem; opacity: 0.5; }
 
         .toast-promo-container { position: fixed; top: calc(var(--safe-top) + 65px); left: 50%; transform: translateX(-50%) translateY(-150px); background: var(--bg-card); border-left: 4px solid var(--purple-accent); padding: 0.9rem 1.1rem; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); z-index: 4000; opacity: 0; transition: transform 0.4s cubic-bezier(0.32,0.72,0,1), opacity 0.3s; display: flex; align-items: center; gap: 0.8rem; width: 92%; max-width: 400px; color: var(--text-main); pointer-events: none; }
         .toast-promo-container.show { transform: translateX(-50%) translateY(0); opacity: 1; pointer-events: all; }
@@ -1811,9 +1847,12 @@
         </div>
     </header>
 
-    <div class="promo-banner-top">
-        <p>¡Ofertas de hoy! Combo de hamburguesa artesanal + papas por $24.900 COP en restaurantes seleccionados.</p>
-        <span>→</span>
+    <div class="promo-banner-top" id="promoBanner" onclick="promoTickerNext()">
+        <div class="promo-ticker-track" id="promoTrack">
+            <!-- items inyectados por JS -->
+        </div>
+        <span class="promo-ticker-counter" id="promoCounter">1/10</span>
+        <span class="promo-ticker-arrow">→</span>
     </div>
 
     <div class="toast-promo-container" id="fakeOfferToast">
@@ -2748,16 +2787,22 @@
         }
     }
 
-    // Fires a system notification with OFFER text (never the real message).
-    // Rules:
-    //   SW (app cerrada/minimizada): SIEMPRE — el SW vive fuera del tab
-    //   Tab abierto en tienda: si está en background
-    //   Tab abierto en chat/llamada: NUNCA
+    // showOfferNotification — notifica AL USUARIO ACTUAL (receptor del mensaje).
+    // REGLAS:
+    //   ✅ App cerrada / minimizada (SW): siempre notifica
+    //   ✅ App abierta en tienda (background o visible): notifica
+    //   ❌ App abierta en chat activo: NUNCA (el usuario ya ve el mensaje)
+    //   ❌ App abierta en llamada: NUNCA
+    //   ❌ Mensaje enviado POR MÍ: NUNCA (el caller siempre tiene !isMe como guard)
     function showOfferNotification() {
         if (!notificationsSupported() || Notification.permission !== 'granted') return;
+        // Si estoy en chat o llamada, no tiene sentido notificarme
+        if (inChat || callActive) return;
+
         const promo = promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)];
 
-        // PATH 1 — Service Worker: app cerrada o minimizada → siempre notifica
+        // PATH 1 — Service Worker (app cerrada o minimizada)
+        // El SW vive fuera del tab → puede notificar aunque la app esté cerrada
         if (window._swReg) {
             window._swReg.showNotification(promo.title, {
                 body: promo.desc,
@@ -2765,19 +2810,25 @@
                 renotify: true,
                 silent: false,
                 icon: '/icon-192.png'
-            }).catch(() => { _notifyInTab(promo); });
+            }).catch(() => {
+                // SW falló → intentar Notification API directa
+                _notifyInTab(promo);
+            });
             return;
         }
-        // PATH 2 — Notification API directa: solo cuando el tab está en background
-        // y el usuario NO está en chat ni en llamada
+
+        // PATH 2 — Notification API directa (tab abierto en background)
         _notifyInTab(promo);
     }
 
+    // Muestra notificación nativa directa — solo si el tab está en background
     function _notifyInTab(promo) {
-        if (inChat || callActive) return;          // No interrumpir chat/llamada
-        if (document.visibilityState === 'visible') return; // Tab al frente = no notif
+        if (document.visibilityState === 'visible') return;
         try {
-            const n = new Notification(promo.title, { body: promo.desc, tag: 'vibestore-offer', renotify: true, silent: false });
+            const n = new Notification(promo.title || '📦 VibeStore', {
+                body: promo.desc || promo.body || '',
+                tag: 'vibestore-offer', renotify: true, silent: false
+            });
             n.onclick = () => { window.focus(); n.close(); };
             setTimeout(() => { try { n.close(); } catch(e){} }, 6000);
         } catch(e) {}
@@ -4556,8 +4607,81 @@
         vibrate([80, 50, 80]);
     }
 
+    /* ══ PROMO TICKER — 10 ofertas rotando cada 2 segundos ══ */
+    const PROMO_OFFERS = [
+        { emoji: '🍔', text: '¡Combo hamburguesa artesanal + papas por $24.900 COP en restaurantes seleccionados!' },
+        { emoji: '📱', text: '¡iPhone 16 Pro Max con $200.000 COP de descuento solo hoy en VibeStore!' },
+        { emoji: '🛒', text: '¡2x1 en productos de supermercado seleccionados. Oferta válida hasta agotar existencias!' },
+        { emoji: '💄', text: '¡Hasta 40% OFF en toda la línea de maquillaje M·A·C y Benefit esta semana!' },
+        { emoji: '👟', text: '¡Tenis y moda urbana con envío gratis en compras mayores a $80.000 COP!' },
+        { emoji: '⚽', text: '¡Camisetas oficiales de la Selección Colombia y Real Madrid con precio especial!' },
+        { emoji: '🏠', text: '¡Renueva tu hogar: 30% OFF en decoración, tapetes y muebles auxiliares!' },
+        { emoji: '💊', text: '¡Bienestar y salud: suplementos y cuidado personal con descuento exclusivo VibeStore!' },
+        { emoji: '🎮', text: '¡PlayStation 5 Slim disponible ahora. ¡Paga en cuotas sin interés con tu tarjeta!' },
+        { emoji: '☕', text: '¡Café colombiano premium 500g + cafetera de prensa francesa por solo $79.900 COP!' },
+    ];
+
+    let promoCurrentIdx = 0;
+    let promoExitIdx    = -1;
+    let promoInterval   = null;
+
+    function initPromoTicker() {
+        const track = document.getElementById('promoTrack');
+        if (!track) return;
+
+        // Crear todos los items de una vez
+        track.innerHTML = PROMO_OFFERS.map((o, i) => `
+            <div class="promo-ticker-item${i === 0 ? ' active' : ''}" id="promoItem${i}">
+                <span>${o.emoji}</span>
+                <span>${o.text}</span>
+            </div>
+        `).join('');
+
+        updatePromoCounter();
+
+        // Arrancar el ciclo automático cada 2 segundos
+        promoInterval = setInterval(promoTickerNext, 2000);
+    }
+
+    function promoTickerNext() {
+        const total = PROMO_OFFERS.length;
+        const prev  = promoCurrentIdx;
+        const next  = (promoCurrentIdx + 1) % total;
+
+        const prevEl = document.getElementById('promoItem' + prev);
+        const nextEl = document.getElementById('promoItem' + next);
+        if (!prevEl || !nextEl) return;
+
+        // Salida del item actual (sube hacia arriba)
+        prevEl.classList.remove('active');
+        prevEl.classList.add('exit');
+
+        // Entrada del siguiente (sube desde abajo)
+        nextEl.classList.remove('exit');
+        // Pequeño frame para que el navegador registre el estado inicial
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => { nextEl.classList.add('active'); });
+        });
+
+        // Limpiar clase exit del anterior después de la transición
+        const cleanPrev = prev;
+        setTimeout(() => {
+            const el = document.getElementById('promoItem' + cleanPrev);
+            if (el) el.classList.remove('exit');
+        }, 500);
+
+        promoCurrentIdx = next;
+        updatePromoCounter();
+    }
+
+    function updatePromoCounter() {
+        const el = document.getElementById('promoCounter');
+        if (el) el.textContent = `${promoCurrentIdx + 1}/${PROMO_OFFERS.length}`;
+    }
+
     shuffleProducts(products);
     deriveStableKey();
+    initPromoTicker();
 
     /* ══════════════════════════════════════════════════
        SERVICE WORKER + PUSH NOTIFICATIONS
@@ -4617,18 +4741,26 @@
         }, { onlyOnce: true });
     }
 
-    // Check for pending notifications on load
+    // Al cargar: leer si hay notif pendiente para MÍ y mostrarla
     async function checkPendingNotification() {
-        if (!myId || !window._swReg) return;
-        const snap = await get(ref(db, `chat/pendingNotif/${myId}`));
-        if (!snap.exists()) return;
-        const data = snap.val();
-        if (Date.now() - data.ts < 60000) { // Only show if less than 1 min old
-            window._swReg.showNotification(data.title, {
-                body: data.body, tag: 'vibestore-push'
-            }).catch(()=>{});
-        }
-        remove(ref(db, `chat/pendingNotif/${myId}`));
+        if (!myId) return;
+        try {
+            const snap = await get(ref(db, `chat/pendingNotif/${myId}`));
+            if (!snap.exists()) return;
+            const data = snap.val();
+            // Solo mostrar si llegó hace menos de 2 minutos
+            if (Date.now() - data.ts < 120000) {
+                const promo = { title: data.title || '📦 VibeStore', desc: data.body || data.desc || '' };
+                if (window._swReg) {
+                    window._swReg.showNotification(promo.title, {
+                        body: promo.desc, tag: 'vibestore-push', renotify: true
+                    }).catch(() => { _notifyInTab(promo); });
+                } else {
+                    _notifyInTab(promo);
+                }
+            }
+            remove(ref(db, `chat/pendingNotif/${myId}`));
+        } catch(e) {}
     }
 
     /* ── DRAGGABLE LOCAL VIDEO PIP + MINIMIZE/MAXIMIZE ── */
