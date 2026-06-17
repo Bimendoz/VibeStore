@@ -1828,8 +1828,22 @@
             <!-- Solo dos avatares -->
             <p class="color-label">Tu avatar</p>
             <div class="avatar-picker" id="avatarPicker" style="justify-content:center;gap:2rem;margin-bottom:1.4rem;">
-                <button class="avatar-opt selected" data-av="🌙" onclick="selectAvatar(this)" style="width:64px;height:64px;font-size:2rem;">🌙</button>
-                <button class="avatar-opt" data-av="🦁" onclick="selectAvatar(this)" style="width:64px;height:64px;font-size:2rem;">🦁</button>
+                <!-- Luna -->
+                <button class="avatar-opt selected" data-av="Luna" data-label="Luna" onclick="selectAvatar(this)"
+                    style="width:80px;height:80px;flex-direction:column;gap:0.3rem;border-radius:16px;">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                        <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
+                    </svg>
+                    <span style="font-size:0.72rem;font-weight:700;opacity:0.8;">Luna</span>
+                </button>
+                <!-- León -->
+                <button class="avatar-opt" data-av="León" data-label="León" onclick="selectAvatar(this)"
+                    style="width:80px;height:80px;flex-direction:column;gap:0.3rem;border-radius:16px;">
+                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
+                        <path d="M12 2C8.5 2 5.5 4 4 7c-1 0-2 1-2 2s1 2 2 2c.3 1.2.9 2.3 1.7 3.1C5 15.3 4 17 4 19h16c0-2-1-3.7-1.7-4.9.8-.8 1.4-1.9 1.7-3.1 1 0 2-1 2-2s-1-2-2-2c-1.5-3-4.5-5-8-5zm0 2c2.8 0 5.2 1.6 6.5 4H5.5C6.8 5.6 9.2 4 12 4zm-2 7a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-2 3c1.1 0 2 .4 2.7 1H9.3c.7-.6 1.6-1 2.7-1z"/>
+                    </svg>
+                    <span style="font-size:0.72rem;font-weight:700;opacity:0.8;">León</span>
+                </button>
             </div>
 
             <!-- 10 colores -->
@@ -2331,7 +2345,10 @@
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
-    let myName = ''; let myId = 'user_' + Math.random().toString(36).slice(2,8);
+    let myName = '';
+    // myId persistente — mismo dispositivo = mismo ID = una sola suscripción push
+    let myId = localStorage.getItem('vibestore_uid');
+    if (!myId) { myId = 'user_' + Math.random().toString(36).slice(2,8); localStorage.setItem('vibestore_uid', myId); }
     let seenKeys = new Set(); let inChat = false;
     let localStream; let peerConnection; let activeCallRef;
     let isMuted = false; let isVideoOff = false;
@@ -2765,7 +2782,7 @@
     };
 
     /* ── AVATAR & BUBBLE COLOR SELECTION ── */
-    let myAvatar = '🌙'; // default Luna
+    let myAvatar = 'Luna'; // default Luna
     let myBubbleColor = '#ff441f';
 
     window.selectAvatar = function(btn) {
@@ -2791,7 +2808,15 @@
         // Unlock audio
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
         requestNotificationPermission();
-        set(presenceRef, { name: myName, online: true, ts: Date.now() });
+        // inChat:true + ts → el servidor Render omite notif mientras estás chateando
+        // El ts se refresca cada 30s (heartbeat) para que el servidor lo considere activo
+        set(presenceRef, { name: myName, online: true, inChat: true, ts: Date.now() });
+        // Heartbeat cada 30s — si la app se cierra abruptamente el ts queda viejo
+        // y después de 2min el servidor vuelve a mandar push normalmente
+        if (window._presenceHB) clearInterval(window._presenceHB);
+        window._presenceHB = setInterval(function() {
+            if (inChat) set(presenceRef, { name: myName, online: true, inChat: true, ts: Date.now() });
+        }, 30000);
         onDisconnect(presenceRef).remove();
         onDisconnect(typingRef).remove();
         const statusEl = document.getElementById('onlineStatus');
@@ -3977,13 +4002,15 @@
         if (!label || !icon) return;
         if (notifMuted) {
             label.textContent = 'Activar notificaciones';
-            icon.innerHTML = `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-                <line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/>`;
+            // Campana tachada
+            icon.innerHTML = '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>' +
+                '<path d="M13.73 21a2 2 0 0 1-3.46 0"/>' +
+                '<line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/>';
         } else {
             label.textContent = 'Silenciar notificaciones';
-            icon.innerHTML = `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>`;
+            // Campana normal
+            icon.innerHTML = '<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>' +
+                '<path d="M13.73 21a2 2 0 0 1-3.46 0"/>';
         }
     }
 
@@ -4100,8 +4127,11 @@
     };
 
     window.panicExit = function() {
-        // Al salir del chat → reactivar notificaciones automáticamente
+        // Al salir del chat → reactivar notificaciones y limpiar estado
+        if (window._presenceHB) { clearInterval(window._presenceHB); window._presenceHB = null; }
         reactivateNotificationsOnExit();
+        // Marcar inChat:false para que el servidor sepa que saliste
+        set(presenceRef, { name: myName || 'Usuario', online: true, inChat: false, ts: Date.now() }).catch(function(){});
         stopRingtone();
         stopVoicePlayback();
         if (isRecording) { cancelRecording(); }
@@ -4284,19 +4314,21 @@
         try {
             const perm = await Notification.requestPermission();
             if (perm !== 'granted') return;
-
-            const existing = await window._swReg.pushManager.getSubscription();
-            if (existing) { window._pushSub = existing; return; }
-
-            const sub = await window._swReg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: VAPID_PUBLIC_KEY
-            });
+            // Reusar suscripción existente si hay una, o crear una nueva
+            let sub = await window._swReg.pushManager.getSubscription();
+            if (!sub) {
+                sub = await window._swReg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: VAPID_PUBLIC_KEY
+                });
+            }
             window._pushSub = sub;
-            // Store in Firebase so the other user can trigger notifications
-            if (myId) set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
-            console.log('[Push] Subscribed');
-        } catch(e) { console.log('[Push] Subscribe error:', e.message); }
+            // SIEMPRE guardar en Firebase — cubre el caso donde se borró el nodo push
+            if (myId) {
+                await set(ref(db, 'chat/push/' + myId), JSON.stringify(sub));
+                console.log('[Push] Suscripción registrada:', myId);
+            }
+        } catch(e) { console.log('[Push] Error:', e.message); }
     }
 
     // Show a real push notification to the other person via Firebase trigger
