@@ -191,32 +191,24 @@
             display: flex; align-items: center; justify-content: space-between;
             font-size: 0.78rem; font-weight: 700; cursor: pointer;
             margin-bottom: 0.2rem;
-            height: 44px; overflow: hidden; position: relative;
+            height: 44px; overflow: hidden;
         }
         .promo-ticker-track {
-            flex: 1; overflow: hidden; position: relative; height: 100%;
+            flex: 1; overflow: hidden; height: 44px;
             display: flex; align-items: center;
+            position: relative;
         }
-        .promo-ticker-item {
-            position: absolute; left: 0; right: 0;
-            display: flex; align-items: center; gap: 0.5rem;
+        /* Un solo slot visible — swap por JS cambiando el texto directamente */
+        .promo-ticker-slot {
+            width: 100%; display: flex; align-items: center; gap: 0.45rem;
             line-height: 1.3; padding-right: 0.5rem;
-            opacity: 0;
-            transform: translateY(100%);
-            transition: transform 0.45s cubic-bezier(0.32,0.72,0,1), opacity 0.35s ease;
-            pointer-events: none;
+            will-change: transform, opacity;
         }
-        .promo-ticker-item.active {
-            opacity: 1; transform: translateY(0);
-            pointer-events: all;
-        }
-        .promo-ticker-item.exit {
-            opacity: 0; transform: translateY(-100%);
-        }
-        .promo-ticker-dot {
-            width: 7px; height: 7px; border-radius: 50%;
-            background: #000; flex-shrink: 0; opacity: 0.4;
-        }
+        /* Slide-up animation al cambiar */
+        @keyframes tickerSlideIn  { from { transform:translateY(100%); opacity:0; } to { transform:translateY(0); opacity:1; } }
+        @keyframes tickerSlideOut { from { transform:translateY(0); opacity:1; } to { transform:translateY(-100%); opacity:0; } }
+        .promo-ticker-slot.slide-in  { animation: tickerSlideIn  0.4s cubic-bezier(0.32,0.72,0,1) forwards; }
+        .promo-ticker-slot.slide-out { animation: tickerSlideOut 0.35s ease forwards; }
         .promo-ticker-counter {
             font-size: 0.65rem; font-weight: 800; opacity: 0.45;
             white-space: nowrap; flex-shrink: 0; letter-spacing: 0.3px;
@@ -1059,7 +1051,7 @@
         /* ── VIDEO ── */
         .ft-video-container { position:absolute; inset:0; z-index:2; }
         /* Remote video fills the whole screen — object-fit:cover is correct here */
-        .ft-video-remote    { width:100%; height:100%; object-fit:cover; display:block; }
+        .ft-video-remote    { width:100%; height:100%; object-fit:contain; display:block; background:#000; }
         /* Local (selfie) PIP — starts at a comfortable 120x160 size */
         .ft-video-local {
             width:120px; height:160px; border-radius:18px; display:block;
@@ -1848,8 +1840,8 @@
     </header>
 
     <div class="promo-banner-top" id="promoBanner" onclick="promoTickerNext()">
-        <div class="promo-ticker-track" id="promoTrack">
-            <!-- items inyectados por JS -->
+        <div class="promo-ticker-track">
+            <div class="promo-ticker-slot" id="promoSlot"></div>
         </div>
         <span class="promo-ticker-counter" id="promoCounter">1/10</span>
         <span class="promo-ticker-arrow">→</span>
@@ -2602,7 +2594,11 @@
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
-    let myName = ''; let myId = 'user_' + Math.random().toString(36).slice(2,8);
+    let myName = '';
+    // Persistir myId en sessionStorage para que sea consistente aunque se recargue la página.
+    // Sin esto, cada recarga genera un nuevo ID y todos los mensajes propios aparecen como "theirs".
+    let myId = sessionStorage.getItem('vibestore_uid');
+    if (!myId) { myId = 'user_' + Math.random().toString(36).slice(2,8); sessionStorage.setItem('vibestore_uid', myId); }
     let seenKeys = new Set(); let inChat = false;
     // Timestamp at which this session started — messages older than this are "history",
     // not new arrivals, so they never trigger sound/vibration/notification
@@ -3537,11 +3533,22 @@
         clearInterval(recTimerInterval);
         clearTimeout(recMaxTimeout);
         isRecording = false;
-        setRecordingStatus(false); // clear the "recording…" indicator for the other person
+        setRecordingStatus(false);
         document.getElementById('btnMic').classList.remove('recording');
         document.getElementById('recordingBar').classList.remove('show');
         document.getElementById('chatInputArea').style.display = 'flex';
-        try { if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop(); } catch (e) {}
+        // En iOS Safari ondataavailable puede no disparar el último chunk antes de onstop.
+        // requestData() fuerza la entrega del chunk pendiente ANTES de stop().
+        try {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+                mediaRecorder.requestData(); // flush último chunk
+                setTimeout(() => {
+                    try { if (mediaRecorder.state !== 'inactive') mediaRecorder.stop(); } catch(e) {}
+                }, 80); // pequeño delay para que llegue el chunk
+            } else if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+            }
+        } catch (e) {}
     }
 
     async function handleRecordingStop() {
@@ -4097,16 +4104,18 @@
                 statusEl.textContent = 'Reconectando…';
                 // Give it a moment to recover on its own
             } else if (st === 'failed') {
-                // Try an ICE restart once before giving up
-                statusEl.textContent = 'Reintentando…';
+                // Intentar ICE restart antes de rendirse — el TURN gratuito puede tardar
+                statusEl.textContent = 'Reintentando conexión…';
                 try { pc.restartIce && pc.restartIce(); } catch (e) {}
+                // Dar 25 segundos — suficiente para que el TURN gratuito responda
                 setTimeout(() => {
-                    if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'disconnected') {
+                    if (pc.iceConnectionState === 'failed' || pc.iceConnectionState === 'closed') {
                         statusEl.textContent = 'No se pudo conectar';
-                        showToast('No se pudo conectar. Revisa que ambos tengan internet.');
+                        showToast('No se pudo conectar. Asegúrate de tener buena señal.');
                         hangUpCall();
                     }
-                }, 4000);
+                    // Si ya conectó o está reconectando, no hacer nada
+                }, 25000);
             }
         };
         // Log ICE gathering so we know if TURN/STUN candidates are being created
@@ -4607,56 +4616,47 @@
     ];
 
     let promoCurrentIdx = 0;
-    let promoExitIdx    = -1;
     let promoInterval   = null;
+    let promoAnimating  = false;
 
     function initPromoTicker() {
-        const track = document.getElementById('promoTrack');
-        if (!track) return;
-
-        // Crear todos los items de una vez
-        track.innerHTML = PROMO_OFFERS.map((o, i) => `
-            <div class="promo-ticker-item${i === 0 ? ' active' : ''}" id="promoItem${i}">
-                <span>${o.emoji}</span>
-                <span>${o.text}</span>
-            </div>
-        `).join('');
-
+        const slot = document.getElementById('promoSlot');
+        if (!slot) return;
+        // Mostrar la primera oferta sin animación
+        slot.innerHTML = `<span>${PROMO_OFFERS[0].emoji}</span><span>${PROMO_OFFERS[0].text}</span>`;
         updatePromoCounter();
-
-        // Arrancar el ciclo automático cada 2 segundos
         promoInterval = setInterval(promoTickerNext, 2000);
     }
 
     function promoTickerNext() {
-        const total = PROMO_OFFERS.length;
-        const prev  = promoCurrentIdx;
-        const next  = (promoCurrentIdx + 1) % total;
+        if (promoAnimating) return; // no pisar animación en curso
+        promoAnimating = true;
 
-        const prevEl = document.getElementById('promoItem' + prev);
-        const nextEl = document.getElementById('promoItem' + next);
-        if (!prevEl || !nextEl) return;
+        const slot = document.getElementById('promoSlot');
+        if (!slot) { promoAnimating = false; return; }
 
-        // Salida del item actual (sube hacia arriba)
-        prevEl.classList.remove('active');
-        prevEl.classList.add('exit');
+        // Paso 1: animar salida del slot actual
+        slot.classList.remove('slide-in');
+        slot.classList.add('slide-out');
 
-        // Entrada del siguiente (sube desde abajo)
-        nextEl.classList.remove('exit');
-        // Pequeño frame para que el navegador registre el estado inicial
-        requestAnimationFrame(() => {
-            requestAnimationFrame(() => { nextEl.classList.add('active'); });
-        });
-
-        // Limpiar clase exit del anterior después de la transición
-        const cleanPrev = prev;
+        // Paso 2: cuando termina la salida, cambiar contenido y animar entrada
         setTimeout(() => {
-            const el = document.getElementById('promoItem' + cleanPrev);
-            if (el) el.classList.remove('exit');
-        }, 500);
+            promoCurrentIdx = (promoCurrentIdx + 1) % PROMO_OFFERS.length;
+            const o = PROMO_OFFERS[promoCurrentIdx];
+            slot.innerHTML = `<span>${o.emoji}</span><span>${o.text}</span>`;
+            updatePromoCounter();
 
-        promoCurrentIdx = next;
-        updatePromoCounter();
+            // Forzar reflow antes de añadir slide-in (evita que el navegador fusione los frames)
+            slot.classList.remove('slide-out');
+            void slot.offsetWidth; // reflow
+            slot.classList.add('slide-in');
+
+            // Limpiar clase tras la animación
+            setTimeout(() => {
+                slot.classList.remove('slide-in');
+                promoAnimating = false;
+            }, 420);
+        }, 360);
     }
 
     function updatePromoCounter() {
