@@ -1559,35 +1559,7 @@
 
 
         /* ── ALIAS PRESETS ── */
-        .alias-presets {
-            display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem;
-            margin-bottom:1rem;
-        }
-        .alias-preset {
-            display:flex; flex-direction:column; align-items:center; gap:0.25rem;
-            background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.1);
-            border-radius:14px; padding:0.6rem 0.3rem; cursor:pointer;
-            transition:transform 0.12s, border-color 0.15s, background 0.15s;
-        }
-        .alias-preset:active { transform:scale(0.92); }
-        .alias-preset.selected {
-            border-color:var(--bubble-mine);
-            background:rgba(255,255,255,0.14);
-            transform:scale(1.05);
-        }
-        .preset-av   { font-size:1.5rem; line-height:1; }
-        .preset-name { font-size:0.65rem; font-weight:600; color:rgba(255,255,255,0.65); }
-        [data-theme="light"] .preset-name { color:rgba(0,0,0,0.55); }
-        .preset-divider {
-            display:flex; align-items:center; gap:0.7rem; margin:0.6rem 0;
-            color:rgba(255,255,255,0.25); font-size:0.72rem;
-        }
-        .preset-divider::before,.preset-divider::after {
-            content:''; flex:1; height:1px; background:rgba(255,255,255,0.1);
-        }
-        [data-theme="light"] .preset-divider { color:rgba(0,0,0,0.3); }
-        [data-theme="light"] .preset-divider::before,
-        [data-theme="light"] .preset-divider::after { background:rgba(0,0,0,0.1); }
+        /* alias-presets eliminados — solo 2 avatares fijos */
 
         /* ── COLOR PICKER expanded ── */
         .color-picker { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem; }
@@ -2099,63 +2071,21 @@
     <!-- ══ ALIAS / SETUP MODAL ══ -->
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
-            <h2>¡Bienvenido! 👋</h2>
-            <p class="subtitle">Elige tu identidad en el canal seguro</p>
+            <h2>Canal seguro</h2>
+            <p class="subtitle">Elige tu avatar y el color de tus mensajes</p>
 
-            <!-- Quick presets — tap and enter instantly -->
-            <p class="color-label">Acceso rápido</p>
-            <div class="alias-presets">
-                <button class="alias-preset" onclick="selectPreset(this,'🦊','Zorro','#ff441f')">
-                    <span class="preset-av">🦊</span><span class="preset-name">Zorro</span>
-                </button>
-                <button class="alias-preset" onclick="selectPreset(this,'🐻','Oso','#ff9800')">
-                    <span class="preset-av">🐻</span><span class="preset-name">Oso</span>
-                </button>
-                <button class="alias-preset" onclick="selectPreset(this,'🐺','Lobo','#9c27b0')">
-                    <span class="preset-av">🐺</span><span class="preset-name">Lobo</span>
-                </button>
-                <button class="alias-preset" onclick="selectPreset(this,'🦋','Mariposa','#e91e63')">
-                    <span class="preset-av">🦋</span><span class="preset-name">Mariposa</span>
-                </button>
-                <button class="alias-preset" onclick="selectPreset(this,'🌙','Luna','#3f51b5')">
-                    <span class="preset-av">🌙</span><span class="preset-name">Luna</span>
-                </button>
-                <button class="alias-preset" onclick="selectPreset(this,'⚡','Rayo','#ffc107')">
-                    <span class="preset-av">⚡</span><span class="preset-name">Rayo</span>
-                </button>
-                <button class="alias-preset" onclick="selectPreset(this,'🔮','Mago','#00bcd4')">
-                    <span class="preset-av">🔮</span><span class="preset-name">Mago</span>
-                </button>
-                <button class="alias-preset" onclick="selectPreset(this,'🦁','León','#ff5722')">
-                    <span class="preset-av">🦁</span><span class="preset-name">León</span>
-                </button>
+            <!-- Solo dos avatares: Luna y León -->
+            <p class="color-label">Tu avatar</p>
+            <div class="avatar-picker" id="avatarPicker" style="justify-content:center;gap:1.5rem;margin-bottom:1.4rem;">
+                <button class="avatar-opt selected" data-av="🌙" onclick="selectAvatar(this)" style="width:58px;height:58px;font-size:1.8rem;">🌙</button>
+                <button class="avatar-opt" data-av="🦁" onclick="selectAvatar(this)" style="width:58px;height:58px;font-size:1.8rem;">🦁</button>
             </div>
 
-            <div class="preset-divider"><span>o personaliza</span></div>
-
-            <!-- Avatar picker -->
-            <p class="color-label">Avatar</p>
-            <div class="avatar-picker" id="avatarPicker">
-                <button class="avatar-opt selected" data-av="🦊" onclick="selectAvatar(this)">🦊</button>
-                <button class="avatar-opt" data-av="🐺" onclick="selectAvatar(this)">🐺</button>
-                <button class="avatar-opt" data-av="🦁" onclick="selectAvatar(this)">🦁</button>
-                <button class="avatar-opt" data-av="🐯" onclick="selectAvatar(this)">🐯</button>
-                <button class="avatar-opt" data-av="🐻" onclick="selectAvatar(this)">🐻</button>
-                <button class="avatar-opt" data-av="🐼" onclick="selectAvatar(this)">🐼</button>
-                <button class="avatar-opt" data-av="🦋" onclick="selectAvatar(this)">🦋</button>
-                <button class="avatar-opt" data-av="🌙" onclick="selectAvatar(this)">🌙</button>
-                <button class="avatar-opt" data-av="⚡" onclick="selectAvatar(this)">⚡</button>
-                <button class="avatar-opt" data-av="🔮" onclick="selectAvatar(this)">🔮</button>
-                <button class="avatar-opt" data-av="🎭" onclick="selectAvatar(this)">🎭</button>
-                <button class="avatar-opt" data-av="🌊" onclick="selectAvatar(this)">🌊</button>
-            </div>
-
-            <!-- Colors — 12 including pinks -->
-            <p class="color-label">Color de mensajes</p>
-            <div class="color-picker" id="colorPicker">
+            <!-- 10 colores -->
+            <p class="color-label">Color de tus mensajes</p>
+            <div class="color-picker" id="colorPicker" style="justify-content:center;gap:0.6rem;margin-bottom:1.3rem;">
                 <button class="color-opt selected" data-color="#ff441f" style="background:#ff441f" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#e91e63" style="background:#e91e63" onclick="selectColor(this)"><span class="color-check">✓</span></button>
-                <button class="color-opt" data-color="#ff69b4" style="background:#ff69b4" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#9c27b0" style="background:#9c27b0" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#3f51b5" style="background:#3f51b5" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#2196f3" style="background:#2196f3" onclick="selectColor(this)"><span class="color-check">✓</span></button>
@@ -2163,15 +2093,14 @@
                 <button class="color-opt" data-color="#4caf50" style="background:#4caf50" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#ff9800" style="background:#ff9800" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#ffc107" style="background:#ffc107" onclick="selectColor(this)"><span class="color-check">✓</span></button>
-                <button class="color-opt" data-color="#ff5722" style="background:#ff5722" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#607d8b" style="background:#607d8b" onclick="selectColor(this)"><span class="color-check">✓</span></button>
             </div>
 
             <div class="name-input-wrap">
-                <input type="text" id="nameInput" placeholder="O escribe tu alias…"
+                <input type="text" id="nameInput" placeholder="Tu nombre o alias…"
                     maxlength="20" onkeypress="if(event.key==='Enter') joinChat()" autocomplete="off">
             </div>
-            <button class="btn-join" onclick="joinChat()">Entrar al canal seguro →</button>
+            <button class="btn-join" onclick="joinChat()">Entrar →</button>
         </div>
     </div>
 
@@ -2693,12 +2622,12 @@
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
-    // Persistir nombre en sessionStorage para que no cambie al volver al chat
-    let myName = sessionStorage.getItem('vibestore_name') || '';
-    // Persistir myId en sessionStorage para que sea consistente aunque se recargue la página.
-    // Sin esto, cada recarga genera un nuevo ID y todos los mensajes propios aparecen como "theirs".
-    let myId = sessionStorage.getItem('vibestore_uid');
-    if (!myId) { myId = 'user_' + Math.random().toString(36).slice(2,8); sessionStorage.setItem('vibestore_uid', myId); }
+    // Persistir nombre en localStorage — sobrevive al cierre del browser
+    let myName = localStorage.getItem('vibestore_name') || '';
+    // Persistir myId en localStorage — un dispositivo = siempre el mismo ID = una sola suscripción push.
+    // Sin esto, cada visita genera un nuevo ID y se acumulan suscripciones basura en Firebase.
+    let myId = localStorage.getItem('vibestore_uid');
+    if (!myId) { myId = 'user_' + Math.random().toString(36).slice(2,8); localStorage.setItem('vibestore_uid', myId); }
     let seenKeys = new Set(); let inChat = false;
     // Timestamp at which this session started — messages older than this are "history",
     // not new arrivals, so they never trigger sound/vibration/notification
@@ -3115,26 +3044,10 @@
 
     /* ── CHAT ── */
     /* ── QUICK PRESET SELECTION ── */
-    window.selectPreset = function(btn, av, name, color) {
-        // Deselect all presets
-        document.querySelectorAll('.alias-preset').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-        // Apply avatar, color, and name
-        myAvatar = av;
-        myBubbleColor = color;
-        document.documentElement.style.setProperty('--bubble-mine', color);
-        document.getElementById('nameInput').value = name;
-        // Sync avatar picker and color picker visually
-        document.querySelectorAll('.avatar-opt').forEach(b => {
-            b.classList.toggle('selected', b.getAttribute('data-av') === av);
-        });
-        document.querySelectorAll('.color-opt').forEach(b => {
-            b.classList.toggle('selected', b.getAttribute('data-color') === color);
-        });
-    };
+    // selectPreset eliminado — solo hay 2 avatares fijos (🌙 🦁) y 10 colores
 
     /* ── AVATAR & BUBBLE COLOR SELECTION ── */
-    let myAvatar = '🦊';
+    let myAvatar = '🌙'; // por defecto Luna (los dos únicos son 🌙 y 🦁)
     let myBubbleColor = '#ff441f';
 
     window.selectAvatar = function(btn) {
@@ -3152,7 +3065,7 @@
 
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
-        sessionStorage.setItem('vibestore_name', myName); // persistir para esta sesión
+        localStorage.setItem('vibestore_name', myName); // persistir indefinidamente en este dispositivo
         inChat = true; document.getElementById('nameModal').classList.remove('show');
         // Apply chosen avatar and bubble color
         document.getElementById('headerAvatar').textContent = myAvatar;
