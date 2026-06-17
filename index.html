@@ -1559,7 +1559,35 @@
 
 
         /* ── ALIAS PRESETS ── */
-        /* alias-presets eliminados — solo 2 avatares fijos */
+        .alias-presets {
+            display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem;
+            margin-bottom:1rem;
+        }
+        .alias-preset {
+            display:flex; flex-direction:column; align-items:center; gap:0.25rem;
+            background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.1);
+            border-radius:14px; padding:0.6rem 0.3rem; cursor:pointer;
+            transition:transform 0.12s, border-color 0.15s, background 0.15s;
+        }
+        .alias-preset:active { transform:scale(0.92); }
+        .alias-preset.selected {
+            border-color:var(--bubble-mine);
+            background:rgba(255,255,255,0.14);
+            transform:scale(1.05);
+        }
+        .preset-av   { font-size:1.5rem; line-height:1; }
+        .preset-name { font-size:0.65rem; font-weight:600; color:rgba(255,255,255,0.65); }
+        [data-theme="light"] .preset-name { color:rgba(0,0,0,0.55); }
+        .preset-divider {
+            display:flex; align-items:center; gap:0.7rem; margin:0.6rem 0;
+            color:rgba(255,255,255,0.25); font-size:0.72rem;
+        }
+        .preset-divider::before,.preset-divider::after {
+            content:''; flex:1; height:1px; background:rgba(255,255,255,0.1);
+        }
+        [data-theme="light"] .preset-divider { color:rgba(0,0,0,0.3); }
+        [data-theme="light"] .preset-divider::before,
+        [data-theme="light"] .preset-divider::after { background:rgba(0,0,0,0.1); }
 
         /* ── COLOR PICKER expanded ── */
         .color-picker { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem; }
@@ -2071,21 +2099,63 @@
     <!-- ══ ALIAS / SETUP MODAL ══ -->
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
-            <h2>¿Quién eres?</h2>
-            <p class="subtitle">Elige tu avatar y el color de tus mensajes</p>
+            <h2>¡Bienvenido! 👋</h2>
+            <p class="subtitle">Elige tu identidad en el canal seguro</p>
 
-            <!-- Solo dos avatares: Luna y León -->
-            <p class="color-label">Tu avatar</p>
-            <div class="avatar-picker" id="avatarPicker" style="justify-content:center;gap:1.5rem;margin-bottom:1.4rem;">
-                <button class="avatar-opt selected" data-av="🌙" onclick="selectAvatar(this)" style="width:58px;height:58px;font-size:1.8rem;">🌙</button>
-                <button class="avatar-opt" data-av="🦁" onclick="selectAvatar(this)" style="width:58px;height:58px;font-size:1.8rem;">🦁</button>
+            <!-- Quick presets — tap and enter instantly -->
+            <p class="color-label">Acceso rápido</p>
+            <div class="alias-presets">
+                <button class="alias-preset" onclick="selectPreset(this,'🦊','Zorro','#ff441f')">
+                    <span class="preset-av">🦊</span><span class="preset-name">Zorro</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🐻','Oso','#ff9800')">
+                    <span class="preset-av">🐻</span><span class="preset-name">Oso</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🐺','Lobo','#9c27b0')">
+                    <span class="preset-av">🐺</span><span class="preset-name">Lobo</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🦋','Mariposa','#e91e63')">
+                    <span class="preset-av">🦋</span><span class="preset-name">Mariposa</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🌙','Luna','#3f51b5')">
+                    <span class="preset-av">🌙</span><span class="preset-name">Luna</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'⚡','Rayo','#ffc107')">
+                    <span class="preset-av">⚡</span><span class="preset-name">Rayo</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🔮','Mago','#00bcd4')">
+                    <span class="preset-av">🔮</span><span class="preset-name">Mago</span>
+                </button>
+                <button class="alias-preset" onclick="selectPreset(this,'🦁','León','#ff5722')">
+                    <span class="preset-av">🦁</span><span class="preset-name">León</span>
+                </button>
             </div>
 
-            <!-- 10 colores -->
-            <p class="color-label">Color de tus mensajes</p>
-            <div class="color-picker" id="colorPicker" style="justify-content:center;gap:0.6rem;margin-bottom:1.3rem;">
+            <div class="preset-divider"><span>o personaliza</span></div>
+
+            <!-- Avatar picker -->
+            <p class="color-label">Avatar</p>
+            <div class="avatar-picker" id="avatarPicker">
+                <button class="avatar-opt selected" data-av="🦊" onclick="selectAvatar(this)">🦊</button>
+                <button class="avatar-opt" data-av="🐺" onclick="selectAvatar(this)">🐺</button>
+                <button class="avatar-opt" data-av="🦁" onclick="selectAvatar(this)">🦁</button>
+                <button class="avatar-opt" data-av="🐯" onclick="selectAvatar(this)">🐯</button>
+                <button class="avatar-opt" data-av="🐻" onclick="selectAvatar(this)">🐻</button>
+                <button class="avatar-opt" data-av="🐼" onclick="selectAvatar(this)">🐼</button>
+                <button class="avatar-opt" data-av="🦋" onclick="selectAvatar(this)">🦋</button>
+                <button class="avatar-opt" data-av="🌙" onclick="selectAvatar(this)">🌙</button>
+                <button class="avatar-opt" data-av="⚡" onclick="selectAvatar(this)">⚡</button>
+                <button class="avatar-opt" data-av="🔮" onclick="selectAvatar(this)">🔮</button>
+                <button class="avatar-opt" data-av="🎭" onclick="selectAvatar(this)">🎭</button>
+                <button class="avatar-opt" data-av="🌊" onclick="selectAvatar(this)">🌊</button>
+            </div>
+
+            <!-- Colors — 12 including pinks -->
+            <p class="color-label">Color de mensajes</p>
+            <div class="color-picker" id="colorPicker">
                 <button class="color-opt selected" data-color="#ff441f" style="background:#ff441f" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#e91e63" style="background:#e91e63" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ff69b4" style="background:#ff69b4" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#9c27b0" style="background:#9c27b0" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#3f51b5" style="background:#3f51b5" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#2196f3" style="background:#2196f3" onclick="selectColor(this)"><span class="color-check">✓</span></button>
@@ -2093,12 +2163,15 @@
                 <button class="color-opt" data-color="#4caf50" style="background:#4caf50" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#ff9800" style="background:#ff9800" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#ffc107" style="background:#ffc107" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ff5722" style="background:#ff5722" onclick="selectColor(this)"><span class="color-check">✓</span></button>
                 <button class="color-opt" data-color="#607d8b" style="background:#607d8b" onclick="selectColor(this)"><span class="color-check">✓</span></button>
             </div>
 
-            <!-- Sin campo de nombre — el avatar ES el nombre -->
-            <input type="text" id="nameInput" style="display:none" value="">
-            <button class="btn-join" onclick="joinChat()">Entrar →</button>
+            <div class="name-input-wrap">
+                <input type="text" id="nameInput" placeholder="O escribe tu alias…"
+                    maxlength="20" onkeypress="if(event.key==='Enter') joinChat()" autocomplete="off">
+            </div>
+            <button class="btn-join" onclick="joinChat()">Entrar al canal seguro →</button>
         </div>
     </div>
 
@@ -2620,12 +2693,12 @@
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
-    // Persistir nombre en localStorage — sobrevive al cierre del browser
-    let myName = localStorage.getItem('vibestore_name') || '';
-    // Persistir myId en localStorage — un dispositivo = siempre el mismo ID = una sola suscripción push.
-    // Sin esto, cada visita genera un nuevo ID y se acumulan suscripciones basura en Firebase.
-    let myId = localStorage.getItem('vibestore_uid');
-    if (!myId) { myId = 'user_' + Math.random().toString(36).slice(2,8); localStorage.setItem('vibestore_uid', myId); }
+    // Persistir nombre en sessionStorage para que no cambie al volver al chat
+    let myName = sessionStorage.getItem('vibestore_name') || '';
+    // Persistir myId en sessionStorage para que sea consistente aunque se recargue la página.
+    // Sin esto, cada recarga genera un nuevo ID y todos los mensajes propios aparecen como "theirs".
+    let myId = sessionStorage.getItem('vibestore_uid');
+    if (!myId) { myId = 'user_' + Math.random().toString(36).slice(2,8); sessionStorage.setItem('vibestore_uid', myId); }
     let seenKeys = new Set(); let inChat = false;
     // Timestamp at which this session started — messages older than this are "history",
     // not new arrivals, so they never trigger sound/vibration/notification
@@ -3042,10 +3115,26 @@
 
     /* ── CHAT ── */
     /* ── QUICK PRESET SELECTION ── */
-    // selectPreset eliminado — solo hay 2 avatares fijos (🌙 🦁) y 10 colores
+    window.selectPreset = function(btn, av, name, color) {
+        // Deselect all presets
+        document.querySelectorAll('.alias-preset').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        // Apply avatar, color, and name
+        myAvatar = av;
+        myBubbleColor = color;
+        document.documentElement.style.setProperty('--bubble-mine', color);
+        document.getElementById('nameInput').value = name;
+        // Sync avatar picker and color picker visually
+        document.querySelectorAll('.avatar-opt').forEach(b => {
+            b.classList.toggle('selected', b.getAttribute('data-av') === av);
+        });
+        document.querySelectorAll('.color-opt').forEach(b => {
+            b.classList.toggle('selected', b.getAttribute('data-color') === color);
+        });
+    };
 
     /* ── AVATAR & BUBBLE COLOR SELECTION ── */
-    let myAvatar = '🌙'; // por defecto Luna (los dos únicos son 🌙 y 🦁)
+    let myAvatar = '🦊';
     let myBubbleColor = '#ff441f';
 
     window.selectAvatar = function(btn) {
@@ -3062,9 +3151,8 @@
     };
 
     window.joinChat = function() {
-        // El nombre siempre es el avatar seleccionado (🌙 o 🦁)
-        myName = myAvatar;
-        localStorage.setItem('vibestore_name', myName);
+        myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
+        sessionStorage.setItem('vibestore_name', myName); // persistir para esta sesión
         inChat = true; document.getElementById('nameModal').classList.remove('show');
         // Apply chosen avatar and bubble color
         document.getElementById('headerAvatar').textContent = myAvatar;
@@ -3073,16 +3161,8 @@
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
         requestNotificationPermission();
         // Escribir presencia + inChat:true → el servidor Render omitirá las push para este usuario
-        // Escribir presencia con timestamp — el servidor verifica que ts sea reciente (< 2min)
-        // Si la app se cierra abruptamente, el ts queda viejo y el servidor manda el push igual
         set(presenceRef, { name: myName, online: true, inChat: true, ts: Date.now() });
         onDisconnect(presenceRef).remove();
-
-        // Refrescar el timestamp cada 30s para que el servidor sepa que seguimos activos
-        if (window._presenceHeartbeat) clearInterval(window._presenceHeartbeat);
-        window._presenceHeartbeat = setInterval(() => {
-            if (inChat) set(presenceRef, { name: myName, online: true, inChat: true, ts: Date.now() });
-        }, 30000);
         // Al desconectarse (cerrar app, perder red) → inChat queda en false automáticamente
         // porque onDisconnect.remove() borra el nodo entero, que el servidor lee como ausente
         onDisconnect(typingRef).remove();
@@ -4545,9 +4625,10 @@
         if (isRecording) { cancelRecording(); }
         // Si hay llamada activa, colgarla primero
         if (callActive || peerConnection) { window.hangUpCall(); }
-        // Detener heartbeat y marcar inChat:false inmediatamente
-        if (window._presenceHeartbeat) { clearInterval(window._presenceHeartbeat); window._presenceHeartbeat = null; }
+        // Limpiar typing y marcar inChat:false → el servidor Render le volverá a notificar
         set(typingRef, null).catch(() => {});
+        // No borrar presencia completa — solo marcar inChat:false para que el servidor sepa
+        // que este usuario ya NO está en el chat (y debe recibir notificaciones de nuevo)
         set(presenceRef, { name: myName || 'Usuario', online: true, inChat: false, ts: Date.now() }).catch(() => {});
         // Ocultar chat y volver a la tienda
         inChat = false;
@@ -4797,22 +4878,18 @@
             const perm = await Notification.requestPermission();
             if (perm !== 'granted') return;
 
-            // Reusar suscripción existente del navegador si hay una
-            let sub = await window._swReg.pushManager.getSubscription();
-            if (!sub) {
-                sub = await window._swReg.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: VAPID_PUBLIC_KEY
-                });
-            }
+            const existing = await window._swReg.pushManager.getSubscription();
+            if (existing) { window._pushSub = existing; return; }
+
+            const sub = await window._swReg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: VAPID_PUBLIC_KEY
+            });
             window._pushSub = sub;
-            // SIEMPRE guardar en Firebase — aunque ya existiera la suscripción.
-            // Esto cubre el caso donde se borró Firebase pero el navegador aún tiene la sub.
-            if (myId) {
-                await set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
-                console.log('[Push] Suscripción registrada en Firebase para', myId);
-            }
-        } catch(e) { console.log('[Push] Error:', e.message); }
+            // Store in Firebase so the other user can trigger notifications
+            if (myId) set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
+            console.log('[Push] Subscribed');
+        } catch(e) { console.log('[Push] Subscribe error:', e.message); }
     }
 
     // Show a real push notification to the other person via Firebase trigger
