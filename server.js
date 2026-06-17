@@ -17,7 +17,7 @@ admin.initializeApp({
 });
 const db = admin.database();
 
-// Cache en tiempo real: presencia + silenciados
+// Cache en tiempo real
 const presenceCache = {};
 const mutedCache    = {};
 
@@ -35,7 +35,18 @@ db.ref('chat/muted').on('value', snap => {
     });
 });
 
-// Escuchar mensajes nuevos
+// Considera que alguien está "en chat activo" SOLO si:
+// 1. inChat === true Y
+// 2. Su timestamp de presencia es de hace menos de 2 minutos
+// Si la app se cerró abruptamente, el ts queda viejo y dejamos de omitir el push
+function isActivelyInChat(id) {
+    const p = presenceCache[id];
+    if (!p || p.inChat !== true) return false;
+    const TWO_MINUTES = 2 * 60 * 1000;
+    const age = Date.now() - (p.ts || 0);
+    return age < TWO_MINUTES;
+}
+
 db.ref('chat/messages').on('child_added', async (snap) => {
     const msg = snap.val();
     if (!msg || msg.type === 'buzz' || msg.type === 'system') return;
@@ -51,17 +62,13 @@ db.ref('chat/messages').on('child_added', async (snap) => {
     });
 
     for (const [id, subJson] of Object.entries(subs)) {
-        // No notificar al emisor
         if (id === msg.senderId) continue;
 
-        // No notificar si está en chat activo
-        const presence = presenceCache[id];
-        if (presence && presence.inChat === true) {
-            console.log(`[Push] Omitido ${id} — en chat activo`);
+        if (isActivelyInChat(id)) {
+            console.log(`[Push] Omitido ${id} — en chat activo (ts válido)`);
             continue;
         }
 
-        // No notificar si silenciló las notificaciones
         if (mutedCache[id] === true) {
             console.log(`[Push] Omitido ${id} — silenciado`);
             continue;
@@ -73,8 +80,6 @@ db.ref('chat/messages').on('child_added', async (snap) => {
             console.log(`[Push] Enviado a ${id}`);
         } catch (err) {
             const code = err.statusCode;
-            // Eliminar suscripciones inválidas: 400, 404 y 410
-            // 400 = malformada o expirada, 404 = no existe, 410 = cancelada
             if (code === 400 || code === 404 || code === 410) {
                 await db.ref(`chat/push/${id}`).remove();
                 console.log(`[Push] Suscripción inválida eliminada (${code}): ${id}`);
