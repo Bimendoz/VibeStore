@@ -701,7 +701,21 @@
         .rec-dot { width:9px; height:9px; border-radius:50%; background:var(--red); animation:recBlink 1s infinite; flex-shrink:0; }
         @keyframes recBlink { 0%,100%{opacity:1} 50%{opacity:0.2} }
         .rec-timer { font-size:0.88rem; font-weight:600; color:#fff; flex:1; }
-        .rec-cancel { background:none; border:none; color:rgba(255,255,255,.5); font-size:0.85rem; font-weight:600; cursor:pointer; padding:0 0.5rem; }
+        .rec-cancel {
+            background:rgba(255,255,255,0.08); border:none; border-radius:50%;
+            color:rgba(255,255,255,.65); cursor:pointer;
+            width:36px; height:36px; display:flex; align-items:center; justify-content:center;
+            flex-shrink:0; transition:background 0.15s;
+        }
+        .rec-cancel:active { background:rgba(255,255,255,0.18); }
+        .rec-send {
+            width:42px; height:42px; border-radius:50%; border:none; cursor:pointer;
+            background:var(--bubble-mine); color:#fff; flex-shrink:0;
+            display:flex; align-items:center; justify-content:center;
+            box-shadow:0 2px 10px rgba(0,0,0,0.35);
+            transition:transform 0.12s, opacity 0.15s;
+        }
+        .rec-send:active { transform:scale(0.88); }
 
         /* ── VOICE NOTE BUBBLE ── */
         .voice-note { display:flex; align-items:center; gap:0.65rem; padding:0.5rem 0.65rem; min-width:200px; }
@@ -1818,6 +1832,62 @@
             width:7px; height:7px; border-radius:50%;
             background:#fff; animation:pulse-presence 1.5s infinite;
         }
+
+        /* ── BOTÓN CANCELAR durante la conexión ── */
+        .ft-cancel-connecting {
+            margin-top: 2rem;
+            display: flex; align-items: center; gap: 0.5rem;
+            background: rgba(255,255,255,0.1);
+            border: 1.5px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.8);
+            border-radius: 24px;
+            padding: 0.65rem 1.4rem;
+            font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; letter-spacing: 0.2px;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .ft-cancel-connecting:active { background: rgba(255,255,255,0.18); transform: scale(0.96); }
+
+        /* ── TIMER de espera real ── */
+        .ft-connecting-timer {
+            font-size: 0.68rem; color: rgba(255,255,255,0.3);
+            font-variant-numeric: tabular-nums; letter-spacing: 0.5px;
+            margin-top: 0.3rem;
+        }
+
+        /* ── SONAR DOT: sin emoji, solo icono SVG centrado ── */
+        .ft-sonar-dot {
+            width: 56px; height: 56px; border-radius: 50%;
+            background: var(--bubble-mine, #ff441f);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 24px rgba(255,68,31,0.5);
+            animation: sonarDot 1.2s ease-in-out infinite alternate;
+            position: relative; z-index: 2;
+            color: #fff;
+        }
+        .ft-sonar-dot svg { display: block; }
+
+        /* ── AVATAR con iniciales (en lugar de emoji) ── */
+        .ft-avatar {
+            width: 118px; height: 118px; border-radius: 50%;
+            background: linear-gradient(145deg, rgba(255,255,255,0.15), rgba(255,255,255,0.05));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2.8rem; font-weight: 800; color: #fff;
+            letter-spacing: -1px;
+            box-shadow: 0 0 0 6px rgba(255,255,255,0.06), 0 12px 40px rgba(0,0,0,0.5);
+            border: 2.5px solid rgba(255,255,255,0.15);
+            animation: ftAvatarGlow 3s ease-in-out infinite alternate;
+        }
+        #ftAvatarInitials { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+
+        /* ── MY AVATAR en el pill (iniciales) ── */
+        .ft-my-avatar {
+            width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+            background: var(--bubble-mine, #ff441f);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; font-weight: 800; color: #fff; line-height: 1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+        }
     </style>
 </head>
 <body>
@@ -2237,9 +2307,14 @@
 
     <!-- ══ VOICE RECORDING BAR (Telegram authentic) ══ -->
     <div class="recording-bar" id="recordingBar">
+        <button class="rec-cancel" onclick="cancelRecording()" aria-label="Cancelar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" width="20" height="20"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
         <div class="rec-dot"></div>
         <span class="rec-timer" id="recTime">0:00</span>
-        <button class="rec-cancel" onclick="cancelRecording()">‹ Cancelar</button>
+        <button class="rec-send" onclick="stopAndSendRecording()" aria-label="Enviar nota de voz">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+        </button>
     </div>
 
     <!-- File inputs -->
@@ -2322,23 +2397,36 @@
 <!-- FACETIME SECTION -->
 <div id="seccion-facetime">
 
-    <!-- ══ CONNECTING ANIMATION OVERLAY (shown while ICE negotiates) ══ -->
+    <!-- ══ CONNECTING OVERLAY — minimalista, sin emojis ══ -->
     <div class="ft-connecting-overlay" id="ftConnectingOverlay">
+        <!-- Anillos de sonar -->
         <div class="ft-sonar">
             <div class="ft-sonar-ring"></div>
             <div class="ft-sonar-ring"></div>
             <div class="ft-sonar-ring"></div>
-            <div class="ft-sonar-ring"></div>
-            <div class="ft-sonar-dot" id="ftSonarDot">📞</div>
+            <div class="ft-sonar-dot" id="ftSonarDot">
+                <!-- Ícono SVG según tipo de llamada, sin emoji -->
+                <svg id="ftSonarIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="26" height="26">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.38 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.9a16 16 0 0 0 6.07 6.07l.97-.97a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+            </div>
         </div>
+        <!-- Texto de estado -->
         <div class="ft-connecting-texts">
-            <div class="ft-connecting-title" id="ftConnectingTitle">Estableciendo conexión</div>
+            <div class="ft-connecting-title" id="ftConnectingTitle">Conectando</div>
             <div class="ft-connecting-dots">
                 <span></span><span></span><span></span>
             </div>
-            <div class="ft-connecting-step" id="ftConnectingStep">Localizando servidores…</div>
+            <div class="ft-connecting-step" id="ftConnectingStep">Buscando ruta…</div>
             <div class="ft-connecting-bar"></div>
+            <!-- Temporizador de espera real -->
+            <div class="ft-connecting-timer" id="ftConnectingTimer">0s</div>
         </div>
+        <!-- Botón cancelar durante la conexión -->
+        <button class="ft-cancel-connecting" onclick="hangUpCall()" aria-label="Cancelar llamada">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            Cancelar
+        </button>
     </div>
 
     <!-- Mesh gradient blobs (take user's bubble color) -->
@@ -2360,27 +2448,29 @@
         </div>
     </div>
 
-    <!-- Top bar: MY small avatar (I know who I am) + type + timer -->
+    <!-- Top bar: mis iniciales + tipo de llamada + timer -->
     <div class="ft-topbar">
         <div class="ft-my-pill">
-            <div class="ft-my-avatar" id="ftMyAvatar">🦊</div>
+            <div class="ft-my-avatar" id="ftMyAvatar"><span id="ftMyInitials">?</span></div>
             <div class="ft-my-info">
-                <span class="ft-call-type" id="ftCallType">VibeCall · Audio</span>
+                <span class="ft-call-type" id="ftCallType">Audio</span>
                 <span class="ft-timer" id="ftTimer">0:00</span>
             </div>
         </div>
     </div>
 
-    <!-- Center: THEIR avatar (the person I'm talking to) -->
+    <!-- Center: avatar limpio (iniciales, sin emoji) -->
     <div class="ft-center">
         <div class="ft-rings" aria-hidden="true">
             <div class="ft-ring r3"></div>
             <div class="ft-ring r2"></div>
             <div class="ft-ring r1"></div>
         </div>
-        <div class="ft-avatar" id="ftAvatar">🦊</div>
+        <div class="ft-avatar" id="ftAvatar">
+            <span id="ftAvatarInitials">?</span>
+        </div>
         <div class="ft-name"   id="ftTargetName">Enlace Seguro</div>
-        <div class="ft-status" id="ftCallStatus">Estableciendo VibeCall…</div>
+        <div class="ft-status" id="ftCallStatus">Conectando…</div>
     </div>
 
     <!-- Controls: 4 glass pills + red hangup -->
@@ -2594,7 +2684,8 @@
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
-    let myName = '';
+    // Persistir nombre en sessionStorage para que no cambie al volver al chat
+    let myName = sessionStorage.getItem('vibestore_name') || '';
     // Persistir myId en sessionStorage para que sea consistente aunque se recargue la página.
     // Sin esto, cada recarga genera un nuevo ID y todos los mensajes propios aparecen como "theirs".
     let myId = sessionStorage.getItem('vibestore_uid');
@@ -3052,6 +3143,7 @@
 
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
+        sessionStorage.setItem('vibestore_name', myName); // persistir para esta sesión
         inChat = true; document.getElementById('nameModal').classList.remove('show');
         // Apply chosen avatar and bubble color
         document.getElementById('headerAvatar').textContent = myAvatar;
@@ -3819,41 +3911,70 @@
     /* ── CONNECTING ANIMATION CONTROLLER ── */
     let connectingStepInterval = null;
     const CONNECTING_STEPS = [
-        'Localizando servidores…',
-        'Solicitando permisos de red…',
-        'Intercambiando claves…',
-        'Probando rutas de conexión…',
-        'Optimizando canal seguro…',
+        'Buscando ruta…',
+        'Conectando servidores…',
+        'Verificando canal…',
+        'Estableciendo enlace…',
         'Casi listo…',
     ];
 
+    let connectingTimerInterval = null;
+    let connectingSeconds = 0;
+
     function showConnectingAnimation(callType) {
         const overlay = document.getElementById('ftConnectingOverlay');
-        const dot     = document.getElementById('ftSonarDot');
+        const icon    = document.getElementById('ftSonarIcon');
         const title   = document.getElementById('ftConnectingTitle');
         if (!overlay) return;
-        dot.textContent   = callType === 'video' ? '🎥' : '📞';
-        title.textContent = callType === 'video' ? 'Estableciendo videollamada' : 'Estableciendo llamada de voz';
+
+        // Cambiar el icono SVG según el tipo — sin emojis
+        if (icon && callType === 'video') {
+            icon.innerHTML = '<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/>';
+        }
+        if (title) title.textContent = callType === 'video' ? 'Videollamada' : 'Llamada de voz';
+
         overlay.classList.add('show');
 
+        // Timer de espera real — el usuario sabe cuántos segundos lleva
+        connectingSeconds = 0;
+        const timerEl = document.getElementById('ftConnectingTimer');
+        clearInterval(connectingTimerInterval);
+        if (timerEl) {
+            timerEl.textContent = '0s';
+            connectingTimerInterval = setInterval(() => {
+                connectingSeconds++;
+                timerEl.textContent = `${connectingSeconds}s`;
+                // A los 15s exactos: avisar pero NO colgar — esperar hasta 30s
+                if (connectingSeconds === 15) {
+                    const stepEl = document.getElementById('ftConnectingStep');
+                    if (stepEl) { stepEl.style.opacity='0'; setTimeout(()=>{ stepEl.textContent='Tomando más tiempo…'; stepEl.style.opacity='1'; },200); }
+                }
+                if (connectingSeconds === 30) {
+                    // 30 segundos sin conectar → rendirse
+                    showToast('No se pudo conectar. Revisa tu señal.');
+                    hangUpCall();
+                }
+            }, 1000);
+        }
+
+        // Rotar los pasos de estado
         let stepIdx = 0;
         const stepEl = document.getElementById('ftConnectingStep');
         if (stepEl) stepEl.textContent = CONNECTING_STEPS[0];
         clearInterval(connectingStepInterval);
         connectingStepInterval = setInterval(() => {
+            if (connectingSeconds >= 15) return; // después de 15s ya mostramos msg fijo
             stepIdx = (stepIdx + 1) % CONNECTING_STEPS.length;
             if (stepEl) {
                 stepEl.style.opacity = '0';
-                setTimeout(() => {
-                    stepEl.textContent = CONNECTING_STEPS[stepIdx];
-                    stepEl.style.opacity = '1';
-                }, 200);
+                setTimeout(() => { stepEl.textContent = CONNECTING_STEPS[stepIdx]; stepEl.style.opacity = '1'; }, 200);
             }
-        }, 2800);
+        }, 3000);
     }
 
     function hideConnectingAnimation() {
         clearInterval(connectingStepInterval);
+        clearInterval(connectingTimerInterval);
         const overlay = document.getElementById('ftConnectingOverlay');
         if (overlay) overlay.classList.remove('show');
     }
@@ -3880,8 +4001,12 @@
         if (isRecording) { showToast('Termina la nota de voz antes de llamar 🎤'); return; }
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
-        document.getElementById('ftMyAvatar').textContent   = myAvatar || '🦊';  // MY emoji in the pill
-        document.getElementById('ftAvatar').textContent     = '📱'; // placeholder while ringing — replaced when answered
+        // Iniciales propias en el pill (sin emoji)
+        const myInitEl = document.getElementById('ftMyInitials');
+        if (myInitEl) myInitEl.textContent = getInitials(myName);
+        // Avatar del otro: iniciales placeholder mientras conecta
+        const theirInitEl = document.getElementById('ftAvatarInitials');
+        if (theirInitEl) theirInitEl.textContent = '?';
         document.getElementById('ftTargetName').textContent = 'Enlace Seguro';
         document.getElementById('ftCallType').textContent   = type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Llamando…';
@@ -3930,9 +4055,12 @@
             const d = snap.val();
             if (d && d.status === 'accepted' && d.answer && peerConnection && !peerConnection.currentRemoteDescription) {
                 document.getElementById('ftCallStatus').textContent = "Conectando…";
-                // Show the receiver's avatar in our center circle — now we know who they are
-                if (d.receiverAvatar) document.getElementById('ftAvatar').textContent = d.receiverAvatar;
-                if (d.receiverName)   document.getElementById('ftTargetName').textContent = d.receiverName;
+                // Mostrar iniciales del receptor cuando contesta
+                if (d.receiverName) {
+                    document.getElementById('ftTargetName').textContent = d.receiverName;
+                    const initEl = document.getElementById('ftAvatarInitials');
+                    if (initEl) initEl.textContent = getInitials(d.receiverName);
+                }
                 await peerConnection.setRemoteDescription(new RTCSessionDescription(d.answer));
                 remoteDescSet = true;
                 while (remoteIceQueue.length) {
@@ -3985,11 +4113,10 @@
     }
 
     function showIncomingScreen(call) {
-        document.getElementById('incomingName').textContent   = call.caller || 'Llamada entrante';
-        document.getElementById('incomingType').textContent   = `VibeCall de ${call.type === 'video' ? 'video' : 'audio'}…`;
-        // Show caller's emoji avatar if available (sent with the call), else first letter
-        const av = call.avatar || (call.caller ? call.caller.charAt(0) : '📞');
-        document.getElementById('incomingAvatar').textContent = av;
+        document.getElementById('incomingName').textContent = call.caller || 'Llamada entrante';
+        document.getElementById('incomingType').textContent = call.type === 'video' ? 'Videollamada entrante' : 'Llamada de voz entrante';
+        // Mostrar iniciales del llamante (sin emoji)
+        document.getElementById('incomingAvatar').textContent = getInitials(call.caller || '?');
         document.getElementById('seccion-incoming').classList.add('show');
         startRingtone();
     }
@@ -4018,11 +4145,13 @@
         activeCallRef = ref(db, `chat/calls/${key}`);
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
-        // THEIR avatar (caller) goes in the big center circle
-        document.getElementById('ftAvatar').textContent     = call.avatar || (call.caller ? call.caller.slice(0,2) : '📞');
+        // Avatar del llamante: iniciales (sin emoji)
+        const theirInitEl2 = document.getElementById('ftAvatarInitials');
+        if (theirInitEl2) theirInitEl2.textContent = getInitials(call.caller);
         document.getElementById('ftTargetName').textContent = call.caller || 'Llamada';
-        // MY avatar goes in the small pill top-left
-        document.getElementById('ftMyAvatar').textContent   = myAvatar || '🦊';
+        // Mis iniciales en el pill
+        const myInitEl2 = document.getElementById('ftMyInitials');
+        if (myInitEl2) myInitEl2.textContent = getInitials(myName);
         document.getElementById('ftCallType').textContent   = call.type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Conectando…';
         document.getElementById('btnFtVideo').style.display = 'flex'; // always show — tap to add camera
@@ -4314,8 +4443,9 @@
         callActive = false;
         isMuted = false; isVideoOff = false;
         speakerOn = false;
-        // ✅ Always hide the connecting animation on cleanup
+        // Ocultar animación de conexión y resetear timer
         hideConnectingAnimation();
+        connectingSeconds = 0;
         // Reset video elements
         const rv = document.getElementById('remoteVideo');
         const lv = document.getElementById('localVideo');
