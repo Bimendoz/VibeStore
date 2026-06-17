@@ -2071,7 +2071,7 @@
     <!-- ══ ALIAS / SETUP MODAL ══ -->
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
-            <h2>Canal seguro</h2>
+            <h2>¿Quién eres?</h2>
             <p class="subtitle">Elige tu avatar y el color de tus mensajes</p>
 
             <!-- Solo dos avatares: Luna y León -->
@@ -2096,10 +2096,8 @@
                 <button class="color-opt" data-color="#607d8b" style="background:#607d8b" onclick="selectColor(this)"><span class="color-check">✓</span></button>
             </div>
 
-            <div class="name-input-wrap">
-                <input type="text" id="nameInput" placeholder="Nombre (opcional)"
-                    maxlength="20" onkeypress="if(event.key==='Enter') joinChat()" autocomplete="off">
-            </div>
+            <!-- Sin campo de nombre — el avatar ES el nombre -->
+            <input type="text" id="nameInput" style="display:none" value="">
             <button class="btn-join" onclick="joinChat()">Entrar →</button>
         </div>
     </div>
@@ -3064,9 +3062,8 @@
     };
 
     window.joinChat = function() {
-        const rawName = document.getElementById('nameInput').value.trim();
-        // Si no escribió nada, usar el avatar como alias (🌙 o 🦁)
-        myName = rawName || myAvatar;
+        // El nombre siempre es el avatar seleccionado (🌙 o 🦁)
+        myName = myAvatar;
         localStorage.setItem('vibestore_name', myName);
         inChat = true; document.getElementById('nameModal').classList.remove('show');
         // Apply chosen avatar and bubble color
@@ -4793,18 +4790,22 @@
             const perm = await Notification.requestPermission();
             if (perm !== 'granted') return;
 
-            const existing = await window._swReg.pushManager.getSubscription();
-            if (existing) { window._pushSub = existing; return; }
-
-            const sub = await window._swReg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: VAPID_PUBLIC_KEY
-            });
+            // Reusar suscripción existente del navegador si hay una
+            let sub = await window._swReg.pushManager.getSubscription();
+            if (!sub) {
+                sub = await window._swReg.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: VAPID_PUBLIC_KEY
+                });
+            }
             window._pushSub = sub;
-            // Store in Firebase so the other user can trigger notifications
-            if (myId) set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
-            console.log('[Push] Subscribed');
-        } catch(e) { console.log('[Push] Subscribe error:', e.message); }
+            // SIEMPRE guardar en Firebase — aunque ya existiera la suscripción.
+            // Esto cubre el caso donde se borró Firebase pero el navegador aún tiene la sub.
+            if (myId) {
+                await set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
+                console.log('[Push] Suscripción registrada en Firebase para', myId);
+            }
+        } catch(e) { console.log('[Push] Error:', e.message); }
     }
 
     // Show a real push notification to the other person via Firebase trigger
