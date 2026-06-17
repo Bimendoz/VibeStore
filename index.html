@@ -1825,47 +1825,24 @@
             <h2>¡Bienvenido! 👋</h2>
             <p class="subtitle">Elige tu identidad en el canal seguro</p>
 
-            <!-- Quick presets — tap and enter instantly -->
-            <p class="color-label">Acceso rápido</p>
-            <div class="alias-presets" style="grid-template-columns:repeat(2,1fr);gap:0.9rem;">
-                <button class="alias-preset" onclick="selectPreset(this,'Luna','Luna','#3f51b5')" style="padding:1rem 0.5rem;border-radius:18px;">
-                    <svg viewBox="0 0 24 24" width="38" height="38" fill="currentColor" style="color:#3f51b5;">
-                        <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
-                    </svg>
-                    <span class="preset-name" style="font-size:0.82rem;font-weight:800;">Luna</span>
+            <!-- Solo 2 avatares: Luna y León -->
+            <p class="color-label" style="margin-bottom:1rem;">Elige tu avatar</p>
+            <div style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1.4rem;">
+                <button class="avatar-opt selected" data-av="🌙"
+                    onclick="selectAvatar(this)"
+                    style="width:90px;height:90px;border-radius:18px;flex-direction:column;gap:0.4rem;font-size:2.4rem;display:flex;align-items:center;justify-content:center;">
+                    🌙
+                    <span style="font-size:0.72rem;font-weight:700;opacity:0.8;">Luna</span>
                 </button>
-                <button class="alias-preset" onclick="selectPreset(this,'León','León','#ff5722')" style="padding:1rem 0.5rem;border-radius:18px;">
-                    <svg viewBox="0 0 24 24" width="38" height="38" fill="currentColor" style="color:#ff5722;">
-                        <path d="M12 2C8.5 2 5.5 4 4 7c-1 0-2 1-2 2s1 2 2 2c.3 1.2.9 2.3 1.7 3.1C5 15.3 4 17 4 19h16c0-2-1-3.7-1.7-4.9.8-.8 1.4-1.9 1.7-3.1 1 0 2-1 2-2s-1-2-2-2c-1.5-3-4.5-5-8-5zm0 2c2.8 0 5.2 1.6 6.5 4H5.5C6.8 5.6 9.2 4 12 4zm-2 7a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-2 3c1.1 0 2 .4 2.7 1H9.3c.7-.6 1.6-1 2.7-1z"/>
-                    </svg>
-                    <span class="preset-name" style="font-size:0.82rem;font-weight:800;">León</span>
-                </button>
-            </div>
-
-            <div class="preset-divider" style="display:none;"><span>o personaliza</span></div>
-
-            <!-- Avatar picker -->
-            <p class="color-label" style="display:none;">Avatar</p>
-            <div class="avatar-picker" id="avatarPicker" style="gap:1.4rem;justify-content:center;">
-                <!-- Luna -->
-                <button class="avatar-opt selected" data-av="Luna" onclick="selectAvatar(this)"
-                    style="width:80px;height:80px;flex-direction:column;gap:0.35rem;border-radius:18px;">
-                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                        <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/>
-                    </svg>
-                    <span style="font-size:0.72rem;font-weight:800;opacity:0.85;">Luna</span>
-                </button>
-                <!-- León -->
-                <button class="avatar-opt" data-av="León" onclick="selectAvatar(this)"
-                    style="width:80px;height:80px;flex-direction:column;gap:0.35rem;border-radius:18px;">
-                    <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
-                        <path d="M12 2C8.5 2 5.5 4 4 7c-1 0-2 1-2 2s1 2 2 2c.3 1.2.9 2.3 1.7 3.1C5 15.3 4 17 4 19h16c0-2-1-3.7-1.7-4.9.8-.8 1.4-1.9 1.7-3.1 1 0 2-1 2-2s-1-2-2-2c-1.5-3-4.5-5-8-5zm0 2c2.8 0 5.2 1.6 6.5 4H5.5C6.8 5.6 9.2 4 12 4zm-2 7a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm-2 3c1.1 0 2 .4 2.7 1H9.3c.7-.6 1.6-1 2.7-1z"/>
-                    </svg>
-                    <span style="font-size:0.72rem;font-weight:800;opacity:0.85;">León</span>
+                <button class="avatar-opt" data-av="🦁"
+                    onclick="selectAvatar(this)"
+                    style="width:90px;height:90px;border-radius:18px;flex-direction:column;gap:0.4rem;font-size:2.4rem;display:flex;align-items:center;justify-content:center;">
+                    🦁
+                    <span style="font-size:0.72rem;font-weight:700;opacity:0.8;">León</span>
                 </button>
             </div>
 
-            <!-- Colors — 12 including pinks -->
+            <!-- Colors — 10 colores -->
             <p class="color-label">Color de mensajes</p>
             <div class="color-picker" id="colorPicker">
                 <button class="color-opt selected" data-color="#ff441f" style="background:#ff441f" onclick="selectColor(this)"><span class="color-check">✓</span></button>
@@ -2794,7 +2771,7 @@
     };
 
     /* ── AVATAR & BUBBLE COLOR SELECTION ── */
-    let myAvatar = 'Luna';
+    let myAvatar = '🌙'; // default Luna
     let myBubbleColor = '#ff441f';
 
     window.selectAvatar = function(btn) {
@@ -2813,6 +2790,10 @@
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
         inChat = true; document.getElementById('nameModal').classList.remove('show');
+        // Mover typingWrap al FINAL del chatWorkspace para que insertBefore lo deje siempre al fondo
+        const _ws = document.getElementById('chatWorkspace');
+        const _tw = document.getElementById('typingWrap');
+        if (_ws && _tw && _ws.lastChild !== _tw) { _ws.appendChild(_tw); }
         // Apply chosen avatar and bubble color
         document.getElementById('headerAvatar').textContent = myAvatar;
         document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
@@ -2958,13 +2939,18 @@
             if (other) {
                 const v = other[1];
                 if (v.kind === 'voice') {
-                    typingName.textContent = `${v.name || 'Alguien'} está grabando una nota de voz…`;
+                    typingName.textContent = (v.name || 'Alguien') + ' está grabando una nota de voz…';
                 } else {
                     typingName.textContent = v.name || 'Alguien';
                 }
-                typingWrap.classList.add('show');
-                const ws = document.getElementById('chatWorkspace');
-                ws.scrollTop = ws.scrollHeight;
+                if (!typingWrap.classList.contains('show')) {
+                    typingWrap.classList.add('show');
+                    // Solo scroll si el usuario ya estaba cerca del fondo
+                    const ws = document.getElementById('chatWorkspace');
+                    if (ws && (ws.scrollHeight - ws.scrollTop - ws.clientHeight) < 150) {
+                        ws.scrollTop = ws.scrollHeight;
+                    }
+                }
             } else {
                 typingWrap.classList.remove('show');
             }
@@ -2979,7 +2965,12 @@
         const div = document.createElement('div');
         div.className = 'msg-system';
         div.textContent = text;
-        ws.insertBefore(div, typingWrap);
+        const tw2 = document.getElementById('typingWrap');
+        if (tw2 && tw2.parentNode === ws) {
+            ws.insertBefore(div, tw2);
+        } else {
+            ws.appendChild(div);
+        }
         ws.scrollTop = ws.scrollHeight;
     }
 
@@ -3176,7 +3167,14 @@
             <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}${receiptHtml}</span>`;
         // Smart scroll: measure BEFORE inserting; only jump to bottom if near it, or own message
         const nearBottom = (ws.scrollHeight - ws.scrollTop - ws.clientHeight) < 120;
-        ws.insertBefore(wrap, typingWrap);
+        // Insertar ANTES del typingWrap para que los mensajes queden en orden cronológico
+        // y el indicador de typing aparezca siempre al final
+        const tw = document.getElementById('typingWrap');
+        if (tw && tw.parentNode === ws) {
+            ws.insertBefore(wrap, tw);
+        } else {
+            ws.appendChild(wrap);
+        }
         if (isMe || nearBottom) { ws.scrollTop = ws.scrollHeight; }
 
         // Long-press to react / delete. Pass plain text only for text messages (for copy).
@@ -4403,10 +4401,11 @@
         const inp = document.getElementById('chatInput');
         if (!inp) return;
         inp.addEventListener('focus', () => {
+            // Pequeño delay para que el teclado iOS termine de abrirse
             setTimeout(() => {
                 const ws = document.getElementById('chatWorkspace');
                 if (ws) ws.scrollTop = ws.scrollHeight;
-            }, 400);
+            }, 350);
         });
     })();
 
