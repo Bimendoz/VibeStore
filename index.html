@@ -2215,6 +2215,15 @@
             Videollamada
         </div>
         <div style="height:1px;background:rgba(255,255,255,.06);"></div>
+        <!-- Botón silenciar/activar notificaciones -->
+        <div class="chat-menu-item" id="muteMenuItem" onclick="closeChatMenu(); toggleMuteNotifications()">
+            <svg id="muteMenuIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span id="muteMenuLabel">Silenciar notificaciones</span>
+        </div>
+        <div style="height:1px;background:rgba(255,255,255,.06);"></div>
         <div class="chat-menu-item" onclick="closeChatMenu(); openTrashMenu()">
             <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
             Vaciar conversación
@@ -3165,6 +3174,7 @@
         rerenderAllMessages();
         subscribeToPush();
         checkPendingNotification();
+        loadMuteState(); // cargar si notificaciones están silenciadas
     };
 
     // Renders any messages not yet shown (used when entering the chat)
@@ -4474,6 +4484,53 @@
         document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
     }
+
+    /* ── SILENCIAR NOTIFICACIONES ── */
+    let notifMuted = false; // estado local
+
+    async function loadMuteState() {
+        if (!myId) return;
+        try {
+            const snap = await get(ref(db, `chat/muted/${myId}`));
+            notifMuted = snap.exists() && snap.val() === true;
+            updateMuteUI();
+        } catch(e) {}
+    }
+
+    function updateMuteUI() {
+        const label = document.getElementById('muteMenuLabel');
+        const icon  = document.getElementById('muteMenuIcon');
+        if (!label || !icon) return;
+        if (notifMuted) {
+            label.textContent = 'Activar notificaciones';
+            // Ícono de campana tachada → campana normal (para activar)
+            icon.innerHTML = `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                <line x1="1" y1="1" x2="23" y2="23"/>`;
+        } else {
+            label.textContent = 'Silenciar notificaciones';
+            // Ícono de campana normal → silenciar
+            icon.innerHTML = `<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>`;
+        }
+    }
+
+    window.toggleMuteNotifications = async function() {
+        notifMuted = !notifMuted;
+        try {
+            if (notifMuted) {
+                await set(ref(db, `chat/muted/${myId}`), true);
+                showToast('Notificaciones silenciadas 🔕');
+            } else {
+                await remove(ref(db, `chat/muted/${myId}`));
+                showToast('Notificaciones activadas 🔔');
+            }
+        } catch(e) {
+            showToast('Error al cambiar notificaciones');
+            notifMuted = !notifMuted; // revertir si falla
+        }
+        updateMuteUI();
+    };
 
     /* ── CHAT OVERFLOW MENU (⋮ button → trash + panic) ── */
     window.openChatMenu = function() {
