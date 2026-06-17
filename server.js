@@ -17,7 +17,7 @@ admin.initializeApp({
 });
 const db = admin.database();
 
-// ── Cache en tiempo real: presencia + silenciados ──
+// Cache en tiempo real: presencia + silenciados
 const presenceCache = {};
 const mutedCache    = {};
 
@@ -35,7 +35,7 @@ db.ref('chat/muted').on('value', snap => {
     });
 });
 
-// ── Escuchar mensajes nuevos ──
+// Escuchar mensajes nuevos
 db.ref('chat/messages').on('child_added', async (snap) => {
     const msg = snap.val();
     if (!msg || msg.type === 'buzz' || msg.type === 'system') return;
@@ -54,16 +54,16 @@ db.ref('chat/messages').on('child_added', async (snap) => {
         // No notificar al emisor
         if (id === msg.senderId) continue;
 
-        // No notificar si está activamente en el chat
+        // No notificar si está en chat activo
         const presence = presenceCache[id];
         if (presence && presence.inChat === true) {
             console.log(`[Push] Omitido ${id} — en chat activo`);
             continue;
         }
 
-        // No notificar si el usuario silenciló las notificaciones
+        // No notificar si silenciló las notificaciones
         if (mutedCache[id] === true) {
-            console.log(`[Push] Omitido ${id} — notificaciones silenciadas`);
+            console.log(`[Push] Omitido ${id} — silenciado`);
             continue;
         }
 
@@ -72,11 +72,14 @@ db.ref('chat/messages').on('child_added', async (snap) => {
             await webpush.sendNotification(sub, payload);
             console.log(`[Push] Enviado a ${id}`);
         } catch (err) {
-            if (err.statusCode === 410 || err.statusCode === 404) {
+            const code = err.statusCode;
+            // Eliminar suscripciones inválidas: 400, 404 y 410
+            // 400 = malformada o expirada, 404 = no existe, 410 = cancelada
+            if (code === 400 || code === 404 || code === 410) {
                 await db.ref(`chat/push/${id}`).remove();
-                console.log(`[Push] Suscripción expirada eliminada: ${id}`);
+                console.log(`[Push] Suscripción inválida eliminada (${code}): ${id}`);
             } else {
-                console.error(`[Push] Error ${id}:`, err.statusCode, err.message);
+                console.error(`[Push] Error ${id}:`, code, err.message);
             }
         }
     }
