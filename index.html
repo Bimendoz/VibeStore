@@ -2097,7 +2097,7 @@
             </div>
 
             <div class="name-input-wrap">
-                <input type="text" id="nameInput" placeholder="Tu nombre o alias…"
+                <input type="text" id="nameInput" placeholder="Nombre (opcional)"
                     maxlength="20" onkeypress="if(event.key==='Enter') joinChat()" autocomplete="off">
             </div>
             <button class="btn-join" onclick="joinChat()">Entrar →</button>
@@ -3064,8 +3064,10 @@
     };
 
     window.joinChat = function() {
-        myName = document.getElementById('nameInput').value.trim(); if (!myName) return;
-        localStorage.setItem('vibestore_name', myName); // persistir indefinidamente en este dispositivo
+        const rawName = document.getElementById('nameInput').value.trim();
+        // Si no escribió nada, usar el avatar como alias (🌙 o 🦁)
+        myName = rawName || myAvatar;
+        localStorage.setItem('vibestore_name', myName);
         inChat = true; document.getElementById('nameModal').classList.remove('show');
         // Apply chosen avatar and bubble color
         document.getElementById('headerAvatar').textContent = myAvatar;
