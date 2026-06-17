@@ -5,39 +5,41 @@ const admin    = require('firebase-admin');
 const app = express();
 app.use(express.json());
 
-// ── VAPID ──────────────────────────────────────────
 webpush.setVapidDetails(
     `mailto:${process.env.VAPID_EMAIL}`,
     process.env.VAPID_PUBLIC,
     process.env.VAPID_PRIVATE
 );
 
-// ── FIREBASE ADMIN ─────────────────────────────────
 admin.initializeApp({
     credential:  admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)),
     databaseURL: 'https://data-base-store-3bbf8-default-rtdb.firebaseio.com'
 });
 const db = admin.database();
 
-// Cache de presencia en memoria — se actualiza en tiempo real con onValue
-// Así no hay latencia de lectura cuando llega un mensaje nuevo
+// ── Cache en tiempo real: presencia + silenciados ──
 const presenceCache = {};
+const mutedCache    = {};
 
 db.ref('chat/presence').on('value', snap => {
-    const data = snap.val() || {};
-    // Limpiar y reconstruir el cache completo
     Object.keys(presenceCache).forEach(k => delete presenceCache[k]);
-    Object.entries(data).forEach(([id, info]) => {
+    Object.entries(snap.val() || {}).forEach(([id, info]) => {
         presenceCache[id] = info;
     });
 });
 
-// ── ESCUCHAR MENSAJES NUEVOS ────────────────────────
+db.ref('chat/muted').on('value', snap => {
+    Object.keys(mutedCache).forEach(k => delete mutedCache[k]);
+    Object.entries(snap.val() || {}).forEach(([id, val]) => {
+        mutedCache[id] = val;
+    });
+});
+
+// ── Escuchar mensajes nuevos ──
 db.ref('chat/messages').on('child_added', async (snap) => {
     const msg = snap.val();
     if (!msg || msg.type === 'buzz' || msg.type === 'system') return;
 
-    // Leer suscripciones push
     const pushSnap = await db.ref('chat/push').once('value');
     const subs = pushSnap.val() || {};
 
@@ -49,14 +51,19 @@ db.ref('chat/messages').on('child_added', async (snap) => {
     });
 
     for (const [id, subJson] of Object.entries(subs)) {
-        // ❌ Nunca notificar al emisor
+        // No notificar al emisor
         if (id === msg.senderId) continue;
 
-        // ❌ No notificar si el destinatario está activamente en el chat
-        // Usamos el cache en memoria (actualizado en tiempo real) — sin latencia
-        const userPresence = presenceCache[id];
-        if (userPresence && userPresence.inChat === true) {
-            console.log(`[Push] Omitido ${id} — está en chat activo`);
+        // No notificar si está activamente en el chat
+        const presence = presenceCache[id];
+        if (presence && presence.inChat === true) {
+            console.log(`[Push] Omitido ${id} — en chat activo`);
+            continue;
+        }
+
+        // No notificar si el usuario silenciló las notificaciones
+        if (mutedCache[id] === true) {
+            console.log(`[Push] Omitido ${id} — notificaciones silenciadas`);
             continue;
         }
 
