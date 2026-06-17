@@ -3073,8 +3073,16 @@
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
         requestNotificationPermission();
         // Escribir presencia + inChat:true → el servidor Render omitirá las push para este usuario
+        // Escribir presencia con timestamp — el servidor verifica que ts sea reciente (< 2min)
+        // Si la app se cierra abruptamente, el ts queda viejo y el servidor manda el push igual
         set(presenceRef, { name: myName, online: true, inChat: true, ts: Date.now() });
         onDisconnect(presenceRef).remove();
+
+        // Refrescar el timestamp cada 30s para que el servidor sepa que seguimos activos
+        if (window._presenceHeartbeat) clearInterval(window._presenceHeartbeat);
+        window._presenceHeartbeat = setInterval(() => {
+            if (inChat) set(presenceRef, { name: myName, online: true, inChat: true, ts: Date.now() });
+        }, 30000);
         // Al desconectarse (cerrar app, perder red) → inChat queda en false automáticamente
         // porque onDisconnect.remove() borra el nodo entero, que el servidor lee como ausente
         onDisconnect(typingRef).remove();
@@ -4537,10 +4545,9 @@
         if (isRecording) { cancelRecording(); }
         // Si hay llamada activa, colgarla primero
         if (callActive || peerConnection) { window.hangUpCall(); }
-        // Limpiar typing y marcar inChat:false → el servidor Render le volverá a notificar
+        // Detener heartbeat y marcar inChat:false inmediatamente
+        if (window._presenceHeartbeat) { clearInterval(window._presenceHeartbeat); window._presenceHeartbeat = null; }
         set(typingRef, null).catch(() => {});
-        // No borrar presencia completa — solo marcar inChat:false para que el servidor sepa
-        // que este usuario ya NO está en el chat (y debe recibir notificaciones de nuevo)
         set(presenceRef, { name: myName || 'Usuario', online: true, inChat: false, ts: Date.now() }).catch(() => {});
         // Ocultar chat y volver a la tienda
         inChat = false;
