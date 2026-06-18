@@ -25,6 +25,7 @@
             flex-direction: column;
             position: fixed;
             top: 0; left: 0; right: 0;
+            /* dvh se ajusta cuando el teclado iOS sube — la barra queda pegada al teclado */
             bottom: 0;
             width: 100%;
             height: 100dvh;
@@ -72,6 +73,8 @@
             gap: 0.5rem;
             align-items: center;
             padding: 0.55rem 0.75rem;
+            /* Con dvh + resizes-visual iOS ajusta el viewport automáticamente.
+               Safe-area solo aplica sin teclado (home bar). */
             padding-bottom: max(0.55rem, env(safe-area-inset-bottom, 0px));
             background: rgba(18,18,28,0.97);
             -webkit-backdrop-filter: blur(20px);
@@ -1635,93 +1638,6 @@
             50%    { box-shadow: 0 0 0 8px rgba(255,59,48,0), 0 2px 10px rgba(0,0,0,.35); }
         }
         .panic-fab { display:none !important; }
-    
-        /* ── CONNECTING OVERLAY ── */
-        .call-connecting-overlay {
-            position:absolute; inset:0; z-index:20;
-            display:none; flex-direction:column;
-            align-items:center; justify-content:center; gap:1.5rem;
-            background:rgba(5,5,15,0.88);
-            -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
-        }
-        .call-connecting-overlay.show { display:flex; }
-        .conn-spinner-wrap {
-            position:relative; width:90px; height:90px;
-        }
-        .conn-ring {
-            position:absolute; inset:0; border-radius:50%;
-            border:3px solid transparent;
-            animation:connSpin 1.4s linear infinite;
-        }
-        .conn-ring-1 { border-top-color:rgba(255,255,255,0.8); animation-duration:1.2s; }
-        .conn-ring-2 { inset:10px; border-top-color:var(--bubble-mine); animation-duration:1.8s; animation-direction:reverse; }
-        @keyframes connSpin { to { transform:rotate(360deg); } }
-        .conn-avatar {
-            position:absolute; inset:18px; border-radius:50%;
-            background:linear-gradient(145deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
-            display:flex; align-items:center; justify-content:center;
-            font-size:1.8rem; line-height:1;
-            border:1px solid rgba(255,255,255,.15);
-        }
-        .conn-status-text {
-            font-size:1.05rem; font-weight:700; color:#fff;
-            text-align:center; letter-spacing:0.2px;
-        }
-        .conn-sub-text {
-            font-size:0.78rem; color:rgba(255,255,255,0.45);
-            text-align:center; margin-top:-1rem;
-        }
-        .conn-dots span {
-            display:inline-block; width:6px; height:6px; border-radius:50%;
-            background:#fff; margin:0 3px; opacity:0.3;
-            animation:connDot 1.4s ease-in-out infinite;
-        }
-        .conn-dots span:nth-child(2) { animation-delay:0.2s; }
-        .conn-dots span:nth-child(3) { animation-delay:0.4s; }
-        @keyframes connDot { 0%,80%,100%{opacity:0.3;transform:scale(1)} 40%{opacity:1;transform:scale(1.3)} }
-        .conn-cancel-btn {
-            position:absolute; top:calc(env(safe-area-inset-top,44px) + 0.8rem); right:1rem;
-            width:44px; height:44px; border-radius:50%; border:none;
-            background:rgba(255,69,58,0.2); border:1.5px solid rgba(255,69,58,0.4);
-            color:#ff453a; cursor:pointer;
-            display:flex; align-items:center; justify-content:center;
-            transition:background 0.15s, transform 0.12s; z-index:21;
-        }
-        .conn-cancel-btn:active { transform:scale(0.88); background:rgba(255,69,58,0.4); }
-        .conn-cancel-btn svg { width:18px; height:18px; fill:currentColor; }
-
-        /* ── TAP TO HIDE CALL CONTROLS ── */
-        #seccion-facetime .ft-controls-panel,
-        #seccion-facetime .ft-topbar { transition:opacity 0.3s ease; }
-
-        /* ── CHAT PIP FLOATING CAMERAS ── */
-        .chat-pip-container {
-            position:fixed; right:1rem;
-            bottom:calc(5.5rem + env(safe-area-inset-bottom,0px) + 2.8rem);
-            z-index:600; display:none;
-            flex-direction:column; gap:0.55rem; align-items:flex-end;
-        }
-        .chat-pip-container.show { display:flex; }
-        .chat-pip-bubble {
-            width:70px; height:70px; border-radius:50%;
-            overflow:hidden; border:2.5px solid rgba(255,255,255,0.3);
-            box-shadow:0 4px 18px rgba(0,0,0,0.55);
-            cursor:pointer; position:relative;
-            transition:width 0.3s cubic-bezier(0.32,0.72,0,1),
-                        height 0.3s cubic-bezier(0.32,0.72,0,1),
-                        border-radius 0.3s cubic-bezier(0.32,0.72,0,1);
-            flex-shrink:0;
-        }
-        .chat-pip-bubble.expanded { width:160px; height:220px; border-radius:20px; }
-        .chat-pip-bubble video { width:100%; height:100%; object-fit:cover; display:block; }
-        .chat-pip-label {
-            position:absolute; bottom:5px; left:0; right:0;
-            text-align:center; font-size:0.58rem; font-weight:700;
-            color:rgba(255,255,255,0.85); pointer-events:none;
-            text-shadow:0 1px 4px rgba(0,0,0,0.7);
-        }
-        .chat-pip-bubble.expanded .chat-pip-label { font-size:0.65rem; bottom:9px; }
-
     </style>
 </head>
 <body>
@@ -1910,21 +1826,46 @@
     <!-- ══ ALIAS / SETUP MODAL (slides up from bottom, Telegram style) ══ -->
     <div class="name-modal" id="nameModal">
         <div class="name-modal-box">
-            <h2>VibeChat 🔒</h2>
+            <h2>¡Bienvenido! 👋</h2>
             <p class="subtitle">Elige tu identidad en el canal seguro</p>
 
-            <div class="alias-presets" style="justify-content:center; gap:2rem;">
-                <button class="alias-preset selected" onclick="selectPreset(this,'🌙','Luna','#3f51b5')">
-                    <span class="preset-av">🌙</span><span class="preset-name">Luna</span>
+            <!-- Solo 2 avatares: Luna y León -->
+            <p class="color-label" style="margin-bottom:1rem;">Elige tu avatar</p>
+            <div style="display:flex;justify-content:center;gap:1.5rem;margin-bottom:1.4rem;">
+                <button class="avatar-opt selected" data-av="🌙"
+                    onclick="selectAvatar(this)"
+                    style="width:90px;height:90px;border-radius:18px;flex-direction:column;gap:0.4rem;font-size:2.4rem;display:flex;align-items:center;justify-content:center;">
+                    🌙
+                    <span style="font-size:0.72rem;font-weight:700;opacity:0.8;">Luna</span>
                 </button>
-                <button class="alias-preset" onclick="selectPreset(this,'🦁','León','#ff5722')">
-                    <span class="preset-av">🦁</span><span class="preset-name">León</span>
+                <button class="avatar-opt" data-av="🦁"
+                    onclick="selectAvatar(this)"
+                    style="width:90px;height:90px;border-radius:18px;flex-direction:column;gap:0.4rem;font-size:2.4rem;display:flex;align-items:center;justify-content:center;">
+                    🦁
+                    <span style="font-size:0.72rem;font-weight:700;opacity:0.8;">León</span>
                 </button>
             </div>
 
+            <!-- Colors — 10 colores -->
+            <p class="color-label">Color de mensajes</p>
+            <div class="color-picker" id="colorPicker">
+                <button class="color-opt selected" data-color="#ff441f" style="background:#ff441f" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#e91e63" style="background:#e91e63" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ff69b4" style="background:#ff69b4" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#9c27b0" style="background:#9c27b0" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#3f51b5" style="background:#3f51b5" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#2196f3" style="background:#2196f3" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#00bcd4" style="background:#00bcd4" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#4caf50" style="background:#4caf50" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ff9800" style="background:#ff9800" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ffc107" style="background:#ffc107" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#ff5722" style="background:#ff5722" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+                <button class="color-opt" data-color="#607d8b" style="background:#607d8b" onclick="selectColor(this)"><span class="color-check">✓</span></button>
+            </div>
+
             <!-- nameInput oculto — se rellena automáticamente con el avatar elegido -->
-            <input type="text" id="nameInput" style="display:none;" value="Luna" autocomplete="off">
-            <button class="btn-join" onclick="joinChat()" style="margin-top:1.2rem;">Entrar al canal seguro →</button>
+            <input type="text" id="nameInput" style="display:none;" value="" autocomplete="off">
+            <button class="btn-join" onclick="joinChat()" style="margin-top:0.5rem;">Entrar al canal seguro →</button>
         </div>
     </div>
 
@@ -2025,18 +1966,6 @@
     <div class="return-call-bar" id="returnCallBar" onclick="returnToCall()">
         <span class="return-call-dot"></span>
         Llamada en curso · Toca para volver
-    </div>
-
-    <!-- ══ CHAT PIP CAMERAS ══ -->
-    <div class="chat-pip-container" id="chatPipContainer">
-        <div class="chat-pip-bubble" id="chatPipRemote" onclick="expandChatPip('remote')">
-            <video id="chatPipRemoteVid" autoplay playsinline></video>
-            <span class="chat-pip-label" id="chatPipRemoteLabel">Otro</span>
-        </div>
-        <div class="chat-pip-bubble" id="chatPipLocal" onclick="expandChatPip('local')">
-            <video id="chatPipLocalVid" autoplay playsinline muted style="transform:scaleX(-1)"></video>
-            <span class="chat-pip-label">Yo</span>
-        </div>
     </div>
 
     <!-- Reply preview bar -->
@@ -2156,23 +2085,6 @@
 
 <!-- FACETIME SECTION -->
 <div id="seccion-facetime">
-
-    <!-- ══ CONNECTING OVERLAY ══ -->
-    <div class="call-connecting-overlay" id="connectingOverlay">
-        <button class="conn-cancel-btn" onclick="cancelConnecting()" aria-label="Cancelar">
-            <svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
-        </button>
-        <div class="conn-spinner-wrap">
-            <div class="conn-ring conn-ring-1"></div>
-            <div class="conn-ring conn-ring-2"></div>
-            <div class="conn-avatar" id="connAvatar">📱</div>
-        </div>
-        <div style="text-align:center">
-            <div class="conn-status-text" id="connStatusText">Estableciendo conexión</div>
-            <div class="conn-dots" style="margin:0.5rem 0"><span></span><span></span><span></span></div>
-            <div class="conn-sub-text" id="connSubText">Contactando a la otra persona…</div>
-        </div>
-    </div>
 
     <!-- Mesh gradient blobs (take user's bubble color) -->
     <div class="ft-bg">
@@ -2427,9 +2339,7 @@
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
-    let myName = '';
-    let myId = sessionStorage.getItem('vibestore_uid') || '';
-    if (!myId) { myId = 'user_' + Math.random().toString(36).slice(2,8); sessionStorage.setItem('vibestore_uid', myId); }
+    let myName = ''; let myId = 'user_' + Math.random().toString(36).slice(2,8);
     let seenKeys = new Set(); let inChat = false;
     let localStream; let peerConnection; let activeCallRef;
     let isMuted = false; let isVideoOff = false;
@@ -2863,13 +2773,16 @@
     };
 
     /* ── AVATAR & BUBBLE COLOR SELECTION ── */
-    let myAvatar = '🦊';
+    let myAvatar = '🌙'; // default Luna — nameInput se sincroniza al cargar
     let myBubbleColor = '#ff441f';
 
     window.selectAvatar = function(btn) {
         document.querySelectorAll('.avatar-opt').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         myAvatar = btn.getAttribute('data-av');
+        // El nombre ES el avatar — rellenar automáticamente
+        var label = btn.querySelector('span') ? btn.querySelector('span').textContent.trim() : myAvatar;
+        document.getElementById('nameInput').value = label;
     };
 
     window.selectColor = function(btn) {
@@ -2880,16 +2793,22 @@
     };
 
     window.joinChat = function() {
+        // El nombre viene del avatar seleccionado (nameInput oculto lo tiene).
+        // Si por algún motivo está vacío, usar el texto del span del botón seleccionado.
         myName = document.getElementById('nameInput').value.trim();
         if (!myName) {
-            const selBtn = document.querySelector('.alias-preset.selected');
+            var selBtn = document.querySelector('.avatar-opt.selected');
             if (selBtn) {
-                const sp = selBtn.querySelector('.preset-name');
-                myName = sp ? sp.textContent.trim() : 'Luna';
+                var sp = selBtn.querySelector('span');
+                myName = sp ? sp.textContent.trim() : (myAvatar || 'Luna');
             } else { myName = 'Luna'; }
         }
         if (!myName) return;
         inChat = true; document.getElementById('nameModal').classList.remove('show');
+        // Mover typingWrap al FINAL del chatWorkspace para que insertBefore lo deje siempre al fondo
+        const _ws = document.getElementById('chatWorkspace');
+        const _tw = document.getElementById('typingWrap');
+        if (_ws && _tw && _ws.lastChild !== _tw) { _ws.appendChild(_tw); }
         // Apply chosen avatar and bubble color
         document.getElementById('headerAvatar').textContent = myAvatar;
         document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
@@ -3035,13 +2954,18 @@
             if (other) {
                 const v = other[1];
                 if (v.kind === 'voice') {
-                    typingName.textContent = `${v.name || 'Alguien'} está grabando una nota de voz…`;
+                    typingName.textContent = (v.name || 'Alguien') + ' está grabando una nota de voz…';
                 } else {
                     typingName.textContent = v.name || 'Alguien';
                 }
-                typingWrap.classList.add('show');
-                const ws = document.getElementById('chatWorkspace');
-                ws.scrollTop = ws.scrollHeight;
+                if (!typingWrap.classList.contains('show')) {
+                    typingWrap.classList.add('show');
+                    // Solo scroll si el usuario ya estaba cerca del fondo
+                    const ws = document.getElementById('chatWorkspace');
+                    if (ws && (ws.scrollHeight - ws.scrollTop - ws.clientHeight) < 150) {
+                        ws.scrollTop = ws.scrollHeight;
+                    }
+                }
             } else {
                 typingWrap.classList.remove('show');
             }
@@ -3056,7 +2980,12 @@
         const div = document.createElement('div');
         div.className = 'msg-system';
         div.textContent = text;
-        ws.insertBefore(div, typingWrap);
+        const tw2 = document.getElementById('typingWrap');
+        if (tw2 && tw2.parentNode === ws) {
+            ws.insertBefore(div, tw2);
+        } else {
+            ws.appendChild(div);
+        }
         ws.scrollTop = ws.scrollHeight;
     }
 
@@ -3177,9 +3106,7 @@
 
     async function renderMessage(msg, key) {
         const ws = document.getElementById('chatWorkspace');
-        let typingWrap = document.getElementById('typingWrap');
-        // Asegurar typingWrap siempre al final para que insertBefore sea correcto
-        if (typingWrap && ws && typingWrap.parentNode !== ws) ws.appendChild(typingWrap);
+        const typingWrap = document.getElementById('typingWrap');
         // BUZZ: not a bubble — trigger the shake/alert effect (only for the receiver, only when new)
         if (msg.type === 'buzz') {
             if (msg.senderId !== myId && initialLoadDone) { receiveBuzz(msg.sender); }
@@ -3255,8 +3182,11 @@
             <span class="msg-time">${new Date(msg.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}${receiptHtml}</span>`;
         // Smart scroll: measure BEFORE inserting; only jump to bottom if near it, or own message
         const nearBottom = (ws.scrollHeight - ws.scrollTop - ws.clientHeight) < 120;
-        if (typingWrap && typingWrap.parentNode === ws) {
-            ws.insertBefore(wrap, typingWrap);
+        // Insertar ANTES del typingWrap para que los mensajes queden en orden cronológico
+        // y el indicador de typing aparezca siempre al final
+        const tw = document.getElementById('typingWrap');
+        if (tw && tw.parentNode === ws) {
+            ws.insertBefore(wrap, tw);
         } else {
             ws.appendChild(wrap);
         }
@@ -3673,13 +3603,11 @@
         document.getElementById('ftTargetName').textContent = 'Enlace Seguro';
         document.getElementById('ftCallType').textContent   = type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Llamando…';
-        document.getElementById('btnFtVideo').style.display = 'flex';
-        showConnectingOverlay('📱', 'Llamando…', 'Esperando que conteste…');
-        setupCallTapToHide();
+        document.getElementById('btnFtVideo').style.display = 'flex'; // always show — tap to add camera
         try {
             await setupLocalStream(type);
         } catch (err) {
-            hideConnectingOverlay();
+            // Could not get media → return to chat cleanly and inform user
             cleanUpCallUI();
             showToast(err.message);
             return;
@@ -3810,13 +3738,11 @@
         document.getElementById('ftMyAvatar').textContent   = myAvatar || '🦊';
         document.getElementById('ftCallType').textContent   = call.type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         document.getElementById('ftCallStatus').textContent = 'Conectando…';
-        document.getElementById('btnFtVideo').style.display = 'flex';
-        showConnectingOverlay(call.avatar || '📞', 'Estableciendo conexión', 'Conectando con ' + (call.caller || 'la otra persona') + '…');
-        setupCallTapToHide();
+        document.getElementById('btnFtVideo').style.display = 'flex'; // always show — tap to add camera
         try {
             await setupLocalStream(call.type);
         } catch (err) {
-            hideConnectingOverlay();
+            // Could not get media → decline the call and inform user
             update(activeCallRef, { status: 'ended' });
             cleanUpCallUI();
             showToast(err.message);
@@ -3871,7 +3797,6 @@
             console.log('[VibeCall] ICE state:', st);
             if (st === 'connected' || st === 'completed') {
                 statusEl.textContent = 'Conectado';
-                hideConnectingOverlay();
                 callActive = true;
                 stopRingtone();
                 startCallTimer();
@@ -4031,10 +3956,8 @@
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-chat').style.display = 'flex';
         document.getElementById('returnCallBar').classList.add('show');
-        showChatPip();
     };
     window.returnToCall = function() {
-        hideChatPip();
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('returnCallBar').classList.remove('show');
@@ -4064,8 +3987,6 @@
         if (lbl) lbl.textContent = 'Altavoz';
         stopCallTimer();
         stopCallParticles();
-        hideChatPip();
-        hideConnectingOverlay();
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-incoming').classList.remove('show');
         document.getElementById('returnCallBar').classList.remove('show');
@@ -4478,9 +4399,9 @@
         window.addEventListener('mousemove', onMove);
         window.addEventListener('mouseup',   onEnd);
     })(); // derive the stable E2E key immediately at startup
-    // Inicializar nameInput con Luna por defecto
+    // Inicializar nameInput con el valor por defecto (Luna) para que joinChat funcione sin tocar nada
     (function() {
-        const inp = document.getElementById('nameInput');
+        var inp = document.getElementById('nameInput');
         if (inp && !inp.value) inp.value = 'Luna';
     })();
     renderStore();
@@ -4500,10 +4421,11 @@
         const inp = document.getElementById('chatInput');
         if (!inp) return;
         inp.addEventListener('focus', () => {
+            // Pequeño delay para que el teclado iOS termine de abrirse
             setTimeout(() => {
                 const ws = document.getElementById('chatWorkspace');
                 if (ws) ws.scrollTop = ws.scrollHeight;
-            }, 400);
+            }, 350);
         });
     })();
 
@@ -4556,99 +4478,6 @@
         // Check the 10-message autodestruct rule AFTER async decryption/render settles
         setTimeout(checkDestructThreshold, 300);
     });
-
-    /* ══ CONNECTING OVERLAY ══ */
-    function showConnectingOverlay(avatar, status, sub) {
-        const ov = document.getElementById('connectingOverlay');
-        const av = document.getElementById('connAvatar');
-        const st = document.getElementById('connStatusText');
-        const sb = document.getElementById('connSubText');
-        if (av) av.textContent = avatar || '📱';
-        if (st) st.textContent = status || 'Estableciendo conexión';
-        if (sb) sb.textContent = sub || '';
-        if (ov) ov.classList.add('show');
-    }
-    window.hideConnectingOverlay = function() {
-        const ov = document.getElementById('connectingOverlay');
-        if (ov) ov.classList.remove('show');
-    };
-    window.cancelConnecting = function() {
-        hideConnectingOverlay();
-        window.hangUpCall();
-    };
-
-    /* ══ TAP TO HIDE/SHOW CALL CONTROLS ══ */
-    let callControlsVisible = true;
-    let tapHideTimer = null;
-    function setupCallTapToHide() {
-        callControlsVisible = true;
-        const screen = document.getElementById('seccion-facetime');
-        if (!screen) return;
-        if (screen._tapHandler) screen.removeEventListener('click', screen._tapHandler);
-        screen._tapHandler = function(e) {
-            if (e.target.closest('button') ||
-                e.target.closest('#connectingOverlay') ||
-                e.target.closest('.ft-video-local-wrap')) return;
-            toggleCallControls();
-        };
-        screen.addEventListener('click', screen._tapHandler);
-        resetAutoHideTimer();
-    }
-    function toggleCallControls() {
-        callControlsVisible = !callControlsVisible;
-        const panel = document.querySelector('#seccion-facetime .ft-controls-panel');
-        const topbar = document.querySelector('#seccion-facetime .ft-topbar');
-        const op = callControlsVisible ? '1' : '0';
-        const pe = callControlsVisible ? '' : 'none';
-        if (panel) { panel.style.opacity = op; panel.style.pointerEvents = pe; }
-        if (topbar) { topbar.style.opacity = op; topbar.style.pointerEvents = pe; }
-        if (callControlsVisible) resetAutoHideTimer();
-        else clearTimeout(tapHideTimer);
-    }
-    function resetAutoHideTimer() {
-        clearTimeout(tapHideTimer);
-        tapHideTimer = setTimeout(() => {
-            if (callControlsVisible) toggleCallControls();
-        }, 6000);
-    }
-
-    /* ══ CHAT PIP (cámaras flotantes en chat) ══ */
-    let expandedPip = null;
-    function showChatPip() {
-        const container = document.getElementById('chatPipContainer');
-        if (!container) return;
-        const remote = document.getElementById('remoteVideo');
-        const local  = document.getElementById('localVideo');
-        const pipRv  = document.getElementById('chatPipRemoteVid');
-        const pipLv  = document.getElementById('chatPipLocalVid');
-        if (remote && remote.srcObject && pipRv) pipRv.srcObject = remote.srcObject;
-        if (local  && local.srcObject  && pipLv) pipLv.srcObject = local.srcObject;
-        // Etiqueta del otro usuario
-        const remLabel = document.getElementById('chatPipRemoteLabel');
-        if (remLabel) remLabel.textContent = document.getElementById('ftTargetName')?.textContent || 'Otro';
-        container.classList.add('show');
-        expandedPip = null;
-    }
-    function hideChatPip() {
-        const container = document.getElementById('chatPipContainer');
-        if (container) container.classList.remove('show');
-        document.querySelectorAll('.chat-pip-bubble').forEach(b => b.classList.remove('expanded'));
-        expandedPip = null;
-    }
-    window.expandChatPip = function(which) {
-        const remote = document.getElementById('chatPipRemote');
-        const local  = document.getElementById('chatPipLocal');
-        if (!remote || !local) return;
-        if (expandedPip === which) {
-            remote.classList.remove('expanded');
-            local.classList.remove('expanded');
-            expandedPip = null;
-        } else {
-            remote.classList.toggle('expanded', which === 'remote');
-            local.classList.toggle('expanded', which === 'local');
-            expandedPip = which;
-        }
-    };
 </script>
 </body>
 </html>
