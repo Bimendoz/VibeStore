@@ -19,25 +19,38 @@ admin.initializeApp({
 });
 const db = admin.database();
 
-// Cache de presencia en memoria — se actualiza en tiempo real con onValue
-// Así no hay latencia de lectura cuando llega un mensaje nuevo
+// Cache en memoria — se actualiza en tiempo real, sin latencia al llegar mensajes
 const presenceCache = {};
+const mutedCache    = {};
 
 db.ref('chat/presence').on('value', snap => {
-    const data = snap.val() || {};
-    // Limpiar y reconstruir el cache completo
     Object.keys(presenceCache).forEach(k => delete presenceCache[k]);
-    Object.entries(data).forEach(([id, info]) => {
+    Object.entries(snap.val() || {}).forEach(([id, info]) => {
         presenceCache[id] = info;
     });
 });
+
+// Cache de silenciados — cuando el usuario toca "Silenciar" en el menú del chat
+db.ref('chat/muted').on('value', snap => {
+    Object.keys(mutedCache).forEach(k => delete mutedCache[k]);
+    Object.entries(snap.val() || {}).forEach(([id, val]) => {
+        mutedCache[id] = val;
+    });
+});
+
+// Usuario activamente en chat solo si inChat:true Y ts < 2 minutos
+// Si la app se cerró abruptamente el ts queda viejo y el push llega igual
+function isActivelyInChat(id) {
+    const p = presenceCache[id];
+    if (!p || p.inChat !== true) return false;
+    return (Date.now() - (p.ts || 0)) < 120000;
+}
 
 // ── ESCUCHAR MENSAJES NUEVOS ────────────────────────
 db.ref('chat/messages').on('child_added', async (snap) => {
     const msg = snap.val();
     if (!msg || msg.type === 'buzz' || msg.type === 'system') return;
 
-    // Leer suscripciones push
     const pushSnap = await db.ref('chat/push').once('value');
     const subs = pushSnap.val() || {};
 
@@ -49,14 +62,18 @@ db.ref('chat/messages').on('child_added', async (snap) => {
     });
 
     for (const [id, subJson] of Object.entries(subs)) {
-        // ❌ Nunca notificar al emisor
+        // No notificar al emisor
         if (id === msg.senderId) continue;
 
-        // ❌ No notificar si el destinatario está activamente en el chat
-        // Usamos el cache en memoria (actualizado en tiempo real) — sin latencia
-        const userPresence = presenceCache[id];
-        if (userPresence && userPresence.inChat === true) {
-            console.log(`[Push] Omitido ${id} — está en chat activo`);
+        // No notificar si está activamente en el chat (con timestamp reciente)
+        if (isActivelyInChat(id)) {
+            console.log(`[Push] Omitido ${id} — en chat activo`);
+            continue;
+        }
+
+        // No notificar si el usuario silenciló manualmente las notificaciones
+        if (mutedCache[id] === true) {
+            console.log(`[Push] Omitido ${id} — silenciado por el usuario`);
             continue;
         }
 
@@ -65,9 +82,10 @@ db.ref('chat/messages').on('child_added', async (snap) => {
             await webpush.sendNotification(sub, payload);
             console.log(`[Push] Enviado a ${id}`);
         } catch (err) {
-            if (err.statusCode === 410 || err.statusCode === 404) {
+            const code = err.statusCode;
+            if (code === 400 || code === 404 || code === 410) {
                 await db.ref(`chat/push/${id}`).remove();
-                console.log(`[Push] Suscripción expirada eliminada: ${id}`);
+                console.log(`[Push] Suscripción inválida eliminada (${code}): ${id}`);
             } else {
                 console.error(`[Push] Error ${id}:`, err.statusCode, err.message);
             }
