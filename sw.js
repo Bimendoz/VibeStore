@@ -35,7 +35,10 @@ self.addEventListener('notificationclick', e => {
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
             const target = e.notification.data?.url || '/';
             const existing = list.find(c => c.url.includes(self.location.origin));
-            if (existing) { existing.focus(); return; }
+            if (existing) { 
+                existing.focus();
+                return existing;
+            }
             return clients.openWindow(target);
         })
     );
