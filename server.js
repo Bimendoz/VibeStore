@@ -1,139 +1,132 @@
+// server.js — VibeStore backend (Render free tier)
+// Mantiene el proceso vivo + envía Web Push reales cuando llegan mensajes
+'use strict';
+
 const express  = require('express');
 const webpush  = require('web-push');
-const admin    = require('firebase-admin');
+const { initializeApp, cert, getApps } = require('firebase-admin/app');
+const { getDatabase }  = require('firebase-admin/database');
+const { getMessaging } = require('firebase-admin/messaging');
 
-const app = express();
-app.use(express.json());
+// ── Firebase Admin ───────────────────────────────────────────────────
+// Usa las credenciales de la cuenta de servicio (env var en Render)
+// Si no tienes FIREBASE_SERVICE_ACCOUNT, el servidor funciona sin push admin
+// pero las notificaciones vía web-push siguen funcionando.
+let db;
+try {
+    const sa = process.env.FIREBASE_SERVICE_ACCOUNT
+        ? JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)
+        : null;
 
-// ── VALIDAR VARIABLES DE ENTORNO ───────────────────
-const requiredEnvVars = ['VAPID_EMAIL', 'VAPID_PUBLIC', 'VAPID_PRIVATE', 'FIREBASE_SERVICE_ACCOUNT'];
-const missingEnvVars = requiredEnvVars.filter(v => !process.env[v]);
-if (missingEnvVars.length > 0) {
-    console.error('❌ Faltan variables de entorno:', missingEnvVars);
-    process.exit(1);
+    if (!getApps().length) {
+        if (sa) {
+            initializeApp({ credential: cert(sa), databaseURL: process.env.FIREBASE_DATABASE_URL || 'https://data-base-store-3bbf8-default-rtdb.firebaseio.com' });
+        } else {
+            // Fallback: SDK sin autenticación de servicio — solo lectura pública
+            initializeApp({ databaseURL: process.env.FIREBASE_DATABASE_URL || 'https://data-base-store-3bbf8-default-rtdb.firebaseio.com' });
+        }
+    }
+    db = getDatabase();
+    console.log('[Firebase] Admin SDK inicializado');
+} catch (e) {
+    console.error('[Firebase] Error al inicializar:', e.message);
 }
 
-// ── VAPID ──────────────────────────────────────────
-webpush.setVapidDetails(
-    `mailto:${process.env.VAPID_EMAIL}`,
-    process.env.VAPID_PUBLIC,
-    process.env.VAPID_PRIVATE
-);
+// ── VAPID (Web Push) ─────────────────────────────────────────────────
+// Clave pública (visible en el cliente)
+const VAPID_PUBLIC_KEY  = process.env.VAPID_PUBLIC_KEY
+    || 'BCxTwZxDIsp3ODLjAgI3M_VMUPGxymhf8B4MQ_fMi9QmzBZIZ3Q9xtUC1LHPexEBvp11B2w6gFfcVpRe2G60Chk';
 
-// ── FIREBASE ADMIN ─────────────────────────────────
-admin.initializeApp({
-    credential:  admin.credential.cert(JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT)),
-    databaseURL: 'https://data-base-store-3bbf8-default-rtdb.firebaseio.com'
-});
-const db = admin.database();
+// Clave privada — OBLIGATORIA para enviar push reales
+// Ponla en las Variables de Entorno de Render: VAPID_PRIVATE_KEY
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || null;
+const VAPID_CONTACT     = process.env.VAPID_CONTACT     || 'mailto:admin@vibestore.app';
 
-// Cache de presencia en memoria — se actualiza en tiempo real con onValue
-// Así no hay latencia de lectura cuando llega un mensaje nuevo
-const presenceCache = {};
-
-db.ref('chat/presence').on('value', snap => {
-    const data = snap.val() || {};
-    // Limpiar y reconstruir el cache completo
-    Object.keys(presenceCache).forEach(k => delete presenceCache[k]);
-    Object.entries(data).forEach(([id, info]) => {
-        presenceCache[id] = info;
-    });
-});
-
-// ── ENDPOINT: Suscribir a Push Notifications ───────
-app.post('/subscribe', async (req, res) => {
+let pushEnabled = false;
+if (VAPID_PRIVATE_KEY) {
     try {
-        const { userId, subscription } = req.body;
-        
-        if (!userId || !subscription) {
-            return res.status(400).json({ error: 'userId y subscription son requeridos' });
-        }
-        
-        // Guardar la suscripción en Firebase
-        await db.ref(`chat/push/${userId}`).set(JSON.stringify(subscription));
-        console.log(`✅ Usuario ${userId} suscrito a push notifications`);
-        
-        res.status(201).json({ message: 'Suscripción guardada' });
-    } catch (error) {
-        console.error('[Subscribe] Error:', error.message);
-        res.status(500).json({ error: 'Error al guardar suscripción' });
+        webpush.setVapidDetails(VAPID_CONTACT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+        pushEnabled = true;
+        console.log('[WebPush] VAPID configurado ✓');
+    } catch (e) {
+        console.error('[WebPush] Error configurando VAPID:', e.message);
     }
-});
+} else {
+    console.warn('[WebPush] VAPID_PRIVATE_KEY no configurada — las notificaciones push no se enviarán.');
+    console.warn('[WebPush] Añade VAPID_PRIVATE_KEY en Environment Variables de Render.');
+}
 
-// ── ENDPOINT: Desuscribir de Push Notifications ────
-app.post('/unsubscribe', async (req, res) => {
-    try {
-        const { userId } = req.body;
-        
-        if (!userId) {
-            return res.status(400).json({ error: 'userId es requerido' });
-        }
-        
-        // Eliminar la suscripción de Firebase
-        await db.ref(`chat/push/${userId}`).remove();
-        console.log(`✅ Usuario ${userId} desuscrito de push notifications`);
-        
-        res.status(200).json({ message: 'Suscripción eliminada' });
-    } catch (error) {
-        console.error('[Unsubscribe] Error:', error.message);
-        res.status(500).json({ error: 'Error al eliminar suscripción' });
-    }
-});
+// ── Express ──────────────────────────────────────────────────────────
+const app  = express();
+const PORT = process.env.PORT || 3000;
+app.use(express.json());
 
-// ── ENDPOINT: Health check ──────────────────────────
+// Health check para UptimeRobot (mantiene el proceso vivo en Render free)
 app.get('/health', (req, res) => {
-    res.status(200).json({ status: 'VibeStore Push Server running ✅' });
+    res.json({ status: 'ok', ts: Date.now(), push: pushEnabled });
 });
 
-// ── ESCUCHAR MENSAJES NUEVOS ────────────────────────
-db.ref('chat/messages').on('child_added', async (snap) => {
-    const msg = snap.val();
-    if (!msg || msg.type === 'buzz' || msg.type === 'system') return;
+app.get('/', (req, res) => {
+    res.json({ status: 'VibeStore server running', push: pushEnabled });
+});
 
-    try {
-        // Leer suscripciones push
-        const pushSnap = await db.ref('chat/push').once('value');
-        const subs = pushSnap.val() || {};
+app.listen(PORT, () => console.log(`[Server] Escuchando en puerto ${PORT}`));
 
-        const payload = JSON.stringify({
-            title: 'VibeStore 🛍️',
-            body:  '📦 Nueva oferta disponible',
+// ── LISTENER DE MENSAJES → Web Push ──────────────────────────────────
+// Cuando llega un mensaje nuevo, notifica a todos los suscriptores
+// excepto al remitente.
+if (db) {
+    const messagesRef = db.ref('chat/messages');
+    const pushSubsRef = db.ref('chat/push');
+
+    // Guardamos las suscripciones en memoria para no leer Firebase en cada mensaje
+    let subscriptions = {};   // { userId: subscriptionObject }
+    pushSubsRef.on('value', snap => {
+        subscriptions = {};
+        if (!snap.exists()) return;
+        snap.forEach(child => {
+            try {
+                subscriptions[child.key] = JSON.parse(child.val());
+            } catch (e) { /* JSON inválido — ignorar */ }
+        });
+        console.log(`[WebPush] ${Object.keys(subscriptions).length} suscripciones cargadas`);
+    });
+
+    // Escuchar mensajes nuevos
+    messagesRef.on('child_added', async snap => {
+        if (!pushEnabled) return;
+        const msg = snap.val();
+        if (!msg || msg.type === 'buzz' || msg.type === 'system') return;
+
+        const senderId = msg.senderId;
+        const targets  = Object.entries(subscriptions).filter(([id]) => id !== senderId);
+        if (!targets.length) return;
+
+        // Payload de notificación — siempre camuflado como oferta
+        const notifPayload = JSON.stringify({
+            title: '🛍️ VibeStore — Oferta especial',
+            body:  'Tienes una promoción disponible. ¡Entra ahora!',
             tag:   'vibestore-msg',
-            url:   '/'
+            data:  { url: '/' }
         });
 
-        for (const [id, subJson] of Object.entries(subs)) {
-            // ❌ Nunca notificar al emisor
-            if (id === msg.senderId) continue;
-
-            // ❌ No notificar si el destinatario está activamente en el chat
-            // Usamos el cache en memoria (actualizado en tiempo real) — sin latencia
-            const userPresence = presenceCache[id];
-            if (userPresence && userPresence.inChat === true) {
-                console.log(`[Push] Omitido ${id} — está en chat activo`);
-                continue;
-            }
-
-            try {
-                const sub = JSON.parse(subJson);
-                await webpush.sendNotification(sub, payload);
-                console.log(`[Push] Enviado a ${id}`);
-            } catch (err) {
-                if (err.statusCode === 410 || err.statusCode === 404) {
-                    await db.ref(`chat/push/${id}`).remove();
-                    console.log(`[Push] Suscripción expirada eliminada: ${id}`);
-                } else {
-                    console.error(`[Push] Error ${id}:`, err.statusCode, err.message);
+        await Promise.allSettled(
+            targets.map(async ([userId, sub]) => {
+                try {
+                    await webpush.sendNotification(sub, notifPayload);
+                    console.log(`[WebPush] ✓ Push enviado a ${userId}`);
+                } catch (err) {
+                    console.warn(`[WebPush] ✗ Error enviando a ${userId}:`, err.statusCode || err.message);
+                    // Si la suscripción expiró (410) o es inválida (404), eliminarla
+                    if (err.statusCode === 410 || err.statusCode === 404) {
+                        db.ref(`chat/push/${userId}`).remove();
+                        delete subscriptions[userId];
+                        console.log(`[WebPush] Suscripción de ${userId} eliminada (expirada)`);
+                    }
                 }
-            }
-        }
-    } catch (error) {
-        console.error('[Message Listener] Error:', error.message);
-    }
-});
+            })
+        );
+    });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`✅ VibeStore Push Server escuchando en puerto ${PORT}`);
-    console.log(`📍 Health check: http://localhost:${PORT}/health`);
-});
+    console.log('[Firebase] Escuchando mensajes para Web Push...');
+}
