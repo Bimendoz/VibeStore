@@ -1,14 +1,9 @@
 {
   "name": "vibestore-server",
   "version": "1.0.0",
-  "description": "VibeStore backend – keep-alive + Web Push",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=18"
-  },
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" },
   "dependencies": {
     "express": "^4.18.2",
     "firebase-admin": "^12.0.0",
