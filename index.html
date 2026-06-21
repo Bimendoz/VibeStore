@@ -1619,16 +1619,15 @@
         document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
         requestNotificationPermission();
-        const statusEl = document.getElementById('onlineStatus');
-        if (statusEl) statusEl.textContent = othersOnline > 0 ? 'En línea' : 'Esperando a la otra persona…';
+        // Registrar presencia AHORA que el usuario entró al canal
+        registerPresence();
+        recomputeOnline();
+        updateConnectionStatus();
         listenForIncomingCalls();
         listenForTyping();
         startKeyExchange();
         rerenderAllMessages();
-        // Registrar presencia AHORA que el usuario entró al canal
-        registerPresence();
         subscribeToPush();
-        checkPendingNotification();
     };
 
     async function rerenderAllMessages() {
@@ -2789,6 +2788,29 @@
     let presenceKnownIds = new Set();
     let presenceInitialized = false;
     let _lastSeenOtherTs = null;   // timestamp del último momento que el otro estuvo activo
+    let _presenceData = {};        // copia local de chat/presence
+    const ONLINE_WINDOW_MS = 35000; // un usuario está "online" si su ts es de los últimos 35s
+
+    // Calcula quién está realmente en línea según su heartbeat reciente
+    function recomputeOnline() {
+        const now = Date.now();
+        const onlineIds = [];
+        let mostRecentOtherTs = null;
+        Object.entries(_presenceData).forEach(([id, v]) => {
+            if (id === myId) return;
+            const ts = (v && v.ts) || 0;
+            if (now - ts < ONLINE_WINDOW_MS) {
+                onlineIds.push(id);
+            }
+            // El más reciente de los otros (esté online o no) sirve para "Activo hace X"
+            if (ts && (mostRecentOtherTs === null || ts > mostRecentOtherTs)) {
+                mostRecentOtherTs = ts;
+            }
+        });
+        if (mostRecentOtherTs) _lastSeenOtherTs = mostRecentOtherTs;
+        othersOnline = onlineIds.length;
+        return onlineIds;
+    }
 
     // Fuente única de verdad para el estado del header
     function updateConnectionStatus() {
@@ -2797,16 +2819,15 @@
         if (othersOnline > 0) {
             statusEl.textContent = 'En línea';
         } else if (_lastSeenOtherTs) {
-            statusEl.textContent = `Activo ${timeAgo(_lastSeenOtherTs)}`;
+            statusEl.textContent = `Última conexión ${timeAgo(_lastSeenOtherTs)}`;
         } else {
             statusEl.textContent = 'Esperando a la otra persona…';
         }
     }
 
     function initPresence() {
-        // ⚠️  NO registramos presencia aquí — solo los listeners.
-        // La presencia real se registra en joinChat() cuando el usuario
-        // entra al canal, evitando aparecer "En línea" desde la tienda.
+        // NO registramos presencia aquí — solo escuchamos. La presencia
+        // activa se registra en joinChat() vía registerPresence().
 
         onValue(ref(db, '.info/connected'), snap => {
             const connected = snap.val() === true;
@@ -2819,30 +2840,19 @@
             }
         });
 
+        // Escuchar TODA la rama de presencia (incluye ts de cada quien)
         onValue(ref(db, 'chat/presence'), snap => {
-            const data = snap.val() || {};
-            const ids = Object.keys(data).filter(id => id !== myId);
-            othersOnline = ids.length;
+            _presenceData = snap.val() || {};
+            const onlineIds = recomputeOnline();
 
             updateConnectionStatus();
-
-            const banner = document.getElementById('chatOfflineBanner');
-            if (banner && inChat) {
-                if (othersOnline === 0) {
-                    const msg = _lastSeenOtherTs
-                        ? `⏳ La otra persona estuvo activa ${timeAgo(_lastSeenOtherTs)}. Verá tus mensajes al entrar.`
-                        : '⏳ La otra persona aún no está conectada. Verá tus mensajes al entrar.';
-                    banner.textContent = msg;
-                    banner.classList.add('show');
-                } else {
-                    banner.classList.remove('show');
-                }
-            }
+            updateOfflineBanner();
+            updateStoreBadge();
 
             if (presenceInitialized) {
-                ids.forEach(id => {
+                onlineIds.forEach(id => {
                     if (!presenceKnownIds.has(id)) {
-                        const nm = (data[id] && data[id].name) || 'La otra persona';
+                        const nm = (_presenceData[id] && _presenceData[id].name) || 'La otra persona';
                         notifyOtherIsOnline(nm);
                         if (inChat) {
                             const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
@@ -2852,7 +2862,7 @@
                     }
                 });
                 presenceKnownIds.forEach(id => {
-                    if (!ids.includes(id)) {
+                    if (!onlineIds.includes(id)) {
                         const nm = window._presenceNames && window._presenceNames[id]
                             ? window._presenceNames[id] : 'La otra persona';
                         if (inChat) {
@@ -2863,37 +2873,75 @@
                 });
             }
             window._presenceNames = {};
-            ids.forEach(id => { window._presenceNames[id] = data[id] && data[id].name; });
-            presenceKnownIds = new Set(ids);
+            onlineIds.forEach(id => { window._presenceNames[id] = _presenceData[id] && _presenceData[id].name; });
+            presenceKnownIds = new Set(onlineIds);
             if (!presenceInitialized) setTimeout(() => { presenceInitialized = true; }, 1500);
         });
 
-        onValue(ref(db, 'chat/lastSeen'), snap => {
-            const data = snap.val() || {};
-            const others = Object.entries(data).filter(([id]) => id !== myId);
-            if (others.length) {
-                const [, info] = others.sort((a,b) => (b[1].ts||0) - (a[1].ts||0))[0];
-                _lastSeenOtherTs = info.ts || null;
-            }
-            // Badge camouflage en la tienda
-            const isOnline = othersOnline > 0;
-            const storeBadge = document.getElementById('storeActivity');
-            if (storeBadge) storeBadge.textContent = isOnline ? 'Tienda activa ahora' : (_lastSeenOtherTs ? `Tienda activa ${timeAgo(_lastSeenOtherTs)}` : 'Tienda disponible');
-            // Actualizar header del chat si ya está abierto
+        // Cada 10s recalculamos por si un heartbeat ajeno expiró sin que cambie Firebase
+        if (window._presenceTick) clearInterval(window._presenceTick);
+        window._presenceTick = setInterval(() => {
+            const before = othersOnline;
+            recomputeOnline();
             updateConnectionStatus();
-        });
+            updateOfflineBanner();
+            updateStoreBadge();
+            // Si alguien "expiró", reflejar en la lista conocida
+            if (before > 0 && othersOnline === 0) {
+                presenceKnownIds = new Set();
+            }
+        }, 10000);
     }
 
-    // Registrar presencia ACTIVA — solo se llama desde joinChat()
+    function updateOfflineBanner() {
+        const banner = document.getElementById('chatOfflineBanner');
+        if (!banner || !inChat) return;
+        if (othersOnline === 0) {
+            banner.textContent = _lastSeenOtherTs
+                ? `⏳ La otra persona se conectó por última vez ${timeAgo(_lastSeenOtherTs)}. Verá tus mensajes al entrar.`
+                : '⏳ La otra persona aún no se ha conectado. Verá tus mensajes al entrar.';
+            banner.classList.add('show');
+        } else {
+            banner.classList.remove('show');
+        }
+    }
+
+    function updateStoreBadge() {
+        const storeBadge = document.getElementById('storeActivity');
+        if (!storeBadge) return;
+        storeBadge.textContent = othersOnline > 0
+            ? 'Tienda activa ahora'
+            : (_lastSeenOtherTs ? `Tienda activa ${timeAgo(_lastSeenOtherTs)}` : 'Tienda disponible');
+    }
+
+    // Registrar presencia ACTIVA con HEARTBEAT — solo se llama desde joinChat()
     function registerPresence() {
-        set(presenceRef, { name: myName, online: true, ts: Date.now() });
-        onDisconnect(presenceRef).remove();
-        onDisconnect(ref(db, 'chat/lastSeen/' + myId)).set({ name: myName, ts: serverTimestamp() });
-        set(ref(db, 'chat/lastSeen/' + myId), { name: myName, ts: Date.now() });
-        if (window._lastSeenInterval) clearInterval(window._lastSeenInterval);
-        window._lastSeenInterval = setInterval(() => {
-            set(ref(db, 'chat/lastSeen/' + myId), { name: myName, ts: Date.now() });
-        }, 20000);
+        const beat = () => {
+            // Solo enviamos heartbeat mientras la pestaña esté visible/activa
+            set(presenceRef, { name: myName, online: true, ts: Date.now() });
+        };
+        beat();
+        onDisconnect(presenceRef).remove();  // respaldo: si Firebase detecta la desconexión, limpia
+        if (window._heartbeat) clearInterval(window._heartbeat);
+        // Heartbeat cada 12s (la ventana de "online" es 35s, así toleramos 2 fallos)
+        window._heartbeat = setInterval(() => {
+            if (document.visibilityState === 'visible') beat();
+        }, 12000);
+
+        // Al cerrar/ocultar la app, marcamos salida inmediata (mejor que esperar onDisconnect)
+        const markAway = () => {
+            // Dejamos el ts viejo (para "última conexión") pero quitamos presencia activa
+            set(presenceRef, null);
+        };
+        window.addEventListener('pagehide', markAway);
+        window.addEventListener('beforeunload', markAway);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                // No borramos del todo, pero dejamos de latir; el ts viejo expirará en 35s
+            } else if (document.visibilityState === 'visible' && inChat) {
+                beat(); // al volver, reanudamos presencia de inmediato
+            }
+        });
     }
 
     function timeAgo(ts) {
@@ -2932,7 +2980,7 @@
     }
 
     /* ── SERVICE WORKER + PUSH ── */
-    const VAPID_PUBLIC_KEY = 'BBXcrMw0HW6X95dtGX9yvPcgPcVn4SLNVrXPE3zEZ5zpthnJmoNjUAHNaburQoxtMwNcUN452H9qyObTym1j6Zc';
+    const VAPID_PUBLIC_KEY = 'BBddPNkEupysXpfhkNyhaNrYGqTAbigGlxyQAwckztPX_dJUWjBx3JHM4BRhagRu2lo2jFFmJNFI-nS7IhYugcE';
 
     // iOS/Safari requiere la clave como Uint8Array, NO como string
     function urlBase64ToUint8Array(base64String) {
