@@ -1,13 +1,17 @@
 {
-  "name": "vibestore-push-server",
+  "name": "vibestore-server",
   "version": "1.0.0",
+  "description": "VibeStore backend – keep-alive + Web Push",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "express": "^4.18.2",
-    "web-push": "^3.6.7",
-    "firebase-admin": "^12.0.0"
+    "firebase-admin": "^12.0.0",
+    "web-push": "^3.6.7"
   }
 }
