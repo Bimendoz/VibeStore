@@ -1,9 +1,10 @@
 'use strict';
 const express = require('express');
+const path    = require('path');
 const webpush = require('web-push');
 const admin   = require('firebase-admin');
 
-// ── Firebase Admin (autenticación anónima — lectura/escritura pública en las reglas) ──
+// ── Firebase Admin ────────────────────────────────────────────────────────────────────
 if (!admin.apps.length) {
     admin.initializeApp({
         databaseURL: 'https://data-base-store-3bbf8-default-rtdb.firebaseio.com'
@@ -14,24 +15,39 @@ const db = admin.database();
 // ── Claves VAPID ─────────────────────────────────────────────────────────────────────
 const VAPID_PUBLIC  = 'BBXcrMw0HW6X95dtGX9yvPcgPcVn4SLNVrXPE3zEZ5zpthnJmoNjUAHNaburQoxtMwNcUN452H9qyObTym1j6Zc';
 const VAPID_PRIVATE = 'Jy1g-pY1dgUdY_-YIAXwLZHWma2ZYoPQ6DH2IA99-lY';
-
 webpush.setVapidDetails('mailto:admin@vibestore.app', VAPID_PUBLIC, VAPID_PRIVATE);
 console.log('[WebPush] VAPID configurado ✓');
 
 // ── Express ───────────────────────────────────────────────────────────────────────────
 const app  = express();
 const PORT = process.env.PORT || 3000;
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
+// Health check para UptimeRobot (keep-alive). Devuelve JSON, NO la web.
 app.get('/health', (_req, res) => res.json({ status: 'ok', ts: Date.now() }));
-app.get('/',       (_req, res) => res.json({ status: 'VibeStore running' }));
 
-app.listen(PORT, () => console.log(`[Server] Puerto ${PORT}`));
+// ⭐ SERVIR LA TIENDA: todos los archivos estáticos (index.html, sw.js, etc.)
+// Esto hace que la raíz "/" entregue tu index.html en vez del JSON.
+app.use(express.static(__dirname, {
+    setHeaders: (res, filePath) => {
+        // El Service Worker debe poder controlar todo el scope
+        if (filePath.endsWith('sw.js')) {
+            res.setHeader('Service-Worker-Allowed', '/');
+            res.setHeader('Cache-Control', 'no-cache');
+        }
+    }
+}));
 
-// ── Escuchar mensajes nuevos → enviar Web Push ────────────────────────────────────────
-let subscriptions = {};   // { userId: subscriptionObject }
+// Fallback: cualquier ruta desconocida devuelve index.html (para la PWA)
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
-// Mantener suscripciones en memoria
+app.listen(PORT, () => console.log(`[Server] Puerto ${PORT} — sirviendo tienda + push`));
+
+// ── Web Push: escuchar mensajes nuevos ────────────────────────────────────────────────
+let subscriptions = {};
+
 db.ref('chat/push').on('value', snap => {
     subscriptions = {};
     if (!snap.exists()) return;
@@ -41,7 +57,6 @@ db.ref('chat/push').on('value', snap => {
     console.log(`[WebPush] ${Object.keys(subscriptions).length} suscripciones`);
 });
 
-// Cada mensaje nuevo → notificar a todos menos al remitente
 db.ref('chat/messages').on('child_added', async snap => {
     const msg = snap.val();
     if (!msg || msg.type === 'buzz' || msg.type === 'system') return;
