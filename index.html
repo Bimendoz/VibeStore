@@ -1619,15 +1619,14 @@
         document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
         requestNotificationPermission();
-        set(presenceRef, { name: myName, online: true, ts: Date.now() });
-        onDisconnect(presenceRef).remove();
-        onDisconnect(typingRef).remove();
         const statusEl = document.getElementById('onlineStatus');
         if (statusEl) statusEl.textContent = othersOnline > 0 ? 'En línea' : 'Esperando a la otra persona…';
         listenForIncomingCalls();
         listenForTyping();
         startKeyExchange();
         rerenderAllMessages();
+        // Registrar presencia AHORA que el usuario entró al canal
+        registerPresence();
         subscribeToPush();
         checkPendingNotification();
     };
@@ -2606,6 +2605,8 @@
         document.getElementById('returnCallBar').classList.remove('show');
         document.getElementById('seccion-chat').style.display = inChat ? 'flex' : 'none';
         document.getElementById('vista-tienda').style.display = inChat ? 'none' : 'flex';
+        // Restablecer altura dinámica del chat para iOS keyboard
+        if (inChat && window._resetChatViewport) window._resetChatViewport();
     }
 
     window.openChatMenu = function() {
@@ -3036,16 +3037,25 @@
     /* ── PRESENCIA + lastSeen ── */
     let presenceKnownIds = new Set();
     let presenceInitialized = false;
+    let _lastSeenOtherTs = null;   // timestamp del último momento que el otro estuvo activo
+
+    // Fuente única de verdad para el estado del header
+    function updateConnectionStatus() {
+        const statusEl = document.getElementById('onlineStatus');
+        if (!statusEl || !inChat) return;
+        if (othersOnline > 0) {
+            statusEl.textContent = 'En línea';
+        } else if (_lastSeenOtherTs) {
+            statusEl.textContent = `Activo ${timeAgo(_lastSeenOtherTs)}`;
+        } else {
+            statusEl.textContent = 'Esperando a la otra persona…';
+        }
+    }
 
     function initPresence() {
-        set(presenceRef, { name: myName || 'Invitado', online: true, ts: Date.now() });
-        onDisconnect(presenceRef).remove();
-        onDisconnect(ref(db, 'chat/lastSeen/' + myId)).set({ name: myName || 'Invitado', ts: serverTimestamp() });
-        set(ref(db, 'chat/lastSeen/' + myId), { name: myName || 'Invitado', ts: Date.now() });
-        if (window._lastSeenInterval) clearInterval(window._lastSeenInterval);
-        window._lastSeenInterval = setInterval(() => {
-            set(ref(db, 'chat/lastSeen/' + myId), { name: myName || 'Invitado', ts: Date.now() });
-        }, 20000);
+        // ⚠️  NO registramos presencia aquí — solo los listeners.
+        // La presencia real se registra en joinChat() cuando el usuario
+        // entra al canal, evitando aparecer "En línea" desde la tienda.
 
         onValue(ref(db, '.info/connected'), snap => {
             const connected = snap.val() === true;
@@ -3053,7 +3063,7 @@
             if (!connected && inChat && banner) {
                 banner.textContent = 'Sin conexión. Reconectando…';
                 banner.classList.add('show');
-            } else if (connected && banner) {
+            } else if (connected && banner && othersOnline > 0) {
                 banner.classList.remove('show');
             }
         });
@@ -3063,15 +3073,15 @@
             const ids = Object.keys(data).filter(id => id !== myId);
             othersOnline = ids.length;
 
-            const statusEl = document.getElementById('onlineStatus');
-            if (statusEl && inChat) {
-                statusEl.textContent = othersOnline > 0 ? 'En línea' : 'Esperando a la otra persona…';
-            }
+            updateConnectionStatus();
 
             const banner = document.getElementById('chatOfflineBanner');
             if (banner && inChat) {
                 if (othersOnline === 0) {
-                    banner.textContent = '⏳ La otra persona aún no está conectada. Verá tus mensajes al entrar.';
+                    const msg = _lastSeenOtherTs
+                        ? `⏳ La otra persona estuvo activa ${timeAgo(_lastSeenOtherTs)}. Verá tus mensajes al entrar.`
+                        : '⏳ La otra persona aún no está conectada. Verá tus mensajes al entrar.';
+                    banner.textContent = msg;
                     banner.classList.add('show');
                 } else {
                     banner.classList.remove('show');
@@ -3110,17 +3120,29 @@
         onValue(ref(db, 'chat/lastSeen'), snap => {
             const data = snap.val() || {};
             const others = Object.entries(data).filter(([id]) => id !== myId);
-            if (!others.length) return;
-            const [, info] = others.sort((a,b) => (b[1].ts||0) - (a[1].ts||0))[0];
-            const isOnline = othersOnline > 0;
-            const label = isOnline ? 'Tienda activa ahora' : `Tienda activa ${timeAgo(info.ts)}`;
-            const storeBadge = document.getElementById('storeActivity');
-            if (storeBadge) storeBadge.textContent = label;
-            const statusEl = document.getElementById('onlineStatus');
-            if (statusEl && inChat && !isOnline) {
-                statusEl.textContent = `Activo ${timeAgo(info.ts)}`;
+            if (others.length) {
+                const [, info] = others.sort((a,b) => (b[1].ts||0) - (a[1].ts||0))[0];
+                _lastSeenOtherTs = info.ts || null;
             }
+            // Badge camouflage en la tienda
+            const isOnline = othersOnline > 0;
+            const storeBadge = document.getElementById('storeActivity');
+            if (storeBadge) storeBadge.textContent = isOnline ? 'Tienda activa ahora' : (_lastSeenOtherTs ? `Tienda activa ${timeAgo(_lastSeenOtherTs)}` : 'Tienda disponible');
+            // Actualizar header del chat si ya está abierto
+            updateConnectionStatus();
         });
+    }
+
+    // Registrar presencia ACTIVA — solo se llama desde joinChat()
+    function registerPresence() {
+        set(presenceRef, { name: myName, online: true, ts: Date.now() });
+        onDisconnect(presenceRef).remove();
+        onDisconnect(ref(db, 'chat/lastSeen/' + myId)).set({ name: myName, ts: serverTimestamp() });
+        set(ref(db, 'chat/lastSeen/' + myId), { name: myName, ts: Date.now() });
+        if (window._lastSeenInterval) clearInterval(window._lastSeenInterval);
+        window._lastSeenInterval = setInterval(() => {
+            set(ref(db, 'chat/lastSeen/' + myId), { name: myName, ts: Date.now() });
+        }, 20000);
     }
 
     function timeAgo(ts) {
@@ -3289,6 +3311,43 @@
         if (!initialLoadDone) { setTimeout(() => { initialLoadDone = true; }, 600); }
         setTimeout(checkDestructThreshold, 300);
     });
+
+    /* ── iOS KEYBOARD FIX — visualViewport ──────────────────────────────
+       En Safari/PWA cuando el teclado sube, el viewport visual se encoge.
+       Ajustamos #seccion-chat dinámicamente para que la barra de input
+       siempre quede pegada al teclado y no flote en el aire.
+    ──────────────────────────────────────────────────────────────────── */
+    (function setupViewportFix() {
+        if (!window.visualViewport) return;
+        const chat = document.getElementById('seccion-chat');
+        if (!chat) return;
+        let rafId = null;
+
+        const apply = () => {
+            rafId = null;
+            if (chat.style.display === 'none') return;
+            const h   = Math.round(window.visualViewport.height);
+            const top = Math.round(window.visualViewport.offsetTop);
+            chat.style.height = h + 'px';
+            chat.style.top    = top + 'px';
+            chat.style.bottom = 'auto';
+            // Mantener scroll al fondo cuando abre el teclado
+            const ws = document.getElementById('chatWorkspace');
+            if (ws) ws.scrollTop = ws.scrollHeight;
+        };
+
+        const schedule = () => { if (!rafId) rafId = requestAnimationFrame(apply); };
+
+        window.visualViewport.addEventListener('resize', schedule);
+        window.visualViewport.addEventListener('scroll', schedule);
+
+        // Al salir del chat resetear para que no quede con altura fija
+        window._resetChatViewport = () => {
+            chat.style.height = '';
+            chat.style.top    = '0';
+            chat.style.bottom = '0';
+        };
+    })();
 
     /* ── INIT ── */
     shuffleProducts(products);
