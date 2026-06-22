@@ -2628,99 +2628,6 @@
     window.clearChatForEveryone = function() {
         closeTrashMenu();
         const wraps = Array.from(document.querySelectorAll('.msg-wrap[id^="wrap-"]'));
-        if (wraps.length === 0) {
-            remove(messagesRef).then(() => seenKeys.clear()).catch(()=>{});
-            return;
-        }
-        const colors = [
-            getComputedStyle(document.documentElement).getPropertyValue('--bubble-mine').trim() || '#ff441f',
-            '#ff9f0a','#30d158','#64d2ff','#bf5af2','#ff453a','#ffd60a','#ff6b6b','#fff'
-        ];
-        wraps.forEach((el, idx) => {
-            const rect  = el.getBoundingClientRect();
-            const cx    = rect.left + rect.width  / 2;
-            const cy    = rect.top  + rect.height / 2;
-            const count = Math.min(28, 12 + Math.floor(rect.width / 8));
-            const delay = idx * 35;
-            setTimeout(() => {
-                for (let i = 0; i < count; i++) {
-                    const p     = document.createElement('div');
-                    const angle = (Math.PI * 2 / count) * i + (Math.random()-.5)*.7;
-                    const speed = 40 + Math.random() * 80;
-                    const size  = 3 + Math.random() * 5;
-                    const dur   = .35 + Math.random() * .45;
-                    const color = colors[i % colors.length];
-                    p.className = 'tg-particle';
-                    p.style.cssText = [
-                        `left:${cx + (Math.random()-.5)*rect.width*.6}px`,
-                        `top:${cy  + (Math.random()-.5)*rect.height*.5}px`,
-                        `width:${size}px`,
-                        `height:${Math.random()>.5 ? size*.5 : size}px`,
-                        `background:${color}`,
-                        `border-radius:${Math.random()>.5 ? '2px' : '50%'}`,
-                        `--tx:${Math.cos(angle)*speed}px`,
-                        `--ty:${Math.sin(angle)*speed - Math.random()*30}px`,
-                        `--dur:${dur}s`,
-                        `animation-duration:${dur}s`
-                    ].join(';');
-                    document.body.appendChild(p);
-                    setTimeout(() => p.remove(), dur*1000 + 100);
-                }
-                el.animate([
-                    {transform:'scale(1)',    opacity:1,  offset:0},
-                    {transform:'scale(1.06)', opacity:.7, offset:.15},
-                    {transform:'scale(0)',    opacity:0,  offset:1}
-                ], {duration:320, easing:'cubic-bezier(0.32,0.72,0,1)', fill:'forwards'})
-                .onfinish = () => el.remove();
-            }, delay);
-        });
-        const totalDuration = wraps.length * 35 + 380;
-        setTimeout(() => {
-            remove(messagesRef).then(() => {
-                seenKeys.clear();
-                document.querySelectorAll('.msg-system').forEach(e => e.remove());
-                showToast('Conversación borrada 🗑️');
-            }).catch(() => showToast('Error al borrar'));
-        }, totalDuration);
-    };
-
-    window.panicExit = function() {
-        stopRingtone();
-        stopVoicePlayback();
-        if (isRecording) { cancelRecording(); }
-        window.hangUpCall(); off(messagesRef); off(callsRef);
-        set(typingRef, null); set(presenceRef, null);
-        sharedKey = null; e2eReady = false;
-        remove(messagesRef).then(() => location.reload()).catch(() => location.reload());
-    };
-
-    window.scrollToBottom = function() {
-        const ws = document.getElementById('chatWorkspace');
-        if (ws) ws.scrollTop = ws.scrollHeight;
-        const fab = document.getElementById('scrollFab');
-        if (fab) fab.style.display = 'none';
-    };
-
-    window.openChatMenu = function() {
-        document.getElementById('chatMenuOverlay').classList.add('open');
-        document.getElementById('chatMenu').classList.add('open');
-    };
-    window.closeChatMenu = function() {
-        document.getElementById('chatMenuOverlay').classList.remove('open');
-        document.getElementById('chatMenu').classList.remove('open');
-    };
-
-    window.openTrashMenu = function() {
-        document.getElementById('trashOverlay').classList.add('open');
-        document.getElementById('trashMenu').classList.add('open');
-    };
-    window.closeTrashMenu = function() {
-        document.getElementById('trashOverlay').classList.remove('open');
-        document.getElementById('trashMenu').classList.remove('open');
-    };
-    window.clearChatForEveryone = function() {
-        closeTrashMenu();
-        const wraps = Array.from(document.querySelectorAll('.msg-wrap[id^="wrap-"]'));
         const colors = [
             getComputedStyle(document.documentElement).getPropertyValue('--bubble-mine').trim() || '#ff441f',
             '#ff9f0a','#30d158','#64d2ff','#bf5af2','#ff453a','#ffd60a','#ff6b6b','#fff'
@@ -2778,10 +2685,18 @@
         stopVoicePlayback();
         if (isRecording) { cancelRecording(); }
         window.hangUpCall();
-        off(messagesRef); off(callsRef);
-        set(typingRef, null); set(presenceRef, null);
-        sharedKey = null; e2eReady = false;
-        remove(messagesRef).then(() => location.reload());
+        // Salir del chat SIN borrar mensajes: solo volver a la tienda
+        closeChatMenu();
+        set(typingRef, null);
+        set(presenceRef, null);          // marcar offline al salir
+        inChat = false;
+        if (window._heartbeat) clearInterval(window._heartbeat);
+        document.getElementById('seccion-chat').style.display = 'none';
+        document.getElementById('vista-tienda').style.display = 'flex';
+        // Limpiar el campo de texto y resetear scroll de la tienda
+        const ws = document.getElementById('chatWorkspace');
+        if (ws) ws.scrollTop = 0;
+        window.scrollTo(0, 0);
     };
 
     /* ── PRESENCIA + lastSeen ── */
@@ -2802,12 +2717,14 @@
             if (now - ts < ONLINE_WINDOW_MS) {
                 onlineIds.push(id);
             }
-            // El más reciente de los otros (esté online o no) sirve para "Activo hace X"
             if (ts && (mostRecentOtherTs === null || ts > mostRecentOtherTs)) {
                 mostRecentOtherTs = ts;
             }
         });
-        if (mostRecentOtherTs) _lastSeenOtherTs = mostRecentOtherTs;
+        // Solo SUBIMOS el último visto; nunca lo bajamos cuando presence se vacía.
+        if (mostRecentOtherTs && (!_lastSeenOtherTs || mostRecentOtherTs > _lastSeenOtherTs)) {
+            _lastSeenOtherTs = mostRecentOtherTs;
+        }
         othersOnline = onlineIds.length;
         return onlineIds;
     }
@@ -2941,35 +2858,32 @@
         const lastSeenRef = ref(db, 'chat/lastSeen/' + myId);
         const beat = () => {
             const now = Date.now();
-            // presence: estado "vivo" (se borra al salir)
             set(presenceRef, { name: myName, online: true, ts: now });
-            // lastSeen: marca persistente (NO se borra; sirve para "última conexión hace X")
             set(lastSeenRef, { name: myName, ts: now });
         };
         beat();
-        // Respaldo: si Firebase detecta la caída, limpia presence pero deja lastSeen actualizado
+        // Respaldo: si Firebase detecta la caída, solo limpia presence.
+        // NO tocamos lastSeen aquí (el último beat ya dejó el ts correcto).
         onDisconnect(presenceRef).remove();
-        onDisconnect(lastSeenRef).set({ name: myName, ts: serverTimestamp() });
 
         if (window._heartbeat) clearInterval(window._heartbeat);
-        // Heartbeat cada 12s (la ventana de "online" es 35s, así toleramos 2 fallos)
+        // Heartbeat cada 12s — actualiza presence Y lastSeen mientras la app está visible
         window._heartbeat = setInterval(() => {
-            if (document.visibilityState === 'visible') beat();
+            if (document.visibilityState === 'visible' && inChat) beat();
         }, 12000);
 
-        // Al cerrar/ocultar la app: quitar presence (online) pero sellar lastSeen con la hora actual
+        // Al cerrar/ocultar: quitar presence (offline) y sellar lastSeen con la hora exacta
         const markAway = () => {
-            set(presenceRef, null);
             set(lastSeenRef, { name: myName, ts: Date.now() });
+            set(presenceRef, null);
         };
         window.addEventListener('pagehide', markAway);
         window.addEventListener('beforeunload', markAway);
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
-                // Sellar la última conexión al momento de ocultar
                 set(lastSeenRef, { name: myName, ts: Date.now() });
             } else if (document.visibilityState === 'visible' && inChat) {
-                beat(); // al volver, reanudamos presencia de inmediato
+                beat();
             }
         });
     }
