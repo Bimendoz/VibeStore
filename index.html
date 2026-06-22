@@ -3022,14 +3022,34 @@
                 showToast('Activa las notificaciones en Ajustes para recibir avisos');
                 return;
             }
+
+            const currentKey = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
             let sub = await window._swReg.pushManager.getSubscription();
+
+            // Si ya hay suscripción, verificar que use la clave VAPID ACTUAL.
+            // Si cambió la clave, la suscripción vieja quedó muerta → re-suscribir.
+            if (sub) {
+                const existingKey = sub.options && sub.options.applicationServerKey
+                    ? new Uint8Array(sub.options.applicationServerKey) : null;
+                const sameKey = existingKey && existingKey.length === currentKey.length &&
+                    existingKey.every((b, i) => b === currentKey[i]);
+                if (!sameKey) {
+                    console.log('[Push] La clave VAPID cambió → re-suscribiendo');
+                    try { await sub.unsubscribe(); } catch(e) {}
+                    // Limpiar la suscripción vieja de Firebase
+                    if (myId) await set(ref(db, `chat/push/${myId}`), null);
+                    sub = null;
+                }
+            }
+
             if (!sub) {
                 sub = await window._swReg.pushManager.subscribe({
                     userVisibleOnly: true,
-                    applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+                    applicationServerKey: currentKey
                 });
                 console.log('[Push] Nueva suscripción creada');
             }
+
             window._pushSub = sub;
             if (myId) await set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
             console.log('[Push] Suscrito y guardado en Firebase');
