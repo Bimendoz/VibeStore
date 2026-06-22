@@ -2891,6 +2891,28 @@
                 presenceKnownIds = new Set();
             }
         }, 10000);
+
+        // Escuchar chat/lastSeen — marca PERSISTENTE de la última conexión de cada quien.
+        // A diferencia de chat/presence (que se borra al salir), esto siempre tiene el
+        // último timestamp real, así "Última conexión hace X" es preciso.
+        onValue(ref(db, 'chat/lastSeen'), snap => {
+            const data = snap.val() || {};
+            let mostRecent = null;
+            Object.entries(data).forEach(([id, v]) => {
+                if (id === myId) return;
+                const ts = (v && v.ts) || 0;
+                if (ts && (mostRecent === null || ts > mostRecent)) mostRecent = ts;
+            });
+            if (mostRecent) {
+                // Usar el más reciente entre lastSeen y lo que ya teníamos
+                if (!_lastSeenOtherTs || mostRecent > _lastSeenOtherTs) {
+                    _lastSeenOtherTs = mostRecent;
+                }
+                updateConnectionStatus();
+                updateOfflineBanner();
+                updateStoreBadge();
+            }
+        });
     }
 
     function updateOfflineBanner() {
@@ -2916,28 +2938,36 @@
 
     // Registrar presencia ACTIVA con HEARTBEAT — solo se llama desde joinChat()
     function registerPresence() {
+        const lastSeenRef = ref(db, 'chat/lastSeen/' + myId);
         const beat = () => {
-            // Solo enviamos heartbeat mientras la pestaña esté visible/activa
-            set(presenceRef, { name: myName, online: true, ts: Date.now() });
+            const now = Date.now();
+            // presence: estado "vivo" (se borra al salir)
+            set(presenceRef, { name: myName, online: true, ts: now });
+            // lastSeen: marca persistente (NO se borra; sirve para "última conexión hace X")
+            set(lastSeenRef, { name: myName, ts: now });
         };
         beat();
-        onDisconnect(presenceRef).remove();  // respaldo: si Firebase detecta la desconexión, limpia
+        // Respaldo: si Firebase detecta la caída, limpia presence pero deja lastSeen actualizado
+        onDisconnect(presenceRef).remove();
+        onDisconnect(lastSeenRef).set({ name: myName, ts: serverTimestamp() });
+
         if (window._heartbeat) clearInterval(window._heartbeat);
         // Heartbeat cada 12s (la ventana de "online" es 35s, así toleramos 2 fallos)
         window._heartbeat = setInterval(() => {
             if (document.visibilityState === 'visible') beat();
         }, 12000);
 
-        // Al cerrar/ocultar la app, marcamos salida inmediata (mejor que esperar onDisconnect)
+        // Al cerrar/ocultar la app: quitar presence (online) pero sellar lastSeen con la hora actual
         const markAway = () => {
-            // Dejamos el ts viejo (para "última conexión") pero quitamos presencia activa
             set(presenceRef, null);
+            set(lastSeenRef, { name: myName, ts: Date.now() });
         };
         window.addEventListener('pagehide', markAway);
         window.addEventListener('beforeunload', markAway);
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
-                // No borramos del todo, pero dejamos de latir; el ts viejo expirará en 35s
+                // Sellar la última conexión al momento de ocultar
+                set(lastSeenRef, { name: myName, ts: Date.now() });
             } else if (document.visibilityState === 'visible' && inChat) {
                 beat(); // al volver, reanudamos presencia de inmediato
             }
