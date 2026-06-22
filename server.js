@@ -30,7 +30,40 @@ app.use(express.static(__dirname, {
         }
     }
 }));
+
+// ── CONTROL DE NOTIFICACIONES (links directos, sin clave) ───────────────────────────────
+// Estado en memoria; se sincroniza con Firebase (chat/config/pushEnabled) para sobrevivir reinicios
+let pushEnabled = true;
+
+async function loadPushState() {
+    const val = await fbGet('chat/config/pushEnabled');
+    // Si nunca se ha configurado (null), por defecto encendido
+    pushEnabled = (val === false) ? false : true;
+    console.log(`[Control] Notificaciones: ${pushEnabled ? 'ENCENDIDAS' : 'APAGADAS'}`);
+}
+loadPushState();
+
+app.get('/notif-on', async (_req, res) => {
+    pushEnabled = true;
+    await fbPut('chat/config/pushEnabled', true);
+    console.log('[Control] Notificaciones ENCENDIDAS por link');
+    res.send('<h2 style="font-family:sans-serif">🔔 Notificaciones ENCENDIDAS</h2><p style="font-family:sans-serif">Todos volverán a recibir avisos.</p>');
+});
+
+app.get('/notif-off', async (_req, res) => {
+    pushEnabled = false;
+    await fbPut('chat/config/pushEnabled', false);
+    console.log('[Control] Notificaciones APAGADAS por link');
+    res.send('<h2 style="font-family:sans-serif">🔕 Notificaciones APAGADAS</h2><p style="font-family:sans-serif">Nadie recibirá avisos hasta que las vuelvas a encender.</p>');
+});
+
+app.get('/notif-status', (_req, res) => {
+    res.send(`<h2 style="font-family:sans-serif">${pushEnabled ? '🔔 ENCENDIDAS' : '🔕 APAGADAS'}</h2>`);
+});
+
+// Catch-all: cualquier otra ruta sirve la tienda (debe ir AL FINAL)
 app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'index.html')));
+
 app.listen(PORT, () => console.log(`[Server] Puerto ${PORT}`));
 
 // ── Helpers REST de Firebase ────────────────────────────────────────────────────────────
@@ -47,6 +80,19 @@ function fbDelete(pathName) {
     const req = https.request(`${DB_BASE}/${pathName}.json`, { method: 'DELETE' }, () => {});
     req.on('error', () => {});
     req.end();
+}
+function fbPut(pathName, value) {
+    return new Promise((resolve) => {
+        const data = JSON.stringify(value);
+        const req = https.request(`${DB_BASE}/${pathName}.json`, { method: 'PUT', headers: { 'Content-Type': 'application/json' } }, (res) => {
+            let body = '';
+            res.on('data', c => body += c);
+            res.on('end', () => resolve(body));
+        });
+        req.on('error', () => resolve(null));
+        req.write(data);
+        req.end();
+    });
 }
 
 // ── Cache de suscripciones push ─────────────────────────────────────────────────────────
@@ -66,6 +112,10 @@ setInterval(refreshSubs, 20000); // refrescar cada 20s
 
 // ── Enviar push a todos menos al remitente ──────────────────────────────────────────────
 async function notifyOthers(senderId) {
+    if (!pushEnabled) {
+        console.log('[WebPush] Notificaciones APAGADAS — no se envía nada');
+        return;
+    }
     const targets = Object.entries(subscriptions).filter(([id]) => id !== senderId);
     if (!targets.length) {
         console.log('[WebPush] No hay destinatarios (solo el remitente esta suscrito)');
