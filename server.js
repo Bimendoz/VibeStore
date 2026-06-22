@@ -67,23 +67,27 @@ setInterval(refreshSubs, 20000); // refrescar cada 20s
 // ── Enviar push a todos menos al remitente ──────────────────────────────────────────────
 async function notifyOthers(senderId) {
     const targets = Object.entries(subscriptions).filter(([id]) => id !== senderId);
-    if (!targets.length) return;
+    if (!targets.length) {
+        console.log('[WebPush] No hay destinatarios (solo el remitente esta suscrito)');
+        return;
+    }
     const payload = JSON.stringify({
         title: '🛍️ VibeStore — Oferta especial',
         body:  'Tienes una promoción disponible. ¡Entra ahora!',
         tag:   'vibestore-msg'
     });
+    console.log(`[WebPush] Enviando a ${targets.length} destinatario(s)...`);
     for (const [userId, sub] of targets) {
         try {
             await webpush.sendNotification(sub, payload);
             console.log(`[WebPush] ✓ enviado a ${userId}`);
         } catch (err) {
+            const code = err.statusCode || '?';
+            console.warn(`[WebPush] ✗ error ${code} en ${userId}: ${err.body || err.message}`);
             if (err.statusCode === 410 || err.statusCode === 404) {
                 fbDelete(`chat/push/${userId}`);
                 delete subscriptions[userId];
-                console.log(`[WebPush] suscripción ${userId} expirada, eliminada`);
-            } else {
-                console.warn(`[WebPush] error ${userId}:`, err.statusCode || err.message);
+                console.log(`[WebPush] suscripción ${userId} expirada/invalida, eliminada`);
             }
         }
     }
@@ -91,6 +95,24 @@ async function notifyOthers(senderId) {
 
 // ── Streaming REST: escuchar mensajes nuevos en tiempo real ──────────────────────────────
 // Firebase Realtime DB soporta Server-Sent Events vía header Accept: text/event-stream
+const SERVER_START = Date.now();
+const seenKeys = new Set();   // claves de mensajes ya procesados, para no duplicar
+
+function handleMessage(key, msg) {
+    if (!msg || !msg.senderId) return;
+    if (msg.type === 'buzz' || msg.type === 'system') return;
+    // Evitar duplicados
+    if (key && seenKeys.has(key)) return;
+    if (key) seenKeys.add(key);
+    // Solo notificar mensajes recientes (evita reenviar todo el historial al arrancar)
+    const ts = msg.ts || 0;
+    if (ts && ts < SERVER_START - 60000) {
+        return; // mensaje viejo, anterior al arranque del server
+    }
+    console.log(`[Firebase] Mensaje nuevo (${key}) de ${msg.senderId}`);
+    notifyOthers(msg.senderId);
+}
+
 function listenMessages() {
     const url = `${DB_BASE}/chat/messages.json`;
     const options = { headers: { 'Accept': 'text/event-stream' } };
@@ -98,39 +120,40 @@ function listenMessages() {
     const req = https.get(url, options, (res) => {
         console.log('[Firebase] Stream conectado, escuchando mensajes...');
         let buffer = '';
-        let ready = false;
-        // Ignoramos el primer evento "put" (carga inicial de todo el historial)
-        let initialDone = false;
 
         res.on('data', (chunk) => {
             buffer += chunk.toString();
-            const events = buffer.split('\n\n');
-            buffer = events.pop(); // lo incompleto queda para la próxima
+            // Los eventos SSE se separan por doble salto de línea
+            let sepIndex;
+            while ((sepIndex = buffer.indexOf('\n\n')) !== -1) {
+                const rawEvent = buffer.slice(0, sepIndex);
+                buffer = buffer.slice(sepIndex + 2);
 
-            for (const ev of events) {
-                const lines = ev.split('\n');
+                const lines = rawEvent.split('\n');
                 const eventLine = lines.find(l => l.startsWith('event:'));
                 const dataLine  = lines.find(l => l.startsWith('data:'));
                 if (!eventLine || !dataLine) continue;
 
-                const eventType = eventLine.replace('event:', '').trim();
+                const eventType = eventLine.slice(6).trim();
+                if (eventType === 'keep-alive') continue;
+
                 let payload;
-                try { payload = JSON.parse(dataLine.replace('data:', '').trim()); }
+                try { payload = JSON.parse(dataLine.slice(5).trim()); }
                 catch { continue; }
+                if (!payload) continue;
 
-                // El primer "put" trae TODO el historial → solo marcamos como listos
-                if (eventType === 'put' && payload && payload.path === '/') {
-                    initialDone = true;
-                    continue;
-                }
+                const path = payload.path || '';
+                const data = payload.data;
 
-                // Mensajes nuevos llegan como "put" con path "/<messageKey>"
-                if (eventType === 'put' && initialDone && payload && payload.data) {
-                    const msg = payload.data;
-                    if (msg && msg.type !== 'buzz' && msg.type !== 'system' && msg.senderId) {
-                        console.log('[Firebase] Mensaje nuevo de', msg.senderId);
-                        notifyOthers(msg.senderId);
-                    }
+                if (path === '/' && data && typeof data === 'object') {
+                    // Carga inicial: TODO el historial. Registramos las claves como ya vistas
+                    // (NO notificamos) para solo reaccionar a lo que llegue después.
+                    Object.keys(data).forEach(k => seenKeys.add(k));
+                    console.log(`[Firebase] Historial inicial: ${Object.keys(data).length} mensajes registrados`);
+                } else if (path && path !== '/' && data && typeof data === 'object') {
+                    // Mensaje nuevo individual: path = "/<key>"
+                    const key = path.replace(/^\//, '');
+                    handleMessage(key, data);
                 }
             }
         });
