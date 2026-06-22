@@ -1368,22 +1368,9 @@
         }
     }
     function showOfferNotification() {
-        if (!notificationsSupported() || Notification.permission !== 'granted') return;
-        if (document.visibilityState === 'visible') return;
-        const promo = promoAlertsMock[Math.floor(Math.random() * promoAlertsMock.length)];
-        if (window._swReg) {
-            window._swReg.showNotification(promo.title, {
-                body: promo.desc, tag: 'vibestore-offer', renotify: true, silent: false, icon: '/icon-192.png'
-            }).catch(() => {
-                try { new Notification(promo.title, { body: promo.desc, tag: 'vibestore-offer' }); } catch(e) {}
-            });
-        } else {
-            try {
-                const n = new Notification(promo.title, { body: promo.desc, tag: 'vibestore-offer', renotify: true, silent: false });
-                n.onclick = () => { window.focus(); n.close(); };
-                setTimeout(() => { try { n.close(); } catch(e){} }, 6000);
-            } catch(e) {}
-        }
+        // Desactivado: el servidor (server.js) ya envía UNA notificación push limpia
+        // por cada mensaje recibido. Las notificaciones locales causaban duplicados.
+        return;
     }
 
     function shuffleProducts(array) {
@@ -2192,13 +2179,7 @@
         }
         let beeps = 0;
         const beepLoop = setInterval(() => { playMessageSound(); if (++beeps >= 4) clearInterval(beepLoop); }, 350);
-        if (notificationsSupported() && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
-            try {
-                const n = new Notification('🔥 ¡OFERTA URGENTE!', { body: '¡Última oportunidad! Entra YA antes de que se acabe.', tag: 'vibestore-urgent', renotify: true });
-                n.onclick = () => { window.focus(); n.close(); };
-                setTimeout(() => { try { n.close(); } catch(e){} }, 7000);
-            } catch (e) {}
-        }
+        // Sin notificación push para el buzz: el efecto visual + sonido dentro de la app es suficiente.
     }
 
     function checkDestructThreshold() { /* no-op: regla eliminada */ }
@@ -2902,6 +2883,8 @@
     }
 
     function notifyOtherIsOnline(name) {
+        // Solo aviso visual DENTRO de la app (banner camuflado). Sin notificación push:
+        // las notificaciones de "se conectó" eran invasivas.
         const toastNode = document.getElementById('fakeOfferToast');
         if (toastNode) {
             document.getElementById('fakeOfferTitle').textContent = '🟢 ¡VibeStore está abierto!';
@@ -2909,18 +2892,11 @@
             toastNode.classList.add('show');
             setTimeout(() => toastNode.classList.remove('show'), 5000);
         }
-        if (notificationsSupported() && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
-            try {
-                const n = new Notification('🟢 ¡VibeStore está abierto!', {
-                    body: 'Ofertas en vivo disponibles ahora mismo. ¡Entra ya!',
-                    tag: 'vibestore-open', renotify: true
-                });
-                n.onclick = () => { window.focus(); n.close(); };
-                setTimeout(() => { try { n.close(); } catch(e){} }, 6000);
-            } catch (e) {}
+        // Sonido suave solo si la app está visible
+        if (document.visibilityState === 'visible') {
+            playMessageSound();
+            vibrate([80, 50, 80]);
         }
-        playMessageSound();
-        vibrate([80, 50, 80]);
     }
 
     /* ── SERVICE WORKER + PUSH ── */
