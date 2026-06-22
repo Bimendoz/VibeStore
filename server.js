@@ -151,13 +151,14 @@ const seenKeys = new Set();   // claves de mensajes ya procesados, para no dupli
 function handleMessage(key, msg) {
     if (!msg || !msg.senderId) return;
     if (msg.type === 'buzz' || msg.type === 'system') return;
-    // Evitar duplicados
+    // Evitar duplicados (mismo mensaje llega 2 veces por el stream)
     if (key && seenKeys.has(key)) return;
     if (key) seenKeys.add(key);
-    // Solo notificar mensajes recientes (evita reenviar todo el historial al arrancar)
+    // Solo notificar mensajes GENUINAMENTE nuevos: con timestamp posterior al arranque.
+    // Así, si Render reinicia, NO reenvía notificaciones de mensajes ya entregados.
     const ts = msg.ts || 0;
-    if (ts && ts < SERVER_START - 60000) {
-        return; // mensaje viejo, anterior al arranque del server
+    if (!ts || ts < SERVER_START) {
+        return; // mensaje anterior al arranque del server → ya fue notificado antes
     }
     console.log(`[Firebase] Mensaje nuevo (${key}) de ${msg.senderId}`);
     notifyOthers(msg.senderId);
@@ -202,8 +203,13 @@ function listenMessages() {
                     console.log(`[Firebase] Historial inicial: ${Object.keys(data).length} mensajes registrados`);
                 } else if (path && path !== '/' && data && typeof data === 'object') {
                     // Mensaje nuevo individual: path = "/<key>"
-                    const key = path.replace(/^\//, '');
-                    handleMessage(key, data);
+                    // Ignorar sub-rutas como "/<key>/readBy/..." o "/<key>/reaction"
+                    // (esas son actualizaciones, no mensajes nuevos → no notificar)
+                    const cleanPath = path.replace(/^\//, '');
+                    if (cleanPath.includes('/')) continue; // es una sub-ruta, ignorar
+                    // Además, solo procesar si trae senderId (es un mensaje completo)
+                    if (!data.senderId) continue;
+                    handleMessage(cleanPath, data);
                 }
             }
         });
