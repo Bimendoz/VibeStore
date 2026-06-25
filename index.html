@@ -452,6 +452,15 @@
         .image-viewer-hint { position:absolute; bottom:calc(var(--safe-bottom,0) + 1.5rem); font-size:0.7rem; color:rgba(255,255,255,0.3); letter-spacing:0.3px; }
         .return-call-bar { display:none; align-items:center; justify-content:center; gap:0.5rem; background:#1e7e34; color:#fff; flex-shrink:0; padding:0.5rem 1rem; font-size:0.83rem; font-weight:700; cursor:pointer; position:relative; z-index:2; }
         .return-call-bar.show { display:flex; }
+        /* Burbujas circulares flotantes en el chat (llamada minimizada) */
+        .chat-call-bubbles { position:absolute; top:5rem; right:0.8rem; z-index:600; display:flex; flex-direction:column; gap:0.6rem; pointer-events:none; }
+        .chat-bubble { position:relative; width:80px; height:80px; border-radius:50%; overflow:hidden; background:#111; border:2.5px solid rgba(255,255,255,0.3); box-shadow:0 6px 20px rgba(0,0,0,0.5); cursor:pointer; pointer-events:auto; transition:all 0.28s cubic-bezier(0.32,0.72,0,1); }
+        .chat-bubble video { width:100%; height:100%; object-fit:cover; background:#111; }
+        .chat-bubble.local video { transform:scaleX(-1); }
+        .chat-bubble-tag { position:absolute; bottom:3px; left:0; right:0; text-align:center; font-size:0.55rem; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.9); pointer-events:none; }
+        .chat-bubble.expanded { position:fixed; top:38%; left:50%; transform:translate(-50%,-50%); width:80vw; height:80vw; max-width:380px; max-height:380px; z-index:650; box-shadow:0 16px 50px rgba(0,0,0,0.75); border-width:3px; }
+        .chat-bubble.expanded .chat-bubble-tag { font-size:1rem; bottom:20px; }
+        .chat-bubble.empty { display:none; }
         .return-call-dot { width:8px; height:8px; border-radius:50%; background:#fff; animation:pulse-presence 1.5s infinite; }
         .disintegrating { pointer-events:none; }
         .tg-particle { position:fixed; border-radius:50%; pointer-events:none; z-index:9999; animation:tgParticle var(--dur,.6s) cubic-bezier(.25,.46,.45,.94) forwards; will-change:transform, opacity; }
@@ -498,14 +507,13 @@
         @keyframes ftFloat { 0%{ transform:translateY(100vh) scale(0); opacity:0; } 10%{ opacity:0.6; } 90%{ opacity:0.3; } 100%{ transform:translateY(-20vh) scale(1.2); opacity:0; } }
 
         /* FIX [3+4]: cámaras flotantes circulares iguales (Ellos / Tú), ampliables al tocar */
-        .cam-bubbles { position:absolute; top:calc(var(--safe-top,44px) + 4.5rem); right:1rem; z-index:6; display:flex; flex-direction:column; gap:0.7rem; }
-        .cam-bubble { position:relative; width:96px; height:130px; border-radius:20px; overflow:hidden; background:#111; border:2px solid rgba(255,255,255,0.22); box-shadow:0 6px 24px rgba(0,0,0,0.55); cursor:pointer; transition:all 0.25s cubic-bezier(0.32,0.72,0,1); }
-        .cam-bubble video { width:100%; height:100%; object-fit:cover; background:#111; }
-        .cam-bubble.local video { transform:scaleX(-1); }
-        .cam-bubble-label { position:absolute; bottom:5px; left:0; right:0; text-align:center; font-size:0.62rem; font-weight:700; color:#fff; text-shadow:0 1px 4px rgba(0,0,0,0.8); pointer-events:none; z-index:2; }
-        .cam-bubble.expanded { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); width:78vw; height:78vw; max-width:420px; max-height:560px; border-radius:50%; z-index:30; box-shadow:0 12px 50px rgba(0,0,0,0.7); }
-        .cam-bubble.expanded .cam-bubble-label { font-size:0.9rem; bottom:18px; }
-        .cam-bubble.empty { display:none; }
+        /* Video remoto a PANTALLA COMPLETA (estilo WhatsApp) */
+        .ft-remote-full { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; background:#0a0a12; z-index:2; display:none; }
+        .ft-remote-full.active { display:block; }
+        /* Tu cámara: recuadro flotante redondeado arriba a la derecha */
+        .ft-local-pip { position:absolute; top:calc(var(--safe-top,44px) + 4.5rem); right:1rem; width:108px; height:150px; border-radius:16px; overflow:hidden; background:#111; border:2px solid rgba(255,255,255,0.25); box-shadow:0 6px 24px rgba(0,0,0,0.55); z-index:7; cursor:pointer; }
+        .ft-local-pip video { width:100%; height:100%; object-fit:cover; transform:scaleX(-1); background:#111; }
+        .ft-local-pip.empty { display:none; }
 
         .ft-topbar { position:relative; z-index:5; width:100%; display:flex; flex-direction:column; align-items:center; gap:0.2rem; padding:0.9rem 1.5rem 0; }
         .ft-my-pill { display:flex; align-items:center; gap:0.65rem; background:rgba(255,255,255,0.08); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.1); border-radius:50px; padding:0.4rem 0.9rem 0.4rem 0.4rem; }
@@ -866,6 +874,18 @@
         Llamada en curso · Toca para volver
     </div>
 
+    <!-- Burbujas circulares flotantes (aparecen al minimizar la llamada al chat) -->
+    <div class="chat-call-bubbles" id="chatCallBubbles">
+        <div class="chat-bubble remote empty" id="chatBubbleRemote" onclick="expandChatBubble(event, this)">
+            <video id="chatRemoteVideo" autoplay playsinline></video>
+            <span class="chat-bubble-tag">Ellos</span>
+        </div>
+        <div class="chat-bubble local empty" id="chatBubbleLocal" onclick="expandChatBubble(event, this)">
+            <video id="chatLocalVideo" autoplay playsinline muted></video>
+            <span class="chat-bubble-tag">Tú</span>
+        </div>
+    </div>
+
     <div class="reply-bar" id="replyBar">
         <div class="reply-bar-line" style="width:3px;height:36px;border-radius:2px;background:var(--bubble-mine);flex-shrink:0;"></div>
         <div class="reply-bar-info" style="flex:1;display:flex;flex-direction:column;overflow:hidden;">
@@ -972,7 +992,7 @@
     </div>
 </div>
 
-<!-- FACETIME SECTION — FIX [3+4][5]: burbujas flotantes + toggle controles -->
+<!-- FACETIME SECTION — estilo WhatsApp -->
 <div id="seccion-facetime" onclick="toggleCallControls(event)">
     <div class="ft-bg">
         <div class="ft-blob ft-blob1"></div>
@@ -981,16 +1001,12 @@
     </div>
     <div class="ft-particles" id="ftParticles" aria-hidden="true"></div>
 
-    <!-- Burbujas de cámara flotantes circulares (Ellos / Tú), ampliables al tocar -->
-    <div class="cam-bubbles" id="camBubbles">
-        <div class="cam-bubble remote empty" id="camBubbleRemote" onclick="expandBubble(event, this)">
-            <video id="remoteVideo" autoplay playsinline></video>
-            <span class="cam-bubble-label">Ellos</span>
-        </div>
-        <div class="cam-bubble local empty" id="camBubbleLocal" onclick="expandBubble(event, this)">
-            <video id="localVideo" autoplay playsinline muted></video>
-            <span class="cam-bubble-label">Tú</span>
-        </div>
+    <!-- Video remoto a PANTALLA COMPLETA (el otro), como WhatsApp -->
+    <video id="remoteVideo" class="ft-remote-full" autoplay playsinline></video>
+
+    <!-- Tu cámara: recuadro flotante arriba a la derecha (PiP) -->
+    <div class="ft-local-pip empty" id="localPip">
+        <video id="localVideo" autoplay playsinline muted></video>
     </div>
 
     <div class="ft-topbar" id="ftTopbar">
@@ -1003,7 +1019,7 @@
         </div>
     </div>
 
-    <div class="ft-center">
+    <div class="ft-center" id="ftCenter">
         <div class="ft-rings" aria-hidden="true">
             <div class="ft-ring r3"></div>
             <div class="ft-ring r2"></div>
@@ -2228,9 +2244,10 @@
         }
         const lv = document.getElementById('localVideo');
         if (lv) lv.srcObject = localStream;
-        // La burbuja local solo aparece si hay video
-        const bubbleLocal = document.getElementById('camBubbleLocal');
-        if (bubbleLocal) bubbleLocal.classList.toggle('empty', type !== 'video');
+        // El recuadro PiP local solo aparece si hay video
+        const localPip = document.getElementById('localPip');
+        if (localPip) localPip.classList.toggle('empty', type !== 'video');
+        syncChatBubbles();
     }
 
     /* FIX [2]: actualizar el estado de la llamada con puntos animados o flash verde */
@@ -2257,29 +2274,59 @@
     }
 
     /* FIX [3+4]: mostrar la burbuja remota cuando llega el stream del otro */
+    // El video remoto va a PANTALLA COMPLETA (estilo WhatsApp)
     function showRemoteBubble(stream) {
+        window._remoteStream = stream;
         const rv = document.getElementById('remoteVideo');
         if (rv) rv.srcObject = stream;
-        const bubble = document.getElementById('camBubbleRemote');
-        // Solo mostrar burbuja remota si el stream trae video
         const hasVideo = stream && stream.getVideoTracks && stream.getVideoTracks().length > 0;
-        if (bubble) bubble.classList.toggle('empty', !hasVideo);
+        const full = document.getElementById('remoteVideo');
+        const center = document.getElementById('ftCenter');
+        if (hasVideo) {
+            if (full) full.classList.add('active');
+            // Ocultar el avatar/anillos cuando hay video remoto
+            if (center) center.style.opacity = '0';
+        } else {
+            if (full) full.classList.remove('active');
+            if (center) center.style.opacity = '1';
+        }
+        // Si estamos en modo chat minimizado, también alimentar la burbuja
+        syncChatBubbles();
+    }
+
+    // Agrandar una burbuja circular dentro del chat (toggle)
+    window.expandChatBubble = function(event, el) {
+        if (event) event.stopPropagation();
+        if (!el || el.classList.contains('empty')) return;
+        const wasExpanded = el.classList.contains('expanded');
+        document.querySelectorAll('.chat-bubble.expanded').forEach(b => b.classList.remove('expanded'));
+        if (!wasExpanded) el.classList.add('expanded');
+    };
+
+    // Copiar los streams activos a las burbujas circulares del chat
+    function syncChatBubbles() {
+        const cRemote = document.getElementById('chatRemoteVideo');
+        const cLocal  = document.getElementById('chatLocalVideo');
+        const bRemote = document.getElementById('chatBubbleRemote');
+        const bLocal  = document.getElementById('chatBubbleLocal');
+        const remoteHasVideo = window._remoteStream && window._remoteStream.getVideoTracks && window._remoteStream.getVideoTracks().length > 0;
+        const localHasVideo  = localStream && localStream.getVideoTracks && localStream.getVideoTracks().filter(t => t.enabled).length > 0;
+        if (cRemote && window._remoteStream) cRemote.srcObject = window._remoteStream;
+        if (cLocal && localStream) cLocal.srcObject = localStream;
+        if (bRemote) bRemote.classList.toggle('empty', !remoteHasVideo);
+        if (bLocal)  bLocal.classList.toggle('empty', !localHasVideo);
     }
 
     /* FIX [3+4]: ampliar una burbuja a círculo grande al tocarla (toggle) */
     window.expandBubble = function(event, el) {
+        // (obsoleta) — reemplazada por expandChatBubble. Se deja vacía por compatibilidad.
         if (event) event.stopPropagation();
-        if (!el || el.classList.contains('empty')) return;
-        const wasExpanded = el.classList.contains('expanded');
-        // Colapsar cualquier otra burbuja expandida
-        document.querySelectorAll('.cam-bubble.expanded').forEach(b => b.classList.remove('expanded'));
-        if (!wasExpanded) el.classList.add('expanded');
     };
 
     /* FIX [3+4][5]: mostrar/ocultar controles al tocar el fondo de la llamada */
     window.toggleCallControls = function(event) {
         // No alternar si se tocó un botón/control o una burbuja
-        if (event && event.target.closest('.ft-btn, .ft-btn-hangup, .ft-my-pill, .cam-bubble, .ft-ctrl-group')) return;
+        if (event && event.target.closest('.ft-btn, .ft-btn-hangup, .ft-my-pill, .ft-local-pip, .ft-ctrl-group')) return;
         const panel = document.getElementById('ftControlsPanel');
         const topbar = document.getElementById('ftTopbar');
         const hidden = panel.classList.toggle('hidden-controls');
@@ -2297,9 +2344,12 @@
         setCallStatus('Llamando', true, false);
         document.getElementById('btnFtVideo').style.display = 'flex';
         // Reset burbujas
-        document.getElementById('camBubbleRemote').classList.add('empty');
-        document.getElementById('camBubbleLocal').classList.add('empty');
-        document.querySelectorAll('.cam-bubble.expanded').forEach(b => b.classList.remove('expanded'));
+        const _lp = document.getElementById('localPip'); if (_lp) _lp.classList.add('empty');
+        const _rf = document.getElementById('remoteVideo'); if (_rf) _rf.classList.remove('active');
+        const _ctr = document.getElementById('ftCenter'); if (_ctr) _ctr.style.opacity = '1';
+        document.getElementById('chatBubbleRemote').classList.add('empty');
+        document.getElementById('chatBubbleLocal').classList.add('empty');
+        document.querySelectorAll('.chat-bubble.expanded').forEach(b => b.classList.remove('expanded'));
         try { await setupLocalStream(type); }
         catch (err) { cleanUpCallUI(); showToast(err.message); return; }
         activeCallRef = push(callsRef);
@@ -2405,9 +2455,12 @@
         document.getElementById('ftCallType').textContent   = call.type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         setCallStatus('Conectando', true, false);
         document.getElementById('btnFtVideo').style.display = 'flex';
-        document.getElementById('camBubbleRemote').classList.add('empty');
-        document.getElementById('camBubbleLocal').classList.add('empty');
-        document.querySelectorAll('.cam-bubble.expanded').forEach(b => b.classList.remove('expanded'));
+        const _lp = document.getElementById('localPip'); if (_lp) _lp.classList.add('empty');
+        const _rf = document.getElementById('remoteVideo'); if (_rf) _rf.classList.remove('active');
+        const _ctr = document.getElementById('ftCenter'); if (_ctr) _ctr.style.opacity = '1';
+        document.getElementById('chatBubbleRemote').classList.add('empty');
+        document.getElementById('chatBubbleLocal').classList.add('empty');
+        document.querySelectorAll('.chat-bubble.expanded').forEach(b => b.classList.remove('expanded'));
         try { await setupLocalStream(call.type); }
         catch (err) { update(activeCallRef, { status: 'ended' }); cleanUpCallUI(); showToast(err.message); return; }
         await buildRtcConfig();
@@ -2502,11 +2555,12 @@
         const lv  = document.getElementById('localVideo');
         const btn = document.getElementById('btnFtVideo');
         const lbl = document.getElementById('lblVideo');
-        const bubbleLocal = document.getElementById('camBubbleLocal');
+        const bubbleLocal = document.getElementById('localPip');
         if (lv) lv.srcObject = localStream;
         if (bubbleLocal) bubbleLocal.classList.toggle('empty', isVideoOff);
         btn.classList.toggle('video-off', isVideoOff);
         if (lbl) lbl.textContent = isVideoOff ? 'Cámara' : 'Apagar cam';
+        syncChatBubbles();
     };
 
     let speakerOn = false;
@@ -2572,11 +2626,22 @@
         document.getElementById('seccion-facetime').style.display = 'none';
         document.getElementById('seccion-chat').style.display = 'flex';
         document.getElementById('returnCallBar').classList.add('show');
+        // Mostrar las burbujas circulares flotantes con los streams actuales
+        syncChatBubbles();
+        const cb = document.getElementById('chatCallBubbles');
+        if (cb) cb.style.display = 'flex';
     };
     window.returnToCall = function() {
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('returnCallBar').classList.remove('show');
+        // Ocultar burbujas del chat y restaurar streams en la pantalla completa
+        const cb = document.getElementById('chatCallBubbles');
+        if (cb) cb.style.display = 'none';
+        document.querySelectorAll('.chat-bubble.expanded').forEach(b => b.classList.remove('expanded'));
+        if (window._remoteStream) showRemoteBubble(window._remoteStream);
+        const lv = document.getElementById('localVideo');
+        if (lv && localStream) lv.srcObject = localStream;
     };
     window.hangUpCall = function() {
         if (activeCallRef) {
@@ -2602,15 +2667,22 @@
         const lbl = document.getElementById('lblSpeaker');
         if (lbl) lbl.textContent = 'Altavoz';
         // Reset burbujas + controles
-        document.getElementById('camBubbleRemote').classList.add('empty');
-        document.getElementById('camBubbleLocal').classList.add('empty');
-        document.querySelectorAll('.cam-bubble.expanded').forEach(b => b.classList.remove('expanded'));
+        const _lp = document.getElementById('localPip'); if (_lp) _lp.classList.add('empty');
+        const _rf = document.getElementById('remoteVideo'); if (_rf) _rf.classList.remove('active');
+        const _ctr = document.getElementById('ftCenter'); if (_ctr) _ctr.style.opacity = '1';
+        document.getElementById('chatBubbleRemote').classList.add('empty');
+        document.getElementById('chatBubbleLocal').classList.add('empty');
+        document.querySelectorAll('.chat-bubble.expanded').forEach(b => b.classList.remove('expanded'));
         const panel = document.getElementById('ftControlsPanel');
         if (panel) panel.classList.remove('hidden-controls');
         const topbar = document.getElementById('ftTopbar');
         if (topbar) topbar.classList.remove('hidden-controls');
         const cancelBtn = document.getElementById('ftCancelConnecting');
         if (cancelBtn) cancelBtn.classList.remove('show');
+        // Ocultar burbujas circulares del chat
+        const ccb = document.getElementById('chatCallBubbles');
+        if (ccb) ccb.style.display = 'none';
+        window._remoteStream = null;
         stopCallTimer();
         stopCallParticles();
         document.getElementById('seccion-facetime').style.display = 'none';
