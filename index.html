@@ -621,6 +621,7 @@
         [data-theme="light"] .preset-name { color:rgba(0,0,0,0.55); }
         .panic-fab { display:none !important; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 </head>
 <body>
 
@@ -1991,7 +1992,7 @@
         } else if (msg.type === 'sticker') {
             bubbleClass = 'msg sticker-msg';
             bubbleInner = (msg.sticker && STICKERS[msg.sticker])
-                ? `<div class="sticker-in-chat">${stickerSVG(msg.sticker,'')}</div>`
+                ? `<div class="sticker-in-chat" data-sticker="${escHtml(msg.sticker)}"></div>`
                 : `<span style="opacity:0.6;font-size:0.8rem;">🩹 Sticker</span>`;
         } else {
             const parsed = checkAndParseEmojiMessage(msg.text);
@@ -2008,6 +2009,11 @@
         const nearBottom = (ws.scrollHeight - ws.scrollTop - ws.clientHeight) < 120;
         const tw = document.getElementById('typingWrap');
         if (tw && tw.parentNode === ws) { ws.insertBefore(wrap, tw); } else { ws.appendChild(wrap); }
+        // Si el mensaje es un sticker, activar su animación Lottie
+        if (msg.type === 'sticker' && msg.sticker) {
+            const holder = wrap.querySelector('.sticker-in-chat[data-sticker]');
+            if (holder) playSticker(holder, msg.sticker);
+        }
         if (isMe || nearBottom) { ws.scrollTop = ws.scrollHeight; }
         const plain = (msg.type === 'text') ? msg.text : null;
         attachLongPress(wrap, key, isMe, plain, msg.sender);
@@ -2254,39 +2260,62 @@
 
     /* ═══════════ STICKERS ANIMADOS ═══════════
        Cada sticker es un SVG autocontenido con animación CSS.
-       Se envían por el ID corto (ej "fox"), compatible con el cifrado E2E. */
+       Se envían por el ID corto, compatible con el cifrado E2E.
+       Usamos Google Noto Emoji animados (Lottie, licencia Apache 2.0 — libres). */
+    const NOTO_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest/';
+    // id corto → código del emoji en el catálogo de Google (carpeta unicode)
     const STICKERS = {
-        fox:    { anim:'stk-bounce', svg:'<circle cx="50" cy="55" r="30" fill="#ff8c42"/><path d="M22 38 L18 15 L38 30 Z" fill="#ff8c42"/><path d="M78 38 L82 15 L62 30 Z" fill="#ff8c42"/><path d="M24 37 L22 22 L33 30 Z" fill="#ffd9b3"/><path d="M76 37 L78 22 L67 30 Z" fill="#ffd9b3"/><path d="M35 60 Q50 80 65 60 Q50 72 35 60Z" fill="#fff"/><circle cx="40" cy="50" r="4" fill="#2a2a2a"/><circle cx="60" cy="50" r="4" fill="#2a2a2a"/><circle cx="50" cy="62" r="4" fill="#2a2a2a"/>' },
-        cat:    { anim:'stk-wobble', svg:'<circle cx="50" cy="56" r="30" fill="#9aa0a6"/><path d="M25 35 L22 16 L40 30 Z" fill="#9aa0a6"/><path d="M75 35 L78 16 L60 30 Z" fill="#9aa0a6"/><circle cx="40" cy="52" r="4" fill="#1a1a1a"/><circle cx="60" cy="52" r="4" fill="#1a1a1a"/><path d="M50 60 l-4 4 4 3 4-3z" fill="#ff8fa3"/><path d="M30 58 H44 M30 63 H44 M56 58 H70 M56 63 H70" stroke="#1a1a1a" stroke-width="1.5"/>' },
-        dog:    { anim:'stk-bounce', svg:'<ellipse cx="50" cy="56" rx="30" ry="28" fill="#c68642"/><ellipse cx="22" cy="50" rx="10" ry="20" fill="#8b5a2b"/><ellipse cx="78" cy="50" rx="10" ry="20" fill="#8b5a2b"/><circle cx="40" cy="50" r="4" fill="#1a1a1a"/><circle cx="60" cy="50" r="4" fill="#1a1a1a"/><ellipse cx="50" cy="62" rx="7" ry="5" fill="#1a1a1a"/><path d="M50 67 Q44 74 38 70 M50 67 Q56 74 62 70" stroke="#1a1a1a" stroke-width="2" fill="none"/>' },
-        panda:  { anim:'stk-pulse', svg:'<circle cx="50" cy="55" r="30" fill="#fff"/><circle cx="28" cy="32" r="11" fill="#1a1a1a"/><circle cx="72" cy="32" r="11" fill="#1a1a1a"/><ellipse cx="38" cy="52" rx="9" ry="11" fill="#1a1a1a"/><ellipse cx="62" cy="52" rx="9" ry="11" fill="#1a1a1a"/><circle cx="38" cy="52" r="3" fill="#fff"/><circle cx="62" cy="52" r="3" fill="#fff"/><ellipse cx="50" cy="66" rx="5" ry="4" fill="#1a1a1a"/>' },
-        bear:   { anim:'stk-bounce', svg:'<circle cx="28" cy="30" r="11" fill="#a87544"/><circle cx="72" cy="30" r="11" fill="#a87544"/><circle cx="50" cy="56" r="30" fill="#c68642"/><circle cx="40" cy="50" r="4" fill="#1a1a1a"/><circle cx="60" cy="50" r="4" fill="#1a1a1a"/><ellipse cx="50" cy="64" rx="10" ry="8" fill="#e8c9a0"/><ellipse cx="50" cy="61" rx="4" ry="3" fill="#1a1a1a"/>' },
-        rabbit: { anim:'stk-float', svg:'<ellipse cx="38" cy="22" rx="7" ry="20" fill="#f5f5f5"/><ellipse cx="62" cy="22" rx="7" ry="20" fill="#f5f5f5"/><ellipse cx="38" cy="24" rx="3" ry="13" fill="#ffb3c6"/><ellipse cx="62" cy="24" rx="3" ry="13" fill="#ffb3c6"/><circle cx="50" cy="58" r="28" fill="#f5f5f5"/><circle cx="40" cy="54" r="4" fill="#1a1a1a"/><circle cx="60" cy="54" r="4" fill="#1a1a1a"/><path d="M50 62 l-3 3 3 2 3-2z" fill="#ffb3c6"/>' },
-        chick:  { anim:'stk-wobble', svg:'<circle cx="50" cy="55" r="30" fill="#ffd93d"/><path d="M50 60 l-9 6 9 4 9-4z" fill="#ff8c00"/><circle cx="40" cy="48" r="4.5" fill="#1a1a1a"/><circle cx="60" cy="48" r="4.5" fill="#1a1a1a"/><path d="M38 26 q12 -10 24 0" stroke="#ff8c00" stroke-width="4" fill="none"/>' },
-        love:   { anim:'stk-beat', svg:'<path d="M50 78 C20 55 18 32 34 26 C44 22 50 32 50 36 C50 32 56 22 66 26 C82 32 80 55 50 78 Z" fill="#ff4757"/><circle cx="40" cy="42" r="4" fill="#fff" opacity="0.6"/>' },
-        laugh:  { anim:'stk-shake', svg:'<circle cx="50" cy="50" r="34" fill="#ffd93d"/><path d="M28 40 q6 -8 12 0" stroke="#1a1a1a" stroke-width="3" fill="none"/><path d="M60 40 q6 -8 12 0" stroke="#1a1a1a" stroke-width="3" fill="none"/><path d="M30 58 Q50 82 70 58 Z" fill="#1a1a1a"/><path d="M34 60 Q50 70 66 60" fill="#ff6b81"/>' },
-        cry:    { anim:'stk-float', svg:'<circle cx="50" cy="50" r="34" fill="#ffd93d"/><circle cx="38" cy="46" r="4" fill="#1a1a1a"/><circle cx="62" cy="46" r="4" fill="#1a1a1a"/><ellipse cx="38" cy="58" rx="4" ry="6" fill="#5bc0eb"><animate attributeName="cy" values="58;70;58" dur="1.5s" repeatCount="indefinite"/></ellipse><ellipse cx="62" cy="58" rx="4" ry="6" fill="#5bc0eb"><animate attributeName="cy" values="58;70;58" dur="1.5s" begin="0.3s" repeatCount="indefinite"/></ellipse><path d="M40 68 q10 -6 20 0" stroke="#1a1a1a" stroke-width="2.5" fill="none"/>' },
-        cool:   { anim:'stk-bounce', svg:'<circle cx="50" cy="50" r="34" fill="#ffd93d"/><rect x="26" y="40" width="20" height="12" rx="4" fill="#1a1a1a"/><rect x="54" y="40" width="20" height="12" rx="4" fill="#1a1a1a"/><rect x="46" y="44" width="8" height="3" fill="#1a1a1a"/><path d="M38 64 q12 8 24 0" stroke="#1a1a1a" stroke-width="3" fill="none"/>' },
-        wink:   { anim:'stk-blink', svg:'<circle cx="50" cy="50" r="34" fill="#ffd93d"/><circle cx="38" cy="46" r="4.5" fill="#1a1a1a"/><path d="M56 46 q6 -5 12 0" stroke="#1a1a1a" stroke-width="3" fill="none"/><path d="M36 62 q14 10 28 0" stroke="#1a1a1a" stroke-width="3" fill="none"/>' },
-        star:   { anim:'stk-spin', svg:'<path d="M50 14 L60 40 L88 40 L65 58 L74 84 L50 68 L26 84 L35 58 L12 40 L40 40 Z" fill="#ffd93d" stroke="#ffb800" stroke-width="2"/>' },
-        fire:   { anim:'stk-sway', svg:'<path d="M50 86 C30 86 22 70 30 54 C34 60 38 58 38 50 C38 38 48 30 46 16 C60 26 70 40 66 56 C70 52 74 50 74 44 C82 58 78 78 60 84 Z" fill="#ff6b35"/><path d="M50 80 C40 80 36 70 40 60 C44 66 48 60 48 52 C56 60 58 70 54 78 Z" fill="#ffd93d"/>' },
-        thumb:  { anim:'stk-bounce', svg:'<path d="M30 50 H40 V82 H30 Z" fill="#e8a87c"/><path d="M40 50 C40 40 48 38 50 28 C52 20 60 20 60 30 C60 38 56 46 56 46 H72 C78 46 78 54 74 54 C78 56 76 62 72 62 C76 64 74 70 70 70 C72 72 70 78 64 78 H46 C42 78 40 74 40 70 Z" fill="#f4b183"/>' },
-        party:  { anim:'stk-shake', svg:'<circle cx="50" cy="50" r="34" fill="#ffd93d"/><circle cx="38" cy="46" r="4" fill="#1a1a1a"/><circle cx="62" cy="46" r="4" fill="#1a1a1a"/><path d="M36 60 q14 12 28 0" stroke="#1a1a1a" stroke-width="3" fill="none"/><circle cx="22" cy="24" r="3" fill="#ff4757"/><circle cx="78" cy="28" r="3" fill="#5bc0eb"/><circle cx="80" cy="60" r="3" fill="#2ecc71"/><circle cx="20" cy="58" r="3" fill="#ff6b35"/><rect x="70" y="18" width="4" height="4" fill="#ffd93d" transform="rotate(45 72 20)"/>' }
+        laugh:   '1f602', // 😂 risa con lágrimas
+        love:    '1f60d', // 😍 ojos de corazón
+        kiss:    '1f618', // 😘 beso
+        cool:    '1f60e', // 😎 cool con gafas
+        wink:    '1f609', // 😉 guiño
+        cry:     '1f622', // 😢 llorando
+        sob:     '1f62d', // 😭 llanto fuerte
+        angry:   '1f621', // 😡 enojado
+        wow:     '1f62e', // 😮 sorprendido
+        think:   '1f914', // 🤔 pensando
+        party:   '1f973', // 🥳 fiesta
+        heart:   '2764_fe0f', // ❤️ corazón
+        fire:    '1f525', // 🔥 fuego
+        thumb:   '1f44d', // 👍 pulgar arriba
+        clap:    '1f44f', // 👏 aplausos
+        hundred: '1f4af'  // 💯 cien puntos
     };
-    const STICKER_ORDER = ['fox','cat','dog','panda','bear','rabbit','chick','love','laugh','cry','cool','wink','star','fire','thumb','party'];
+    const STICKER_ORDER = ['laugh','love','kiss','cool','wink','cry','sob','angry','wow','think','party','heart','fire','thumb','clap','hundred'];
 
-    function stickerSVG(id, cls) {
-        const s = STICKERS[id];
-        if (!s) return '';
-        return `<svg viewBox="0 0 100 100" class="${cls}"><g class="${s.anim}">${s.svg}</g></svg>`;
+    function stickerLottieURL(id) {
+        const code = STICKERS[id];
+        if (!code) return '';
+        return `${NOTO_BASE}${code}/lottie.json`;
+    }
+
+    // Reproduce un emoji Lottie dentro de un contenedor
+    function playSticker(container, id) {
+        if (!container || !window.lottie) return;
+        const url = stickerLottieURL(id);
+        if (!url) return;
+        try {
+            window.lottie.loadAnimation({
+                container, renderer:'svg', loop:true, autoplay:true, path:url
+            });
+        } catch(e) {}
     }
 
     function buildStickerPanel() {
         const grid = document.getElementById('stickerGrid');
         if (!grid || grid.children.length) return;
-        grid.innerHTML = STICKER_ORDER.map(id =>
-            `<div class="sticker-item" onclick="sendSticker('${id}')">${stickerSVG(id,'')}</div>`
-        ).join('');
+        STICKER_ORDER.forEach(id => {
+            const item = document.createElement('div');
+            item.className = 'sticker-item';
+            item.onclick = () => sendSticker(id);
+            const holder = document.createElement('div');
+            holder.style.width = '100%';
+            holder.style.height = '100%';
+            item.appendChild(holder);
+            grid.appendChild(item);
+            playSticker(holder, id);
+        });
     }
 
     window.toggleStickerPanel = function() {
@@ -2294,7 +2323,6 @@
         if (!panel) return;
         buildStickerPanel();
         const showing = panel.classList.toggle('show');
-        // Cerrar el teclado si se abre el panel
         if (showing) document.getElementById('chatInput').blur();
     };
 
@@ -2302,12 +2330,11 @@
         if (!STICKERS[id]) return;
         const panel = document.getElementById('stickerPanel');
         if (panel) panel.classList.remove('show');
-        const msgData = { type:'sticker', sticker:id, sender:myName, senderId:myId, ts:Date.now() };
         if (e2eReady) {
             const enc = await encryptText(id);
             push(messagesRef, { type:'sticker', enc, sender:myName, senderId:myId, ts:Date.now() });
         } else {
-            push(messagesRef, msgData);
+            push(messagesRef, { type:'sticker', sticker:id, sender:myName, senderId:myId, ts:Date.now() });
         }
         triggerPushForOther('Sticker');
     };
