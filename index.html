@@ -1794,14 +1794,14 @@
         try { playMessageSound(); } catch(e) {}
         vibrate([40, 30, 60]);
 
-        // Mantener visible ~2.6s, luego desvanecer
+        // Mantener visible ~4.5s, luego desvanecer
         setTimeout(() => {
             screen.classList.add('hide');
             setTimeout(() => {
                 screen.classList.remove('show', 'hide');
                 if (done) done();
             }, 700);
-        }, 2600);
+        }, 4500);
     }
 
     window.joinChat = function() {
