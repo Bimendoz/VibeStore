@@ -623,6 +623,7 @@
         .panic-fab { display:none !important; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+    <script src="stickers.js"></script>
 </head>
 <body>
 
@@ -1993,7 +1994,7 @@
                 : `<span style="opacity:0.6;font-size:0.8rem;">📷 Imagen</span>`;
         } else if (msg.type === 'sticker') {
             bubbleClass = 'msg sticker-msg';
-            bubbleInner = (msg.sticker && STICKERS[msg.sticker])
+            bubbleInner = (msg.sticker && stickerExists(msg.sticker))
                 ? `<div class="sticker-in-chat" data-sticker="${escHtml(msg.sticker)}"></div>`
                 : `<span style="opacity:0.6;font-size:0.8rem;">🩹 Sticker</span>`;
         } else {
@@ -2292,7 +2293,17 @@
         clap:    '1f44f', // 👏 aplausos
         hundred: '1f4af'  // 💯 cien puntos
     };
-    const STICKER_ORDER = ['rofl','laugh','love','kiss','cool','wink','hug','think','zany','tongue','melt','cry','sob','angry','wow','scream','sleep','sick','party','heart','fire','thumb','clap','hundred'];
+    const EMOJI_ORDER = ['rofl','laugh','love','kiss','cool','wink','hug','think','zany','tongue','melt','cry','sob','angry','wow','scream','sleep','sick','party','heart','fire','thumb','clap','hundred'];
+
+    // Stickers PROPIOS (incrustados desde stickers.js) van primero, luego los emojis de Google.
+    const CUSTOM_STICKERS = window.VIBE_STICKERS || {};
+    const CUSTOM_ORDER = window.VIBE_STICKER_ORDER || [];
+    const STICKER_ORDER = [...CUSTOM_ORDER, ...EMOJI_ORDER];
+
+    // ¿Existe este id como sticker (propio o emoji)?
+    function stickerExists(id) {
+        return !!(CUSTOM_STICKERS[id] || STICKERS[id]);
+    }
 
     function stickerLottieURL(id) {
         const code = STICKERS[id];
@@ -2300,15 +2311,23 @@
         return `${NOTO_BASE}${code}/lottie.json`;
     }
 
-    // Reproduce un emoji Lottie dentro de un contenedor
+    // Reproduce un sticker: si es propio usa su animación incrustada, si es emoji usa la URL
     function playSticker(container, id) {
         if (!container || !window.lottie) return;
-        const url = stickerLottieURL(id);
-        if (!url) return;
         try {
-            window.lottie.loadAnimation({
-                container, renderer:'svg', loop:true, autoplay:true, path:url
-            });
+            if (CUSTOM_STICKERS[id]) {
+                // Sticker propio: animación incrustada
+                window.lottie.loadAnimation({
+                    container, renderer:'svg', loop:true, autoplay:true,
+                    animationData: CUSTOM_STICKERS[id].data
+                });
+            } else {
+                const url = stickerLottieURL(id);
+                if (!url) return;
+                window.lottie.loadAnimation({
+                    container, renderer:'svg', loop:true, autoplay:true, path:url
+                });
+            }
         } catch(e) {}
     }
 
@@ -2337,7 +2356,7 @@
     };
 
     window.sendSticker = async function(id) {
-        if (!STICKERS[id]) return;
+        if (!stickerExists(id)) return;
         const panel = document.getElementById('stickerPanel');
         if (panel) panel.classList.remove('show');
         if (e2eReady) {
