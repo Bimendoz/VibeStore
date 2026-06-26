@@ -114,16 +114,16 @@
         /* ─── PANEL DE STICKERS ─── */
         .sticker-panel { display:none; flex-shrink:0; height:0; overflow:hidden; background:rgba(18,18,28,0.98); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.07); transition:height 0.25s cubic-bezier(0.32,0.72,0,1); z-index:3; }
         .sticker-panel.show { display:flex; height:320px; }
-        .sticker-panel { flex-direction:row; }
-        /* Pestañas en COLUMNA vertical a la derecha */
-        .sticker-tabs { display:flex; flex-direction:column; gap:0.35rem; padding:0.6rem 0.4rem; border-left:1px solid rgba(255,255,255,0.07); overflow-y:auto; -webkit-overflow-scrolling:touch; flex-shrink:0; order:2; }
-        .sticker-tab { flex-shrink:0; width:46px; height:46px; border-radius:14px; border:none; background:rgba(255,255,255,0.05); font-size:1.4rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, transform 0.1s; }
+        .sticker-panel { flex-direction:column; }
+        /* Pestañas en FILA horizontal arriba */
+        .sticker-tabs { display:flex; flex-direction:row; gap:0.35rem; padding:0.5rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.07); overflow-x:auto; overflow-y:hidden; -webkit-overflow-scrolling:touch; flex-shrink:0; }
+        .sticker-tab { flex-shrink:0; width:46px; height:40px; border-radius:13px; border:none; background:rgba(255,255,255,0.05); font-size:1.35rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, transform 0.1s; }
         .sticker-tab.active { background:rgba(255,138,0,0.28); }
         .sticker-tab:active { transform:scale(0.88); }
         [data-theme="light"] .sticker-tab { background:rgba(0,0,0,0.05); }
         [data-theme="light"] .sticker-tab.active { background:rgba(255,138,0,0.32); }
         [data-theme="light"] .sticker-panel { background:rgba(245,245,247,0.98); }
-        .sticker-panel-grid { flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; padding:0.9rem; height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch; order:1; align-content:start; }
+        .sticker-panel-grid { flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; padding:0.9rem; overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; align-content:start; }
         .sticker-item { aspect-ratio:1/1; background:rgba(255,255,255,0.05); border-radius:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.12s, background 0.15s; padding:0.4rem; }
         .sticker-item:active { transform:scale(0.88); background:rgba(255,255,255,0.12); }
         .sticker-item svg { width:100%; height:100%; }
@@ -2457,6 +2457,7 @@
         { id:'emoji',  icon:'😀', ids: EMOJI_ORDER },
         { id:'tigres', icon:'🐯', ids: LOTTIE_CATS.tigres || [] },
         { id:'gatos',  icon:'🐱', ids: LOTTIE_CATS.gatos || [] },
+        { id:'perros', icon:'🐶', ids: LOTTIE_CATS.perros || [] },
         { id:'patos',  icon:'🦆', ids: LOTTIE_CATS.patos || [] },
         { id:'amor',   icon:'💖', ids: LOTTIE_CATS.amor || [] },
         { id:'varios', icon:'⭐', ids: LOTTIE_CATS.varios || [] }
