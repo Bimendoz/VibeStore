@@ -113,15 +113,17 @@
         @keyframes welcomeTextIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         /* ─── PANEL DE STICKERS ─── */
         .sticker-panel { display:none; flex-shrink:0; height:0; overflow:hidden; background:rgba(18,18,28,0.98); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.07); transition:height 0.25s cubic-bezier(0.32,0.72,0,1); z-index:3; }
-        .sticker-panel.show { display:block; height:300px; }
-        .sticker-tabs { display:flex; gap:0.3rem; padding:0.5rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.07); overflow-x:auto; -webkit-overflow-scrolling:touch; flex-shrink:0; }
-        .sticker-tab { flex-shrink:0; width:44px; height:36px; border-radius:12px; border:none; background:rgba(255,255,255,0.05); font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, transform 0.1s; }
-        .sticker-tab.active { background:rgba(255,138,0,0.25); }
-        .sticker-tab:active { transform:scale(0.9); }
+        .sticker-panel.show { display:flex; height:320px; }
+        .sticker-panel { flex-direction:row; }
+        /* Pestañas en COLUMNA vertical a la derecha */
+        .sticker-tabs { display:flex; flex-direction:column; gap:0.35rem; padding:0.6rem 0.4rem; border-left:1px solid rgba(255,255,255,0.07); overflow-y:auto; -webkit-overflow-scrolling:touch; flex-shrink:0; order:2; }
+        .sticker-tab { flex-shrink:0; width:46px; height:46px; border-radius:14px; border:none; background:rgba(255,255,255,0.05); font-size:1.4rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, transform 0.1s; }
+        .sticker-tab.active { background:rgba(255,138,0,0.28); }
+        .sticker-tab:active { transform:scale(0.88); }
         [data-theme="light"] .sticker-tab { background:rgba(0,0,0,0.05); }
-        [data-theme="light"] .sticker-tab.active { background:rgba(255,138,0,0.3); }
+        [data-theme="light"] .sticker-tab.active { background:rgba(255,138,0,0.32); }
         [data-theme="light"] .sticker-panel { background:rgba(245,245,247,0.98); }
-        .sticker-panel-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; padding:0.9rem; height:252px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        .sticker-panel-grid { flex:1; display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; padding:0.9rem; height:320px; overflow-y:auto; -webkit-overflow-scrolling:touch; order:1; align-content:start; }
         .sticker-item { aspect-ratio:1/1; background:rgba(255,255,255,0.05); border-radius:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.12s, background 0.15s; padding:0.4rem; }
         .sticker-item:active { transform:scale(0.88); background:rgba(255,255,255,0.12); }
         .sticker-item svg { width:100%; height:100%; }
@@ -1740,16 +1742,40 @@
         else timeGreeting = 'Buenas noches';
 
         if (isLuna) {
-            // Mezcla de saludos por hora + piropos bonitos
+            // Mezcla de saludos por hora + muchos piropos amorosos
             const opciones = [
-                { g: `${timeGreeting}, Luna`, s: 'Qué bueno verte por aquí ✨' },
+                { g: `${timeGreeting}, Luna`, s: 'Qué bonito verte por aquí ✨' },
                 { g: 'Hermosa bienvenida', s: 'Luna llegó y todo brilla 🌙' },
                 { g: 'Bienvenida, Luna linda', s: 'Te estábamos esperando 💫' },
                 { g: 'Hola, mamacita Luna', s: 'Llegó la más bella 💖' },
                 { g: `${timeGreeting}, preciosa`, s: 'Luna, mi persona favorita 🥰' },
                 { g: 'Luna hermosa', s: 'El chat se ilumina contigo ⭐' },
-                { g: 'Aquí está Luna', s: 'La reina del canal 👑' },
-                { g: `${timeGreeting}, Luna bella`, s: 'Lista para conversar 💕' }
+                { g: 'Aquí está mi reina', s: 'Luna, la dueña de todo 👑' },
+                { g: `${timeGreeting}, Luna bella`, s: 'Lista para enamorar 💕' },
+                { g: 'Mi Luna llegó', s: 'Y el mundo se puso lindo 🌎💖' },
+                { g: 'Hola, amor', s: 'Te extrañaba, Luna 🥺💗' },
+                { g: 'Luna preciosa', s: 'Eres lo mejor de mi día ☀️' },
+                { g: 'Bienvenida, mi cielo', s: 'Contigo todo es mejor 🌌' },
+                { g: 'Mi niña bonita', s: 'Luna, mi lucecita 💫' },
+                { g: 'Llegó la más hermosa', s: 'Nadie brilla como tú, Luna ✨' },
+                { g: 'Hola, mi vida', s: 'Te quiero, Luna 💞' },
+                { g: 'Luna, mi amor', s: 'Mi corazón es tuyo 💘' },
+                { g: 'Mi Luna favorita', s: 'No hay nadie como tú 🌷' },
+                { g: 'Bienvenida, hermosura', s: 'Me robaste una sonrisa 😍' },
+                { g: 'Hola, princesa', s: 'Luna, mi tesoro 👑💎' },
+                { g: 'Mi reina llegó', s: 'Todo es tuyo aquí, Luna 💕' },
+                { g: 'Luna de mis ojos', s: 'Brillas más que las estrellas 🌟' },
+                { g: 'Mi amor llegó', s: 'El día ya valió la pena 🥰' },
+                { g: 'Hola, bombón', s: 'Luna, dulce como ninguna 🍯' },
+                { g: 'Mi cosita linda', s: 'Te adoro, Luna 💗' },
+                { g: 'Luna consentida', s: 'Aquí siempre eres primero 👑' },
+                { g: 'Mi sol y mi luna', s: 'Todo a la vez eres tú ☀️🌙' },
+                { g: 'Bienvenida, mi amor', s: 'Cada día te quiero más 💞' },
+                { g: 'Hola, hermosa', s: 'Luna, me alegras la existencia ✨' },
+                { g: 'Mi corazón llegó', s: 'Late más fuerte contigo 💓' },
+                { g: 'Luna divina', s: 'Eres un sueño hecho realidad 🌙💫' },
+                { g: `${timeGreeting}, mi amor`, s: 'Pensando en ti siempre 💭💕' },
+                { g: 'Mi chiquita bella', s: 'Luna, eres perfecta 🥹💖' }
             ];
             return opciones[Math.floor(Math.random() * opciones.length)];
         }
@@ -2410,9 +2436,9 @@
     };
     const FOX_ORDER = ["foxhappy", "foxlove", "foxlaugh", "foxcry", "foxwink", "foxangry", "foxwow", "foxcool"];
 
-    // Pato y estrella (Lottie incrustado desde stickers.js)
+    // Stickers Lottie incrustados desde stickers.js, organizados por categoría
     const LOTTIE_STICKERS = window.VIBE_STICKERS || {};
-    const LOTTIE_ORDER = window.VIBE_STICKER_LOTTIE_ORDER || [];
+    const LOTTIE_CATS = window.VIBE_STICKER_CATS || {};
 
     // Emojis animados de Google Noto (Lottie por URL, licencia libre)
     const NOTO_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest/';
@@ -2425,11 +2451,15 @@
     };
     const EMOJI_ORDER = ['rofl','laugh','elove','kiss','ecool','ewink','hug','think','zany','tongue','melt','ecry','sob','eangry','ewow','scream','sleep','sick','party','eheart','fire','thumb','clap','hundred'];
 
-    // CATEGORÍAS por pestañas
+    // CATEGORÍAS (navegación vertical lateral)
     const STICKER_CATEGORIES = [
-        { id:'fox',   icon:'🦊', ids: FOX_ORDER },
-        { id:'emoji', icon:'😀', ids: EMOJI_ORDER },
-        { id:'otros', icon:'⭐', ids: LOTTIE_ORDER }
+        { id:'fox',    icon:'🦊', ids: FOX_ORDER },
+        { id:'emoji',  icon:'😀', ids: EMOJI_ORDER },
+        { id:'tigres', icon:'🐯', ids: LOTTIE_CATS.tigres || [] },
+        { id:'gatos',  icon:'🐱', ids: LOTTIE_CATS.gatos || [] },
+        { id:'patos',  icon:'🦆', ids: LOTTIE_CATS.patos || [] },
+        { id:'amor',   icon:'💖', ids: LOTTIE_CATS.amor || [] },
+        { id:'varios', icon:'⭐', ids: LOTTIE_CATS.varios || [] }
     ];
     let _activeCategory = 'fox';
 
