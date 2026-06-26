@@ -104,8 +104,9 @@
         [data-theme="light"] .sticker-item { background:rgba(0,0,0,0.04); }
         /* Sticker dentro de un mensaje del chat */
         .msg.sticker-msg { background:transparent !important; border:none !important; box-shadow:none !important; padding:0.2rem !important; }
-        .sticker-in-chat { width:130px; height:130px; }
+        .sticker-in-chat { width:150px; height:150px; animation:stickerPop 0.35s cubic-bezier(0.34,1.56,0.64,1); }
         .sticker-in-chat svg { width:100%; height:100%; }
+        @keyframes stickerPop { 0%{transform:scale(0.3);opacity:0} 100%{transform:scale(1);opacity:1} }
         /* ─── Animaciones de los stickers ─── */
         @keyframes stkBounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
         @keyframes stkWobble { 0%,100%{transform:rotate(-6deg)} 50%{transform:rotate(6deg)} }
@@ -1724,6 +1725,7 @@
         document.getElementById('btnMic').style.display = 'flex';
         document.getElementById('btnPhoto').style.display = 'flex';
         document.getElementById('btnBuzz').style.display = 'flex';
+        { const stk = document.getElementById('btnSticker'); if (stk) stk.style.display = 'flex'; }
         input.focus();
         clearTimeout(typingTimer);
         set(ref(db, 'chat/typing/' + myId), null);
@@ -2265,16 +2267,24 @@
     const NOTO_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest/';
     // id corto → código del emoji en el catálogo de Google (carpeta unicode)
     const STICKERS = {
+        rofl:    '1f923', // 🤣 muerto de risa
         laugh:   '1f602', // 😂 risa con lágrimas
         love:    '1f60d', // 😍 ojos de corazón
-        kiss:    '1f618', // 😘 beso
+        kiss:    '1f618', // 😘 beso con corazón
         cool:    '1f60e', // 😎 cool con gafas
         wink:    '1f609', // 😉 guiño
+        hug:     '1f917', // 🤗 abrazo
+        think:   '1f914', // 🤔 pensando
+        zany:    '1f92a', // 🤪 loco
+        tongue:  '1f61c', // 😜 lengua afuera
+        melt:    '1fae0', // 🫠 derritiéndose
         cry:     '1f622', // 😢 llorando
         sob:     '1f62d', // 😭 llanto fuerte
         angry:   '1f621', // 😡 enojado
         wow:     '1f62e', // 😮 sorprendido
-        think:   '1f914', // 🤔 pensando
+        scream:  '1f631', // 😱 grito
+        sleep:   '1f634', // 😴 dormido
+        sick:    '1f922', // 🤢 con náuseas
         party:   '1f973', // 🥳 fiesta
         heart:   '2764_fe0f', // ❤️ corazón
         fire:    '1f525', // 🔥 fuego
@@ -2282,7 +2292,7 @@
         clap:    '1f44f', // 👏 aplausos
         hundred: '1f4af'  // 💯 cien puntos
     };
-    const STICKER_ORDER = ['laugh','love','kiss','cool','wink','cry','sob','angry','wow','think','party','heart','fire','thumb','clap','hundred'];
+    const STICKER_ORDER = ['rofl','laugh','love','kiss','cool','wink','hug','think','zany','tongue','melt','cry','sob','angry','wow','scream','sleep','sick','party','heart','fire','thumb','clap','hundred'];
 
     function stickerLottieURL(id) {
         const code = STICKERS[id];
