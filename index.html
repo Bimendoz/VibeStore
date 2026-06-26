@@ -2519,20 +2519,10 @@
         const grid = document.getElementById('stickerGrid');
         if (!grid) return;
         grid.innerHTML = '';
-        if (_stickerObserver) { _stickerObserver.disconnect(); _stickerObserver = null; }
-        if ('IntersectionObserver' in window) {
-            _stickerObserver = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting && !entry.target._loaded) {
-                        entry.target._loaded = true;
-                        playSticker(entry.target, entry.target.dataset.sid);
-                        _stickerObserver.unobserve(entry.target);
-                    }
-                });
-            }, { root: grid, rootMargin: '120px' });
-        }
         const cat = STICKER_CATEGORIES.find(c => c.id === _activeCategory);
         const ids = (cat && cat.ids) || [];
+        // Crear todos los contenedores primero
+        const holders = [];
         ids.forEach(id => {
             const item = document.createElement('div');
             item.className = 'sticker-item';
@@ -2543,8 +2533,12 @@
             holder.dataset.sid = id;
             item.appendChild(holder);
             grid.appendChild(item);
-            if (_stickerObserver) _stickerObserver.observe(holder);
-            else playSticker(holder, id);
+            holders.push({ holder, id });
+        });
+        // Animar cada sticker con un pequeño retraso escalonado (evita congelar el móvil
+        // y garantiza que el contenedor ya tiene tamaño visible)
+        holders.forEach((h, i) => {
+            setTimeout(() => playSticker(h.holder, h.id), i * 40);
         });
     }
 
@@ -2556,9 +2550,13 @@
     window.toggleStickerPanel = function() {
         const panel = document.getElementById('stickerPanel');
         if (!panel) return;
-        buildStickerPanel();
         const showing = panel.classList.toggle('show');
-        if (showing) document.getElementById('chatInput').blur();
+        if (showing) {
+            document.getElementById('chatInput').blur();
+            // Construir después de mostrar, cuando el panel ya tiene tamaño
+            buildStickerTabs();
+            setTimeout(renderStickerGrid, 50);
+        }
     };
 
     window.sendSticker = async function(id) {
