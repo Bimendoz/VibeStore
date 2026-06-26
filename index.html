@@ -95,9 +95,15 @@
         .recording-bar.show { display: flex; }
         /* ─── PANEL DE STICKERS ─── */
         .sticker-panel { display:none; flex-shrink:0; height:0; overflow:hidden; background:rgba(18,18,28,0.98); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.07); transition:height 0.25s cubic-bezier(0.32,0.72,0,1); z-index:3; }
-        .sticker-panel.show { display:block; height:280px; }
+        .sticker-panel.show { display:block; height:300px; }
+        .sticker-tabs { display:flex; gap:0.3rem; padding:0.5rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.07); overflow-x:auto; -webkit-overflow-scrolling:touch; flex-shrink:0; }
+        .sticker-tab { flex-shrink:0; width:44px; height:36px; border-radius:12px; border:none; background:rgba(255,255,255,0.05); font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.15s, transform 0.1s; }
+        .sticker-tab.active { background:rgba(255,138,0,0.25); }
+        .sticker-tab:active { transform:scale(0.9); }
+        [data-theme="light"] .sticker-tab { background:rgba(0,0,0,0.05); }
+        [data-theme="light"] .sticker-tab.active { background:rgba(255,138,0,0.3); }
         [data-theme="light"] .sticker-panel { background:rgba(245,245,247,0.98); }
-        .sticker-panel-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; padding:0.9rem; height:280px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        .sticker-panel-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0.5rem; padding:0.9rem; height:252px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
         .sticker-item { aspect-ratio:1/1; background:rgba(255,255,255,0.05); border-radius:16px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.12s, background 0.15s; padding:0.4rem; }
         .sticker-item:active { transform:scale(0.88); background:rgba(255,255,255,0.12); }
         .sticker-item svg { width:100%; height:100%; }
@@ -970,6 +976,7 @@
 
     <!-- Panel selector de stickers animados -->
     <div class="sticker-panel" id="stickerPanel">
+        <div class="sticker-tabs" id="stickerTabs"></div>
         <div class="sticker-panel-grid" id="stickerGrid"></div>
     </div>
 
@@ -2299,23 +2306,42 @@
     const LOTTIE_STICKERS = window.VIBE_STICKERS || {};
     const LOTTIE_ORDER = window.VIBE_STICKER_LOTTIE_ORDER || [];
 
-    // Orden final del panel: zorrito primero, luego pato y estrella
-    const STICKER_ORDER = [...FOX_ORDER, ...LOTTIE_ORDER];
+    // Emojis animados de Google Noto (Lottie por URL, licencia libre)
+    const NOTO_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest/';
+    const EMOJI_STICKERS = {
+        rofl:'1f923', laugh:'1f602', elove:'1f60d', kiss:'1f618', ecool:'1f60e',
+        ewink:'1f609', hug:'1f917', think:'1f914', zany:'1f92a', tongue:'1f61c',
+        melt:'1fae0', ecry:'1f622', sob:'1f62d', eangry:'1f621', ewow:'1f62e',
+        scream:'1f631', sleep:'1f634', sick:'1f922', party:'1f973', eheart:'2764_fe0f',
+        fire:'1f525', thumb:'1f44d', clap:'1f44f', hundred:'1f4af'
+    };
+    const EMOJI_ORDER = ['rofl','laugh','elove','kiss','ecool','ewink','hug','think','zany','tongue','melt','ecry','sob','eangry','ewow','scream','sleep','sick','party','eheart','fire','thumb','clap','hundred'];
 
-    // ¿Existe este id? (zorrito o lottie)
+    // CATEGORÍAS por pestañas
+    const STICKER_CATEGORIES = [
+        { id:'fox',   icon:'🦊', ids: FOX_ORDER },
+        { id:'emoji', icon:'😀', ids: EMOJI_ORDER },
+        { id:'otros', icon:'⭐', ids: LOTTIE_ORDER }
+    ];
+    let _activeCategory = 'fox';
+
     function stickerExists(id) {
-        return !!(FOX_STICKERS[id] || LOTTIE_STICKERS[id]);
+        return !!(FOX_STICKERS[id] || LOTTIE_STICKERS[id] || EMOJI_STICKERS[id]);
     }
 
-    function stickerLottieURL() { return ''; } // (ya no se usan emojis de URL)
-
-    // Reproduce un sticker: zorrito = SVG directo; pato/estrella = Lottie incrustado
+    // Reproduce un sticker según su tipo
     function playSticker(container, id) {
         if (!container) return;
         try {
             if (FOX_STICKERS[id]) {
-                // Zorrito: inyectar el SVG animado directamente
                 container.innerHTML = FOX_STICKERS[id].svg;
+                return;
+            }
+            if (EMOJI_STICKERS[id] && window.lottie) {
+                window.lottie.loadAnimation({
+                    container, renderer:'svg', loop:true, autoplay:true,
+                    path:`${NOTO_BASE}${EMOJI_STICKERS[id]}/lottie.json`
+                });
                 return;
             }
             if (LOTTIE_STICKERS[id] && window.lottie) {
@@ -2328,11 +2354,34 @@
     }
 
     let _stickerObserver = null;
-    function buildStickerPanel() {
-        const grid = document.getElementById('stickerGrid');
-        if (!grid || grid.children.length) return;
+    // Construye las pestañas (una vez)
+    function buildStickerTabs() {
+        const tabs = document.getElementById('stickerTabs');
+        if (!tabs || tabs.children.length) return;
+        STICKER_CATEGORIES.forEach(cat => {
+            if (!cat.ids || !cat.ids.length) return; // omitir categorías vacías
+            const t = document.createElement('button');
+            t.className = 'sticker-tab' + (cat.id === _activeCategory ? ' active' : '');
+            t.textContent = cat.icon;
+            t.onclick = () => switchStickerCategory(cat.id);
+            t.dataset.cat = cat.id;
+            tabs.appendChild(t);
+        });
+    }
 
-        // Observer: anima cada sticker solo cuando entra en pantalla (evita trabar el móvil)
+    function switchStickerCategory(catId) {
+        _activeCategory = catId;
+        document.querySelectorAll('.sticker-tab').forEach(t =>
+            t.classList.toggle('active', t.dataset.cat === catId));
+        renderStickerGrid();
+    }
+
+    // Renderiza solo los stickers de la categoría activa
+    function renderStickerGrid() {
+        const grid = document.getElementById('stickerGrid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        if (_stickerObserver) { _stickerObserver.disconnect(); _stickerObserver = null; }
         if ('IntersectionObserver' in window) {
             _stickerObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -2342,10 +2391,11 @@
                         _stickerObserver.unobserve(entry.target);
                     }
                 });
-            }, { root: grid, rootMargin: '100px' });
+            }, { root: grid, rootMargin: '120px' });
         }
-
-        STICKER_ORDER.forEach(id => {
+        const cat = STICKER_CATEGORIES.find(c => c.id === _activeCategory);
+        const ids = (cat && cat.ids) || [];
+        ids.forEach(id => {
             const item = document.createElement('div');
             item.className = 'sticker-item';
             item.onclick = () => sendSticker(id);
@@ -2355,10 +2405,14 @@
             holder.dataset.sid = id;
             item.appendChild(holder);
             grid.appendChild(item);
-            // Cargar con observer si existe; si no, cargar directo
             if (_stickerObserver) _stickerObserver.observe(holder);
             else playSticker(holder, id);
         });
+    }
+
+    function buildStickerPanel() {
+        buildStickerTabs();
+        renderStickerGrid();
     }
 
     window.toggleStickerPanel = function() {
