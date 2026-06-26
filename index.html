@@ -93,6 +93,24 @@
             z-index: 2;
         }
         .recording-bar.show { display: flex; }
+        /* ═══ PANTALLA DE BIENVENIDA (estilo iOS) ═══ */
+        #welcomeScreen { position:fixed; inset:0; z-index:3000; background:radial-gradient(circle at 50% 40%, #1a1f3a 0%, #0a0a14 70%); display:none; align-items:center; justify-content:center; overflow:hidden; opacity:0; }
+        #welcomeScreen.show { display:flex; animation:welcomeFadeIn 0.6s ease forwards; }
+        #welcomeScreen.hide { animation:welcomeFadeOut 0.7s ease forwards; }
+        @keyframes welcomeFadeIn { from{opacity:0} to{opacity:1} }
+        @keyframes welcomeFadeOut { from{opacity:1} to{opacity:0; visibility:hidden} }
+        .welcome-glow { position:absolute; width:300px; height:300px; border-radius:50%; background:radial-gradient(circle, rgba(255,138,0,0.35), transparent 70%); filter:blur(40px); animation:welcomeGlowPulse 3s ease-in-out infinite; }
+        @keyframes welcomeGlowPulse { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.3);opacity:1} }
+        .welcome-particles { position:absolute; inset:0; pointer-events:none; }
+        .welcome-particles span { position:absolute; width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,0.8); animation:welcomeParticle linear infinite; }
+        @keyframes welcomeParticle { 0%{transform:translateY(100vh) scale(0);opacity:0} 10%{opacity:1} 90%{opacity:1} 100%{transform:translateY(-10vh) scale(1);opacity:0} }
+        .welcome-content { position:relative; z-index:2; display:flex; flex-direction:column; align-items:center; text-align:center; padding:0 2rem; }
+        .welcome-avatar { font-size:5rem; line-height:1; margin-bottom:1.5rem; animation:welcomeAvatarIn 1s cubic-bezier(0.34,1.56,0.64,1) forwards, welcomeAvatarFloat 3s ease-in-out 1s infinite; transform:scale(0); }
+        @keyframes welcomeAvatarIn { from{transform:scale(0) rotate(-180deg);opacity:0} to{transform:scale(1) rotate(0);opacity:1} }
+        @keyframes welcomeAvatarFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+        .welcome-greeting { font-size:2rem; font-weight:800; color:#fff; opacity:0; transform:translateY(20px); animation:welcomeTextIn 0.8s ease 0.5s forwards; letter-spacing:-0.02em; text-shadow:0 2px 20px rgba(255,138,0,0.3); }
+        .welcome-sub { font-size:1.05rem; font-weight:500; color:rgba(255,255,255,0.65); margin-top:0.6rem; opacity:0; transform:translateY(20px); animation:welcomeTextIn 0.8s ease 0.8s forwards; }
+        @keyframes welcomeTextIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
         /* ─── PANEL DE STICKERS ─── */
         .sticker-panel { display:none; flex-shrink:0; height:0; overflow:hidden; background:rgba(18,18,28,0.98); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.07); transition:height 0.25s cubic-bezier(0.32,0.72,0,1); z-index:3; }
         .sticker-panel.show { display:block; height:300px; }
@@ -811,6 +829,17 @@
 </div>
 
 <div class="toast" id="toast"></div>
+
+<!-- Pantalla de BIENVENIDA animada (estilo iOS) -->
+<div id="welcomeScreen">
+    <div class="welcome-glow"></div>
+    <div class="welcome-particles" id="welcomeParticles"></div>
+    <div class="welcome-content">
+        <div class="welcome-avatar" id="welcomeAvatar">🌙</div>
+        <div class="welcome-greeting" id="welcomeGreeting"></div>
+        <div class="welcome-sub" id="welcomeSub"></div>
+    </div>
+</div>
 
 <div id="seccion-chat">
     <div class="name-modal" id="nameModal">
@@ -1698,6 +1727,83 @@
         document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
     };
 
+    // ═══ BIENVENIDA PERSONALIZADA ═══
+    function getWelcomeMessages(name) {
+        const h = new Date().getHours();
+        const isLuna = /luna/i.test(name);
+        const isLeon = /le[oó]n/i.test(name);
+
+        // Saludo según la hora
+        let timeGreeting;
+        if (h >= 5 && h < 12) timeGreeting = 'Buenos días';
+        else if (h >= 12 && h < 19) timeGreeting = 'Buenas tardes';
+        else timeGreeting = 'Buenas noches';
+
+        if (isLuna) {
+            // Mezcla de saludos por hora + piropos bonitos
+            const opciones = [
+                { g: `${timeGreeting}, Luna`, s: 'Qué bueno verte por aquí ✨' },
+                { g: 'Hermosa bienvenida', s: 'Luna llegó y todo brilla 🌙' },
+                { g: 'Bienvenida, Luna linda', s: 'Te estábamos esperando 💫' },
+                { g: 'Hola, mamacita Luna', s: 'Llegó la más bella 💖' },
+                { g: `${timeGreeting}, preciosa`, s: 'Luna, mi persona favorita 🥰' },
+                { g: 'Luna hermosa', s: 'El chat se ilumina contigo ⭐' },
+                { g: 'Aquí está Luna', s: 'La reina del canal 👑' },
+                { g: `${timeGreeting}, Luna bella`, s: 'Lista para conversar 💕' }
+            ];
+            return opciones[Math.floor(Math.random() * opciones.length)];
+        }
+        if (isLeon) {
+            const opciones = [
+                { g: 'Bienvenido, León', s: `${timeGreeting} 🦁` },
+                { g: `${timeGreeting}, León`, s: 'Qué gusto tenerte aquí 💪' },
+                { g: 'León llegó', s: 'El rey del canal 👑' },
+                { g: 'Bienvenido, León', s: 'Todo listo para ti ⚡' }
+            ];
+            return opciones[Math.floor(Math.random() * opciones.length)];
+        }
+        // Genérico para cualquier otro nombre
+        return { g: `${timeGreeting}, ${name}`, s: 'Bienvenido al canal seguro ✨' };
+    }
+
+    function showWelcomeScreen(name, avatar, done) {
+        const screen = document.getElementById('welcomeScreen');
+        if (!screen) { if (done) done(); return; }
+        const msg = getWelcomeMessages(name);
+        document.getElementById('welcomeAvatar').textContent = avatar || '🌙';
+        document.getElementById('welcomeGreeting').textContent = msg.g;
+        document.getElementById('welcomeSub').textContent = msg.s;
+
+        // Generar partículas flotantes
+        const pc = document.getElementById('welcomeParticles');
+        if (pc) {
+            pc.innerHTML = '';
+            for (let i = 0; i < 18; i++) {
+                const s = document.createElement('span');
+                s.style.left = Math.random() * 100 + '%';
+                s.style.animationDuration = (3 + Math.random() * 3) + 's';
+                s.style.animationDelay = (Math.random() * 2) + 's';
+                const colors = ['rgba(255,138,0,0.8)','rgba(255,255,255,0.8)','rgba(255,100,150,0.7)'];
+                s.style.background = colors[i % colors.length];
+                pc.appendChild(s);
+            }
+        }
+
+        screen.classList.remove('hide');
+        screen.classList.add('show');
+        try { playMessageSound(); } catch(e) {}
+        vibrate([40, 30, 60]);
+
+        // Mantener visible ~2.6s, luego desvanecer
+        setTimeout(() => {
+            screen.classList.add('hide');
+            setTimeout(() => {
+                screen.classList.remove('show', 'hide');
+                if (done) done();
+            }, 700);
+        }, 2600);
+    }
+
     window.joinChat = function() {
         myName = document.getElementById('nameInput').value.trim();
         if (!myName) {
@@ -1709,6 +1815,8 @@
         }
         if (!myName) return;
         inChat = true; document.getElementById('nameModal').classList.remove('show');
+        // ✨ Mostrar pantalla de bienvenida personalizada antes del chat
+        showWelcomeScreen(myName, myAvatar);
         const _ws = document.getElementById('chatWorkspace');
         const _tw = document.getElementById('typingWrap');
         if (_ws && _tw && _ws.lastChild !== _tw) { _ws.appendChild(_tw); }
