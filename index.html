@@ -93,6 +93,29 @@
             z-index: 2;
         }
         .recording-bar.show { display: flex; }
+        /* ═══ PANTALLA: Mensajes de Luna para León ═══ */
+        #lunaMessagesScreen { position:fixed; inset:0; z-index:2500; background:var(--chat-bg,#0d1117); display:none; flex-direction:column; }
+        #lunaMessagesScreen.show { display:flex; animation:lmSlideIn 0.3s ease; }
+        @keyframes lmSlideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
+        .lm-header { display:flex; align-items:center; gap:0.8rem; padding:calc(env(safe-area-inset-top,44px) + 0.5rem) 1rem 0.9rem; background:linear-gradient(135deg,#ff6b9d,#ff8a5b); flex-shrink:0; }
+        .lm-back { background:rgba(255,255,255,0.2); border:none; width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+        .lm-back svg { width:24px; height:24px; fill:#fff; }
+        .lm-title { color:#fff; font-size:1.15rem; font-weight:800; }
+        .lm-intro { padding:1rem 1.2rem; font-size:0.9rem; color:rgba(255,255,255,0.7); line-height:1.5; }
+        [data-theme="light"] .lm-intro { color:rgba(0,0,0,0.6); }
+        .lm-add { display:flex; gap:0.5rem; padding:0 1.2rem 1rem; }
+        .lm-add input { flex:1; padding:0.85rem 1rem; border-radius:14px; border:1.5px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:inherit; font-size:0.95rem; outline:none; }
+        .lm-add input:focus { border-color:#ff6b9d; }
+        .lm-add-btn { padding:0.85rem 1.3rem; border-radius:14px; border:none; background:linear-gradient(135deg,#ff6b9d,#ff8a5b); color:#fff; font-weight:700; font-size:0.92rem; cursor:pointer; flex-shrink:0; }
+        .lm-add-btn:active { transform:scale(0.94); }
+        .lm-list { flex:1; overflow-y:auto; padding:0 1.2rem 2rem; display:flex; flex-direction:column; gap:0.6rem; -webkit-overflow-scrolling:touch; }
+        .lm-item { display:flex; align-items:center; gap:0.7rem; padding:0.95rem 1.1rem; border-radius:14px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); }
+        [data-theme="light"] .lm-item { background:rgba(0,0,0,0.04); }
+        .lm-item-text { flex:1; font-size:0.95rem; line-height:1.4; word-break:break-word; }
+        .lm-item-del { background:rgba(255,69,58,0.15); border:none; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
+        .lm-item-del svg { width:18px; height:18px; fill:#ff453a; }
+        .lm-item-del:active { transform:scale(0.88); }
+        .lm-empty { text-align:center; padding:2rem 1rem; color:rgba(255,255,255,0.4); font-size:0.9rem; }
         /* ═══ PANTALLA DE BIENVENIDA (estilo iOS) ═══ */
         #welcomeScreen { position:fixed; inset:0; z-index:3000; background:radial-gradient(circle at 50% 40%, #1a1f3a 0%, #0a0a14 70%); display:none; align-items:center; justify-content:center; overflow:hidden; opacity:0; }
         #welcomeScreen.show { display:flex; animation:welcomeFadeIn 0.6s ease forwards; }
@@ -914,6 +937,10 @@
             Videollamada
         </div>
         <div style="height:1px;background:rgba(255,255,255,.06);"></div>
+        <div class="chat-menu-item" id="menuLunaMessages" style="display:none" onclick="closeChatMenu(); openLunaMessages()">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            💌 Mensajes para León
+        </div>
         <div class="chat-menu-item" onclick="closeChatMenu(); openTrashMenu()">
             <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
             Vaciar conversación
@@ -922,6 +949,22 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
+    </div>
+
+    <!-- Pantalla: Mensajes que Luna deja para León -->
+    <div id="lunaMessagesScreen">
+        <div class="lm-header">
+            <button class="lm-back" onclick="closeLunaMessages()" aria-label="Volver">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <div class="lm-title">💌 Mensajes para León</div>
+        </div>
+        <div class="lm-intro">Escribe mensajes de bienvenida que León verá al entrar. Saldrá uno al azar cada vez. 💕</div>
+        <div class="lm-add">
+            <input type="text" id="lmInput" placeholder="Escribe un mensaje bonito..." maxlength="120" autocomplete="off">
+            <button class="lm-add-btn" onclick="addLunaMessage()">Agregar</button>
+        </div>
+        <div class="lm-list" id="lmList"></div>
     </div>
 
     <div class="chat-wallpaper" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;">
@@ -1730,6 +1773,62 @@
     };
 
     // ═══ BIENVENIDA PERSONALIZADA ═══
+    // ═══ MENSAJES DE LUNA PARA LEÓN ═══
+    let _lunaMessages = [];   // copia local de los mensajes que Luna dejó
+
+    // Escuchar los mensajes guardados (ambos los sincronizan)
+    function listenLunaMessages() {
+        onValue(ref(db, 'chat/welcomeForLeon'), snap => {
+            const data = snap.val() || {};
+            _lunaMessages = Object.entries(data).map(([id, v]) => ({ id, text: v.text, ts: v.ts }))
+                .sort((a, b) => (a.ts || 0) - (b.ts || 0));
+            if (document.getElementById('lunaMessagesScreen').classList.contains('show')) {
+                renderLunaMessages();
+            }
+        });
+    }
+
+    window.openLunaMessages = function() {
+        document.getElementById('lunaMessagesScreen').classList.add('show');
+        renderLunaMessages();
+    };
+    window.closeLunaMessages = function() {
+        document.getElementById('lunaMessagesScreen').classList.remove('show');
+        const inp = document.getElementById('lmInput');
+        if (inp) inp.value = '';
+    };
+
+    window.addLunaMessage = function() {
+        const inp = document.getElementById('lmInput');
+        const text = inp.value.trim();
+        if (!text) return;
+        const newRef = push(ref(db, 'chat/welcomeForLeon'));
+        set(newRef, { text, ts: Date.now() });
+        inp.value = '';
+        showToast('Mensaje guardado 💕');
+    };
+
+    window.deleteLunaMessage = function(id) {
+        if (!id) return;
+        set(ref(db, 'chat/welcomeForLeon/' + id), null);
+    };
+
+    function renderLunaMessages() {
+        const list = document.getElementById('lmList');
+        if (!list) return;
+        if (!_lunaMessages.length) {
+            list.innerHTML = '<div class="lm-empty">Aún no hay mensajes.<br>Escribe el primero para León 💌</div>';
+            return;
+        }
+        list.innerHTML = _lunaMessages.map(m => `
+            <div class="lm-item">
+                <span class="lm-item-text">${escHtml(m.text)}</span>
+                <button class="lm-item-del" onclick="deleteLunaMessage('${m.id}')" aria-label="Borrar">
+                    <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </button>
+            </div>`).join('');
+    }
+
     function getWelcomeMessages(name) {
         const h = new Date().getHours();
         const isLuna = /luna/i.test(name);
@@ -1780,6 +1879,11 @@
             return opciones[Math.floor(Math.random() * opciones.length)];
         }
         if (isLeon) {
+            // Si Luna dejó mensajes personalizados, usar uno al azar de los suyos
+            if (_lunaMessages && _lunaMessages.length) {
+                const elegido = _lunaMessages[Math.floor(Math.random() * _lunaMessages.length)];
+                return { g: elegido.text, s: `${timeGreeting}, León 💛` };
+            }
             const opciones = [
                 { g: 'Bienvenido, León', s: `${timeGreeting} 🦁` },
                 { g: `${timeGreeting}, León`, s: 'Qué gusto tenerte aquí 💪' },
@@ -1793,6 +1897,21 @@
     }
 
     function showWelcomeScreen(name, avatar, done) {
+        const screen = document.getElementById('welcomeScreen');
+        if (!screen) { if (done) done(); return; }
+        // Si es León, intentar traer los mensajes de Luna primero (con un margen corto)
+        const isLeon = /le[oó]n/i.test(name);
+        if (isLeon && (!_lunaMessages || !_lunaMessages.length)) {
+            get(ref(db, 'chat/welcomeForLeon')).then(snap => {
+                const data = snap.val() || {};
+                _lunaMessages = Object.entries(data).map(([id, v]) => ({ id, text: v.text, ts: v.ts }));
+            }).catch(()=>{}).finally(() => _renderWelcome(name, avatar, done));
+            return;
+        }
+        _renderWelcome(name, avatar, done);
+    }
+
+    function _renderWelcome(name, avatar, done) {
         const screen = document.getElementById('welcomeScreen');
         if (!screen) { if (done) done(); return; }
         const msg = getWelcomeMessages(name);
@@ -1842,6 +1961,11 @@
         if (!myName) return;
         inChat = true; document.getElementById('nameModal').classList.remove('show');
         // ✨ Mostrar pantalla de bienvenida personalizada antes del chat
+        // Escuchar mensajes que Luna deja para León
+        listenLunaMessages();
+        // Mostrar la opción "Mensajes para León" solo si quien entra es Luna
+        const menuLuna = document.getElementById('menuLunaMessages');
+        if (menuLuna) menuLuna.style.display = /luna/i.test(myName) ? 'flex' : 'none';
         showWelcomeScreen(myName, myAvatar);
         const _ws = document.getElementById('chatWorkspace');
         const _tw = document.getElementById('typingWrap');
