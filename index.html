@@ -134,6 +134,14 @@
         .welcome-greeting { font-size:2rem; font-weight:800; color:#fff; opacity:0; transform:translateY(20px); animation:welcomeTextIn 0.8s ease 0.5s forwards; letter-spacing:-0.02em; text-shadow:0 2px 20px rgba(255,138,0,0.3); }
         .welcome-sub { font-size:1.05rem; font-weight:500; color:rgba(255,255,255,0.65); margin-top:0.6rem; opacity:0; transform:translateY(20px); animation:welcomeTextIn 0.8s ease 0.8s forwards; }
         @keyframes welcomeTextIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+        /* Explosión de amor (corazones que estallan) */
+        .love-burst { position:absolute; top:38%; left:50%; width:0; height:0; pointer-events:none; z-index:3; }
+        .love-burst span { position:absolute; font-size:1.6rem; opacity:0; transform:translate(-50%,-50%); animation:loveBurst 1.4s ease-out forwards; }
+        @keyframes loveBurst {
+            0% { opacity:0; transform:translate(-50%,-50%) scale(0.2) rotate(0deg); }
+            15% { opacity:1; }
+            100% { opacity:0; transform:translate(var(--bx), var(--by)) scale(1.1) rotate(var(--br)); }
+        }
         /* ─── PANEL DE STICKERS ─── */
         .sticker-panel { display:none; flex-shrink:0; height:0; overflow:hidden; background:rgba(18,18,28,0.98); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.07); transition:height 0.25s cubic-bezier(0.32,0.72,0,1); z-index:3; }
         .sticker-panel.show { display:flex; height:320px; }
@@ -859,6 +867,7 @@
 <div id="welcomeScreen">
     <div class="welcome-glow"></div>
     <div class="welcome-particles" id="welcomeParticles"></div>
+    <div class="love-burst" id="loveBurst"></div>
     <div class="welcome-content">
         <div class="welcome-avatar" id="welcomeAvatar">🌙</div>
         <div class="welcome-greeting" id="welcomeGreeting"></div>
@@ -1841,40 +1850,60 @@
         else timeGreeting = 'Buenas noches';
 
         if (isLuna) {
-            // Mezcla de saludos por hora + muchos piropos amorosos
             const opciones = [
-                { g: `${timeGreeting}, Luna`, s: 'Qué bonito verte por aquí ✨' },
-                { g: 'Hermosa bienvenida', s: 'Luna llegó y todo brilla 🌙' },
-                { g: 'Bienvenida, Luna linda', s: 'Te estábamos esperando 💫' },
-                { g: 'Hola, mamacita Luna', s: 'Llegó la más bella 💖' },
-                { g: `${timeGreeting}, preciosa`, s: 'Luna, mi persona favorita 🥰' },
-                { g: 'Luna hermosa', s: 'El chat se ilumina contigo ⭐' },
-                { g: 'Aquí está mi reina', s: 'Luna, la dueña de todo 👑' },
-                { g: `${timeGreeting}, Luna bella`, s: 'Lista para enamorar 💕' },
+                // Saludos por hora
+                { g: `${timeGreeting}, Luna`, s: 'Mi razón para sonreír 😊💕' },
+                { g: `${timeGreeting}, mi amor`, s: 'Pensé en ti apenas desperté 💭💗' },
+                { g: `${timeGreeting}, preciosa`, s: 'El día empieza contigo ☀️' },
+                // Piropos tiernos
                 { g: 'Mi Luna llegó', s: 'Y el mundo se puso lindo 🌎💖' },
-                { g: 'Hola, amor', s: 'Te extrañaba, Luna 🥺💗' },
-                { g: 'Luna preciosa', s: 'Eres lo mejor de mi día ☀️' },
-                { g: 'Bienvenida, mi cielo', s: 'Contigo todo es mejor 🌌' },
-                { g: 'Mi niña bonita', s: 'Luna, mi lucecita 💫' },
-                { g: 'Llegó la más hermosa', s: 'Nadie brilla como tú, Luna ✨' },
-                { g: 'Hola, mi vida', s: 'Te quiero, Luna 💞' },
-                { g: 'Luna, mi amor', s: 'Mi corazón es tuyo 💘' },
-                { g: 'Mi Luna favorita', s: 'No hay nadie como tú 🌷' },
-                { g: 'Bienvenida, hermosura', s: 'Me robaste una sonrisa 😍' },
-                { g: 'Hola, princesa', s: 'Luna, mi tesoro 👑💎' },
-                { g: 'Mi reina llegó', s: 'Todo es tuyo aquí, Luna 💕' },
-                { g: 'Luna de mis ojos', s: 'Brillas más que las estrellas 🌟' },
-                { g: 'Mi amor llegó', s: 'El día ya valió la pena 🥰' },
-                { g: 'Hola, bombón', s: 'Luna, dulce como ninguna 🍯' },
-                { g: 'Mi cosita linda', s: 'Te adoro, Luna 💗' },
-                { g: 'Luna consentida', s: 'Aquí siempre eres primero 👑' },
+                { g: 'Hola, mi vida', s: 'Te extrañaba muchísimo 🥺💗' },
+                { g: 'Luna hermosa', s: 'Eres lo mejor de mi día ✨' },
+                { g: 'Mi niña bonita', s: 'Mi lucecita en la noche 💫' },
+                { g: 'Llegó la más hermosa', s: 'Nadie brilla como tú 🌟' },
+                { g: 'Luna, mi amor', s: 'Mi corazón es todo tuyo 💘' },
+                { g: 'Mi reina llegó', s: 'Todo aquí es para ti 👑💕' },
+                { g: 'Luna de mis ojos', s: 'Más bella que las estrellas 🌙' },
+                { g: 'Hola, bombón', s: 'Dulce como ninguna 🍯💛' },
+                { g: 'Mi cosita linda', s: 'Te adoro con todo 💗' },
                 { g: 'Mi sol y mi luna', s: 'Todo a la vez eres tú ☀️🌙' },
-                { g: 'Bienvenida, mi amor', s: 'Cada día te quiero más 💞' },
-                { g: 'Hola, hermosa', s: 'Luna, me alegras la existencia ✨' },
                 { g: 'Mi corazón llegó', s: 'Late más fuerte contigo 💓' },
-                { g: 'Luna divina', s: 'Eres un sueño hecho realidad 🌙💫' },
-                { g: `${timeGreeting}, mi amor`, s: 'Pensando en ti siempre 💭💕' },
-                { g: 'Mi chiquita bella', s: 'Luna, eres perfecta 🥹💖' }
+                { g: 'Luna divina', s: 'Un sueño hecho realidad 🌙💫' },
+                { g: 'Mi chiquita bella', s: 'Eres perfecta así 🥹💖' },
+                // Más románticos / intensos
+                { g: 'Te amo, Luna', s: 'Cada día más que ayer 💞' },
+                { g: 'Mi todo llegó', s: 'Contigo lo tengo todo 🌹' },
+                { g: 'Hola, mi cielo', s: 'Mi lugar favorito eres tú 🌌' },
+                { g: 'Luna, mi persona', s: 'La que le da sentido a todo 💕' },
+                { g: 'Mi amor eterno', s: 'Tú y yo, siempre 💍✨' },
+                { g: 'Reina de mi corazón', s: 'Reinas en cada latido 👑💓' },
+                { g: 'Mi hermosa Luna', s: 'Me enamoras cada día 😍' },
+                { g: 'Aquí está mi amor', s: 'Y todo vuelve a brillar ✨💗' },
+                { g: 'Mi dulce Luna', s: 'Endulzas mi existencia 🍬💕' },
+                { g: 'Te esperaba, amor', s: 'Siempre vale la pena 🥰' },
+                { g: 'Mi flor más linda', s: 'Floreces mi mundo 🌸💗' },
+                { g: 'Luna preciosa', s: 'Me robaste el corazón 💘' },
+                { g: 'Mi princesa', s: 'Mi tesoro más valioso 👑💎' },
+                { g: 'Hola, hermosura', s: 'Me alegras la vida entera ✨' },
+                { g: 'Mi amor bonito', s: 'No hay nadie como tú 🌷' },
+                { g: 'Luna consentida', s: 'Aquí siempre eres primero 💕' },
+                { g: 'Mi vida entera', s: 'Latís dentro de mí 💗' },
+                { g: 'Mi ángel llegó', s: 'Bajaste del cielo para mí 😇💫' },
+                { g: 'Hola, mi corazón', s: 'Late solo por ti 💓' },
+                { g: 'Mi Luna llena', s: 'Iluminas mis noches 🌕✨' },
+                { g: 'Eres mi paz', s: 'Contigo todo está bien 🕊️💗' },
+                { g: 'Mi amor infinito', s: 'Sin final ni medida ♾️💕' },
+                { g: 'Luna encantadora', s: 'Me tienes hechizado 🪄💘' },
+                { g: 'Mi razón de ser', s: 'Todo cobra sentido contigo 💞' },
+                { g: 'Hola, mi tesoro', s: 'El más grande que tengo 💎💗' },
+                { g: 'Mi Luna soñada', s: 'Mejor que en mis sueños 💭💕' },
+                { g: 'Mi bella durmiente', s: 'Despiertas todo en mí 🌹' },
+                { g: 'Mi amor sincero', s: 'De verdad y para siempre 💌' },
+                { g: 'Luna radiante', s: 'Brillas y me deslumbras ✨🌙' },
+                { g: 'Mi caramelo', s: 'Lo más dulce de mi vida 🍭💗' },
+                { g: 'Eres mi hogar', s: 'Donde quiero estar siempre 🏡💕' },
+                { g: 'Mi Luna adorada', s: 'Te adoro sin medida 🥰💖' },
+                { g: 'Mi latido llegó', s: 'Sin ti no habría ritmo 💓✨' }
             ];
             return opciones[Math.floor(Math.random() * opciones.length)];
         }
@@ -1911,6 +1940,26 @@
         _renderWelcome(name, avatar, done);
     }
 
+    // Explosión de corazones/emojis desde el centro
+    function triggerLoveBurst() {
+        const burst = document.getElementById('loveBurst');
+        if (!burst) return;
+        const emojis = ['💖','💕','💗','💓','💞','❤️','🌹','✨','💘','😍','🥰','💫'];
+        const count = 14;
+        for (let i = 0; i < count; i++) {
+            const s = document.createElement('span');
+            s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            const angle = (Math.PI * 2 * i) / count + (Math.random() * 0.5);
+            const dist = 90 + Math.random() * 80;
+            s.style.setProperty('--bx', `calc(-50% + ${Math.cos(angle) * dist}px)`);
+            s.style.setProperty('--by', `calc(-50% + ${Math.sin(angle) * dist}px)`);
+            s.style.setProperty('--br', (Math.random() * 360 - 180) + 'deg');
+            s.style.animationDelay = (Math.random() * 0.2) + 's';
+            burst.appendChild(s);
+            setTimeout(() => s.remove(), 1600);
+        }
+    }
+
     function _renderWelcome(name, avatar, done) {
         const screen = document.getElementById('welcomeScreen');
         if (!screen) { if (done) done(); return; }
@@ -1938,6 +1987,12 @@
         screen.classList.add('show');
         try { playMessageSound(); } catch(e) {}
         vibrate([40, 30, 60]);
+
+        // Explosión de amor para Luna 💥💕
+        if (/luna/i.test(name)) {
+            triggerLoveBurst();
+            setTimeout(triggerLoveBurst, 600);  // segunda oleada
+        }
 
         // Mantener visible ~4.5s, luego desvanecer
         setTimeout(() => {
