@@ -2074,14 +2074,23 @@
         }
         const msgData = { type:'text', sender:myName, senderId:myId, ts:Date.now() };
         if (replyData) { msgData.replyTo = replyData; cancelReply(); }
-        if (e2eReady) {
-            const enc = await encryptText(text);
-            push(messagesRef, { ...msgData, enc });
-        } else {
-            push(messagesRef, { ...msgData, text });
+        try {
+            let enc = null;
+            if (e2eReady) {
+                enc = await encryptText(text);
+            }
+            if (enc) {
+                await push(messagesRef, { ...msgData, enc });
+            } else {
+                // Si el cifrado no está listo o falló, enviar el texto igual (no dejar al usuario sin poder escribir)
+                await push(messagesRef, { ...msgData, text });
+            }
+            triggerPushForOther(text);
+        } catch (err) {
+            // Si algo falla, avisar y devolver el texto al input para que no se pierda
+            input.value = text;
+            showToast('No se pudo enviar. Revisa tu conexión.');
         }
-        // BUG ADICIONAL corregido: disparar push al otro usuario al enviar
-        triggerPushForOther(text);
     };
     window.handleChatKey = function(e) { if (e.key === 'Enter') window.sendMsg(); };
 
