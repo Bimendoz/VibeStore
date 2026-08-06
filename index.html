@@ -379,6 +379,12 @@
             }
         }
         .chat-wallpaper { position:absolute; inset:0; pointer-events:none; overflow:hidden; z-index:0; opacity:1; }
+        .cw-blob { position:absolute; border-radius:50%; filter:blur(80px); animation:blobDrift 16s ease-in-out infinite alternate; }
+        .cw-blob1 { width:260px; height:260px; background:var(--bubble-mine); opacity:0.22; top:-60px; left:-60px; animation-delay:0s; }
+        .cw-blob2 { width:220px; height:220px; background:#4060c0; opacity:0.16; bottom:15%; right:-70px; animation-delay:-5s; }
+        .cw-blob3 { width:200px; height:200px; background:#8040c0; opacity:0.14; top:45%; left:20%; animation-delay:-9s; }
+        .cw-dots { color:rgba(255,255,255,0.5); }
+        [data-theme="light"] .cw-dots { color:rgba(0,0,0,0.4); }
         .scroll-fab { position:fixed; right:1rem; z-index:500; width:42px; height:42px; border-radius:50%; background:rgba(30,30,45,0.92); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); border:1.5px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.8); cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(0,0,0,0.4); transition:opacity 0.2s, transform 0.2s; bottom:calc(5.5rem + var(--safe-bottom,0)); }
         .scroll-fab.hidden { opacity:0; transform:scale(0.7); pointer-events:none; }
         .scroll-fab-badge { position:absolute; top:-4px; right:-4px; background:var(--bubble-mine); color:#fff; font-size:0.6rem; font-weight:800; border-radius:10px; padding:1px 5px; min-width:16px; text-align:center; display:none; }
@@ -991,26 +997,16 @@
     </div>
 
     <div class="chat-wallpaper" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;">
-        <svg width="400" height="700" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%">
+        <div class="cw-blob cw-blob1"></div>
+        <div class="cw-blob cw-blob2"></div>
+        <div class="cw-blob cw-blob3"></div>
+        <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.5;">
           <defs>
-            <pattern id="wp" width="200" height="200" patternUnits="userSpaceOnUse">
-              <path d="M18 12l2.5 7h7l-5.5 4.5 2.5 7L18 27l-6.5 3.5 2.5-7L8.5 19h7z" fill="none" stroke="#c97040" stroke-width="1.3" opacity="0.7"/>
-              <path d="M76 8c0-5 4-8 8-5s8 0 8 5c0 4-8 12-8 12s-8-8-8-12z" fill="none" stroke="#c97040" stroke-width="1.2" opacity="0.6"/>
-              <circle cx="145" cy="30" r="14" fill="none" stroke="#c97040" stroke-width="1.3" opacity="0.5"/>
-              <path d="M160 80 Q175 60 185 85 Q175 105 160 80z" fill="none" stroke="#c97040" stroke-width="1.2" opacity="0.55"/>
-              <path d="M30 95l-6 14h5l-8 16 13-18h-5z" fill="none" stroke="#c97040" stroke-width="1.3" opacity="0.6"/>
-              <path d="M5 160 Q28 150 50 160 Q73 170 95 160 Q118 150 140 160 Q162 170 185 160" fill="none" stroke="#c97040" stroke-width="1.2" opacity="0.4"/>
-              <path d="M110 105l1.8 5.5h5.5l-4.5 3.5 1.8 5.5-4.6-3-4.6 3 1.8-5.5-4.5-3.5h5.5z" fill="none" stroke="#4060a0" stroke-width="1.2" opacity="0.65"/>
-              <path d="M55 135c0-4 3-6 6-4s6 0 6 4c0 3-6 9-6 9s-6-6-6-9z" fill="none" stroke="#4060a0" stroke-width="1.2" opacity="0.6"/>
-              <circle cx="178" cy="125" r="10" fill="none" stroke="#4060a0" stroke-width="1.2" opacity="0.5"/>
-              <path d="M100 60 Q90 45 80 65 Q90 80 100 60z" fill="none" stroke="#4060a0" stroke-width="1.2" opacity="0.5"/>
-              <path d="M145 155l8-12 8 12-8 12z" fill="none" stroke="#4060a0" stroke-width="1.2" opacity="0.5"/>
-              <circle cx="10" cy="60" r="5" fill="none" stroke="#4060a0" stroke-width="1" opacity="0.4"/>
-              <circle cx="190" cy="185" r="7" fill="none" stroke="#4060a0" stroke-width="1" opacity="0.4"/>
-              <path d="M60 175 Q80 165 100 175 Q120 185 140 175" fill="none" stroke="#4060a0" stroke-width="1" opacity="0.35"/>
+            <pattern id="wp-dots" width="26" height="26" patternUnits="userSpaceOnUse">
+              <circle cx="2" cy="2" r="1.4" fill="currentColor"/>
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#wp)"/>
+          <rect width="100%" height="100%" fill="url(#wp-dots)" class="cw-dots"/>
         </svg>
     </div>
 
@@ -1372,7 +1368,7 @@
         { id:78, cat:'hogar', name:'Cojines de Terciopelo Gris Decorativos', desc:'Set de 2 fundas con relleno blando siliconado mullido.', price:59900, img:'https://images.unsplash.com/photo-1540574163026-643ea20ade25?auto=format&fit=crop&w=400&q=80' },
         { id:79, cat:'hogar', name:'Planta Artificial Monstera Hogar', desc:'Hojas de aspecto real con maceta cerámica minimalista.', price:129900, img:'https://images.unsplash.com/photo-1614594975525-e45190c55d0b?auto=format&fit=crop&w=400&q=80' },
         { id:80, cat:'hogar', name:'Tapete de Sala Pelo Largo Beige', desc:'Material denso de pelo largo suave 120x170cm acogedor.', price:199900, img:'https://images.unsplash.com/photo-1600121848594-d8ee72416255?auto=format&fit=crop&w=400&q=80' },
-        { id:81, cat:'hogar', name:'Cafetera de Prensa Francesa Vidrio', desc:'Cuerpo de borosilicato térmico con émbolo de acero inoxidable.', price:64900, img:'https://images.unsplash.com/photo-1577968897966-c53ac47c33f1?auto=format&fit=crop&w=400&q=80' },
+        { id:81, cat:'hogar', name:'Cafetera de Prensa Francesa Vidrio', desc:'Cuerpo de borosilicato térmico con émbolo de acero inoxidable.', price:64900, img:'https://images.unsplash.com/photo-1559249672-e74704da756f?auto=format&fit=crop&w=400&q=80' },
         { id:82, cat:'hogar', name:'Organizador Vajilla Modular Bambú', desc:'Bandeja expandible con compartimentos para cajones.', price:49900, img:'https://images.unsplash.com/photo-1594224457860-1d39db5e9f91?auto=format&fit=crop&w=400&q=80' },
         { id:83, cat:'hogar', name:'Organizador Metálico Multiusos', desc:'Malla metálica rígida con separadores para documentos.', price:39900, img:'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=400&q=80' },
         { id:84, cat:'hogar', name:'Velas Aromáticas Relajantes Soya', desc:'Tres frascos de vidrio con esencias florales relajantes.', price:42900, img:'https://images.unsplash.com/photo-1603006905003-be475563bc59?auto=format&fit=crop&w=400&q=80' },
@@ -1385,7 +1381,7 @@
         { id:91, cat:'drogueria', name:'Crema Dental Protección Total x3u', desc:'Pack familiar de tres tubos con flúor para cuidado total.', price:28900, img:'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=400&q=80' },
         { id:92, cat:'drogueria', name:'Shampoo Anticaspa Purificante Mentol', desc:'Limpieza profunda del cuero cabelludo con frescura de menta.', price:32900, img:'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?auto=format&fit=crop&w=400&q=80' },
         { id:93, cat:'drogueria', name:'Jabón Líquido Hidratante Corporal', desc:'Fórmula cremosa humectante con dosificador para baño.', price:21900, img:'https://images.unsplash.com/photo-1556228578-b98e50516a65?auto=format&fit=crop&w=400&q=80' },
-        { id:94, cat:'drogueria', name:'Suero Rehidratante Iones Coco', desc:'Bebida de hidratación de rápida absorción con electrolitos.', price:9500, img:'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=400&q=80' },
+        { id:94, cat:'drogueria', name:'Suero Rehidratante Iones Coco', desc:'Bebida de hidratación de rápida absorción con electrolitos.', price:9500, img:'https://images.unsplash.com/photo-1704895234367-35115a1a3cc7?auto=format&fit=crop&w=400&q=80' },
         { id:95, cat:'drogueria', name:'Geles Alcohol Desinfectantes Kit', desc:'Pack de bolsillo de alcohol en gel con aloe vera humectante.', price:14900, img:'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80' },
         { id:96, cat:'drogueria', name:'Proteína Aislada Whey Isolate Shake', desc:'Suplemento deportivo de suero purificado cero carbohidratos.', price:165000, img:'https://images.unsplash.com/photo-1593079831268-3381b0db4a77?auto=format&fit=crop&w=400&q=80' },
         { id:97, cat:'comida', name:'Pizza Mediana Tradicional Crispy', desc:'Masa delgada crujiente, salsa artesanal y pepperoni.', price:34900, img:'https://images.unsplash.com/photo-1513104890138-7c749659a591?auto=format&fit=crop&w=400&q=80' },
@@ -1774,6 +1770,7 @@
 
     function closePaymentModalAndReset() {
         document.getElementById('paymentModal').classList.remove('open');
+        if (window._resetPaymentViewport) window._resetPaymentViewport();
         document.getElementById('payFormContent').classList.remove('hide');
         document.getElementById('payProcessing').classList.remove('show');
         document.getElementById('cardNumber').value = '';
@@ -3879,6 +3876,49 @@
 
         const lunaScreen = document.getElementById('lunaMessagesScreen');
         if (lunaScreen) window._resetLunaMsgViewport = attachKeyboardFix(lunaScreen, ['lmInput'], 'lmList');
+    })();
+
+    /* ── FIX teclado en el modal de pago (bottom-sheet: estructura distinta a
+       las pantallas de ancho completo, por eso usa su propio mecanismo) ──
+       El campo de código secreto (y los demás campos del formulario) quedaban
+       tapados por el teclado porque el modal usaba una altura fija (93vh) que
+       iOS no actualiza cuando el teclado aparece. ──────────────────────── */
+    (function setupPaymentKeyboardFix() {
+        if (!window.visualViewport) return;
+        const modal = document.getElementById('paymentModal');
+        const box = modal ? modal.querySelector('.payment-box') : null;
+        if (!modal || !box) return;
+        let rafId = null;
+
+        const apply = () => {
+            rafId = null;
+            if (!modal.classList.contains('open')) return;
+            const vv = window.visualViewport;
+            // Altura realmente visible (descuenta el teclado si está abierto)
+            box.style.maxHeight = Math.max(200, Math.round(vv.height - 16)) + 'px';
+        };
+        const schedule = () => { if (!rafId) rafId = requestAnimationFrame(apply); };
+
+        window.visualViewport.addEventListener('resize', schedule);
+        window.visualViewport.addEventListener('scroll', schedule);
+
+        document.addEventListener('focusin', (e) => {
+            if (e.target && e.target.closest && e.target.closest('.payment-box')) {
+                setTimeout(schedule, 100);
+                // Asegurar que el campo activo (incluido el de código secreto) quede
+                // visible por encima del teclado, sea cual sea su posición en el form.
+                setTimeout(() => {
+                    try { e.target.scrollIntoView({ block: 'center', behavior: 'smooth' }); } catch (err) {}
+                }, 320);
+            }
+        });
+        document.addEventListener('focusout', (e) => {
+            if (e.target && e.target.closest && e.target.closest('.payment-box')) {
+                setTimeout(schedule, 100);
+            }
+        });
+
+        window._resetPaymentViewport = () => { box.style.maxHeight = ''; };
     })();
 
     /* ── INIT ── */
