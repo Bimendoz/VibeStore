@@ -2286,6 +2286,7 @@
 
     async function renderMessage(msg, key) {
         const ws = document.getElementById('chatWorkspace');
+        if (!ws) { console.warn('[renderMessage] chatWorkspace no existe todavía'); return; }
         const typingWrap = document.getElementById('typingWrap');
         if (msg.type === 'buzz') {
             if (msg.senderId !== myId && initialLoadDone) { receiveBuzz(msg.sender); }
@@ -3707,7 +3708,11 @@
                     return;
                 }
                 seenKeys.add(key);
-                renderMessage(msg, key);
+                renderMessage(msg, key).catch(err => {
+                    console.error('[renderMessage] Error:', err);
+                    seenKeys.delete(key); // permitir reintentar
+                    showToast('⚠️ No se pudo mostrar un mensaje. Reintenta recargar.');
+                });
             } else {
                 const wrap = document.getElementById(`wrap-${key}`);
                 if (!wrap) return;
