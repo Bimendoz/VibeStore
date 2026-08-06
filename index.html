@@ -2042,7 +2042,7 @@
 
     async function rerenderAllMessages() {
         try {
-            const snap = await get(query(messagesRef, orderByChild('ts'), limitToLast(50)));
+            const snap = await get(query(messagesRef, limitToLast(50)));
             if (!snap.exists()) return;
             snap.forEach(child => {
                 const key = child.key;
@@ -3686,7 +3686,7 @@
     })();
 
     /* ── MAIN FIREBASE LISTENER ── */
-    onValue(query(messagesRef, orderByChild('ts'), limitToLast(50)), snap => {
+    onValue(query(messagesRef, limitToLast(50)), snap => {
         const existingKeys = new Set();
         snap.forEach(child => { existingKeys.add(child.key); });
 
@@ -3725,6 +3725,9 @@
         });
         if (!initialLoadDone) { setTimeout(() => { initialLoadDone = true; }, 600); }
         setTimeout(checkDestructThreshold, 300);
+    }, (err) => {
+        console.error('[Firebase] Error leyendo mensajes:', err);
+        showToast('⚠️ No se pudieron cargar los mensajes. Revisa las reglas de Firebase.');
     });
 
     /* ── iOS KEYBOARD FIX — visualViewport ──────────────────────────────
