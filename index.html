@@ -630,13 +630,20 @@
         .return-call-bar { display:none; align-items:center; justify-content:center; gap:0.5rem; background:#1e7e34; color:#fff; flex-shrink:0; padding:0.5rem 1rem; font-size:0.83rem; font-weight:700; cursor:pointer; position:relative; z-index:2; }
         .return-call-bar.show { display:flex; }
         /* Burbujas circulares flotantes en el chat (llamada minimizada) */
-        .chat-call-bubbles { position:absolute; top:5rem; right:0.8rem; z-index:600; display:flex; flex-direction:column; gap:0.6rem; pointer-events:none; }
-        .chat-bubble { position:relative; width:80px; height:80px; border-radius:50%; overflow:hidden; background:#111; border:2.5px solid rgba(255,255,255,0.3); box-shadow:0 6px 20px rgba(0,0,0,0.5); cursor:pointer; pointer-events:auto; transition:all 0.28s cubic-bezier(0.32,0.72,0,1); }
+        .chat-call-bubbles { position:absolute; top:5rem; right:0.8rem; z-index:600; pointer-events:none; }
+        .chat-call-bubbles .chat-bubble.local { position:absolute; bottom:-8px; right:-8px; z-index:1; }
+        .chat-bubble { position:relative; border-radius:50%; overflow:hidden; background:#111; border:2.5px solid rgba(255,255,255,0.3); box-shadow:0 6px 20px rgba(0,0,0,0.5); cursor:pointer; pointer-events:auto; transition:all 0.28s cubic-bezier(0.32,0.72,0,1); }
+        .chat-bubble.remote { width:92px; height:92px; }
+        .chat-bubble.local  { width:58px; height:58px; border-width:2px; }
         .chat-bubble video { width:100%; height:100%; object-fit:cover; background:#111; }
         .chat-bubble.local video { transform:scaleX(-1); }
         .chat-bubble-tag { position:absolute; bottom:3px; left:0; right:0; text-align:center; font-size:0.55rem; font-weight:700; color:#fff; text-shadow:0 1px 3px rgba(0,0,0,0.9); pointer-events:none; }
-        .chat-bubble.expanded { position:fixed; top:38%; left:50%; transform:translate(-50%,-50%); width:80vw; height:80vw; max-width:380px; max-height:380px; z-index:650; box-shadow:0 16px 50px rgba(0,0,0,0.75); border-width:3px; }
-        .chat-bubble.expanded .chat-bubble-tag { font-size:1rem; bottom:20px; }
+        .chat-bubble.local .chat-bubble-tag { display:none; }
+        /* Un toque: agranda un poco (no a pantalla completa) para ver mejor sin perder el chat de vista */
+        .chat-bubble.expanded.remote { width:150px; height:150px; }
+        .chat-bubble.expanded.local  { width:96px; height:96px; }
+        .chat-bubble.expanded { box-shadow:0 10px 32px rgba(0,0,0,0.6); border-width:3px; }
+        .chat-bubble.expanded .chat-bubble-tag { font-size:0.68rem; bottom:6px; }
         .chat-bubble.empty { display:none; }
         .return-call-dot { width:8px; height:8px; border-radius:50%; background:#fff; animation:pulse-presence 1.5s infinite; }
         .disintegrating { pointer-events:none; }
@@ -741,6 +748,7 @@
         #btnFtSpeaker.speaker-on { background:rgba(48,209,88,0.25); color:#30d158; }
         .ft-hangup-row { display:flex; justify-content:center; }
         .ft-btn-hangup { width:74px; height:74px; border-radius:50%; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; color:#fff; background:linear-gradient(145deg, #ff453a, #c0180e); box-shadow:0 8px 28px rgba(255,59,48,0.6), inset 0 1px 0 rgba(255,255,255,0.2); transition:transform 0.12s, box-shadow 0.15s; }
+        .ft-btn-hangup svg { transform:rotate(135deg); }
         .ft-btn-hangup:active { transform:scale(0.88); box-shadow:0 4px 14px rgba(255,59,48,0.4); }
         .ft-btn-hangup svg { width:28px; height:28px; transform:rotate(135deg); fill:currentColor; }
 
@@ -749,8 +757,10 @@
         #seccion-incoming.show { display:flex; animation:incomingIn 0.32s cubic-bezier(0.34,1.2,0.64,1); }
         @keyframes incomingIn { from{ opacity:0; transform:translateY(28px) scale(0.96); } to  { opacity:1; transform:translateY(0)    scale(1); } }
         .incoming-info { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:1.1rem; }
-        .incoming-avatar { width:108px; height:108px; border-radius:50%; background:linear-gradient(135deg, var(--bubble-mine), #ff7f5c); display:flex; align-items:center; justify-content:center; font-size:3.4rem; line-height:1; color:#fff; border:3px solid rgba(255,255,255,0.1); box-shadow:0 8px 30px rgba(0,0,0,0.4); animation:incomingPulse 2s ease-out infinite; }
-        @keyframes incomingPulse { 0%{ box-shadow:0 8px 30px rgba(0,0,0,0.4),0 0 0 0   rgba(255,255,255,0.3); } 70%{ box-shadow:0 8px 30px rgba(0,0,0,0.4),0 0 0 24px rgba(255,255,255,0); } 100%{ box-shadow:0 8px 30px rgba(0,0,0,0.4),0 0 0 0   rgba(255,255,255,0); } }
+        .incoming-avatar { width:108px; height:108px; border-radius:50%; background:linear-gradient(135deg, var(--bubble-mine), #ff7f5c); display:flex; align-items:center; justify-content:center; font-size:3.4rem; line-height:1; color:#fff; border:3px solid rgba(255,255,255,0.1); box-shadow:0 8px 30px rgba(0,0,0,0.4); position:relative; }
+        .incoming-avatar::before, .incoming-avatar::after { content:''; position:absolute; inset:0; border-radius:50%; border:2px solid var(--bubble-mine); animation:incomingRing 2s cubic-bezier(0.2,0.7,0.4,1) infinite; }
+        .incoming-avatar::after { animation-delay:0.7s; }
+        @keyframes incomingRing { 0%{ transform:scale(1); opacity:0.7; } 100%{ transform:scale(1.7); opacity:0; } }
         .incoming-name { position:relative; z-index:1; font-size:1.7rem; font-weight:800; color:#fff; letter-spacing:-0.4px; }
         .incoming-type { position:relative; z-index:1; font-size:0.9rem; color:rgba(255,255,255,0.45); }
         .incoming-actions { position:relative; z-index:1; display:flex; justify-content:center; gap:4rem; width:100%; }
@@ -759,6 +769,7 @@
         .incoming-btn:active { transform:scale(0.88); }
         .incoming-btn svg   { width:28px; height:28px; fill:#fff; transform:rotate(135deg); }
         .incoming-btn.decline { background:linear-gradient(145deg,#ff453a,#c0180e); box-shadow:0 6px 22px rgba(255,59,48,0.5); }
+        .incoming-btn.decline svg { transform:rotate(135deg); }
         .incoming-btn.accept { background:linear-gradient(145deg,#30d158,#1a9e3f); box-shadow:0 6px 22px rgba(48,209,88,0.5); }
         .incoming-label { font-size:0.84rem; color:rgba(255,255,255,0.65); font-weight:600; }
 
@@ -1035,7 +1046,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
-        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v5</div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v8</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
@@ -1115,11 +1126,11 @@
 
     <!-- Burbujas circulares flotantes (aparecen al minimizar la llamada al chat) -->
     <div class="chat-call-bubbles" id="chatCallBubbles">
-        <div class="chat-bubble remote empty" id="chatBubbleRemote" onclick="expandChatBubble(event, this)">
+        <div class="chat-bubble remote empty" id="chatBubbleRemote" onclick="expandChatBubble(event, this)" ontouchstart="bubbleHoldStart(event)" ontouchend="bubbleHoldEnd(event)" ontouchcancel="bubbleHoldEnd(event)">
             <video id="chatRemoteVideo" autoplay playsinline></video>
             <span class="chat-bubble-tag">Ellos</span>
         </div>
-        <div class="chat-bubble local empty" id="chatBubbleLocal" onclick="expandChatBubble(event, this)">
+        <div class="chat-bubble local empty" id="chatBubbleLocal" onclick="expandChatBubble(event, this)" ontouchstart="bubbleHoldStart(event)" ontouchend="bubbleHoldEnd(event)" ontouchcancel="bubbleHoldEnd(event)">
             <video id="chatLocalVideo" autoplay playsinline muted></video>
             <span class="chat-bubble-tag">Tú</span>
         </div>
@@ -2003,6 +2014,7 @@
     // Escuchar los perfiles guardados: aplica MI propio perfil guardado (persiste
     // entre sesiones/dispositivos) y muestra el avatar REAL de la OTRA persona
     // en el header, en vez del mío propio (antes mostraba mi avatar por error).
+    let otherAvatar = '🦊'; let otherName = '';
     function listenProfiles() {
         onValue(ref(db, 'chat/profiles'), snap => {
             const data = snap.val() || {};
@@ -2012,8 +2024,12 @@
                 document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
             }
             const otherEntry = Object.entries(data).find(([id]) => id !== myId);
+            if (otherEntry) {
+                otherAvatar = otherEntry[1].avatar || otherAvatar;
+                otherName = otherEntry[1].name || otherName;
+            }
             const headerAv = document.getElementById('headerAvatar');
-            if (headerAv && otherEntry) headerAv.textContent = otherEntry[1].avatar || '🦊';
+            if (headerAv && otherEntry) headerAv.textContent = otherAvatar;
         });
     }
 
@@ -3154,12 +3170,34 @@
     }
 
     // Agrandar una burbuja circular dentro del chat (toggle)
+    let _bubbleTapCount = 0; let _bubbleTapTimer = null; let _bubbleHoldTimer = null;
     window.expandChatBubble = function(event, el) {
         if (event) event.stopPropagation();
         if (!el || el.classList.contains('empty')) return;
-        const wasExpanded = el.classList.contains('expanded');
-        document.querySelectorAll('.chat-bubble.expanded').forEach(b => b.classList.remove('expanded'));
-        if (!wasExpanded) el.classList.add('expanded');
+
+        // Un toque: agranda un poco. Doble toque (o mantener presionado): vuelve
+        // a la pantalla completa de la llamada, con todos los controles.
+        _bubbleTapCount++;
+        if (_bubbleTapCount === 1) {
+            _bubbleTapTimer = setTimeout(() => {
+                _bubbleTapCount = 0;
+                const wasExpanded = el.classList.contains('expanded');
+                document.querySelectorAll('.chat-bubble.expanded').forEach(b => b.classList.remove('expanded'));
+                if (!wasExpanded) el.classList.add('expanded');
+            }, 260);
+        } else {
+            clearTimeout(_bubbleTapTimer);
+            _bubbleTapCount = 0;
+            if (callActive) window.returnToCall();
+        }
+    };
+    window.bubbleHoldStart = function(event) {
+        if (event) event.stopPropagation();
+        _bubbleHoldTimer = setTimeout(() => { if (callActive) window.returnToCall(); }, 480);
+    };
+    window.bubbleHoldEnd = function(event) {
+        if (event) event.stopPropagation();
+        clearTimeout(_bubbleHoldTimer);
     };
 
     // Copiar los streams activos a las burbujas circulares del chat
@@ -3198,8 +3236,8 @@
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
         document.getElementById('ftMyAvatar').textContent   = myAvatar || '🦊';
-        document.getElementById('ftAvatar').textContent     = '📱';
-        document.getElementById('ftTargetName').textContent = 'Enlace Seguro';
+        document.getElementById('ftAvatar').textContent     = otherAvatar || '🦊';
+        document.getElementById('ftTargetName').textContent = otherName || 'Enlace Seguro';
         document.getElementById('ftCallType').textContent   = type === 'video' ? 'VibeCall · Video' : 'VibeCall · Audio';
         setCallStatus('Llamando', true, false);
         document.getElementById('btnFtVideo').style.display = 'flex';
@@ -3233,7 +3271,13 @@
         remoteIceQueue = [];
         let remoteDescSet = false;
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-        peerConnection.onicecandidate = e => { if (e.candidate && activeCallRef) push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON()); };
+        peerConnection.onicecandidate = e => {
+            if (e.candidate && activeCallRef) {
+                const typ = (e.candidate.candidate.match(/ typ (\w+)/) || [])[1] || '?';
+                console.log('[VibeCall] Candidato ICE generado, tipo:', typ, typ === 'relay' ? '✅ TURN funcionando' : '');
+                push(ref(db, `chat/calls/${activeCallRef.key}/callerCandidates`), e.candidate.toJSON());
+            }
+        };
         peerConnection.ontrack = e => {
             showRemoteBubble(e.streams[0]);
             const lv = document.getElementById('localVideo');
@@ -3351,7 +3395,13 @@
         monitorConnection(peerConnection);
         remoteIceQueue = [];
         localStream.getTracks().forEach(t => peerConnection.addTrack(t, localStream));
-        peerConnection.onicecandidate = e => { if (e.candidate) push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON()); };
+        peerConnection.onicecandidate = e => {
+            if (e.candidate) {
+                const typ = (e.candidate.candidate.match(/ typ (\w+)/) || [])[1] || '?';
+                console.log('[VibeCall] Candidato ICE generado, tipo:', typ, typ === 'relay' ? '✅ TURN funcionando' : '');
+                push(ref(db, `chat/calls/${key}/receiverCandidates`), e.candidate.toJSON());
+            }
+        };
         peerConnection.ontrack = e => {
             showRemoteBubble(e.streams[0]);
             const lv = document.getElementById('localVideo');
@@ -3386,6 +3436,18 @@
                 stopRingtone();
                 startCallTimer();
                 startCallParticles();
+                // Diagnóstico definitivo: qué tipo de conexión se usó realmente.
+                pc.getStats().then(stats => {
+                    stats.forEach(r => {
+                        if (r.type === 'candidate-pair' && r.state === 'succeeded' && r.nominated) {
+                            const local = stats.get(r.localCandidateId);
+                            const remote = stats.get(r.remoteCandidateId);
+                            const lt = local ? local.candidateType : '?';
+                            const rt = remote ? remote.candidateType : '?';
+                            console.log(`[VibeCall] Conectado vía: local=${lt} remote=${rt}`, (lt === 'relay' || rt === 'relay') ? '(usando servidor TURN de relevo)' : '(conexión directa)');
+                        }
+                    });
+                }).catch(() => {});
             } else if (st === 'checking') {
                 setCallStatus('Conectando', true, false);
             } else if (st === 'disconnected') {
