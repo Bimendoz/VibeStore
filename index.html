@@ -96,6 +96,14 @@
         .recording-bar.show { display: flex; }
         /* ═══ PANTALLA: Mensajes de Luna para León ═══ */
         #lunaMessagesScreen { position:fixed; inset:0; z-index:1900; background:var(--chat-bg,#0d1117); display:none; flex-direction:column; }
+        #leonMessagesScreen { position:fixed; inset:0; z-index:1900; background:var(--chat-bg,#0d1117); display:none; flex-direction:column; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        #leonMessagesScreen.show { display:flex; animation:lmSlideIn 0.3s ease; }
+        .lm-suggest-title { font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:rgba(255,255,255,0.4); padding:0.9rem 1.1rem 0.5rem; }
+        [data-theme="light"] .lm-suggest-title { color:rgba(0,0,0,0.4); }
+        .lm-suggest-list { display:flex; flex-wrap:wrap; gap:0.5rem; padding:0 1.1rem 0.4rem; }
+        .lm-suggest-chip { background:rgba(74,108,247,0.14); border:1px solid rgba(74,108,247,0.35); color:#8fa8ff; font-size:0.76rem; padding:0.4rem 0.8rem; border-radius:14px; cursor:pointer; transition:transform 0.1s, background 0.15s; }
+        .lm-suggest-chip:active { transform:scale(0.94); background:rgba(74,108,247,0.28); }
+        [data-theme="light"] .lm-suggest-chip { color:#3450c9; }
         #profileEditorScreen { position:fixed; inset:0; z-index:1900; background:var(--chat-bg,#0d1117); display:none; flex-direction:column; overflow-y:auto; -webkit-overflow-scrolling:touch; }
         #profileEditorScreen.show { display:flex; animation:lmSlideIn 0.3s ease; }
         .pe-preview { display:flex; justify-content:center; padding:1.6rem 0 0.8rem; }
@@ -782,8 +790,6 @@
         [data-theme="light"] .preset-name { color:rgba(0,0,0,0.55); }
         .panic-fab { display:none !important; }
     </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
-    <script src="stickers.js"></script>
 </head>
 <body>
 
@@ -1037,6 +1043,12 @@
         <div class="chat-menu-item" id="menuLunaMessages" style="display:none" onclick="closeChatMenu(); openLunaMessages()">
             <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
             💌 Mensajes para León
+            <span id="menuLunaBadge" style="display:none; margin-left:auto; width:9px; height:9px; border-radius:50%; background:#ff453a; box-shadow:0 0 0 2px rgba(255,69,58,0.3);"></span>
+        </div>
+        <div class="chat-menu-item" id="menuLeonMessages" style="display:none" onclick="closeChatMenu(); openLeonMessages()">
+            <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+            💌 Mensajes para Luna
+            <span id="menuLeonBadge" style="display:none; margin-left:auto; width:9px; height:9px; border-radius:50%; background:#ff453a; box-shadow:0 0 0 2px rgba(255,69,58,0.3);"></span>
         </div>
         <div class="chat-menu-item" onclick="closeChatMenu(); openTrashMenu()">
             <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
@@ -1046,7 +1058,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
-        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v8</div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v12</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
@@ -1094,6 +1106,24 @@
             <button class="lm-add-btn" onclick="addLunaMessage()">Agregar</button>
         </div>
         <div class="lm-list" id="lmList"></div>
+    </div>
+
+    <!-- Pantalla espejo: Mensajes que León deja para Luna -->
+    <div id="leonMessagesScreen">
+        <div class="lm-header" style="background:linear-gradient(135deg,#4a6cf7,#2f4fd6);">
+            <button class="lm-back" onclick="closeLeonMessages()" aria-label="Volver">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <div class="lm-title">💌 Mensajes para Luna</div>
+        </div>
+        <div class="lm-intro">Escribe mensajes de bienvenida que Luna verá al entrar. Saldrá uno al azar cada vez. 💙</div>
+        <div class="lm-add">
+            <input type="text" id="lfInput" placeholder="Escribe un mensaje bonito..." maxlength="120" autocomplete="off" autocorrect="on" autocapitalize="sentences" enterkeyhint="done" onkeypress="if(event.key==='Enter'){event.preventDefault();addLeonMessage();}">
+            <button class="lm-add-btn" onclick="addLeonMessage()" style="background:linear-gradient(135deg,#4a6cf7,#2f4fd6);">Agregar</button>
+        </div>
+        <div class="lm-suggest-title">Frases sugeridas (toca para usar)</div>
+        <div class="lm-suggest-list" id="lfSuggestList"></div>
+        <div class="lm-list" id="lfList"></div>
     </div>
 
     <div class="chat-wallpaper" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;">
@@ -1925,7 +1955,12 @@
     }
 
     window.filterCat = function(cat, btn) { document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active')); btn.classList.add('active'); curCat = cat; renderStore(); };
-    window.filterSearch = function(input) { document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0); renderStore(); };
+    let _searchDebounce = null;
+    window.filterSearch = function(input) {
+        document.getElementById('searchClear').classList.toggle('visible', input.value.length > 0);
+        clearTimeout(_searchDebounce);
+        _searchDebounce = setTimeout(renderStore, 180);
+    };
     window.clearSearch = function() { document.getElementById('searchBox').value = ''; document.getElementById('searchClear').classList.remove('visible'); renderStore(); };
     window.toggleTheme = function() { const c = document.body.getAttribute('data-theme'); const dark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.body.setAttribute('data-theme', (c === 'dark' || (!c && dark)) ? 'light' : 'dark'); };
 
@@ -2041,7 +2076,7 @@
     function listenLunaMessages() {
         onValue(ref(db, 'chat/welcomeForLeon'), snap => {
             const data = snap.val() || {};
-            _lunaMessages = Object.entries(data).map(([id, v]) => ({ id, text: v.text, ts: v.ts }))
+            _lunaMessages = Object.entries(data).map(([id, v]) => ({ id, text: v.text, ts: v.ts, reads: v.reads || 0 }))
                 .sort((a, b) => (a.ts || 0) - (b.ts || 0));
             if (document.getElementById('lunaMessagesScreen').classList.contains('show')) {
                 renderLunaMessages();
@@ -2069,6 +2104,7 @@
         try {
             const newRef = push(ref(db, 'chat/welcomeForLeon'));
             await set(newRef, { text, ts: Date.now() });
+            await set(ref(db, 'chat/lunaCardReminder'), null); // ya escribió algo nuevo, apagar el aviso
             inp.value = '';
             showToast('Mensaje guardado 💕');
             // Desplazar la lista hasta el final para ver el nuevo mensaje
@@ -2099,13 +2135,137 @@
             list.innerHTML = '<div class="lm-empty">Aún no hay mensajes.<br>Escribe el primero para León 💌</div>';
             return;
         }
-        list.innerHTML = _lunaMessages.map(m => `
+        list.innerHTML = _lunaMessages.map(m => {
+            const restantes = LUNA_CARD_MAX_READS - (m.reads || 0);
+            return `
             <div class="lm-item">
-                <span class="lm-item-text">${escHtml(m.text)}</span>
+                <div style="flex:1;">
+                    <span class="lm-item-text">${escHtml(m.text)}</span>
+                    <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-top:2px;">👁️ ${restantes} lectura${restantes === 1 ? '' : 's'} restante${restantes === 1 ? '' : 's'} antes de vencer</div>
+                </div>
                 <button class="lm-item-del" onclick="deleteLunaMessage('${m.id}')" aria-label="Borrar">
                     <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                 </button>
-            </div>`).join('');
+            </div>`;
+        }).join('');
+    }
+
+    // ═══ MENSAJES QUE LEÓN DEJA PARA LUNA (espejo del sistema de Luna) ═══
+    let _leonMessages = [];
+
+    // Banco de frases de amor nuevas que León puede usar directo, con un toque,
+    // en vez de tener que escribir desde cero cada vez.
+    const LEON_LOVE_SUGGESTIONS = [
+        'Eres el mejor "buenos días" que existe',
+        'Contigo hasta el silencio se siente bonito',
+        'Mi persona favorita en el mundo entero',
+        'Hoy también elijo quererte a ti',
+        'Tú y yo, siempre en el mismo equipo',
+        'Eres mi lugar seguro',
+        'No hay wifi que compita con tu sonrisa',
+        'Gracias por existir justo como eres',
+        'Contigo el tiempo se siente distinto, mejor',
+        'Eres mi calma en medio de todo',
+        'Mereces todo lo bueno, y un poco más',
+        'Mi día siempre mejora cuando te escribo',
+        'Eres esa clase de bonito que no se explica',
+        'Contigo aprendí a querer bien',
+        'Mi lugar favorito es donde estás tú',
+        'Hoy pensé en ti más de lo normal (otra vez)',
+        'Eres la razón de mi mejor sonrisa',
+        'Contigo todo pesa menos',
+        'Mi corazón ya sabe que eres tú',
+        'Eres mi persona, sin dudarlo'
+    ];
+
+    function listenLeonMessages() {
+        onValue(ref(db, 'chat/welcomeForLuna'), snap => {
+            const data = snap.val() || {};
+            _leonMessages = Object.entries(data).map(([id, v]) => ({ id, text: v.text, ts: v.ts, reads: v.reads || 0 }))
+                .sort((a, b) => (a.ts || 0) - (b.ts || 0));
+            if (document.getElementById('leonMessagesScreen').classList.contains('show')) {
+                renderLeonMessages();
+            }
+        });
+    }
+
+    window.openLeonMessages = function() {
+        document.getElementById('leonMessagesScreen').classList.add('show');
+        renderLeonSuggestions();
+        renderLeonMessages();
+    };
+    window.closeLeonMessages = function() {
+        document.getElementById('leonMessagesScreen').classList.remove('show');
+        const inp = document.getElementById('lfInput');
+        if (inp) { inp.value = ''; inp.blur(); }
+        if (window._resetLeonMsgViewport) window._resetLeonMsgViewport();
+    };
+
+    window.useLeonSuggestion = function(text) {
+        const inp = document.getElementById('lfInput');
+        if (inp) { inp.value = text; inp.focus(); }
+    };
+
+    function renderLeonSuggestions() {
+        const wrap = document.getElementById('lfSuggestList');
+        if (!wrap || wrap.children.length) return; // construir una sola vez
+        wrap.innerHTML = LEON_LOVE_SUGGESTIONS.map(t =>
+            `<div class="lm-suggest-chip" onclick="useLeonSuggestion('${t.replace(/'/g, "\\'")}')">${escHtml(t)}</div>`
+        ).join('');
+    }
+
+    window.addLeonMessage = async function() {
+        const inp = document.getElementById('lfInput');
+        const text = inp.value.trim();
+        if (!text) return;
+        const btn = document.querySelector('#leonMessagesScreen .lm-add-btn');
+        if (btn) btn.disabled = true;
+        try {
+            const newRef = push(ref(db, 'chat/welcomeForLuna'));
+            await set(newRef, { text, ts: Date.now() });
+            await set(ref(db, 'chat/leonCardReminder'), null); // ya escribió algo nuevo, apagar el aviso
+            inp.value = '';
+            showToast('Mensaje guardado 💙');
+            setTimeout(() => {
+                const list = document.getElementById('lfList');
+                if (list) list.scrollTop = list.scrollHeight;
+            }, 150);
+        } catch (err) {
+            showToast('⚠️ No se pudo guardar. Revisa tu conexión.');
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    };
+
+    window.deleteLeonMessage = async function(id) {
+        if (!id) return;
+        try {
+            await set(ref(db, 'chat/welcomeForLuna/' + id), null);
+        } catch (err) {
+            showToast('⚠️ No se pudo borrar. Intenta de nuevo.');
+        }
+    };
+
+    function renderLeonMessages() {
+        const list = document.getElementById('lfList');
+        if (!list) return;
+        if (!_leonMessages.length) {
+            list.innerHTML = '<div class="lm-empty">Aún no hay mensajes.<br>Escribe el primero para Luna 💙</div>';
+            return;
+        }
+        list.innerHTML = _leonMessages.map(m => {
+            const restantes = LUNA_CARD_MAX_READS - (m.reads || 0);
+            return `
+            <div class="lm-item">
+                <div style="flex:1;">
+                    <span class="lm-item-text">${escHtml(m.text)}</span>
+                    <div style="font-size:0.68rem;color:rgba(255,255,255,0.4);margin-top:2px;">👁️ ${restantes} lectura${restantes === 1 ? '' : 's'} restante${restantes === 1 ? '' : 's'} antes de vencer</div>
+                </div>
+                <button class="lm-item-del" onclick="deleteLeonMessage('${m.id}')" aria-label="Borrar">
+                    <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+                </button>
+            </div>`;
+        }).join('');
     }
 
     function getWelcomeMessages(name) {
@@ -2120,6 +2280,11 @@
         else timeGreeting = 'Buenas noches';
 
         if (isLuna) {
+            // Si León dejó mensajes personalizados, usar uno al azar de los suyos
+            if (_leonMessages && _leonMessages.length) {
+                const elegido = _leonMessages[Math.floor(Math.random() * _leonMessages.length)];
+                return { g: elegido.text, s: `${timeGreeting}, Luna 💙`, cardId: elegido.id, cardFor: 'luna' };
+            }
             const opciones = [
                 // Saludos por hora
                 { g: `${timeGreeting}, Luna`, s: 'Mi razón para sonreír 😊💕' },
@@ -2181,7 +2346,7 @@
             // Si Luna dejó mensajes personalizados, usar uno al azar de los suyos
             if (_lunaMessages && _lunaMessages.length) {
                 const elegido = _lunaMessages[Math.floor(Math.random() * _lunaMessages.length)];
-                return { g: elegido.text, s: `${timeGreeting}, León 💛` };
+                return { g: elegido.text, s: `${timeGreeting}, León 💛`, cardId: elegido.id, cardFor: 'leon' };
             }
             const opciones = [
                 { g: 'Bienvenido, León', s: `${timeGreeting} 🦁` },
@@ -2200,10 +2365,19 @@
         if (!screen) { if (done) done(); return; }
         // Si es León, intentar traer los mensajes de Luna primero (con un margen corto)
         const isLeon = /le[oó]n/i.test(name);
+        const isLuna = /luna/i.test(name);
         if (isLeon && (!_lunaMessages || !_lunaMessages.length)) {
             get(ref(db, 'chat/welcomeForLeon')).then(snap => {
                 const data = snap.val() || {};
-                _lunaMessages = Object.entries(data).map(([id, v]) => ({ id, text: v.text, ts: v.ts }));
+                _lunaMessages = Object.entries(data).map(([id, v]) => ({ id, text: v.text, ts: v.ts, reads: v.reads || 0 }));
+            }).catch(()=>{}).finally(() => _renderWelcome(name, avatar, done));
+            return;
+        }
+        // Si es Luna, intentar traer los mensajes de León primero (espejo)
+        if (isLuna && (!_leonMessages || !_leonMessages.length)) {
+            get(ref(db, 'chat/welcomeForLuna')).then(snap => {
+                const data = snap.val() || {};
+                _leonMessages = Object.entries(data).map(([id, v]) => ({ id, text: v.text, ts: v.ts, reads: v.reads || 0 }));
             }).catch(()=>{}).finally(() => _renderWelcome(name, avatar, done));
             return;
         }
@@ -2230,10 +2404,60 @@
         }
     }
 
+    // Cada vez que alguien ve una tarjeta que la otra persona dejó, cuenta como
+    // "lectura". Al llegar a 3 lecturas, la tarjeta vence y se borra sola. Si con
+    // eso no queda ninguna tarjeta, se activa un aviso para quien las escribe.
+    const LUNA_CARD_MAX_READS = 3;
+    async function registerCardRead(cardFor, cardId) {
+        if (!cardId) return;
+        const path = cardFor === 'luna' ? 'chat/welcomeForLuna' : 'chat/welcomeForLeon';
+        const reminderPath = cardFor === 'luna' ? 'chat/leonCardReminder' : 'chat/lunaCardReminder';
+        try {
+            const snap = await get(ref(db, path + '/' + cardId));
+            const card = snap.val();
+            if (!card) return; // ya no existe (pudo borrarse mientras tanto)
+            const reads = (card.reads || 0) + 1;
+            if (reads >= LUNA_CARD_MAX_READS) {
+                await set(ref(db, path + '/' + cardId), null); // vence, se borra
+                const rest = await get(ref(db, path));
+                const data = rest.val() || {};
+                if (Object.keys(data).length === 0) {
+                    await set(ref(db, reminderPath), true);
+                }
+            } else {
+                await update(ref(db, path + '/' + cardId), { reads });
+            }
+        } catch (err) { /* silencioso: no afecta la bienvenida si falla */ }
+    }
+
+    // Avisos: escuchar en vivo si hace falta escribir tarjetas nuevas (cada quien
+    // ve solo el aviso que le corresponde a él).
+    function listenLunaCardReminder() {
+        onValue(ref(db, 'chat/lunaCardReminder'), snap => {
+            const needsMore = !!snap.val();
+            const badge = document.getElementById('menuLunaBadge');
+            if (badge) badge.style.display = (needsMore && /luna/i.test(myName)) ? 'inline-flex' : 'none';
+            if (needsMore && /luna/i.test(myName) && inChat) {
+                showToast('💌 A León se le acabaron tus tarjetas — escríbele algo nuevo');
+            }
+        });
+    }
+    function listenLeonCardReminder() {
+        onValue(ref(db, 'chat/leonCardReminder'), snap => {
+            const needsMore = !!snap.val();
+            const badge = document.getElementById('menuLeonBadge');
+            if (badge) badge.style.display = (needsMore && /le[oó]n/i.test(myName)) ? 'inline-flex' : 'none';
+            if (needsMore && /le[oó]n/i.test(myName) && inChat) {
+                showToast('💌 A Luna se le acabaron tus tarjetas — escríbele algo nuevo');
+            }
+        });
+    }
+
     function _renderWelcome(name, avatar, done) {
         const screen = document.getElementById('welcomeScreen');
         if (!screen) { if (done) done(); return; }
         const msg = getWelcomeMessages(name);
+        if (msg.cardId) registerCardRead(msg.cardFor, msg.cardId);
         document.getElementById('welcomeAvatar').textContent = avatar || '🌙';
         document.getElementById('welcomeGreeting').textContent = msg.g;
         document.getElementById('welcomeSub').textContent = msg.s;
@@ -2291,11 +2515,17 @@
         presenceRef = ref(db, 'chat/presence/' + myId);
         inChat = true; document.getElementById('nameModal').classList.remove('show');
         // ✨ Mostrar pantalla de bienvenida personalizada antes del chat
-        // Escuchar mensajes que Luna deja para León
+        // Escuchar mensajes que Luna deja para León, y que León deja para Luna
         listenLunaMessages();
-        // Mostrar la opción "Mensajes para León" solo si quien entra es Luna
+        listenLunaCardReminder();
+        listenLeonMessages();
+        listenLeonCardReminder();
+        // Mostrar la opción "Mensajes para León" solo si quien entra es Luna,
+        // y "Mensajes para Luna" solo si quien entra es León
         const menuLuna = document.getElementById('menuLunaMessages');
         if (menuLuna) menuLuna.style.display = /luna/i.test(myName) ? 'flex' : 'none';
+        const menuLeon = document.getElementById('menuLeonMessages');
+        if (menuLeon) menuLeon.style.display = /le[oó]n/i.test(myName) ? 'flex' : 'none';
         showWelcomeScreen(myName, myAvatar);
         const _ws = document.getElementById('chatWorkspace');
         const _tw = document.getElementById('typingWrap');
@@ -2935,8 +3165,8 @@
     const FOX_ORDER = ["foxhappy", "foxlove", "foxlaugh", "foxcry", "foxwink", "foxangry", "foxwow", "foxcool"];
 
     // Stickers Lottie incrustados desde stickers.js, organizados por categoría
-    const LOTTIE_STICKERS = window.VIBE_STICKERS || {};
-    const LOTTIE_CATS = window.VIBE_STICKER_CATS || {};
+    let LOTTIE_STICKERS = {};
+    let LOTTIE_CATS = {};
 
     // Emojis animados de Google Noto (Lottie por URL, licencia libre)
     const NOTO_BASE = 'https://fonts.gstatic.com/s/e/notoemoji/latest/';
@@ -2963,7 +3193,12 @@
     let _activeCategory = 'fox';
 
     function stickerExists(id) {
-        return !!(FOX_STICKERS[id] || LOTTIE_STICKERS[id] || EMOJI_STICKERS[id]);
+        if (FOX_STICKERS[id] || EMOJI_STICKERS[id]) return true;
+        // El catálogo de stickers.js aún no se cargó (nadie abrió el panel todavía):
+        // asumir que es válido en vez de rechazarlo, así el mensaje SÍ se intenta
+        // mostrar y playSticker() se encarga de cargar la librería y resolverlo.
+        if (!_stickersLoaded) return true;
+        return !!LOTTIE_STICKERS[id];
     }
 
     // Reproduce un sticker según su tipo
@@ -2972,6 +3207,15 @@
         try {
             if (FOX_STICKERS[id]) {
                 container.innerHTML = FOX_STICKERS[id].svg;
+                return;
+            }
+            // Si el sticker necesita Lottie (emoji animado o sticker importado) y
+            // aún no se cargó (nunca se abrió el panel propio), cargarlo ahora
+            // mismo y reintentar en cuanto esté listo — así un sticker RECIBIDO
+            // se ve igual, sin depender de haber abierto el panel primero.
+            const needsLottie = EMOJI_STICKERS[id] || LOTTIE_STICKERS[id];
+            if (needsLottie && !window.lottie) {
+                loadStickerAssets().then(() => playSticker(container, id)).catch(() => {});
                 return;
             }
             if (EMOJI_STICKERS[id] && window.lottie) {
@@ -3046,12 +3290,46 @@
         renderStickerGrid();
     }
 
-    window.toggleStickerPanel = function() {
+    let _stickersLoaded = false;
+    let _stickersLoadingPromise = null;
+    // Cargar lottie.js + stickers.js (3.7MB) SOLO cuando el panel se abre por
+    // primera vez, no en cada arranque de la app — antes bloqueaban el dibujo
+    // inicial de la tienda/chat en TODAS las sesiones, aunque nunca se usaran.
+    function loadStickerAssets() {
+        if (_stickersLoadingPromise) return _stickersLoadingPromise;
+        _stickersLoadingPromise = new Promise((resolve, reject) => {
+            const s1 = document.createElement('script');
+            s1.src = 'https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js';
+            s1.onload = () => {
+                const s2 = document.createElement('script');
+                s2.src = 'stickers.js';
+                s2.onload = () => {
+                    LOTTIE_STICKERS = window.VIBE_STICKERS || {};
+                    LOTTIE_CATS = window.VIBE_STICKER_CATS || {};
+                    _stickersLoaded = true;
+                    resolve();
+                };
+                s2.onerror = reject;
+                document.head.appendChild(s2);
+            };
+            s1.onerror = reject;
+            document.head.appendChild(s1);
+        });
+        return _stickersLoadingPromise;
+    }
+
+    window.toggleStickerPanel = async function() {
         const panel = document.getElementById('stickerPanel');
         if (!panel) return;
         const showing = panel.classList.toggle('show');
         if (showing) {
             document.getElementById('chatInput').blur();
+            if (!_stickersLoaded) {
+                const grid = document.getElementById('stickerGrid');
+                if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:rgba(255,255,255,0.4);font-size:0.85rem;">Cargando stickers…</div>';
+                try { await loadStickerAssets(); }
+                catch (e) { if (grid) grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:rgba(255,255,255,0.4);font-size:0.85rem;">No se pudieron cargar los stickers. Revisa tu conexión.</div>'; return; }
+            }
             // Construir después de mostrar, cuando el panel ya tiene tamaño
             buildStickerTabs();
             setTimeout(renderStickerGrid, 50);
@@ -4221,6 +4499,8 @@
 
         const lunaScreen = document.getElementById('lunaMessagesScreen');
         if (lunaScreen) window._resetLunaMsgViewport = attachKeyboardFix(lunaScreen, ['lmInput'], 'lmList');
+        const leonScreen = document.getElementById('leonMessagesScreen');
+        if (leonScreen) window._resetLeonMsgViewport = attachKeyboardFix(leonScreen, ['lfInput'], 'lfList');
     })();
 
     /* ── FIX teclado en el modal de pago ──────────────────────────────
