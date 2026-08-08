@@ -35,8 +35,8 @@ self.addEventListener('push', (event) => {
         badge: ICON,
         tag: data.tag || 'vibestore-msg',
         renotify: true,
-        requireInteraction: false,
-        vibrate: [200, 100, 200],
+        requireInteraction: data.requireInteraction || false,
+        vibrate: data.tag === 'vibestore-call' ? [300,150,300,150,300,150,600] : [200, 100, 200],
         data: { url: data.url || '/' }
     };
 
