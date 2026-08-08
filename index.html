@@ -1037,6 +1037,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v3</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
@@ -4101,10 +4102,18 @@
             // el patrón style.display='flex' del chat como la clase .show).
             if (getComputedStyle(screenEl).display === 'none') return;
             const vv = window.visualViewport;
-            const h = Math.round(vv.height + vv.offsetTop);
+            // CLAVE: seguir el desplazamiento REAL del viewport visual (offsetTop),
+            // no forzarlo siempre a 0. Cuando iOS desplaza la página para mantener
+            // visible el campo de texto sobre el teclado, un "top:0" fijo dejaba
+            // el header empujado fuera de la pantalla. Ahora el contenedor se
+            // mueve CON ese desplazamiento, así el header siempre queda arriba
+            // de lo que realmente se ve, no de lo que se veía antes de escribir.
+            const top = Math.round(vv.offsetTop);
+            const h = Math.round(vv.height);
             screenEl.style.height = h + 'px';
-            screenEl.style.top = '0px';
+            screenEl.style.top = top + 'px';
             screenEl.style.bottom = 'auto';
+            if (window.scrollTo) window.scrollTo(0, 0);
             if (scrollElId) {
                 const el = document.getElementById(scrollElId);
                 if (el) el.scrollTop = el.scrollHeight;
@@ -4115,6 +4124,7 @@
 
         window.visualViewport.addEventListener('resize', schedule);
         window.visualViewport.addEventListener('scroll', schedule);
+        window.addEventListener('scroll', schedule, { passive: true });
 
         const onFocusIn = (e) => {
             if (e.target && watchedInputIds.includes(e.target.id)) {
