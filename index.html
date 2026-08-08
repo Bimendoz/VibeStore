@@ -38,10 +38,10 @@
             padding-bottom: 0.65rem;
             padding-left: 0.85rem;
             padding-right: 0.85rem;
-            background: color-mix(in srgb, var(--bubble-mine) 7%, rgba(18,18,28,0.95));
-            -webkit-backdrop-filter: blur(20px);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: color-mix(in srgb, var(--bubble-mine) 8%, rgba(20,20,30,0.7));
+            -webkit-backdrop-filter: blur(28px) saturate(1.6);
+            backdrop-filter: blur(28px) saturate(1.6);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
             min-height: 58px;
             z-index: 2;
             transition: background 0.4s;
@@ -65,10 +65,10 @@
             align-items: center;
             padding: 0.55rem 0.75rem;
             padding-bottom: max(0.55rem, env(safe-area-inset-bottom, 0px));
-            background: rgba(18,18,28,0.97);
-            -webkit-backdrop-filter: blur(20px);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,255,255,0.07);
+            background: rgba(20,20,30,0.72);
+            -webkit-backdrop-filter: blur(28px) saturate(1.6);
+            backdrop-filter: blur(28px) saturate(1.6);
+            border-top: 1px solid rgba(255,255,255,0.1);
             z-index: 2;
         }
         .reply-bar {
@@ -96,6 +96,24 @@
         .recording-bar.show { display: flex; }
         /* ═══ PANTALLA: Mensajes de Luna para León ═══ */
         #lunaMessagesScreen { position:fixed; inset:0; z-index:1900; background:var(--chat-bg,#0d1117); display:none; flex-direction:column; }
+        #profileEditorScreen { position:fixed; inset:0; z-index:1900; background:var(--chat-bg,#0d1117); display:none; flex-direction:column; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        #profileEditorScreen.show { display:flex; animation:lmSlideIn 0.3s ease; }
+        .pe-preview { display:flex; justify-content:center; padding:1.6rem 0 0.8rem; }
+        .pe-avatar-big { width:110px; height:110px; border-radius:32px; background:rgba(255,255,255,0.08); display:flex; align-items:center; justify-content:center; font-size:3.6rem; box-shadow:0 8px 24px rgba(0,0,0,0.35); border:3px solid var(--bubble-mine); transition:border-color 0.2s; }
+        .pe-section-title { font-size:0.78rem; font-weight:800; text-transform:uppercase; letter-spacing:0.4px; color:rgba(255,255,255,0.45); padding:1.1rem 1.2rem 0.5rem; }
+        [data-theme="light"] .pe-section-title { color:rgba(0,0,0,0.4); }
+        .pe-avatar-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:0.6rem; padding:0 1.1rem; }
+        .pe-avatar-opt { aspect-ratio:1/1; border-radius:18px; border:2.5px solid transparent; background:rgba(255,255,255,0.06); font-size:1.7rem; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:transform 0.12s, border-color 0.15s; }
+        .pe-avatar-opt:active { transform:scale(0.9); }
+        .pe-avatar-opt.selected { border-color:var(--bubble-mine); background:color-mix(in srgb, var(--bubble-mine) 18%, transparent); }
+        [data-theme="light"] .pe-avatar-opt { background:rgba(0,0,0,0.04); }
+        .pe-color-grid { display:grid; grid-template-columns:repeat(6,1fr); gap:0.7rem; padding:0 1.1rem; }
+        .pe-color-opt { aspect-ratio:1/1; border-radius:50%; border:3px solid transparent; cursor:pointer; transition:transform 0.12s; display:flex; align-items:center; justify-content:center; }
+        .pe-color-opt:active { transform:scale(0.88); }
+        .pe-color-opt.selected { border-color:#fff; transform:scale(1.12); }
+        .pe-color-opt.selected::after { content:'✓'; color:#fff; font-weight:900; font-size:1rem; text-shadow:0 1px 3px rgba(0,0,0,0.5); }
+        .pe-save-btn { margin:1.6rem 1.1rem calc(1.6rem + env(safe-area-inset-bottom,0px)); padding:0.95rem; border-radius:16px; border:none; background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; font-weight:800; font-size:0.98rem; cursor:pointer; box-shadow:0 6px 20px rgba(102,126,234,0.4); }
+        .pe-save-btn:active { transform:scale(0.97); }
         #lunaMessagesScreen.show { display:flex; animation:lmSlideIn 0.3s ease; }
         @keyframes lmSlideIn { from{transform:translateX(100%)} to{transform:translateX(0)} }
         .lm-header { display:flex; align-items:center; gap:0.8rem; padding:calc(env(safe-area-inset-top,44px) + 0.5rem) 1rem 0.9rem; background:linear-gradient(135deg,#ff6b9d,#ff8a5b); flex-shrink:0; }
@@ -164,7 +182,7 @@
             100% { opacity:0; transform:translate(var(--bx), var(--by)) scale(1.1) rotate(var(--br)); }
         }
         /* ─── PANEL DE STICKERS ─── */
-        .sticker-panel { display:none; flex-shrink:0; height:0; overflow:hidden; background:rgba(18,18,28,0.98); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); border-top:1px solid rgba(255,255,255,0.07); transition:height 0.25s cubic-bezier(0.32,0.72,0,1); z-index:3; }
+        .sticker-panel { display:none; flex-shrink:0; height:0; overflow:hidden; background:rgba(20,20,30,0.75); -webkit-backdrop-filter:blur(28px) saturate(1.6); backdrop-filter:blur(28px) saturate(1.6); border-top:1px solid rgba(255,255,255,0.1); transition:height 0.25s cubic-bezier(0.32,0.72,0,1); z-index:3; }
         .sticker-panel.show { display:flex; height:320px; }
         .sticker-panel { flex-direction:column; }
         /* Pestañas en FILA horizontal arriba */
@@ -445,7 +463,7 @@
         [data-theme="light"] .btn-header-more { border-color:rgba(0,0,0,.1); background:rgba(0,0,0,.04); color:rgba(0,0,0,.5); }
         .chat-menu-overlay { position:fixed; inset:0; z-index:1200; opacity:0; pointer-events:none; }
         .chat-menu-overlay.open { opacity:1; pointer-events:all; }
-        .chat-menu { position:fixed; top:70px; right:0.85rem; background:rgba(30,30,42,0.96); -webkit-backdrop-filter:var(--tg-blur); backdrop-filter:var(--tg-blur); border-radius:16px; z-index:1201; transform:scale(0.9) translateY(-8px) translateX(4px); opacity:0; pointer-events:none; transition:transform 0.18s cubic-bezier(0.32,0.72,0,1), opacity 0.14s; min-width:220px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.06); }
+        .chat-menu { position:fixed; top:70px; right:0.85rem; background:rgba(32,32,45,0.78); -webkit-backdrop-filter:blur(30px) saturate(1.7); backdrop-filter:blur(30px) saturate(1.7); border-radius:16px; z-index:1201; transform:scale(0.9) translateY(-8px) translateX(4px); opacity:0; pointer-events:none; transition:transform 0.18s cubic-bezier(0.32,0.72,0,1), opacity 0.14s; min-width:220px; overflow:hidden; box-shadow:0 12px 40px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.08); }
         .chat-menu.open { transform:scale(1) translateY(0); opacity:1; pointer-events:all; }
         .chat-menu-item { display:flex; align-items:center; gap:0.85rem; padding:0.92rem 1.1rem; font-size:0.92rem; font-weight:600; cursor:pointer; border:none; background:none; width:100%; text-align:left; color:rgba(255,255,255,0.9); border-bottom:1px solid rgba(255,255,255,0.05); }
         .chat-menu-item:last-child { border-bottom:none; }
@@ -483,7 +501,7 @@
         .msg { padding:0.6rem 0.92rem; border-radius:19px; font-size:0.94rem; line-height:1.48; word-break:break-word; position:relative; box-shadow:0 1px 2px rgba(0,0,0,.18); animation:msgPop 0.22s cubic-bezier(0.34,1.4,0.64,1); }
         @keyframes msgPop { from{ transform:scale(0.92) translateY(4px); opacity:0; } to{ transform:scale(1) translateY(0); opacity:1; } }
         .msg.mine { background:linear-gradient(135deg, var(--bubble-mine), color-mix(in srgb, var(--bubble-mine) 82%, #000)); color:#fff; border-bottom-right-radius:5px; }
-        .msg.theirs { background:color-mix(in srgb, var(--bubble-theirs) 78%, transparent); color:#e8e8f0; border-bottom-left-radius:5px; border:1px solid rgba(255,255,255,0.1); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
+        .msg.theirs { background:color-mix(in srgb, var(--bubble-theirs) 68%, transparent); color:#e8e8f0; border-bottom-left-radius:5px; border:1px solid rgba(255,255,255,0.12); -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5); }
         [data-theme="light"] .msg.theirs { color:#111; border-color:rgba(0,0,0,.08); background:color-mix(in srgb, var(--bubble-theirs) 88%, transparent); }
         /* Si justo DESPUÉS viene otro mensaje del MISMO remitente, la tanda continúa:
            esquina inferior redondeada por completo (la "cola" solo va al final de verdad). */
@@ -591,11 +609,11 @@
         .msg-action-overlay.open { opacity:1; pointer-events:all; }
         .msg-action-sheet { position:fixed; left:50%; bottom:calc(1.5rem + var(--safe-bottom)); transform:translateX(-50%) scale(0.92) translateY(8px); width:92%; max-width:360px; z-index:1301; opacity:0; pointer-events:none; transition:opacity 0.2s, transform 0.22s cubic-bezier(0.32,0.72,0,1); }
         .msg-action-sheet.open { opacity:1; pointer-events:all; transform:translateX(-50%) scale(1) translateY(0); }
-        .reaction-row { display:flex; justify-content:space-around; background:rgba(30,30,45,0.97); -webkit-backdrop-filter:var(--tg-blur); backdrop-filter:var(--tg-blur); border:1px solid rgba(255,255,255,.08); border-radius:28px; padding:0.55rem 0.4rem; margin-bottom:0.6rem; box-shadow:0 8px 28px rgba(0,0,0,.45); }
+        .reaction-row { display:flex; justify-content:space-around; background:rgba(32,32,48,0.78); -webkit-backdrop-filter:blur(30px) saturate(1.7); backdrop-filter:blur(30px) saturate(1.7); border:1px solid rgba(255,255,255,.14); border-radius:28px; padding:0.55rem 0.4rem; margin-bottom:0.6rem; box-shadow:0 8px 28px rgba(0,0,0,.45); }
         [data-theme="light"] .reaction-row { background:rgba(255,255,255,.97); border-color:rgba(0,0,0,.08); }
         .reaction-emoji { font-size:1.65rem; cursor:pointer; padding:0.2rem; background:none; border:none; transition:transform 0.15s; line-height:1; }
         .reaction-emoji:active { transform:scale(1.45); }
-        .action-list { background:rgba(30,30,45,0.97); -webkit-backdrop-filter:var(--tg-blur); backdrop-filter:var(--tg-blur); border:1px solid rgba(255,255,255,.08); border-radius:18px; overflow:hidden; box-shadow:0 8px 28px rgba(0,0,0,.45); }
+        .action-list { background:rgba(32,32,48,0.78); -webkit-backdrop-filter:blur(30px) saturate(1.7); backdrop-filter:blur(30px) saturate(1.7); border:1px solid rgba(255,255,255,.14); border-radius:18px; overflow:hidden; box-shadow:0 8px 28px rgba(0,0,0,.45); }
         [data-theme="light"] .action-list { background:rgba(255,255,255,.97); border-color:rgba(0,0,0,.08); }
         .action-item { display:flex; align-items:center; gap:0.8rem; padding:0.88rem 1.1rem; font-size:0.94rem; font-weight:600; cursor:pointer; border-bottom:1px solid rgba(255,255,255,.06); color:#fff; }
         [data-theme="light"] .action-item { color:#111; border-bottom-color:rgba(0,0,0,.06); }
@@ -1003,6 +1021,10 @@
             Videollamada
         </div>
         <div style="height:1px;background:rgba(255,255,255,.06);"></div>
+        <div class="chat-menu-item" onclick="closeChatMenu(); openProfileEditor()">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm0 2c-3.33 0-10 1.67-10 5v3h20v-3c0-3.33-6.67-5-10-5z"/></svg>
+            Editar perfil
+        </div>
         <div class="chat-menu-item" id="menuLunaMessages" style="display:none" onclick="closeChatMenu(); openLunaMessages()">
             <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
             💌 Mensajes para León
@@ -1028,6 +1050,24 @@
                 <button class="confirm-btn danger" id="confirmDangerBtn">Confirmar</button>
             </div>
         </div>
+    </div>
+
+    <!-- Pantalla: Editor de perfil (avatar + color, sin nombre) -->
+    <div id="profileEditorScreen">
+        <div class="lm-header" style="background:linear-gradient(135deg,#667eea,#764ba2);">
+            <button class="lm-back" onclick="closeProfileEditor()" aria-label="Volver">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <div class="lm-title">Editar perfil</div>
+        </div>
+        <div class="pe-preview">
+            <div class="pe-avatar-big" id="peAvatarPreview">🌙</div>
+        </div>
+        <div class="pe-section-title">Elige tu ícono</div>
+        <div class="pe-avatar-grid" id="peAvatarGrid"></div>
+        <div class="pe-section-title">Elige tu color</div>
+        <div class="pe-color-grid" id="peColorGrid"></div>
+        <button class="pe-save-btn" onclick="saveProfileChanges()">Guardar cambios</button>
     </div>
 
     <!-- Pantalla: Mensajes que Luna deja para León -->
@@ -1902,6 +1942,76 @@
         document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
     };
 
+    // ═══ EDITOR DE PERFIL (avatar + color, el nombre NO se puede cambiar) ═══
+    const PROFILE_AVATARS = ['🌙','🦁','🦊','🐱','🐶','🐼','🐻','🐰','🦄','🐨','🦋','🌸','⭐','🔥','💎','🎧','🎨','⚡','🌈','🍀'];
+    const PROFILE_COLORS = ['#ff441f','#e91e63','#ff69b4','#9c27b0','#3f51b5','#2196f3','#00bcd4','#4caf50','#ff9800','#ffc107','#ff5722','#607d8b'];
+    let _peSelectedAvatar = null;
+    let _peSelectedColor  = null;
+
+    window.openProfileEditor = function() {
+        _peSelectedAvatar = myAvatar;
+        _peSelectedColor  = myBubbleColor;
+        document.getElementById('peAvatarPreview').textContent = myAvatar;
+
+        const avGrid = document.getElementById('peAvatarGrid');
+        avGrid.innerHTML = PROFILE_AVATARS.map(av => `
+            <div class="pe-avatar-opt ${av === myAvatar ? 'selected' : ''}" data-av="${av}" onclick="selectPeAvatar(this)">${av}</div>
+        `).join('');
+
+        const colGrid = document.getElementById('peColorGrid');
+        colGrid.innerHTML = PROFILE_COLORS.map(c => `
+            <div class="pe-color-opt ${c === myBubbleColor ? 'selected' : ''}" data-color="${c}" style="background:${c}" onclick="selectPeColor(this)"></div>
+        `).join('');
+
+        document.getElementById('profileEditorScreen').classList.add('show');
+    };
+    window.closeProfileEditor = function() {
+        document.getElementById('profileEditorScreen').classList.remove('show');
+    };
+
+    window.selectPeAvatar = function(el) {
+        document.querySelectorAll('.pe-avatar-opt').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        _peSelectedAvatar = el.getAttribute('data-av');
+        document.getElementById('peAvatarPreview').textContent = _peSelectedAvatar;
+    };
+    window.selectPeColor = function(el) {
+        document.querySelectorAll('.pe-color-opt').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        _peSelectedColor = el.getAttribute('data-color');
+        document.getElementById('peAvatarPreview').style.borderColor = _peSelectedColor;
+    };
+
+    window.saveProfileChanges = async function() {
+        myAvatar = _peSelectedAvatar || myAvatar;
+        myBubbleColor = _peSelectedColor || myBubbleColor;
+        document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
+        try {
+            await set(ref(db, 'chat/profiles/' + myId), { avatar: myAvatar, color: myBubbleColor, name: myName });
+            showToast('Perfil actualizado ✨');
+            closeProfileEditor();
+        } catch (err) {
+            showToast('⚠️ No se pudo guardar. Revisa tu conexión.');
+        }
+    };
+
+    // Escuchar los perfiles guardados: aplica MI propio perfil guardado (persiste
+    // entre sesiones/dispositivos) y muestra el avatar REAL de la OTRA persona
+    // en el header, en vez del mío propio (antes mostraba mi avatar por error).
+    function listenProfiles() {
+        onValue(ref(db, 'chat/profiles'), snap => {
+            const data = snap.val() || {};
+            if (data[myId]) {
+                myAvatar = data[myId].avatar || myAvatar;
+                myBubbleColor = data[myId].color || myBubbleColor;
+                document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
+            }
+            const otherEntry = Object.entries(data).find(([id]) => id !== myId);
+            const headerAv = document.getElementById('headerAvatar');
+            if (headerAv && otherEntry) headerAv.textContent = otherEntry[1].avatar || '🦊';
+        });
+    }
+
     // ═══ BIENVENIDA PERSONALIZADA ═══
     // ═══ MENSAJES DE LUNA PARA LEÓN ═══
     let _lunaMessages = [];   // copia local de los mensajes que Luna dejó
@@ -2179,6 +2289,7 @@
         updateConnectionStatus();
         listenForIncomingCalls();
         listenForTyping();
+        listenProfiles();
         startKeyExchange();
         rerenderAllMessages();
         subscribeToPush();
