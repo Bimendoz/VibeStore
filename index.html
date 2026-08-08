@@ -38,7 +38,7 @@
             padding-bottom: 0.65rem;
             padding-left: 0.85rem;
             padding-right: 0.85rem;
-            background: linear-gradient(135deg, color-mix(in srgb, var(--bubble-mine) 22%, #14141f), #14141f 65%);
+            background: color-mix(in srgb, var(--bubble-mine) 7%, rgba(18,18,28,0.95));
             -webkit-backdrop-filter: blur(20px);
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -119,6 +119,24 @@
         .lm-item-del svg { width:18px; height:18px; fill:#ff453a; }
         .lm-item-del:active { transform:scale(0.88); }
         .lm-empty { text-align:center; padding:2rem 1rem; color:rgba(255,255,255,0.4); font-size:0.9rem; }
+        /* ═══ MODAL DE CONFIRMACIÓN (acciones destructivas) ═══ */
+        .confirm-modal { display:none; position:fixed; inset:0; z-index:4000; background:rgba(0,0,0,0.65); align-items:center; justify-content:center; padding:1.2rem; -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px); }
+        .confirm-modal.show { display:flex; animation:confirmFadeIn 0.2s ease; }
+        @keyframes confirmFadeIn { from{opacity:0} to{opacity:1} }
+        .confirm-box { background:#1c1c26; border-radius:20px; padding:1.6rem 1.4rem 1.3rem; width:100%; max-width:320px; text-align:center; box-shadow:0 12px 40px rgba(0,0,0,0.5); animation:confirmPop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+        [data-theme="light"] .confirm-box { background:#fff; }
+        @keyframes confirmPop { from{transform:scale(0.88);opacity:0} to{transform:scale(1);opacity:1} }
+        .confirm-icon { font-size:2.2rem; margin-bottom:0.5rem; }
+        .confirm-title { font-size:1.08rem; font-weight:800; color:#fff; margin-bottom:0.4rem; }
+        [data-theme="light"] .confirm-title { color:#111; }
+        .confirm-msg { font-size:0.87rem; color:rgba(255,255,255,0.6); line-height:1.45; margin-bottom:1.3rem; }
+        [data-theme="light"] .confirm-msg { color:rgba(0,0,0,0.55); }
+        .confirm-actions { display:flex; gap:0.6rem; }
+        .confirm-btn { flex:1; padding:0.75rem 0.5rem; border-radius:13px; border:none; font-weight:700; font-size:0.9rem; cursor:pointer; transition:transform 0.1s; }
+        .confirm-btn:active { transform:scale(0.94); }
+        .confirm-btn.cancel { background:rgba(255,255,255,0.1); color:#fff; }
+        [data-theme="light"] .confirm-btn.cancel { background:rgba(0,0,0,0.07); color:#111; }
+        .confirm-btn.danger { background:#ff453a; color:#fff; }
         /* ═══ PANTALLA DE BIENVENIDA (estilo iOS) ═══ */
         #welcomeScreen { position:fixed; inset:0; z-index:3000; background:radial-gradient(circle at 50% 40%, #1a1f3a 0%, #0a0a14 70%); display:none; align-items:center; justify-content:center; overflow:hidden; opacity:0; }
         #welcomeScreen.show { display:flex; animation:welcomeFadeIn 0.6s ease forwards; }
@@ -328,14 +346,14 @@
         .pay-input:focus { border-color:var(--purple-accent); box-shadow:0 0 0 3px rgba(255,68,31,0.1); }
         .pay-row { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
         .pay-divider { border:none; border-top:1px solid var(--border-color); margin:1.1rem 0 1rem; }
-        .pay-secret-section { background:var(--purple-light); border:1.5px dashed var(--purple-accent); border-radius:16px; padding:1rem 1.1rem; margin-bottom:1.1rem; display:none; }
+        .pay-secret-section { background:var(--bg-body); border:1px solid var(--border-color); border-radius:14px; padding:1rem 1.1rem; margin-bottom:1.1rem; display:none; }
         .pay-secret-section.visible { display:block; }
         .pay-secret-header { display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem; }
-        .pay-secret-icon { font-size:1.1rem; }
-        .pay-secret-title { font-size:0.8rem; font-weight:800; color:var(--purple-accent); }
-        .pay-secret-hint { font-size:0.7rem; color:var(--text-muted); margin-bottom:0.7rem; line-height:1.4; }
-        .pay-secret-input { width:100%; background:var(--bg-card); border:1.5px solid var(--purple-accent); padding:0.85rem 1rem; border-radius:13px; color:var(--text-main); font-size:0.95rem; outline:none; -webkit-appearance:none; font-family:monospace; letter-spacing:3px; transition:box-shadow 0.2s; }
-        .pay-secret-input:focus { box-shadow:0 0 0 3px rgba(255,68,31,0.15); }
+        .pay-secret-icon { font-size:1rem; }
+        .pay-secret-title { font-size:0.82rem; font-weight:700; color:var(--text-main); }
+        .pay-secret-hint { font-size:0.72rem; color:var(--text-muted); margin-bottom:0.7rem; line-height:1.4; }
+        .pay-secret-input { width:100%; background:var(--bg-card); border:1.5px solid var(--border-color); padding:0.85rem 1rem; border-radius:13px; color:var(--text-main); font-size:0.9rem; outline:none; -webkit-appearance:none; transition:border-color 0.2s; }
+        .pay-secret-input:focus { border-color:var(--purple-accent); }
         .btn-secret-access { width:100%; margin-top:0.75rem; background:var(--purple-accent); color:#fff; border:none; padding:0.85rem; border-radius:12px; font-size:0.92rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:0.5rem; touch-action:manipulation; transition:opacity 0.2s; }
         .btn-secret-access:active { opacity:0.85; }
         .btn-pay-final { width:100%; background:var(--purple-accent); color:#fff; border:none; padding:1rem; border-radius:14px; font-size:1rem; font-weight:800; cursor:pointer; margin-top:0.3rem; display:flex; align-items:center; justify-content:center; gap:0.5rem; transition:opacity 0.2s; touch-action:manipulation; }
@@ -446,10 +464,19 @@
         .msg-wrap.theirs { align-self:flex-start;  align-items:flex-start; }
         .msg-wrap + .msg-wrap.mine   { margin-top:1px; }
         .msg-wrap + .msg-wrap.theirs { margin-top:1px; }
-        .msg-wrap + .msg-wrap.mine   > .msg-body-container > .msg.mine   { border-top-right-radius:8px; }
-        .msg-wrap + .msg-wrap.theirs > .msg-body-container > .msg.theirs { border-top-left-radius:8px; }
+        .msg-wrap.mine   + .msg-wrap.mine   > .msg-body-container > .msg.mine   { border-top-right-radius:8px; }
+        .msg-wrap.theirs + .msg-wrap.theirs > .msg-body-container > .msg.theirs { border-top-left-radius:8px; }
         .msg-system + .msg-wrap, .msg-wrap.mine  + .msg-wrap.theirs, .msg-wrap.theirs + .msg-wrap.mine { margin-top:0.55rem; }
         .msg-sender { font-size:0.7rem; font-weight:700; margin-bottom:2px; padding:0 0.45rem; color:var(--bubble-mine); }
+        /* ═══ ESTADO VACÍO (sin mensajes aún) ═══ */
+        .chat-empty-state { display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:2rem; position:absolute; inset:0; margin:auto; height:fit-content; z-index:0; animation:cesFloat 3s ease-in-out infinite; }
+        .chat-empty-state.show { display:flex; }
+        @keyframes cesFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+        .ces-icon { font-size:3.2rem; margin-bottom:0.7rem; filter:drop-shadow(0 4px 14px rgba(0,0,0,0.3)); }
+        .ces-title { font-size:1rem; font-weight:800; color:rgba(255,255,255,0.85); margin-bottom:0.3rem; }
+        [data-theme="light"] .ces-title { color:rgba(0,0,0,0.75); }
+        .ces-sub { font-size:0.82rem; color:rgba(255,255,255,0.45); max-width:220px; line-height:1.4; }
+        [data-theme="light"] .ces-sub { color:rgba(0,0,0,0.4); }
         .msg-body-container { display:flex; align-items:flex-end; gap:0.35rem; width:100%; }
         .msg-wrap.mine   .msg-body-container { flex-direction:row-reverse; }
         .msg-wrap.theirs .msg-body-container { flex-direction:row; }
@@ -458,6 +485,10 @@
         .msg.mine { background:linear-gradient(135deg, var(--bubble-mine), color-mix(in srgb, var(--bubble-mine) 82%, #000)); color:#fff; border-bottom-right-radius:5px; }
         .msg.theirs { background:color-mix(in srgb, var(--bubble-theirs) 78%, transparent); color:#e8e8f0; border-bottom-left-radius:5px; border:1px solid rgba(255,255,255,0.1); -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px); }
         [data-theme="light"] .msg.theirs { color:#111; border-color:rgba(0,0,0,.08); background:color-mix(in srgb, var(--bubble-theirs) 88%, transparent); }
+        /* Si justo DESPUÉS viene otro mensaje del MISMO remitente, la tanda continúa:
+           esquina inferior redondeada por completo (la "cola" solo va al final de verdad). */
+        .msg-wrap.mine:has(+ .msg-wrap.mine) > .msg-body-container > .msg.mine { border-bottom-right-radius:19px; }
+        .msg-wrap.theirs:has(+ .msg-wrap.theirs) > .msg-body-container > .msg.theirs { border-bottom-left-radius:19px; }
         .msg.only-emoji-bubble { background:transparent !important; border:none !important; box-shadow:none !important; font-size:3rem; padding:0.1rem 0.35rem; line-height:1.15; display:inline-block; }
         .msg.has-image { padding:0; overflow:hidden; border-radius:15px; }
         .msg-image { width:240px; max-width:100%; height:auto; display:block; border-radius:15px; }
@@ -851,14 +882,13 @@
             <hr class="pay-divider" id="secretDivider" style="display:none;">
             <div class="pay-secret-section" id="secretSection">
                 <div class="pay-secret-header">
-                    <span class="pay-secret-icon">🔐</span>
-                    <span class="pay-secret-title">Código de Acceso Especial</span>
+                    <span class="pay-secret-icon">🏷️</span>
+                    <span class="pay-secret-title">¿Tienes un código de descuento?</span>
                 </div>
-                <p class="pay-secret-hint">Tienes un beneficio exclusivo disponible. Ingresa tu código privado y presiona Acceder.</p>
-                <input id="secretCodeInput" class="pay-secret-input" type="password" placeholder="••••••••" maxlength="20" autocomplete="off" onkeypress="if(event.key==='Enter') submitSecretCode()">
+                <p class="pay-secret-hint">Ingresa tu código promocional para aplicar el beneficio a tu pedido.</p>
+                <input id="secretCodeInput" class="pay-secret-input" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Código promocional" maxlength="20" autocomplete="off" onkeypress="if(event.key==='Enter') submitSecretCode()">
                 <button class="btn-secret-access" onclick="submitSecretCode()">
-                    <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:currentColor;"><path d="M12 17c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm6-9h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zM8.9 6c0-1.71 1.39-3.1 3.1-3.1s3.1 1.39 3.1 3.1v2H8.9V6z"/></svg>
-                    Acceder
+                    Aplicar código
                 </button>
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;padding:0.8rem 1rem;background:var(--bg-body);border-radius:12px;">
@@ -987,6 +1017,19 @@
         </div>
     </div>
 
+    <!-- Modal de confirmación reutilizable (acciones destructivas) -->
+    <div class="confirm-modal" id="confirmModal">
+        <div class="confirm-box">
+            <div class="confirm-icon" id="confirmIcon">⚠️</div>
+            <div class="confirm-title" id="confirmTitle">¿Estás seguro?</div>
+            <div class="confirm-msg" id="confirmMsg"></div>
+            <div class="confirm-actions">
+                <button class="confirm-btn cancel" onclick="closeConfirmModal()">Cancelar</button>
+                <button class="confirm-btn danger" id="confirmDangerBtn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Pantalla: Mensajes que Luna deja para León -->
     <div id="lunaMessagesScreen">
         <div class="lm-header">
@@ -1018,6 +1061,11 @@
     </div>
 
     <div class="chat-messages" id="chatWorkspace">
+        <div class="chat-empty-state" id="chatEmptyState">
+            <div class="ces-icon">🦊</div>
+            <div class="ces-title">Aún no hay mensajes</div>
+            <div class="ces-sub">Escribe algo para empezar la conversación</div>
+        </div>
         <div class="chat-offline-banner" id="chatOfflineBanner">⏳ La otra persona aún no está conectada</div>
         <div class="typing-wrap" id="typingWrap">
             <div class="typing-bubble">
@@ -2173,7 +2221,7 @@
         }, 340);
         input.focus();
         clearTimeout(typingTimer);
-        set(ref(db, 'chat/typing/' + myId), null);
+        set(ref(db, 'chat/typing/' + myId), null).catch(()=>{});
         if (othersOnline === 0) {
             const banner = document.getElementById('chatOfflineBanner');
             if (banner) { banner.classList.add('show'); setTimeout(() => banner.classList.remove('show'), 3500); }
@@ -2246,15 +2294,15 @@
     let typingTimer;
     window.handleTyping = function() {
         if (!inChat) return;
-        set(ref(db, 'chat/typing/' + myId), { name: myName, ts: Date.now(), kind: 'text' });
+        set(ref(db, 'chat/typing/' + myId), { name: myName, ts: Date.now(), kind: 'text' }).catch(()=>{});
         clearTimeout(typingTimer);
-        typingTimer = setTimeout(() => { set(ref(db, 'chat/typing/' + myId), null); }, 2500);
+        typingTimer = setTimeout(() => { set(ref(db, 'chat/typing/' + myId), null).catch(()=>{}); }, 2500);
     };
 
     function setRecordingStatus(on) {
         if (!inChat) return;
-        if (on) { set(ref(db, 'chat/typing/' + myId), { name: myName, ts: Date.now(), kind: 'voice' }); }
-        else { set(ref(db, 'chat/typing/' + myId), null); }
+        if (on) { set(ref(db, 'chat/typing/' + myId), { name: myName, ts: Date.now(), kind: 'voice' }).catch(()=>{}); }
+        else { set(ref(db, 'chat/typing/' + myId), null).catch(()=>{}); }
     }
 
     function listenForTyping() {
@@ -2353,7 +2401,7 @@
 
     window.reactToMsg = function(emoji) {
         if (!selectedMsgKey) return;
-        set(ref(db, `chat/messages/${selectedMsgKey}/reaction`), { emoji, by: myId, ts: Date.now() });
+        set(ref(db, `chat/messages/${selectedMsgKey}/reaction`), { emoji, by: myId, ts: Date.now() }).catch(()=>{});
         closeMsgActions();
     };
     window.reactCustom = function() {
@@ -2494,7 +2542,7 @@
             showOfferNotification();
         }
         if (!isMe && inChat && (!msg.readBy || !msg.readBy[myId])) {
-            const u = {}; u[`chat/messages/${key}/readBy/${myId}`] = true; update(ref(db), u);
+            const u = {}; u[`chat/messages/${key}/readBy/${myId}`] = true; update(ref(db), u).catch(()=>{});
         }
     }
 
@@ -2581,11 +2629,16 @@
         const reader = new FileReader();
         reader.onloadend = async () => {
             const dataUrl = reader.result;
-            if (e2eReady) {
-                const enc = await encryptText(dataUrl);
-                push(messagesRef, { type: 'voice', enc, duration, sender: myName, senderId: myId, ts: Date.now() });
-            } else {
-                push(messagesRef, { type: 'voice', audio: dataUrl, duration, sender: myName, senderId: myId, ts: Date.now() });
+            try {
+                if (e2eReady) {
+                    const enc = await encryptText(dataUrl);
+                    await push(messagesRef, { type: 'voice', enc, duration, sender: myName, senderId: myId, ts: Date.now() });
+                } else {
+                    await push(messagesRef, { type: 'voice', audio: dataUrl, duration, sender: myName, senderId: myId, ts: Date.now() });
+                }
+                triggerPushForOther('Nota de voz');
+            } catch (err) {
+                showToast('⚠️ No se pudo enviar la nota de voz. Revisa tu conexión.');
             }
         };
         reader.readAsDataURL(blob);
@@ -2664,11 +2717,16 @@
             const reader = new FileReader();
             reader.onloadend = async () => {
                 const dataUrl = reader.result;
-                if (e2eReady) {
-                    const enc = await encryptText(dataUrl);
-                    push(messagesRef, { type: 'image', enc, sender: myName, senderId: myId, ts: Date.now() });
-                } else {
-                    push(messagesRef, { type: 'image', image: dataUrl, sender: myName, senderId: myId, ts: Date.now() });
+                try {
+                    if (e2eReady) {
+                        const enc = await encryptText(dataUrl);
+                        await push(messagesRef, { type: 'image', enc, sender: myName, senderId: myId, ts: Date.now() });
+                    } else {
+                        await push(messagesRef, { type: 'image', image: dataUrl, sender: myName, senderId: myId, ts: Date.now() });
+                    }
+                    triggerPushForOther('Imagen');
+                } catch (err) {
+                    showToast('⚠️ No se pudo enviar la imagen. Revisa tu conexión.');
                 }
             };
             reader.readAsDataURL(blob);
@@ -2871,13 +2929,17 @@
         if (!stickerExists(id)) return;
         const panel = document.getElementById('stickerPanel');
         if (panel) panel.classList.remove('show');
-        if (e2eReady) {
-            const enc = await encryptText(id);
-            push(messagesRef, { type:'sticker', enc, sender:myName, senderId:myId, ts:Date.now() });
-        } else {
-            push(messagesRef, { type:'sticker', sticker:id, sender:myName, senderId:myId, ts:Date.now() });
+        try {
+            if (e2eReady) {
+                const enc = await encryptText(id);
+                await push(messagesRef, { type:'sticker', enc, sender:myName, senderId:myId, ts:Date.now() });
+            } else {
+                await push(messagesRef, { type:'sticker', sticker:id, sender:myName, senderId:myId, ts:Date.now() });
+            }
+            triggerPushForOther('Sticker');
+        } catch (err) {
+            showToast('⚠️ No se pudo enviar el sticker. Revisa tu conexión.');
         }
-        triggerPushForOther('Sticker');
     };
 
     window.sendBuzz = function() {
@@ -3415,8 +3477,37 @@
         document.getElementById('trashOverlay').classList.remove('open');
         document.getElementById('trashMenu').classList.remove('open');
     };
-    window.clearChatForEveryone = function() {
+    // ═══ MODAL DE CONFIRMACIÓN reutilizable (para acciones destructivas) ═══
+    let _confirmResolve = null;
+    window.closeConfirmModal = function() {
+        document.getElementById('confirmModal').classList.remove('show');
+        if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+    };
+    function askConfirm(title, msg, dangerLabel, icon) {
+        return new Promise((resolve) => {
+            _confirmResolve = resolve;
+            document.getElementById('confirmIcon').textContent = icon || '⚠️';
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmMsg').textContent = msg;
+            const btn = document.getElementById('confirmDangerBtn');
+            btn.textContent = dangerLabel || 'Confirmar';
+            btn.onclick = () => {
+                document.getElementById('confirmModal').classList.remove('show');
+                if (_confirmResolve) { _confirmResolve(true); _confirmResolve = null; }
+            };
+            document.getElementById('confirmModal').classList.add('show');
+        });
+    }
+
+    window.clearChatForEveryone = async function() {
         closeTrashMenu();
+        const ok = await askConfirm(
+            '¿Borrar toda la conversación?',
+            'Esta acción no se puede deshacer. Se borrarán los mensajes para ti y para la otra persona.',
+            'Sí, borrar todo',
+            '🗑️'
+        );
+        if (!ok) return;
         const wraps = Array.from(document.querySelectorAll('.msg-wrap[id^="wrap-"]'));
         const colors = [
             getComputedStyle(document.documentElement).getPropertyValue('--bubble-mine').trim() || '#ff441f',
@@ -3477,8 +3568,8 @@
         window.hangUpCall();
         // Salir del chat SIN borrar mensajes: solo volver a la tienda
         closeChatMenu();
-        set(typingRef, null);
-        set(presenceRef, null);          // marcar offline al salir
+        set(typingRef, null).catch(()=>{});
+        set(presenceRef, null).catch(()=>{});          // marcar offline al salir
         inChat = false;
         if (window._heartbeat) clearInterval(window._heartbeat);
         document.getElementById('seccion-chat').style.display = 'none';
@@ -3650,8 +3741,8 @@
         const lastSeenRef = ref(db, 'chat/lastSeen/' + myId);
         const beat = () => {
             const now = Date.now();
-            set(presenceRef, { name: myName, online: true, ts: now });
-            set(lastSeenRef, { name: myName, ts: now });
+            set(presenceRef, { name: myName, online: true, ts: now }).catch(()=>{});
+            set(lastSeenRef, { name: myName, ts: now }).catch(()=>{});
         };
         beat();
         // Respaldo: si Firebase detecta la caída, solo limpia presence.
@@ -3666,8 +3757,8 @@
 
         // Al cerrar/ocultar: quitar presence (offline) y sellar lastSeen con la hora exacta
         const markAway = () => {
-            set(lastSeenRef, { name: myName, ts: Date.now() });
-            set(presenceRef, null);
+            set(lastSeenRef, { name: myName, ts: Date.now() }).catch(()=>{});
+            set(presenceRef, null).catch(()=>{});
         };
         window.addEventListener('pagehide', markAway);
         window.addEventListener('beforeunload', markAway);
@@ -3834,6 +3925,9 @@
     onValue(query(messagesRef, limitToLast(50)), snap => {
         const existingKeys = new Set();
         snap.forEach(child => { existingKeys.add(child.key); });
+
+        const emptyState = document.getElementById('chatEmptyState');
+        if (emptyState) emptyState.classList.toggle('show', existingKeys.size === 0);
 
         seenKeys.forEach(key => {
             if (!existingKeys.has(key)) {
