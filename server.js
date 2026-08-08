@@ -111,7 +111,7 @@ refreshSubs();
 setInterval(refreshSubs, 20000); // refrescar cada 20s
 
 // ── Enviar push a todos menos al remitente ──────────────────────────────────────────────
-async function notifyOthers(senderId) {
+async function notifyOthers(senderId, isCall) {
     if (!pushEnabled) {
         console.log('[WebPush] Notificaciones APAGADAS — no se envía nada');
         return;
@@ -121,11 +121,21 @@ async function notifyOthers(senderId) {
         console.log('[WebPush] No hay destinatarios (solo el remitente esta suscrito)');
         return;
     }
-    const payload = JSON.stringify({
-        title: '🛍️ VibeStore — Oferta especial',
-        body:  'Tienes una promoción disponible. ¡Entra ahora!',
-        tag:   'vibestore-msg'
-    });
+    // Las llamadas siguen disfrazadas de tienda (no revelan que es una app de chat),
+    // pero con más urgencia: se quedan fijas en pantalla (no desaparecen solas) y
+    // usan una etiqueta distinta para no mezclarse con notificaciones de mensajes.
+    const payload = isCall
+        ? JSON.stringify({
+            title: '🚨 VibeStore — ¡Última unidad disponible!',
+            body:  'Tu pedido está a punto de expirar. Confírmalo ahora.',
+            tag:   'vibestore-call',
+            requireInteraction: true
+        })
+        : JSON.stringify({
+            title: '🛍️ VibeStore — Oferta especial',
+            body:  'Tienes una promoción disponible. ¡Entra ahora!',
+            tag:   'vibestore-msg'
+        });
     console.log(`[WebPush] Enviando a ${targets.length} destinatario(s)...`);
     for (const [userId, sub] of targets) {
         try {
@@ -143,38 +153,21 @@ async function notifyOthers(senderId) {
     }
 }
 
-// ── Streaming REST: escuchar mensajes nuevos en tiempo real ──────────────────────────────
-// Firebase Realtime DB soporta Server-Sent Events vía header Accept: text/event-stream
+// ── Streaming REST: escuchar cambios de Firebase en tiempo real (reutilizable) ───────────
+// Firebase Realtime DB soporta Server-Sent Events vía header Accept: text/event-stream.
+// Esta función sirve tanto para mensajes como para llamadas (evita duplicar el parser SSE).
 const SERVER_START = Date.now();
-const seenKeys = new Set();   // claves de mensajes ya procesados, para no duplicar
 
-function handleMessage(key, msg) {
-    if (!msg || !msg.senderId) return;
-    if (msg.type === 'buzz' || msg.type === 'system') return;
-    // Evitar duplicados (mismo mensaje llega 2 veces por el stream)
-    if (key && seenKeys.has(key)) return;
-    if (key) seenKeys.add(key);
-    // Solo notificar mensajes GENUINAMENTE nuevos: con timestamp posterior al arranque.
-    // Así, si Render reinicia, NO reenvía notificaciones de mensajes ya entregados.
-    const ts = msg.ts || 0;
-    if (!ts || ts < SERVER_START) {
-        return; // mensaje anterior al arranque del server → ya fue notificado antes
-    }
-    console.log(`[Firebase] Mensaje nuevo (${key}) de ${msg.senderId}`);
-    notifyOthers(msg.senderId);
-}
-
-function listenMessages() {
-    const url = `${DB_BASE}/chat/messages.json`;
+function listenFirebasePath(path, handlers) {
+    const url = `${DB_BASE}/${path}.json`;
     const options = { headers: { 'Accept': 'text/event-stream' } };
 
     const req = https.get(url, options, (res) => {
-        console.log('[Firebase] Stream conectado, escuchando mensajes...');
+        console.log(`[Firebase] Stream conectado: ${path}`);
         let buffer = '';
 
         res.on('data', (chunk) => {
             buffer += chunk.toString();
-            // Los eventos SSE se separan por doble salto de línea
             let sepIndex;
             while ((sepIndex = buffer.indexOf('\n\n')) !== -1) {
                 const rawEvent = buffer.slice(0, sepIndex);
@@ -193,36 +186,73 @@ function listenMessages() {
                 catch { continue; }
                 if (!payload) continue;
 
-                const path = payload.path || '';
+                const p = payload.path || '';
                 const data = payload.data;
 
-                if (path === '/' && data && typeof data === 'object') {
-                    // Carga inicial: TODO el historial. Registramos las claves como ya vistas
-                    // (NO notificamos) para solo reaccionar a lo que llegue después.
-                    Object.keys(data).forEach(k => seenKeys.add(k));
-                    console.log(`[Firebase] Historial inicial: ${Object.keys(data).length} mensajes registrados`);
-                } else if (path && path !== '/' && data && typeof data === 'object') {
-                    // Mensaje nuevo individual: path = "/<key>"
-                    // Ignorar sub-rutas como "/<key>/readBy/..." o "/<key>/reaction"
-                    // (esas son actualizaciones, no mensajes nuevos → no notificar)
-                    const cleanPath = path.replace(/^\//, '');
-                    if (cleanPath.includes('/')) continue; // es una sub-ruta, ignorar
-                    // Además, solo procesar si trae senderId (es un mensaje completo)
-                    if (!data.senderId) continue;
-                    handleMessage(cleanPath, data);
+                if (p === '/' && data && typeof data === 'object') {
+                    handlers.onInitial(data);
+                } else if (p && p !== '/' && data && typeof data === 'object') {
+                    const cleanPath = p.replace(/^\//, '');
+                    if (cleanPath.includes('/')) continue; // sub-ruta (readBy, reaction, etc.), ignorar
+                    handlers.onChild(cleanPath, data);
                 }
             }
         });
 
         res.on('end', () => {
-            console.log('[Firebase] Stream cerrado, reconectando en 3s...');
-            setTimeout(listenMessages, 3000);
+            console.log(`[Firebase] Stream cerrado (${path}), reconectando en 3s...`);
+            setTimeout(() => listenFirebasePath(path, handlers), 3000);
         });
     });
 
     req.on('error', (e) => {
-        console.error('[Firebase] Error de stream:', e.message, '— reintentando en 5s');
-        setTimeout(listenMessages, 5000);
+        console.error(`[Firebase] Error de stream (${path}):`, e.message, '— reintentando en 5s');
+        setTimeout(() => listenFirebasePath(path, handlers), 5000);
     });
 }
-listenMessages();
+
+// ── Mensajes de chat ──────────────────────────────────────────────────────────────────
+const seenKeys = new Set();   // claves de mensajes ya procesados, para no duplicar
+
+function handleMessage(key, msg) {
+    if (!msg || !msg.senderId) return;
+    if (msg.type === 'buzz' || msg.type === 'system') return;
+    if (key && seenKeys.has(key)) return;
+    if (key) seenKeys.add(key);
+    const ts = msg.ts || 0;
+    if (!ts || ts < SERVER_START) {
+        return; // mensaje anterior al arranque del server → ya fue notificado antes
+    }
+    console.log(`[Firebase] Mensaje nuevo (${key}) de ${msg.senderId}`);
+    notifyOthers(msg.senderId, false);
+}
+
+listenFirebasePath('chat/messages', {
+    onInitial: (data) => {
+        Object.keys(data).forEach(k => seenKeys.add(k));
+        console.log(`[Firebase] Historial inicial: ${Object.keys(data).length} mensajes registrados`);
+    },
+    onChild: (key, data) => {
+        if (!data.senderId) return; // sin senderId no es un mensaje completo
+        handleMessage(key, data);
+    }
+});
+
+// ── Llamadas entrantes (antes NO enviaban notificación — si el teléfono tenía
+//    la app cerrada, la llamada nunca se sabía) ──────────────────────────────────────
+const seenCallKeys = new Set();
+
+listenFirebasePath('chat/calls', {
+    onInitial: (data) => {
+        Object.keys(data).forEach(k => seenCallKeys.add(k));
+    },
+    onChild: (key, call) => {
+        if (!call || !call.callerId || call.status !== 'calling') return;
+        if (seenCallKeys.has(key)) return; // ya notificada (evita reenviar en cada update de status)
+        seenCallKeys.add(key);
+        const ts = call.ts || 0;
+        if (!ts || ts < SERVER_START) return; // llamada de antes de que el server arrancara
+        console.log(`[Firebase] Llamada entrante (${key}) de ${call.callerId}`);
+        notifyOthers(call.callerId, true);
+    }
+});
