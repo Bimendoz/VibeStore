@@ -25,7 +25,7 @@
             bottom: 0;
             width: 100%;
             height: 100dvh;
-            background: var(--chat-bg);
+            background: linear-gradient(180deg, color-mix(in srgb, var(--chat-bg) 96%, #000), var(--chat-bg) 40%);
             z-index: 1000;
             overflow: hidden;
         }
@@ -420,8 +420,6 @@
         .cw-blob1 { width:320px; height:320px; background:var(--bubble-mine); opacity:0.32; top:-70px; left:-70px; animation-delay:0s; }
         .cw-blob2 { width:280px; height:280px; background:#4a6cf7; opacity:0.24; bottom:12%; right:-90px; animation-delay:-4s; }
         .cw-blob3 { width:260px; height:260px; background:#b347f0; opacity:0.2; top:42%; left:15%; animation-delay:-8s; }
-        .cw-dots { color:rgba(255,255,255,0.5); }
-        [data-theme="light"] .cw-dots { color:rgba(0,0,0,0.4); }
         .scroll-fab { position:fixed; right:1rem; z-index:500; width:42px; height:42px; border-radius:50%; background:rgba(30,30,45,0.92); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); border:1.5px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.8); cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 16px rgba(0,0,0,0.4); transition:opacity 0.2s, transform 0.2s; bottom:calc(5.5rem + var(--safe-bottom,0)); }
         .scroll-fab.hidden { opacity:0; transform:scale(0.7); pointer-events:none; }
         .scroll-fab-badge { position:absolute; top:-4px; right:-4px; background:var(--bubble-mine); color:#fff; font-size:0.6rem; font-weight:800; border-radius:10px; padding:1px 5px; min-width:16px; text-align:center; display:none; }
@@ -1037,7 +1035,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
-        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v3</div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v5</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
@@ -1091,14 +1089,6 @@
         <div class="cw-blob cw-blob1"></div>
         <div class="cw-blob cw-blob2"></div>
         <div class="cw-blob cw-blob3"></div>
-        <svg width="400" height="400" xmlns="http://www.w3.org/2000/svg" style="position:absolute;inset:0;width:100%;height:100%;opacity:0.5;">
-          <defs>
-            <pattern id="wp-dots" width="26" height="26" patternUnits="userSpaceOnUse">
-              <circle cx="2" cy="2" r="1.4" fill="currentColor"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#wp-dots)" class="cw-dots"/>
-        </svg>
     </div>
 
     <div class="chat-messages" id="chatWorkspace">
@@ -1721,6 +1711,20 @@
             try { Notification.requestPermission().catch(() => {}); } catch (e) {}
         }
     }
+    // Avisar al service worker que cierre TODAS las notificaciones pendientes
+    // (evita que se acumulen/resuman como "6 notificaciones" en el Centro de
+    // Notificaciones aunque el mensaje ya se haya leído dentro de la app).
+    function clearPendingNotifications() {
+        if (!notificationsSupported() || !navigator.serviceWorker) return;
+        navigator.serviceWorker.ready.then(reg => {
+            if (reg.active) reg.active.postMessage({ type: 'CLEAR_NOTIFICATIONS' });
+        }).catch(() => {});
+    }
+    // Limpiar también cada vez que la app vuelve a primer plano (no solo al
+    // entrar la primera vez), por si llegaron mensajes mientras estaba minimizada.
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && inChat) clearPendingNotifications();
+    });
     function showOfferNotification() {
         // Desactivado: el servidor (server.js) ya envía UNA notificación push limpia
         // por cada mensaje recibido. Las notificaciones locales causaban duplicados.
@@ -2284,6 +2288,7 @@
         document.documentElement.style.setProperty('--bubble-mine', myBubbleColor);
         const ctx = getAudioCtx(); if (ctx && ctx.state === 'suspended') ctx.resume();
         requestNotificationPermission();
+        clearPendingNotifications();
         // Registrar presencia AHORA que el usuario entró al canal
         registerPresence();
         recomputeOnline();
