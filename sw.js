@@ -47,14 +47,32 @@ self.addEventListener('push', (event) => {
 
 // Al tocar la notificación: abrir/enfocar la app
 self.addEventListener('notificationclick', (event) => {
+    const tag = event.notification.tag;
     event.notification.close();
     const targetUrl = (event.notification.data && event.notification.data.url) || '/';
     event.waitUntil(
-        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            for (const client of clientList) {
-                if ('focus' in client) return client.focus();
-            }
-            if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
-        })
+        Promise.all([
+            // Cerrar TODAS las notificaciones pendientes del mismo tipo (no solo
+            // la que se tocó), para que no queden acumuladas/resumidas en el
+            // Centro de Notificaciones aunque ya se haya leído el mensaje.
+            self.registration.getNotifications({ tag }).then(list => list.forEach(n => n.close())),
+            self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+                for (const client of clientList) {
+                    if ('focus' in client) return client.focus();
+                }
+                if (self.clients.openWindow) return self.clients.openWindow(targetUrl);
+            })
+        ])
     );
+});
+
+// Si la app se abre directo (sin tocar la notificación) y ya hay mensajes
+// leídos, limpiar igual las notificaciones pendientes al recibir aviso
+// de la página (ver clearPendingNotifications() en index.html).
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'CLEAR_NOTIFICATIONS') {
+        event.waitUntil(
+            self.registration.getNotifications().then(list => list.forEach(n => n.close()))
+        );
+    }
 });
