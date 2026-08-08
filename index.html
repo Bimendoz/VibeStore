@@ -1398,7 +1398,20 @@
     ];
 
     let cart = {}; let curCat = 'all'; let toastTimer;
-    let myName = ''; let myId = 'user_' + Math.random().toString(36).slice(2,8);
+    let myName = ''; let myId = ''; // se fija de forma ESTABLE (por identidad) al entrar, ver joinChat()
+    // Convierte un nombre en un identificador fijo y predecible: "León" y "Luna"
+    // SIEMPRE producen el mismo id, sin importar el dispositivo o cuántas veces
+    // se abra la app. Antes se generaba un id AL AZAR en cada sesión, lo que
+    // rompía la identidad de los mensajes viejos al volver a entrar (se veían
+    // todos como si los hubiera escrito la otra persona) y además creaba una
+    // suscripción de notificaciones nueva y huérfana cada vez (causa probable
+    // de las notificaciones duplicadas).
+    function identitySlug(name) {
+        const slug = String(name || '').toLowerCase()
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // quitar tildes
+            .replace(/[^a-z0-9]/g, '');
+        return slug ? 'user_' + slug : '';
+    }
     let seenKeys = new Set(); let inChat = false;
     let localStream; let peerConnection; let activeCallRef;
     let isMuted = false; let isVideoOff = false;
@@ -1451,8 +1464,8 @@
     const SECRET_PIN_HASH = "10231121";
 
     const messagesRef = ref(db, 'chat/messages');
-    const typingRef   = ref(db, 'chat/typing/' + myId);
-    const presenceRef = ref(db, 'chat/presence/' + myId);
+    let typingRef   = null; // se fija en joinChat(), cuando myId ya tiene su valor estable
+    let presenceRef = null; // ídem
     const callsRef    = ref(db, 'chat/calls');
     const keysRef     = ref(db, 'chat/keys');
 
@@ -2092,6 +2105,11 @@
             } else { myName = 'Luna'; }
         }
         if (!myName) return;
+        // Identificador ESTABLE por identidad (no aleatorio): así "León" y "Luna"
+        // siempre tienen el mismo id, en cualquier dispositivo o sesión.
+        myId = identitySlug(myName) || myId || ('user_' + Math.random().toString(36).slice(2,8));
+        typingRef = ref(db, 'chat/typing/' + myId);
+        presenceRef = ref(db, 'chat/presence/' + myId);
         inChat = true; document.getElementById('nameModal').classList.remove('show');
         // ✨ Mostrar pantalla de bienvenida personalizada antes del chat
         // Escuchar mensajes que Luna deja para León
@@ -2399,7 +2417,11 @@
                 else if (msg.type === 'sticker') msg.sticker = clear;
             }
         }
-        const isMe = msg.senderId === myId;
+        // isMe: primero por id (lo normal a partir de ahora); si no coincide,
+        // respaldo por NOMBRE — así los mensajes de ANTES de este arreglo
+        // (guardados con el viejo id aleatorio) se reconocen correctamente
+        // en vez de verse todos como si fueran de la otra persona.
+        const isMe = msg.senderId === myId || (msg.sender && identitySlug(msg.sender) === myId);
         const wrap = document.createElement('div');
         wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
         wrap.id = `wrap-${key}`;
@@ -2992,6 +3014,7 @@
     };
 
     window.initiateCall = async function(type) {
+        if (callActive) { showToast('Ya tienes una llamada activa 📞'); return; }
         if (isRecording) { showToast('Termina la nota de voz antes de llamar 🎤'); return; }
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('seccion-facetime').style.display = 'flex';
@@ -3013,6 +3036,18 @@
         activeCallRef = push(callsRef);
         callActive = true;
         await set(activeCallRef, { type, caller: myName, callerId: myId, avatar: myAvatar || '📞', status: 'calling', ts: Date.now() });
+        // Si nadie contesta en 35s, cerrar la llamada sola en vez de dejarla
+        // "Llamando..." para siempre (coincide con la ventana de 30s del lado
+        // de quien recibe, más un pequeño margen).
+        const thisCallKey = activeCallRef.key;
+        const noAnswerTimer = setTimeout(() => {
+            if (callActive && activeCallRef && activeCallRef.key === thisCallKey) {
+                update(ref(db, `chat/calls/${thisCallKey}`), { status: 'ended' }).catch(()=>{});
+                setCallStatus('No contestaron', false, false);
+                showToast('No contestaron la llamada 📵');
+                setTimeout(() => hangUpCall(), 900);
+            }
+        }, 35000);
         await buildRtcConfig();
         peerConnection = new RTCPeerConnection(rtcConfig);
         monitorConnection(peerConnection);
@@ -3030,6 +3065,7 @@
         await update(activeCallRef, { offer: { type: offer.type, sdp: offer.sdp } });
         onValue(ref(db, `chat/calls/${activeCallRef.key}`), async snap => {
             const d = snap.val();
+            if (d && d.status === 'accepted') clearTimeout(noAnswerTimer);
             if (d && d.status === 'accepted' && d.answer && peerConnection && !peerConnection.currentRemoteDescription) {
                 setCallStatus('Conectando', true, false);
                 if (d.receiverAvatar) document.getElementById('ftAvatar').textContent = d.receiverAvatar;
@@ -3065,6 +3101,14 @@
                 call.callerId !== myId && call.status === 'calling' && (!call.ts || (now - call.ts) < 30000)
             );
             if (entry && (!pendingIncoming || pendingIncoming.key !== entry[0])) {
+                if (callActive) {
+                    // Ya está en una llamada: rechazar automáticamente la nueva
+                    // (como el "ocupado" de un teléfono real), sin mostrar pantalla.
+                    const busyRef = ref(db, `chat/calls/${entry[0]}`);
+                    update(busyRef, { status: 'ended' }).catch(()=>{});
+                    setTimeout(() => remove(busyRef).catch(() => {}), 1500);
+                    return;
+                }
                 pendingIncoming = { key: entry[0], call: entry[1] };
                 showIncomingScreen(entry[1]);
             } else if (!entry && pendingIncoming) {
@@ -3099,7 +3143,9 @@
         const { key } = pendingIncoming;
         pendingIncoming = null;
         hideIncomingScreen();
-        update(ref(db, `chat/calls/${key}`), { status: 'ended' });
+        const callRef = ref(db, `chat/calls/${key}`);
+        update(callRef, { status: 'ended' });
+        setTimeout(() => remove(callRef).catch(() => {}), 1500);
     };
 
     async function acceptIncomingCall(key, call) {
@@ -3814,7 +3860,7 @@
             } else {
                 const wrap = document.getElementById(`wrap-${key}`);
                 if (!wrap) return;
-                const isMe = msg.senderId === myId;
+                const isMe = msg.senderId === myId || (msg.sender && identitySlug(msg.sender) === myId);
                 const wasRead = msg.readBy && Object.keys(msg.readBy).some(id => id !== msg.senderId);
                 if (isMe && wasRead) {
                     const receipt = wrap.querySelector('.msg-receipt');
