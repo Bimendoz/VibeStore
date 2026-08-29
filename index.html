@@ -38,12 +38,25 @@
             padding-bottom: 0.65rem;
             padding-left: 0.85rem;
             padding-right: 0.85rem;
+            position: relative;
+            min-height: 58px;
+            z-index: 2;
+        }
+        /* El desenfoque va en un elemento interno, NO directo sobre el header fijo.
+           Safari 26 (Liquid Glass) compone su propio efecto de vidrio sobre los
+           elementos fijos pegados al borde de la pantalla; si el backdrop-filter
+           está puesto directo ahí, se mezcla mal con el de Safari y se ve un
+           desenfoque doble/raro. Poniéndolo en un ::before interno, Safari ya no
+           lo confunde con su propia barra de sistema. */
+        .chat-header::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
             background: color-mix(in srgb, var(--bubble-mine) 8%, rgba(20,20,30,0.7));
             -webkit-backdrop-filter: blur(28px) saturate(1.6);
             backdrop-filter: blur(28px) saturate(1.6);
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            min-height: 58px;
-            z-index: 2;
             transition: background 0.4s;
         }
         .chat-messages {
@@ -65,11 +78,22 @@
             align-items: center;
             padding: 0.55rem 0.75rem;
             padding-bottom: max(0.55rem, env(safe-area-inset-bottom, 0px));
+            position: relative;
+            z-index: 2;
+        }
+        /* Mismo motivo que .chat-header::before: el desenfoque va en un elemento
+           interno, no directo sobre la barra fija pegada abajo — evita el
+           desenfoque doble/raro que genera Safari 26 al mezclar su propio
+           efecto de vidrio con el nuestro. */
+        .chat-input-area::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: -1;
             background: rgba(20,20,30,0.72);
             -webkit-backdrop-filter: blur(28px) saturate(1.6);
             backdrop-filter: blur(28px) saturate(1.6);
             border-top: 1px solid rgba(255,255,255,0.1);
-            z-index: 2;
         }
         .reply-bar {
             display: none;
@@ -1084,7 +1108,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
-        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v14</div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v15</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
