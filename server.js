@@ -293,3 +293,58 @@ listenFirebasePath('chat/calls', {
         notifyOthers(call.callerId, true);
     }
 });
+
+// ── Citas: avisos recurrentes a medida que se acerca la hora (24h, 1h, 15min,
+//    y al momento exacto) — van a AMBOS, ya que la cita es de los dos. Sigue
+//    disfrazado de tienda, igual que el resto de notificaciones. ────────────────
+let citasCache = {};
+const CITA_REMINDER_OFFSETS = [
+    { key: 'sent_24h', ms: 24 * 3600000, title: '🛍️ VibeStore — Recordatorio de pedido', body: 'Tu pedido llega mañana. ¡Prepárate!' },
+    { key: 'sent_1h',  ms: 3600000,       title: '🛍️ VibeStore — Tu pedido está cerca',   body: 'Tu pedido llega en 1 hora.' },
+    { key: 'sent_15m', ms: 15 * 60000,    title: '🚨 VibeStore — ¡Últimos minutos!',        body: 'Tu pedido llega en 15 minutos.' },
+    { key: 'sent_now', ms: 0,             title: '🚨 VibeStore — ¡Tu pedido llegó!',        body: 'Confírmalo ahora mismo.' }
+];
+
+listenFirebasePath('chat/citas', {
+    onInitial: (data) => { citasCache = data || {}; },
+    onChild: (id, data) => { citasCache[id] = data; }
+});
+
+async function notifyCitaReminder(payload) {
+    if (!pushEnabled) return;
+    const targets = Object.entries(subscriptions); // a AMBOS, no solo "los otros"
+    if (!targets.length) return;
+    const body = JSON.stringify(payload);
+    for (const [userId, sub] of targets) {
+        try { await webpush.sendNotification(sub, body); }
+        catch (err) {
+            if (err.statusCode === 410 || err.statusCode === 404) {
+                fbDelete(`chat/push/${userId}`);
+                delete subscriptions[userId];
+            }
+        }
+    }
+}
+
+setInterval(async () => {
+    const now = Date.now();
+    for (const [id, cita] of Object.entries(citasCache)) {
+        if (!cita || !cita.datetime) continue;
+        const diff = cita.datetime - now;
+        if (diff < -3600000) continue; // ya pasó hace más de 1h, ignorar del todo
+        let actual = cita; // acumulador local: se actualiza en cada paso, para no
+                            // perder una marca ya puesta si dos avisos cruzan su
+                            // umbral en la misma revisión (ej. 1h y 15min a la vez)
+        for (const offset of CITA_REMINDER_OFFSETS) {
+            if (actual[offset.key]) continue; // este aviso ya se mandó, no repetir
+            if (diff <= offset.ms) {
+                actual = { ...actual, [offset.key]: true };
+                citasCache[id] = actual;
+                await fbPut(`chat/citas/${id}`, actual);
+                console.log(`[Citas] Aviso "${offset.key}" enviado para "${cita.title}"`);
+                notifyCitaReminder({ title: offset.title, body: offset.body, tag: 'vibestore-cita' });
+            }
+        }
+    }
+}, 30000); // revisar cada 30 segundos
+
