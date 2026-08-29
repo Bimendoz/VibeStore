@@ -479,6 +479,28 @@
         [data-theme="light"] .chat-menu { background:rgba(255,255,255,0.96); }
         [data-theme="light"] .chat-menu-item { color:rgba(0,0,0,0.85); border-bottom-color:rgba(0,0,0,.06); }
         .chat-offline-banner { display:none; align-self:center; font-size:0.72rem; color:rgba(255,255,255,.65); background:var(--sys-pill); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); padding:0.28rem 0.9rem; border-radius:12px; margin:0.2rem auto; text-align:center; position:relative; z-index:1; }
+        /* ═══ CUENTA REGRESIVA en el chat (banner fijo arriba) ═══ */
+        .cita-banner { align-self:center; max-width:88%; text-align:center; background:linear-gradient(135deg, rgba(255,107,157,0.22), rgba(123,75,255,0.22)); border:1px solid rgba(255,255,255,0.15); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); padding:0.5rem 1rem; border-radius:14px; margin:0.3rem auto; position:relative; z-index:1; cursor:pointer; transition:transform 0.12s; }
+        .cita-banner:active { transform:scale(0.97); }
+        .cita-banner-title { font-size:0.76rem; font-weight:700; color:#fff; margin-bottom:1px; }
+        .cita-banner-count { font-size:0.82rem; font-weight:800; color:#ffd6e8; font-variant-numeric:tabular-nums; }
+        /* ═══ PANTALLA DE CITAS ═══ */
+        #citasScreen { position:fixed; inset:0; z-index:1900; background:var(--chat-bg,#0d1117); display:none; flex-direction:column; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+        #citasScreen.show { display:flex; animation:lmSlideIn 0.3s ease; }
+        .citas-form { display:flex; flex-direction:column; gap:0.6rem; padding:0 1.1rem 0.6rem; }
+        .citas-form input[type="text"] { background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.12); border-radius:13px; padding:0.85rem 1rem; color:var(--text-main); font-size:0.9rem; outline:none; }
+        .citas-form input[type="datetime-local"] { background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.12); border-radius:13px; padding:0.75rem 1rem; color:var(--text-main); font-size:0.9rem; outline:none; -webkit-appearance:none; color-scheme:dark; }
+        [data-theme="light"] .citas-form input[type="datetime-local"] { color-scheme:light; }
+        .citas-list { display:flex; flex-direction:column; gap:0.7rem; padding:0 1.1rem 1.5rem; }
+        .cita-card { background:linear-gradient(135deg, rgba(255,107,157,0.14), rgba(123,75,255,0.14)); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:0.9rem 1rem; }
+        .cita-card-title { font-size:0.92rem; font-weight:800; color:var(--text-main); margin-bottom:0.15rem; }
+        .cita-card-date { font-size:0.78rem; color:rgba(255,255,255,0.55); margin-bottom:0.5rem; }
+        [data-theme="light"] .cita-card-date { color:rgba(0,0,0,0.5); }
+        .cita-card-count { font-size:0.9rem; font-weight:700; color:#ff8fb3; font-variant-numeric:tabular-nums; margin-bottom:0.7rem; }
+        .cita-card-actions { display:flex; gap:0.5rem; }
+        .cita-btn { flex:1; padding:0.55rem 0.5rem; border-radius:10px; border:none; font-size:0.78rem; font-weight:700; cursor:pointer; }
+        .cita-btn.cal { background:rgba(255,255,255,0.12); color:var(--text-main); }
+        .cita-btn.del { background:rgba(255,69,58,0.18); color:#ff8a80; }
         .chat-offline-banner.show { display:block; }
         .msg-system { align-self:center; font-size:0.72rem; color:rgba(255,255,255,.62); background:var(--sys-pill); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); padding:0.25rem 0.85rem; border-radius:11px; margin:0.5rem auto; z-index:1; position:relative; }
         [data-theme="light"] .msg-system { color:rgba(0,0,0,.55); }
@@ -1050,6 +1072,10 @@
             💌 Mensajes para Luna
             <span id="menuLeonBadge" style="display:none; margin-left:auto; width:9px; height:9px; border-radius:50%; background:#ff453a; box-shadow:0 0 0 2px rgba(255,69,58,0.3);"></span>
         </div>
+        <div class="chat-menu-item" onclick="closeChatMenu(); openCitasScreen()">
+            <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+            📅 Crear una cita
+        </div>
         <div class="chat-menu-item" onclick="closeChatMenu(); openTrashMenu()">
             <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
             Vaciar conversación
@@ -1058,7 +1084,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
-        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v13</div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v14</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
@@ -1126,6 +1152,24 @@
         <div class="lm-list" id="lfList"></div>
     </div>
 
+    <!-- Pantalla: Crear una cita con fecha, hora y cuenta regresiva -->
+    <div id="citasScreen">
+        <div class="lm-header" style="background:linear-gradient(135deg,#ff6b9d,#7b4bff);">
+            <button class="lm-back" onclick="closeCitasScreen()" aria-label="Volver">
+                <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+            <div class="lm-title">📅 Crear una cita</div>
+        </div>
+        <div class="lm-intro">Elige el día y la hora — la otra persona lo verá al instante, con cuenta regresiva y avisos antes de que llegue. 💫</div>
+        <div class="citas-form">
+            <input type="text" id="citaTitulo" placeholder="¿Qué van a hacer? (opcional)" maxlength="60" autocomplete="off">
+            <input type="datetime-local" id="citaFecha">
+            <button class="lm-add-btn" onclick="crearCita()" style="background:linear-gradient(135deg,#ff6b9d,#7b4bff);">Crear cita</button>
+        </div>
+        <div class="lm-suggest-title">Próximas citas</div>
+        <div class="citas-list" id="citasList"></div>
+    </div>
+
     <div class="chat-wallpaper" aria-hidden="true" style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;">
         <div class="cw-blob cw-blob1"></div>
         <div class="cw-blob cw-blob2"></div>
@@ -1139,6 +1183,10 @@
             <div class="ces-sub">Escribe algo para empezar la conversación</div>
         </div>
         <div class="chat-offline-banner" id="chatOfflineBanner">⏳ La otra persona aún no está conectada</div>
+        <div class="cita-banner" id="citaBanner" style="display:none" onclick="openCitasScreen()">
+            <div class="cita-banner-title" id="citaBannerTitle"></div>
+            <div class="cita-banner-count" id="citaBannerCount"></div>
+        </div>
         <div class="typing-wrap" id="typingWrap">
             <div class="typing-bubble">
                 <span class="typing-name" id="typingName"></span>
@@ -2268,6 +2316,137 @@
         }).join('');
     }
 
+    // ═══ CITAS: fecha y hora para verse, con cuenta regresiva y aviso al Calendario ═══
+    let _citas = [];
+
+    function listenCitas() {
+        onValue(ref(db, 'chat/citas'), snap => {
+            const data = snap.val() || {};
+            _citas = Object.entries(data)
+                .map(([id, v]) => ({ id, ...v }))
+                .filter(c => c.datetime > Date.now() - 3600000) // ocultar las que ya pasaron hace más de 1h
+                .sort((a, b) => a.datetime - b.datetime);
+            renderCitas();
+            updateCitaBanner();
+        });
+    }
+
+    window.openCitasScreen = function() {
+        document.getElementById('citasScreen').classList.add('show');
+        renderCitas();
+    };
+    window.closeCitasScreen = function() {
+        document.getElementById('citasScreen').classList.remove('show');
+    };
+
+    window.crearCita = async function() {
+        const tituloEl = document.getElementById('citaTitulo');
+        const fechaEl = document.getElementById('citaFecha');
+        const titulo = tituloEl.value.trim() || 'Nuestra cita';
+        if (!fechaEl.value) { showToast('Elige una fecha y hora'); return; }
+        const datetime = new Date(fechaEl.value).getTime();
+        if (isNaN(datetime) || datetime <= Date.now()) { showToast('Elige una fecha futura'); return; }
+        try {
+            const newRef = push(ref(db, 'chat/citas'));
+            await set(newRef, { title: titulo, datetime, createdBy: myId, createdByName: myName });
+            tituloEl.value = ''; fechaEl.value = '';
+            showToast('📅 Cita creada — ya se la avisamos');
+        } catch (err) {
+            showToast('⚠️ No se pudo crear la cita. Revisa tu conexión.');
+        }
+    };
+
+    window.deleteCita = async function(id) {
+        try { await set(ref(db, 'chat/citas/' + id), null); }
+        catch (err) { showToast('⚠️ No se pudo borrar. Intenta de nuevo.'); }
+    };
+
+    // Texto de cuenta regresiva legible ("2d 4h 12m" o "¡Es ahora!")
+    function formatoCuentaRegresiva(datetime) {
+        const diff = datetime - Date.now();
+        if (diff <= 0) return '🎉 ¡Es ahora!';
+        const d = Math.floor(diff / 86400000);
+        const h = Math.floor((diff % 86400000) / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        if (d > 0) return `Faltan ${d}d ${h}h ${m}m`;
+        if (h > 0) return `Faltan ${h}h ${m}m`;
+        if (m > 0) return `Faltan ${m}m ${s}s`;
+        return `Faltan ${s}s`;
+    }
+
+    function renderCitas() {
+        const list = document.getElementById('citasList');
+        if (!list) return;
+        if (!_citas.length) {
+            list.innerHTML = '<div class="lm-empty">Aún no hay citas.<br>Crea la primera arriba 📅</div>';
+            return;
+        }
+        list.innerHTML = _citas.map(c => {
+            const fecha = new Date(c.datetime).toLocaleString('es', { weekday:'long', day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
+            return `
+            <div class="cita-card">
+                <div class="cita-card-title">${escHtml(c.title)}</div>
+                <div class="cita-card-date">${fecha}</div>
+                <div class="cita-card-count" data-cita-id="${c.id}">${formatoCuentaRegresiva(c.datetime)}</div>
+                <div class="cita-card-actions">
+                    <button class="cita-btn cal" onclick="agregarCitaAlCalendario('${c.id}')">📆 Agregar al Calendario</button>
+                    <button class="cita-btn del" onclick="deleteCita('${c.id}')">Borrar</button>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // Actualiza el banner fijo del chat con la PRÓXIMA cita
+    function updateCitaBanner() {
+        const banner = document.getElementById('citaBanner');
+        if (!banner) return;
+        const proxima = _citas[0];
+        if (!proxima) { banner.style.display = 'none'; return; }
+        banner.style.display = 'block';
+        document.getElementById('citaBannerTitle').textContent = '📅 ' + proxima.title;
+        document.getElementById('citaBannerCount').textContent = formatoCuentaRegresiva(proxima.datetime);
+    }
+
+    // Refrescar todos los textos de cuenta regresiva visibles cada segundo, sin
+    // re-renderizar toda la lista (más liviano, evita parpadeos).
+    setInterval(() => {
+        if (!_citas.length) return;
+        updateCitaBanner();
+        document.querySelectorAll('[data-cita-id]').forEach(el => {
+            const c = _citas.find(x => x.id === el.getAttribute('data-cita-id'));
+            if (c) el.textContent = formatoCuentaRegresiva(c.datetime);
+        });
+    }, 1000);
+
+    // Generar un archivo .ics (estándar de calendario) para que el iPhone lo
+    // reconozca y ofrezca agregarlo directo a la app Calendario, con su propio
+    // recordatorio/alerta — esto es lo más parecido a "poner una alarma" que
+    // se puede hacer desde una app web: no se puede crear una alarma nativa
+    // de la app Reloj de iOS desde el navegador (Apple no lo permite por
+    // seguridad), pero un evento de Calendario con alerta cumple la misma
+    // función — el teléfono avisa igual a la hora elegida.
+    window.agregarCitaAlCalendario = function(id) {
+        const c = _citas.find(x => x.id === id);
+        if (!c) return;
+        const start = new Date(c.datetime);
+        const end = new Date(c.datetime + 60 * 60000); // 1 hora de duración por defecto
+        const fmt = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+        const ics = [
+            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//VibeStore//Cita//ES', 'BEGIN:VEVENT',
+            `UID:${id}@vibestore`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
+            `SUMMARY:${c.title}`, 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Recordatorio', 'TRIGGER:-PT15M', 'END:VALARM',
+            'END:VEVENT', 'END:VCALENDAR'
+        ].join('\r\n');
+        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'cita.ics';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 3000);
+    };
+
+
     function getWelcomeMessages(name) {
         const h = new Date().getHours();
         const isLuna = /luna/i.test(name);
@@ -2520,6 +2699,7 @@
         listenLunaCardReminder();
         listenLeonMessages();
         listenLeonCardReminder();
+        listenCitas();
         // Mostrar la opción "Mensajes para León" solo si quien entra es Luna,
         // y "Mensajes para Luna" solo si quien entra es León
         const menuLuna = document.getElementById('menuLunaMessages');
@@ -4501,6 +4681,8 @@
         if (lunaScreen) window._resetLunaMsgViewport = attachKeyboardFix(lunaScreen, ['lmInput'], 'lmList');
         const leonScreen = document.getElementById('leonMessagesScreen');
         if (leonScreen) window._resetLeonMsgViewport = attachKeyboardFix(leonScreen, ['lfInput'], 'lfList');
+        const citasScreen = document.getElementById('citasScreen');
+        if (citasScreen) window._resetCitasViewport = attachKeyboardFix(citasScreen, ['citaTitulo'], 'citasList');
     })();
 
     /* ── FIX teclado en el modal de pago ──────────────────────────────
