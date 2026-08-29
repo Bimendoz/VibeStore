@@ -138,6 +138,10 @@ async function notifyOthers(senderId, isCall) {
         });
     console.log(`[WebPush] Enviando a ${targets.length} destinatario(s)...`);
     for (const [userId, sub] of targets) {
+        if (isRecipientActivelyViewing(userId)) {
+            console.log(`[WebPush] ${userId} ya está viendo el chat en vivo — se omite notificación`);
+            continue;
+        }
         try {
             await webpush.sendNotification(sub, payload);
             console.log(`[WebPush] ✓ enviado a ${userId}`);
@@ -158,8 +162,8 @@ async function notifyOthers(senderId, isCall) {
 // Esta función sirve tanto para mensajes como para llamadas (evita duplicar el parser SSE).
 const SERVER_START = Date.now();
 
-function listenFirebasePath(path, handlers) {
-    const url = `${DB_BASE}/${path}.json`;
+function listenFirebasePath(path, handlers, queryParams) {
+    const url = `${DB_BASE}/${path}.json${queryParams ? '?' + queryParams : ''}`;
     const options = { headers: { 'Accept': 'text/event-stream' } };
 
     const req = https.get(url, options, (res) => {
@@ -201,18 +205,41 @@ function listenFirebasePath(path, handlers) {
 
         res.on('end', () => {
             console.log(`[Firebase] Stream cerrado (${path}), reconectando en 3s...`);
-            setTimeout(() => listenFirebasePath(path, handlers), 3000);
+            setTimeout(() => listenFirebasePath(path, handlers, queryParams), 3000);
         });
     });
 
     req.on('error', (e) => {
         console.error(`[Firebase] Error de stream (${path}):`, e.message, '— reintentando en 5s');
-        setTimeout(() => listenFirebasePath(path, handlers), 5000);
+        setTimeout(() => listenFirebasePath(path, handlers, queryParams), 5000);
     });
+}
+
+// ── Presencia en tiempo real (para saber si la otra persona YA está viendo
+//    el chat en vivo, y en ese caso NO mandarle notificación — ya lo está
+//    viendo con sus propios ojos, no hace falta avisarle) ────────────────────────────
+const presenceCache = {};   // { userId: { online: true/false, ts: 169... } }
+const PRESENCE_FRESH_MS = 20000; // el cliente manda "latido" cada 12s; 20s de margen
+
+listenFirebasePath('chat/presence', {
+    onInitial: (data) => { Object.assign(presenceCache, data); },
+    onChild: (userId, data) => { presenceCache[userId] = data; }
+});
+
+function isRecipientActivelyViewing(userId) {
+    const p = presenceCache[userId];
+    if (!p || !p.online || !p.ts) return false;
+    return (Date.now() - p.ts) < PRESENCE_FRESH_MS;
 }
 
 // ── Mensajes de chat ──────────────────────────────────────────────────────────────────
 const seenKeys = new Set();   // claves de mensajes ya procesados, para no duplicar
+
+// Agrupar mensajes seguidos del MISMO remitente en una sola notificación, en vez
+// de mandar una por cada mensaje (si llegan 6 mensajes en ráfaga, antes salían
+// 6 avisos; ahora sale UNO solo, esperando un breve margen por si siguen llegando).
+const pendingNotify = {}; // { senderId: timeoutId }
+const NOTIFY_DEBOUNCE_MS = 2500;
 
 function handleMessage(key, msg) {
     if (!msg || !msg.senderId) return;
@@ -224,9 +251,19 @@ function handleMessage(key, msg) {
         return; // mensaje anterior al arranque del server → ya fue notificado antes
     }
     console.log(`[Firebase] Mensaje nuevo (${key}) de ${msg.senderId}`);
-    notifyOthers(msg.senderId, false);
+
+    if (pendingNotify[msg.senderId]) clearTimeout(pendingNotify[msg.senderId]);
+    pendingNotify[msg.senderId] = setTimeout(() => {
+        delete pendingNotify[msg.senderId];
+        notifyOthers(msg.senderId, false);
+    }, NOTIFY_DEBOUNCE_MS);
 }
 
+// Solo se piden los últimos 20 mensajes (no el historial completo) en cada
+// conexión/reconexión — el servidor solo necesita saber de mensajes NUEVOS
+// para notificar, así que traer todo el historial completo (con fotos y notas
+// de voz incluidas) en cada reinicio del servidor era ancho de banda
+// desperdiciado. Esto es el mismo límite que ya usa la propia app del chat.
 listenFirebasePath('chat/messages', {
     onInitial: (data) => {
         Object.keys(data).forEach(k => seenKeys.add(k));
@@ -236,7 +273,7 @@ listenFirebasePath('chat/messages', {
         if (!data.senderId) return; // sin senderId no es un mensaje completo
         handleMessage(key, data);
     }
-});
+}, 'orderBy=%22$key%22&limitToLast=20');
 
 // ── Llamadas entrantes (antes NO enviaban notificación — si el teléfono tenía
 //    la app cerrada, la llamada nunca se sabía) ──────────────────────────────────────
