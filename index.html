@@ -513,8 +513,13 @@
         #citasScreen.show { display:flex; animation:lmSlideIn 0.3s ease; }
         .citas-form { display:flex; flex-direction:column; gap:0.6rem; padding:0 1.1rem 0.6rem; }
         .citas-form input[type="text"] { background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.12); border-radius:13px; padding:0.85rem 1rem; color:var(--text-main); font-size:0.9rem; outline:none; }
-        .citas-form input[type="datetime-local"] { background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.12); border-radius:13px; padding:0.75rem 1rem; color:var(--text-main); font-size:0.9rem; outline:none; -webkit-appearance:none; color-scheme:dark; }
-        [data-theme="light"] .citas-form input[type="datetime-local"] { color-scheme:light; }
+        .citas-label { display:block; font-size:0.72rem; font-weight:700; color:rgba(255,255,255,0.5); margin-bottom:0.3rem; text-transform:uppercase; letter-spacing:0.3px; }
+        [data-theme="light"] .citas-label { color:rgba(0,0,0,0.45); }
+        .citas-row { display:flex; gap:0.6rem; }
+        .citas-form input[type="date"], .citas-form input[type="time"] { width:100%; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.12); border-radius:13px; padding:0.75rem 0.8rem; color:var(--text-main); font-size:0.9rem; outline:none; -webkit-appearance:none; color-scheme:dark; }
+        [data-theme="light"] .citas-form input[type="date"], [data-theme="light"] .citas-form input[type="time"] { color-scheme:light; }
+        .citas-shortcut-help { margin:0 1.1rem 1rem; padding:0.8rem 0.9rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:13px; font-size:0.78rem; color:rgba(255,255,255,0.7); line-height:1.5; }
+        [data-theme="light"] .citas-shortcut-help { color:rgba(0,0,0,0.65); }
         .citas-list { display:flex; flex-direction:column; gap:0.7rem; padding:0 1.1rem 1.5rem; }
         .cita-card { background:linear-gradient(135deg, rgba(255,107,157,0.14), rgba(123,75,255,0.14)); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:0.9rem 1rem; }
         .cita-card-title { font-size:0.92rem; font-weight:800; color:var(--text-main); margin-bottom:0.15rem; }
@@ -1108,7 +1113,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
-        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v15</div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v16</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
@@ -1186,9 +1191,29 @@
         </div>
         <div class="lm-intro">Elige el día y la hora — la otra persona lo verá al instante, con cuenta regresiva y avisos antes de que llegue. 💫</div>
         <div class="citas-form">
-            <input type="text" id="citaTitulo" placeholder="¿Qué van a hacer? (opcional)" maxlength="60" autocomplete="off">
-            <input type="datetime-local" id="citaFecha">
+            <label class="citas-label" for="citaTitulo">¿Qué van a hacer?</label>
+            <input type="text" id="citaTitulo" placeholder="Ej: Cena, videollamada, salida..." maxlength="60" autocomplete="off">
+            <div class="citas-row">
+                <div style="flex:1;">
+                    <label class="citas-label" for="citaFechaDia">Fecha</label>
+                    <input type="date" id="citaFechaDia">
+                </div>
+                <div style="flex:1;">
+                    <label class="citas-label" for="citaFechaHora">Hora</label>
+                    <input type="time" id="citaFechaHora">
+                </div>
+            </div>
             <button class="lm-add-btn" onclick="crearCita()" style="background:linear-gradient(135deg,#ff6b9d,#7b4bff);">Crear cita</button>
+        </div>
+        <div id="shortcutHelp" class="citas-shortcut-help">
+            <b>¿Primera vez usando "Crear alarma"?</b> Necesitas armar un Atajo llamado <b>CrearAlarma</b> una sola vez, en la app Atajos de tu iPhone:
+            <ol style="margin:0.4rem 0 0.2rem 1.1rem; padding:0;">
+                <li>Abre la app <b>Atajos</b> → toca <b>+</b> (nuevo atajo)</li>
+                <li>Busca la acción <b>"Crear alarma"</b> y agrégala</li>
+                <li>Toca el campo de la hora → elige la variable <b>"Entrada de acceso directo"</b> en vez de una hora fija (esa variable recibe automáticamente la hora que le mande esta app)</li>
+                <li>Nombra el atajo exactamente <b>CrearAlarma</b> y guárdalo</li>
+            </ol>
+            Después de esto, el botón "⏰ Crear alarma" de cada cita se la va a proponer directo a la app Reloj.
         </div>
         <div class="lm-suggest-title">Próximas citas</div>
         <div class="citas-list" id="citasList"></div>
@@ -2357,6 +2382,11 @@
 
     window.openCitasScreen = function() {
         document.getElementById('citasScreen').classList.add('show');
+        const diaEl = document.getElementById('citaFechaDia');
+        if (diaEl && !diaEl.value) {
+            const hoy = new Date();
+            diaEl.value = `${hoy.getFullYear()}-${String(hoy.getMonth()+1).padStart(2,'0')}-${String(hoy.getDate()).padStart(2,'0')}`;
+        }
         renderCitas();
     };
     window.closeCitasScreen = function() {
@@ -2365,15 +2395,23 @@
 
     window.crearCita = async function() {
         const tituloEl = document.getElementById('citaTitulo');
-        const fechaEl = document.getElementById('citaFecha');
+        const diaEl = document.getElementById('citaFechaDia');
+        const horaEl = document.getElementById('citaFechaHora');
         const titulo = tituloEl.value.trim() || 'Nuestra cita';
-        if (!fechaEl.value) { showToast('Elige una fecha y hora'); return; }
-        const datetime = new Date(fechaEl.value).getTime();
-        if (isNaN(datetime) || datetime <= Date.now()) { showToast('Elige una fecha futura'); return; }
+        if (!diaEl.value || !horaEl.value) { showToast('Elige la fecha y la hora'); return; }
+        // Construir la fecha a partir de los componentes por separado (año, mes,
+        // día, hora, minuto) en vez de parsear un string combinado — así no hay
+        // ninguna ambigüedad de zona horaria ni confusión con la rueda de un
+        // solo selector: "hoy a las 8pm" siempre se arma bien, sin importar
+        // en qué momento del día estés eligiendo.
+        const [y, mo, d] = diaEl.value.split('-').map(Number);
+        const [h, mi] = horaEl.value.split(':').map(Number);
+        const datetime = new Date(y, mo - 1, d, h, mi).getTime();
+        if (isNaN(datetime) || datetime <= Date.now()) { showToast('Esa hora ya pasó — elige una en el futuro'); return; }
         try {
             const newRef = push(ref(db, 'chat/citas'));
             await set(newRef, { title: titulo, datetime, createdBy: myId, createdByName: myName });
-            tituloEl.value = ''; fechaEl.value = '';
+            tituloEl.value = ''; horaEl.value = '';
             showToast('📅 Cita creada — ya se la avisamos');
         } catch (err) {
             showToast('⚠️ No se pudo crear la cita. Revisa tu conexión.');
@@ -2414,7 +2452,7 @@
                 <div class="cita-card-date">${fecha}</div>
                 <div class="cita-card-count" data-cita-id="${c.id}">${formatoCuentaRegresiva(c.datetime)}</div>
                 <div class="cita-card-actions">
-                    <button class="cita-btn cal" onclick="agregarCitaAlCalendario('${c.id}')">📆 Agregar al Calendario</button>
+                    <button class="cita-btn cal" onclick="crearAlarmaParaCita('${c.id}')">⏰ Crear alarma</button>
                     <button class="cita-btn del" onclick="deleteCita('${c.id}')">Borrar</button>
                 </div>
             </div>`;
@@ -2450,24 +2488,22 @@
     // de la app Reloj de iOS desde el navegador (Apple no lo permite por
     // seguridad), pero un evento de Calendario con alerta cumple la misma
     // función — el teléfono avisa igual a la hora elegida.
-    window.agregarCitaAlCalendario = function(id) {
+    //
+    // ACTUALIZACIÓN: ahora se usa la app Atajos (Shortcuts) para crear una
+    // ALARMA de verdad en la app Reloj, no un evento de Calendario. Esto
+    // requiere que cada quien arme, una sola vez, un Atajo llamado
+    // "CrearAlarma" que reciba la hora y use la acción nativa "Crear alarma"
+    // (instrucciones visibles arriba de la lista de citas, en la app).
+    window.crearAlarmaParaCita = function(id) {
         const c = _citas.find(x => x.id === id);
         if (!c) return;
-        const start = new Date(c.datetime);
-        const end = new Date(c.datetime + 60 * 60000); // 1 hora de duración por defecto
-        const fmt = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-        const ics = [
-            'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//VibeStore//Cita//ES', 'BEGIN:VEVENT',
-            `UID:${id}@vibestore`, `DTSTAMP:${fmt(new Date())}`, `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
-            `SUMMARY:${c.title}`, 'BEGIN:VALARM', 'ACTION:DISPLAY', 'DESCRIPTION:Recordatorio', 'TRIGGER:-PT15M', 'END:VALARM',
-            'END:VEVENT', 'END:VCALENDAR'
-        ].join('\r\n');
-        const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'cita.ics';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 3000);
+        const d = new Date(c.datetime);
+        // Formato de hora simple (ej. "8:30 PM") — es lo que la acción nativa
+        // "Crear alarma" de Atajos espera para interpretar la hora correctamente.
+        const horaTexto = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        const url = `shortcuts://run-shortcut?name=CrearAlarma&input=text&text=${encodeURIComponent(horaTexto)}`;
+        showToast('⏰ Abriendo Atajos para crear la alarma...');
+        setTimeout(() => { window.location.href = url; }, 300);
     };
 
 
