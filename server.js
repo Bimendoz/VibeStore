@@ -111,7 +111,7 @@ refreshSubs();
 setInterval(refreshSubs, 20000); // refrescar cada 20s
 
 // ── Enviar push a todos menos al remitente ──────────────────────────────────────────────
-async function notifyOthers(senderId, isCall) {
+async function notifyOthers(senderId, kind) {
     if (!pushEnabled) {
         console.log('[WebPush] Notificaciones APAGADAS — no se envía nada');
         return;
@@ -121,22 +121,33 @@ async function notifyOthers(senderId, isCall) {
         console.log('[WebPush] No hay destinatarios (solo el remitente esta suscrito)');
         return;
     }
-    // Las llamadas siguen disfrazadas de tienda (no revelan que es una app de chat),
-    // pero con más urgencia: se quedan fijas en pantalla (no desaparecen solas) y
-    // usan una etiqueta distinta para no mezclarse con notificaciones de mensajes.
-    const payload = isCall
-        ? JSON.stringify({
+    // Las llamadas y el zumbido siguen disfrazados de tienda (no revelan que es
+    // una app de chat), pero con más urgencia que un mensaje normal: se quedan
+    // fijas en pantalla (no desaparecen solas) y usan una etiqueta distinta.
+    let payloadObj;
+    if (kind === 'call') {
+        payloadObj = {
             title: '🚨 VibeStore — ¡Última unidad disponible!',
             body:  'Tu pedido está a punto de expirar. Confírmalo ahora.',
             tag:   'vibestore-call',
             requireInteraction: true
-        })
-        : JSON.stringify({
+        };
+    } else if (kind === 'buzz') {
+        payloadObj = {
+            title: '🚨 VibeStore — ¡Gran promoción!',
+            body:  'Ingresa ya, no te lo pierdas: gran promoción por tiempo limitado.',
+            tag:   'vibestore-buzz',
+            requireInteraction: true
+        };
+    } else {
+        payloadObj = {
             title: '🛍️ VibeStore — Oferta especial',
             body:  'Tienes una promoción disponible. ¡Entra ahora!',
             tag:   'vibestore-msg'
-        });
-    console.log(`[WebPush] Enviando a ${targets.length} destinatario(s)...`);
+        };
+    }
+    const payload = JSON.stringify(payloadObj);
+    console.log(`[WebPush] Enviando (${kind || 'message'}) a ${targets.length} destinatario(s)...`);
     for (const [userId, sub] of targets) {
         if (isRecipientActivelyViewing(userId)) {
             console.log(`[WebPush] ${userId} ya está viendo el chat en vivo — se omite notificación`);
@@ -243,19 +254,25 @@ const NOTIFY_DEBOUNCE_MS = 2500;
 
 function handleMessage(key, msg) {
     if (!msg || !msg.senderId) return;
-    if (msg.type === 'buzz' || msg.type === 'system') return;
+    if (msg.type === 'system') return;
     if (key && seenKeys.has(key)) return;
     if (key) seenKeys.add(key);
     const ts = msg.ts || 0;
     if (!ts || ts < SERVER_START) {
         return; // mensaje anterior al arranque del server → ya fue notificado antes
     }
-    console.log(`[Firebase] Mensaje nuevo (${key}) de ${msg.senderId}`);
 
+    if (msg.type === 'buzz') {
+        console.log(`[Firebase] Zumbido (${key}) de ${msg.senderId}`);
+        notifyOthers(msg.senderId, 'buzz'); // aviso inmediato, sin agrupar
+        return;
+    }
+
+    console.log(`[Firebase] Mensaje nuevo (${key}) de ${msg.senderId}`);
     if (pendingNotify[msg.senderId]) clearTimeout(pendingNotify[msg.senderId]);
     pendingNotify[msg.senderId] = setTimeout(() => {
         delete pendingNotify[msg.senderId];
-        notifyOthers(msg.senderId, false);
+        notifyOthers(msg.senderId, 'message');
     }, NOTIFY_DEBOUNCE_MS);
 }
 
@@ -290,7 +307,7 @@ listenFirebasePath('chat/calls', {
         const ts = call.ts || 0;
         if (!ts || ts < SERVER_START) return; // llamada de antes de que el server arrancara
         console.log(`[Firebase] Llamada entrante (${key}) de ${call.callerId}`);
-        notifyOthers(call.callerId, true);
+        notifyOthers(call.callerId, 'call');
     }
 });
 
@@ -310,8 +327,6 @@ function formatoHoraCita(datetime) {
 }
 
 const CITA_REMINDER_OFFSETS = [
-    { key: 'sent_24h', ms: 24 * 3600000, title: '🛍️ VibeStore — Recordatorio de pedido',
-      body: (h) => `A las ${h}: grandes descuentos. No olvides entrar mañana y no perder el descuento.` },
     { key: 'sent_1h',  ms: 3600000,       title: '🛍️ VibeStore — Tu pedido está cerca',
       body: (h) => `A las ${h}: grandes descuentos. Falta 1 hora — no olvides entrar y no perder el descuento.` },
     { key: 'sent_15m', ms: 15 * 60000,    title: '🚨 VibeStore — ¡Últimos minutos!',
@@ -352,6 +367,11 @@ setInterval(async () => {
                             // umbral en la misma revisión (ej. 1h y 15min a la vez)
         for (const offset of CITA_REMINDER_OFFSETS) {
             if (actual[offset.key]) continue; // este aviso ya se mandó, no repetir
+            // Si la persona eligió qué avisos quiere (wantedReminders), respetarlo.
+            // Si nunca eligió nada (citas creadas antes de esta función, o dejó
+            // todo marcado), se mandan los tres por compatibilidad.
+            const wantedKey = offset.key.replace('sent_', '');
+            if (Array.isArray(cita.wantedReminders) && !cita.wantedReminders.includes(wantedKey)) continue;
             if (diff <= offset.ms) {
                 actual = { ...actual, [offset.key]: true };
                 citasCache[id] = actual;

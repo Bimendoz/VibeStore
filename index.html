@@ -518,6 +518,11 @@
         .citas-row { display:flex; gap:0.6rem; }
         .citas-form input[type="date"], .citas-form input[type="time"] { width:100%; background:rgba(255,255,255,0.07); border:1.5px solid rgba(255,255,255,0.12); border-radius:13px; padding:0.75rem 0.8rem; color:var(--text-main); font-size:0.9rem; outline:none; -webkit-appearance:none; color-scheme:dark; }
         [data-theme="light"] .citas-form input[type="date"], [data-theme="light"] .citas-form input[type="time"] { color-scheme:light; }
+        .citas-reminders-row { display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:0.2rem; }
+        .citas-reminder-chk { display:flex; align-items:center; gap:0.4rem; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:11px; padding:0.5rem 0.7rem; font-size:0.8rem; color:var(--text-main); cursor:pointer; }
+        .citas-reminder-chk input { accent-color:#ff6b9d; width:16px; height:16px; }
+        .citas-shortcut-toggle { display:block; width:calc(100% - 2.2rem); margin:0 1.1rem 0.6rem; padding:0.6rem 0.8rem; background:transparent; border:1px solid rgba(255,255,255,0.12); border-radius:11px; color:rgba(255,255,255,0.55); font-size:0.78rem; text-align:left; cursor:pointer; }
+        [data-theme="light"] .citas-shortcut-toggle { color:rgba(0,0,0,0.5); }
         .citas-shortcut-help { margin:0 1.1rem 1rem; padding:0.8rem 0.9rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); border-radius:13px; font-size:0.78rem; color:rgba(255,255,255,0.7); line-height:1.5; }
         [data-theme="light"] .citas-shortcut-help { color:rgba(0,0,0,0.65); }
         .citas-list { display:flex; flex-direction:column; gap:0.7rem; padding:0 1.1rem 1.5rem; }
@@ -526,8 +531,8 @@
         .cita-card-date { font-size:0.78rem; color:rgba(255,255,255,0.55); margin-bottom:0.5rem; }
         [data-theme="light"] .cita-card-date { color:rgba(0,0,0,0.5); }
         .cita-card-count { font-size:0.9rem; font-weight:700; color:#ff8fb3; font-variant-numeric:tabular-nums; margin-bottom:0.7rem; }
-        .cita-card-actions { display:flex; gap:0.5rem; }
-        .cita-btn { flex:1; padding:0.55rem 0.5rem; border-radius:10px; border:none; font-size:0.78rem; font-weight:700; cursor:pointer; }
+        .cita-card-actions { display:flex; gap:0.4rem; }
+        .cita-btn { flex:1; padding:0.55rem 0.3rem; border-radius:10px; border:none; font-size:0.72rem; font-weight:700; cursor:pointer; white-space:nowrap; }
         .cita-btn.cal { background:rgba(255,255,255,0.12); color:var(--text-main); }
         .cita-btn.del { background:rgba(255,69,58,0.18); color:#ff8a80; }
         .chat-offline-banner.show { display:block; }
@@ -1113,7 +1118,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
-        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v17</div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v18</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
@@ -1203,9 +1208,16 @@
                     <input type="time" id="citaFechaHora">
                 </div>
             </div>
-            <button class="lm-add-btn" onclick="crearCita()" style="background:linear-gradient(135deg,#ff6b9d,#7b4bff);">Crear cita</button>
+            <label class="citas-label">¿Qué avisos quieres recibir?</label>
+            <div class="citas-reminders-row">
+                <label class="citas-reminder-chk"><input type="checkbox" id="remind1h" checked> 1 hora antes</label>
+                <label class="citas-reminder-chk"><input type="checkbox" id="remind15m" checked> 15 min antes</label>
+                <label class="citas-reminder-chk"><input type="checkbox" id="remindNow" checked> Al momento</label>
+            </div>
+            <button class="lm-add-btn" id="citaSubmitBtn" onclick="crearCita()" style="background:linear-gradient(135deg,#ff6b9d,#7b4bff);">Crear cita</button>
         </div>
-        <div id="shortcutHelp" class="citas-shortcut-help">
+        <button class="citas-shortcut-toggle" id="shortcutToggleBtn" onclick="toggleShortcutHelp()">¿Cómo funciona "Crear alarma"? ▾</button>
+        <div id="shortcutHelp" class="citas-shortcut-help" style="display:none;">
             <b>¿Primera vez usando "Crear alarma"?</b> Necesitas armar un Atajo llamado <b>CrearAlarma</b> una sola vez, en la app Atajos de tu iPhone:
             <ol style="margin:0.4rem 0 0.2rem 1.1rem; padding:0;">
                 <li>Abre la app <b>Atajos</b> → toca <b>+</b> (nuevo atajo)</li>
@@ -2391,6 +2403,9 @@
     };
     window.closeCitasScreen = function() {
         document.getElementById('citasScreen').classList.remove('show');
+        _editingCitaId = null;
+        const btn = document.getElementById('citaSubmitBtn');
+        if (btn) btn.textContent = 'Crear cita';
     };
 
     window.crearCita = async function() {
@@ -2399,23 +2414,65 @@
         const horaEl = document.getElementById('citaFechaHora');
         const titulo = tituloEl.value.trim() || 'Nuestra cita';
         if (!diaEl.value || !horaEl.value) { showToast('Elige la fecha y la hora'); return; }
-        // Construir la fecha a partir de los componentes por separado (año, mes,
-        // día, hora, minuto) en vez de parsear un string combinado — así no hay
-        // ninguna ambigüedad de zona horaria ni confusión con la rueda de un
-        // solo selector: "hoy a las 8pm" siempre se arma bien, sin importar
-        // en qué momento del día estés eligiendo.
         const [y, mo, d] = diaEl.value.split('-').map(Number);
         const [h, mi] = horaEl.value.split(':').map(Number);
         const datetime = new Date(y, mo - 1, d, h, mi).getTime();
         if (isNaN(datetime) || datetime <= Date.now()) { showToast('Esa hora ya pasó — elige una en el futuro'); return; }
+
+        const wantedReminders = [];
+        if (document.getElementById('remind1h').checked) wantedReminders.push('1h');
+        if (document.getElementById('remind15m').checked) wantedReminders.push('15m');
+        if (document.getElementById('remindNow').checked) wantedReminders.push('now');
+
         try {
-            const newRef = push(ref(db, 'chat/citas'));
-            await set(newRef, { title: titulo, datetime, createdBy: myId, createdByName: myName });
+            if (_editingCitaId) {
+                // Modo edición: se actualiza la cita existente y se reinician las
+                // marcas de aviso ya enviadas, porque la hora pudo haber cambiado.
+                await update(ref(db, 'chat/citas/' + _editingCitaId), {
+                    title: titulo, datetime, wantedReminders,
+                    sent_1h: null, sent_15m: null, sent_now: null
+                });
+                showToast('📅 Cita actualizada');
+                _editingCitaId = null;
+                document.getElementById('citaSubmitBtn').textContent = 'Crear cita';
+            } else {
+                const newRef = push(ref(db, 'chat/citas'));
+                await set(newRef, { title: titulo, datetime, createdBy: myId, createdByName: myName, wantedReminders });
+                // Mensaje de sistema visible en el chat para ambos — más notorio
+                // que solo el banner, se ve justo en el momento en que se crea.
+                const fecha = new Date(datetime).toLocaleString('es', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+                push(ref(db, 'chat/messages'), { type: 'system', text: `📅 ${myName} creó una cita: ${titulo}, ${fecha}`, ts: Date.now(), senderId: myId }).catch(()=>{});
+                showToast('📅 Cita creada — ya se la avisamos');
+            }
             tituloEl.value = ''; horaEl.value = '';
-            showToast('📅 Cita creada — ya se la avisamos');
         } catch (err) {
-            showToast('⚠️ No se pudo crear la cita. Revisa tu conexión.');
+            showToast('⚠️ No se pudo guardar. Revisa tu conexión.');
         }
+    };
+
+    let _editingCitaId = null;
+    window.editarCita = function(id) {
+        const c = _citas.find(x => x.id === id);
+        if (!c) return;
+        _editingCitaId = id;
+        document.getElementById('citaTitulo').value = c.title;
+        const d = new Date(c.datetime);
+        document.getElementById('citaFechaDia').value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        document.getElementById('citaFechaHora').value = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+        const wanted = Array.isArray(c.wantedReminders) ? c.wantedReminders : ['1h','15m','now'];
+        document.getElementById('remind1h').checked = wanted.includes('1h');
+        document.getElementById('remind15m').checked = wanted.includes('15m');
+        document.getElementById('remindNow').checked = wanted.includes('now');
+        document.getElementById('citaSubmitBtn').textContent = 'Guardar cambios';
+        document.querySelector('.citas-form').scrollIntoView({ behavior: 'smooth' });
+    };
+
+    window.toggleShortcutHelp = function() {
+        const help = document.getElementById('shortcutHelp');
+        const btn = document.getElementById('shortcutToggleBtn');
+        const showing = help.style.display !== 'none';
+        help.style.display = showing ? 'none' : 'block';
+        btn.textContent = showing ? '¿Cómo funciona "Crear alarma"? ▾' : '¿Cómo funciona "Crear alarma"? ▴';
     };
 
     window.deleteCita = async function(id) {
@@ -2452,7 +2509,8 @@
                 <div class="cita-card-date">${fecha}</div>
                 <div class="cita-card-count" data-cita-id="${c.id}">${formatoCuentaRegresiva(c.datetime)}</div>
                 <div class="cita-card-actions">
-                    <button class="cita-btn cal" onclick="crearAlarmaParaCita('${c.id}')">⏰ Crear alarma</button>
+                    <button class="cita-btn cal" onclick="editarCita('${c.id}')">✏️ Editar</button>
+                    <button class="cita-btn cal" onclick="crearAlarmaParaCita('${c.id}')">⏰ Alarma</button>
                     <button class="cita-btn del" onclick="deleteCita('${c.id}')">Borrar</button>
                 </div>
             </div>`;
