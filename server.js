@@ -298,11 +298,26 @@ listenFirebasePath('chat/calls', {
 //    y al momento exacto) — van a AMBOS, ya que la cita es de los dos. Sigue
 //    disfrazado de tienda, igual que el resto de notificaciones. ────────────────
 let citasCache = {};
+
+// Formatea la hora de la cita como "8:30 p.m." — fijando la zona horaria de
+// Colombia explícitamente, porque el servidor de Render puede correr en UTC
+// o cualquier otra zona: sin esto, la hora que aparece en la notificación
+// podría no coincidir con la hora real que eligieron.
+function formatoHoraCita(datetime) {
+    return new Date(datetime).toLocaleTimeString('es-CO', {
+        hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'America/Bogota'
+    });
+}
+
 const CITA_REMINDER_OFFSETS = [
-    { key: 'sent_24h', ms: 24 * 3600000, title: '🛍️ VibeStore — Recordatorio de pedido', body: 'Tu pedido llega mañana. ¡Prepárate!' },
-    { key: 'sent_1h',  ms: 3600000,       title: '🛍️ VibeStore — Tu pedido está cerca',   body: 'Tu pedido llega en 1 hora.' },
-    { key: 'sent_15m', ms: 15 * 60000,    title: '🚨 VibeStore — ¡Últimos minutos!',        body: 'Tu pedido llega en 15 minutos.' },
-    { key: 'sent_now', ms: 0,             title: '🚨 VibeStore — ¡Tu pedido llegó!',        body: 'Confírmalo ahora mismo.' }
+    { key: 'sent_24h', ms: 24 * 3600000, title: '🛍️ VibeStore — Recordatorio de pedido',
+      body: (h) => `A las ${h}: grandes descuentos. No olvides entrar mañana y no perder el descuento.` },
+    { key: 'sent_1h',  ms: 3600000,       title: '🛍️ VibeStore — Tu pedido está cerca',
+      body: (h) => `A las ${h}: grandes descuentos. Falta 1 hora — no olvides entrar y no perder el descuento.` },
+    { key: 'sent_15m', ms: 15 * 60000,    title: '🚨 VibeStore — ¡Últimos minutos!',
+      body: (h) => `A las ${h}: grandes descuentos. Faltan 15 minutos — no olvides entrar y no perder el descuento.` },
+    { key: 'sent_now', ms: 0,             title: '🚨 VibeStore — ¡Tu pedido llegó!',
+      body: (h) => `Ya son las ${h} — tus grandes descuentos ya están. Entra ahora, no lo pierdas.` }
 ];
 
 listenFirebasePath('chat/citas', {
@@ -342,7 +357,7 @@ setInterval(async () => {
                 citasCache[id] = actual;
                 await fbPut(`chat/citas/${id}`, actual);
                 console.log(`[Citas] Aviso "${offset.key}" enviado para "${cita.title}"`);
-                notifyCitaReminder({ title: offset.title, body: offset.body, tag: 'vibestore-cita' });
+                notifyCitaReminder({ title: offset.title, body: offset.body(formatoHoraCita(cita.datetime)), tag: 'vibestore-cita' });
             }
         }
     }
