@@ -1118,7 +1118,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
-        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v18</div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v19</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
@@ -2795,7 +2795,7 @@
         }, 4500);
     }
 
-    window.joinChat = function() {
+    window.joinChat = function(isAutoResume) {
         myName = document.getElementById('nameInput').value.trim();
         if (!myName) {
             var selBtn = document.querySelector('.avatar-opt.selected');
@@ -2811,6 +2811,10 @@
         typingRef = ref(db, 'chat/typing/' + myId);
         presenceRef = ref(db, 'chat/presence/' + myId);
         inChat = true; document.getElementById('nameModal').classList.remove('show');
+        // Guardar quién eres para poder volver directo al chat si iOS mata el
+        // proceso al minimizar la app (algo que hace para liberar memoria, sin
+        // avisar) — así, al reabrir, no hay que pasar por la tienda de nuevo.
+        try { localStorage.setItem('vibestore_session', JSON.stringify({ name: myName, avatar: myAvatar })); } catch (e) {}
         // ✨ Mostrar pantalla de bienvenida personalizada antes del chat
         // Escuchar mensajes que Luna deja para León, y que León deja para Luna
         listenLunaMessages();
@@ -2824,7 +2828,12 @@
         if (menuLuna) menuLuna.style.display = /luna/i.test(myName) ? 'flex' : 'none';
         const menuLeon = document.getElementById('menuLeonMessages');
         if (menuLeon) menuLeon.style.display = /le[oó]n/i.test(myName) ? 'flex' : 'none';
-        showWelcomeScreen(myName, myAvatar);
+        if (isAutoResume) {
+            const ws = document.getElementById('welcomeScreen');
+            if (ws) ws.style.display = 'none'; // sin animación: se siente instantáneo
+        } else {
+            showWelcomeScreen(myName, myAvatar);
+        }
         const _ws = document.getElementById('chatWorkspace');
         const _tw = document.getElementById('typingWrap');
         if (_ws && _tw && _ws.lastChild !== _tw) { _ws.appendChild(_tw); }
@@ -4326,6 +4335,7 @@
         set(typingRef, null).catch(()=>{});
         set(presenceRef, null).catch(()=>{});          // marcar offline al salir
         inChat = false;
+        try { localStorage.removeItem('vibestore_session'); } catch (e) {}
         if (window._heartbeat) clearInterval(window._heartbeat);
         document.getElementById('seccion-chat').style.display = 'none';
         document.getElementById('vista-tienda').style.display = 'flex';
@@ -4838,6 +4848,23 @@
         if (inp && !inp.value) inp.value = 'Luna';
     })();
     renderStore();
+
+    // Si ya habías entrado al chat antes (y no saliste explícitamente a la
+    // tienda), volver directo ahí — sin pasar por la tienda ni el código
+    // secreto de nuevo. Esto es lo que hace que minimizar la app no se sienta
+    // como "cerrarla", aunque iOS haya matado el proceso por dentro.
+    (function() {
+        try {
+            const saved = JSON.parse(localStorage.getItem('vibestore_session') || 'null');
+            if (saved && saved.name) {
+                myAvatar = saved.avatar || myAvatar;
+                document.getElementById('nameInput').value = saved.name;
+                document.getElementById('vista-tienda').style.display = 'none';
+                document.getElementById('seccion-chat').style.display = 'flex';
+                joinChat(true);
+            }
+        } catch (e) {}
+    })();
     initPresence();
 
     function primeNotificationsOnce() {
