@@ -1118,7 +1118,7 @@
             <svg viewBox="0 0 24 24"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>
             ⚠ PÁNICO
         </div>
-        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v19</div>
+        <div style="text-align:center; font-size:0.62rem; color:rgba(255,255,255,0.25); padding:0.5rem 0 0.3rem;">build 2026-08-08-v20</div>
     </div>
 
     <!-- Modal de confirmación reutilizable (acciones destructivas) -->
@@ -4529,7 +4529,14 @@
         window.addEventListener('beforeunload', markAway);
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'hidden') {
-                set(lastSeenRef, { name: myName, ts: Date.now() });
+                // Importante: borrar presence YA, no solo actualizar lastSeen.
+                // Antes, al minimizar (sin llegar a disparar pagehide), la
+                // presencia se quedaba "en línea" hasta 20-30s más — y en ese
+                // rato, el servidor pensaba que seguías viendo el chat y se
+                // saltaba la notificación aunque ya no estuvieras mirando el
+                // teléfono. Esto cierra esa ventana por completo.
+                set(lastSeenRef, { name: myName, ts: Date.now() }).catch(()=>{});
+                set(presenceRef, null).catch(()=>{});
             } else if (document.visibilityState === 'visible' && inChat) {
                 beat();
             }
