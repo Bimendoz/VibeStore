@@ -20,3 +20,4 @@ Cada persona tiene su propio Baúl (ícono de cofre en la cabecera del chat). Lo
 - **Identidad visible:** el Baúl muestra "Baúl de León" / "Baúl de Luna". Para cambiar de usuario: menú del chat → "Cambiar de usuario" (vuelve a pedir el código y la identidad). Importante: el Baúl, el PIN y las notificaciones van atados al usuario; si entras con otra identidad verás otro Baúl.
 - **PIN:** al abrir el Baúl se pide el PIN si está puesto; si no se puede leer aún, NO abre sin protección (falla cerrado).
 - **Mi Baúl:** botón "Seleccionar" para elegir varias y Eliminar o Enviar al Baúl de la otra persona.
+- Notificaciones por usuario: cada telefono queda suscrito SOLO a la identidad actual. Al entrar, el telefono se reclama para ese usuario y se borra de la otra identidad (chat/push). Asi Leon solo recibe las de Luna y Luna las de Leon, nunca las propias. Con Cambiar de usuario se suelta la suscripcion de quien sale.
