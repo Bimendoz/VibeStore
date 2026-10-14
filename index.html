@@ -1384,6 +1384,7 @@
     <button data-tab="hist" onclick="setVaultTab('hist')">Historial</button>
   </nav>
   <div class="vault-body" id="vaultMine">
+    <div class="album-bar" id="albumBar"></div>
     <div class="hist-bar" id="mineBar"><small id="mineInfo"></small><button class="hist-sel" id="mineSelBtn" onclick="toggleMineSelect()">Seleccionar</button></div>
     <div class="vault-grid" id="vaultGrid"></div>
     <div class="vault-empty" id="vaultEmpty">
@@ -1397,7 +1398,9 @@
     <div class="vault-empty" id="histEmpty"><span class="ve-ico"><svg class="li" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><b id="histEmptyT">Buscando en el historial…</b><p id="histEmptyP">Aquí aparecen las fotos que siguen guardadas en el chat. Lo que ya se borró no se puede recuperar.</p></div>
   </div>
   <div class="hist-actions" id="mineActions">
-    <button onclick="mineSendSelected()" class="orange"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M15 2.5l4 4-4 4M19 6.5h-7"/></svg><span id="mineSendLbl">Enviar al Baúl</span></button>
+    <button onclick="mineFavSelected()" class="fav"><svg class="li" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg><span>Favorito</span></button>
+    <button onclick="mineAlbumSelected()"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.3l1.8 2.2H18a2 2 0 0 1 2 2v7.3a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/></svg><span>A álbum</span></button>
+    <button onclick="mineSendSelected()" class="orange"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M15 2.5l4 4-4 4M19 6.5h-7"/></svg><span id="mineSendLbl">Enviar</span></button>
     <button onclick="mineDeleteSelected()" class="danger-act"><svg class="li" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4h4M6.5 7l.8 11.6a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/><path d="M10 11v5M14 11v5"/></svg><span id="mineDelLbl">Eliminar</span></button>
   </div>
   <div class="hist-actions" id="histActions">
@@ -1413,6 +1416,8 @@
     <button onclick="closeVaultViewer()" aria-label="Cerrar"><svg class="li" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
     <span class="vv-info" id="vvInfo"></span>
     <div class="vv-acts">
+      <button onclick="vvFav()" id="vvFav" class="fav" aria-label="Favorito"><svg class="li" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg></button>
+      <button onclick="vvAlbum()" id="vvAlbum" aria-label="A álbum"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.3l1.8 2.2H18a2 2 0 0 1 2 2v7.3a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/></svg></button>
       <button onclick="vvSaveDevice()" aria-label="Guardar en el teléfono"><svg class="li" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5"/><path d="M5 19.5h14"/></svg></button>
       <button onclick="vvSendPeer()" id="vvPeer" class="orange" aria-label="Enviar al Baúl de la otra persona"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M15 2.5l4 4-4 4M19 6.5h-7"/></svg></button>
       <button onclick="vvDelete()" id="vvDel" class="danger" aria-label="Borrar del Baúl"><svg class="li" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4h4M6.5 7l.8 11.6a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/><path d="M10 11v5M14 11v5"/></svg></button>
@@ -1435,6 +1440,22 @@
 <div class="vault-sheet" id="confirmSheet">
   <div class="vs-head"><b id="confirmTitle"></b><small id="confirmTxt"></small></div>
   <div class="vs-row"><button class="vs-cancel" id="confirmNo">Cancelar</button><button class="vs-danger" id="confirmYes">Borrar</button></div>
+</div>
+
+<!-- nuevo álbum -->
+<div class="vault-sheet-ov" id="albumNewOv" onclick="closeAlbumNew()"></div>
+<div class="vault-sheet" id="albumNewSheet">
+  <div class="vs-head"><b>Nuevo álbum</b><small>Para clasificar tus fotos del Baúl</small></div>
+  <input class="vs-input" id="albumNewInput" maxlength="24" placeholder="Nombre del álbum" autocomplete="off">
+  <div class="vs-row"><button class="vs-cancel" onclick="closeAlbumNew()">Cancelar</button><button class="vs-ok" onclick="confirmAlbumNew()">Crear</button></div>
+</div>
+
+<!-- elegir álbum -->
+<div class="vault-sheet-ov" id="albumPickOv" onclick="closeAlbumPick()"></div>
+<div class="vault-sheet" id="albumPickSheet">
+  <div class="vs-head"><b id="albumPickTitle">Mover a álbum</b><small id="albumPickSub"></small></div>
+  <div class="vs-list" id="albumPickList"></div>
+  <button class="vs-cancel" onclick="closeAlbumPick()">Cancelar</button>
 </div>
 
 <!-- opciones del PIN -->
@@ -1609,7 +1630,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, onChildAdded, get, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp, onChildRemoved }
+    import { getDatabase, ref, push, onValue, onChildAdded, get, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp, onChildRemoved, onChildChanged }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -4833,13 +4854,19 @@
     let vaultStarted = false, vaultOpen = false, vaultTab = 'mine';
     let vaultFresh = new Set();
     let mineSelect = false, mineSel = new Set();
+    let activeAlbum = 'all';
+    const vaultAlbums = new Map();   // id -> { id, name, ts }
     const isVaultAdmin = () => /le[oó]n/i.test(myName) || myId === 'user_leon';
     function startVault() {
         if (vaultStarted || !myId) return;
         vaultStarted = true;
         const q = ref(db, `chat/vault/${myId}`);
         onChildAdded(q, (snap) => vaultUpsert(snap.key, snap.val()));
+        onChildChanged(q, (snap) => vaultUpsert(snap.key, snap.val()));
         onChildRemoved(q, (snap) => { vaultItems.delete(snap.key); vaultChanged(); });
+        const qa = ref(db, `chat/vaultAlbums/${myId}`);
+        onChildAdded(qa, (snap) => { const v = snap.val() || {}; vaultAlbums.set(snap.key, { id: snap.key, name: v.name || 'Álbum', ts: v.ts || 0 }); if (vaultOpen) { renderAlbumBar(); } });
+        onChildRemoved(qa, (snap) => { vaultAlbums.delete(snap.key); if (activeAlbum === snap.key) activeAlbum = 'all'; if (vaultOpen) { renderAlbumBar(); renderVaultMine(); } });
         watchVaultPin();
     }
     async function vaultUpsert(key, rec) {
@@ -4878,6 +4905,7 @@
         un.forEach(it => set(ref(db, `chat/vault/${myId}/${it.key}/seen`), true).catch(() => {}));
         histLoaded = false; histSelect = false; histSel.clear(); document.getElementById('histSelBtn').textContent = 'Seleccionar';
         mineSelect = false; mineSel.clear(); document.getElementById('mineSelBtn').textContent = 'Seleccionar';
+        activeAlbum = 'all';
         document.querySelector('#vaultScreen .vault-title b').textContent = 'Baúl de ' + (myName || '');
         const admin = isVaultAdmin();
         document.getElementById('vaultTabs').style.display = admin ? 'flex' : 'none';
@@ -4910,16 +4938,44 @@
           ${img ? `<img src="${escHtml(img)}" alt="" loading="lazy">` : '<span class="v-ph"></span>'}
           ${badge || ''}${selMode ? `<span class="v-check">${selected ? VCHECK : ''}</span>` : ''}</button>`;
     }
-    function renderVaultMine() {
-        const list = [...vaultItems.values()].sort((a, b) => (b.rec.ts || 0) - (a.rec.ts || 0));
-        document.getElementById('vaultEmpty').style.display = list.length ? 'none' : '';
-        const n = list.length;
-        document.getElementById('vaultSub').textContent = n ? `${n} ${n === 1 ? 'foto' : 'fotos'} · solo tú puedes borrarlas` : 'Solo tú puedes borrar lo que hay aquí';
-        document.getElementById('mineInfo').textContent = n ? 'Toca para ver · Seleccionar para borrar varias' : '';
-        document.getElementById('mineSelBtn').style.display = n ? '' : 'none';
-        document.getElementById('vaultGrid').innerHTML = list.map(it =>
-            tileHTML(it.key, it.img, vaultFresh.has(it.key) ? '<span class="v-saved">Nuevo</span>' : '', mineSelect, mineSel.has(it.key))).join('');
+    const STARMINI = '<svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg>';
+    function albumMatch(rec) {
+        if (activeAlbum === 'all') return true;
+        if (activeAlbum === 'fav') return !!rec.fav;
+        return rec.album === activeAlbum;
     }
+    function renderVaultMine() {
+        renderAlbumBar();
+        const all = [...vaultItems.values()].sort((a, b) => (b.rec.ts || 0) - (a.rec.ts || 0));
+        const list = all.filter(it => albumMatch(it.rec));
+        const totalN = all.length;
+        document.getElementById('vaultEmpty').style.display = list.length ? 'none' : '';
+        document.getElementById('vaultSub').textContent = totalN ? `${totalN} ${totalN === 1 ? 'foto' : 'fotos'} · solo tú puedes borrarlas` : 'Solo tú puedes borrar lo que hay aquí';
+        document.getElementById('mineInfo').textContent = list.length ? 'Toca para ver · Seleccionar para organizar o borrar' : '';
+        document.getElementById('mineSelBtn').style.display = list.length ? '' : 'none';
+        const emptyB = document.querySelector('#vaultEmpty b'), emptyP = document.querySelector('#vaultEmpty p');
+        if (!list.length) {
+            if (activeAlbum === 'fav') { emptyB.textContent = 'Sin favoritos'; emptyP.textContent = 'Marca una foto con la estrella para verla aquí.'; }
+            else if (activeAlbum !== 'all') { emptyB.textContent = 'Álbum vacío'; emptyP.textContent = 'Selecciona fotos y toca “A álbum” para traerlas aquí.'; }
+            else { emptyB.textContent = 'Tu Baúl está vacío'; emptyP.textContent = 'Aquí quedan las fotos que te dejen o que guardes desde el chat. Solo tú puedes borrarlas.'; }
+        }
+        document.getElementById('vaultGrid').innerHTML = list.map(it => {
+            const fav = it.rec.fav ? `<span class="v-fav">${STARMINI}</span>` : '';
+            const nv = vaultFresh.has(it.key) ? '<span class="v-saved">Nuevo</span>' : '';
+            return tileHTML(it.key, it.img, nv + fav, mineSelect, mineSel.has(it.key));
+        }).join('');
+    }
+    function renderAlbumBar() {
+        const bar = document.getElementById('albumBar'); if (!bar) return;
+        const albums = [...vaultAlbums.values()].sort((a, b) => (a.ts || 0) - (b.ts || 0));
+        const chip = (id, label, extraCls, ico) => `<button class="album-chip ${extraCls || ''} ${activeAlbum === id ? 'on' : ''}" onclick="setAlbum('${id}')">${ico || ''}${label}</button>`;
+        let html = chip('all', 'Todo');
+        html += chip('fav', 'Favoritos', 'fav', STARMINI);
+        html += albums.map(a => chip(a.id, escHtml(a.name))).join('');
+        html += `<button class="album-chip add" onclick="openAlbumNew()">+ Álbum</button>`;
+        bar.innerHTML = html;
+    }
+    window.setAlbum = function(id) { activeAlbum = id; renderVaultMine(); };
     window.toggleMineSelect = function() {
         mineSelect = !mineSelect; mineSel.clear();
         document.getElementById('mineSelBtn').textContent = mineSelect ? 'Cancelar' : 'Seleccionar';
@@ -4955,7 +5011,7 @@
         const it = vaultItems.get(t.dataset.k); if (!it) return;
         if (mineSelect) { if (mineSel.has(it.key)) mineSel.delete(it.key); else mineSel.add(it.key); renderVaultMine(); updateMineActions(); return; }
         const who = it.rec.senderId === myId ? 'Guardada por ti' : `Te la dejó ${vaultPeerName()}`;
-        openVaultViewer({ img: it.img, info: `${who} · ${new Date(it.rec.ts).toLocaleDateString('es-CO',{day:'numeric',month:'short'})} ${new Date(it.rec.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`,
+        openVaultViewer({ img: it.img, itemKey: it.key, info: `${who} · ${new Date(it.rec.ts).toLocaleDateString('es-CO',{day:'numeric',month:'short'})} ${new Date(it.rec.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`,
             onDelete: () => deleteVaultItem(it.key), onSendPeer: () => sendDataUrlToPeer(it.img) });
     });
     async function deleteVaultItem(key) {
@@ -5107,6 +5163,10 @@
         document.getElementById('vvInfo').textContent = ctx.info || '';
         document.getElementById('vvDel').style.display = ctx.onDelete ? '' : 'none';
         document.getElementById('vvPeer').style.display = ctx.onSendPeer ? '' : 'none';
+        const mineItem = ctx.itemKey ? vaultItems.get(ctx.itemKey) : null;
+        document.getElementById('vvFav').style.display = mineItem ? '' : 'none';
+        document.getElementById('vvAlbum').style.display = mineItem ? '' : 'none';
+        document.getElementById('vvFav').classList.toggle('on', !!(mineItem && mineItem.rec.fav));
         const body = document.getElementById('vvBody');
         body.innerHTML = ctx.img ? `<img src="${escHtml(ctx.img)}" alt="">` : '<span class="vv-spin"></span>';
     }
@@ -5122,6 +5182,56 @@
             const a = document.createElement('a'); a.href = vvCtx.img; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
         } catch (e) { if (e && e.name !== 'AbortError') showToast('No se pudo guardar'); }
     };
+
+    // ── favoritos ──
+    async function setFav(key, val) { try { await set(ref(db, `chat/vault/${myId}/${key}/fav`), val ? true : null); } catch {} }
+    window.vvFav = async function() {
+        if (!vvCtx || !vvCtx.itemKey) return;
+        const it = vaultItems.get(vvCtx.itemKey); if (!it) return;
+        const nv = !it.rec.fav; it.rec.fav = nv; // optimista
+        document.getElementById('vvFav').classList.toggle('on', nv);
+        await setFav(vvCtx.itemKey, nv);
+        showToast(nv ? 'Agregada a Favoritos' : 'Quitada de Favoritos', 1400);
+    };
+    window.mineFavSelected = async function() {
+        const keys = [...mineSel]; if (!keys.length) return;
+        // si todas ya son favoritas, se quitan; si no, se marcan
+        const allFav = keys.every(k => vaultItems.get(k) && vaultItems.get(k).rec.fav);
+        for (const k of keys) { const it = vaultItems.get(k); if (it) { it.rec.fav = !allFav; await setFav(k, !allFav); } }
+        mineSelect = false; mineSel.clear(); document.getElementById('mineSelBtn').textContent = 'Seleccionar';
+        renderVaultMine(); updateMineActions();
+        showToast(allFav ? 'Quitadas de Favoritos' : `${keys.length} en Favoritos`);
+    };
+    // ── álbumes ──
+    let albumTargetKeys = [];
+    window.openAlbumNew = function() { document.getElementById('albumNewInput').value = ''; document.getElementById('albumNewOv').classList.add('on'); document.getElementById('albumNewSheet').classList.add('on'); setTimeout(() => document.getElementById('albumNewInput').focus(), 250); };
+    window.closeAlbumNew = function() { document.getElementById('albumNewOv').classList.remove('on'); document.getElementById('albumNewSheet').classList.remove('on'); };
+    window.confirmAlbumNew = async function() {
+        const name = (document.getElementById('albumNewInput').value || '').trim(); if (!name) { showToast('Escribe un nombre'); return; }
+        try { const r = push(ref(db, `chat/vaultAlbums/${myId}`)); await set(r, { name, ts: Date.now() }); vaultAlbums.set(r.key, { id: r.key, name, ts: Date.now() }); closeAlbumNew(); showToast('Álbum creado'); renderAlbumBar();
+            if (albumTargetKeys.length) { await moveToAlbum(albumTargetKeys, r.key); albumTargetKeys = []; } }
+        catch { showToast('No se pudo crear el álbum'); }
+    };
+    function openAlbumPick(keys) {
+        albumTargetKeys = keys.slice();
+        document.getElementById('albumPickSub').textContent = keys.length === 1 ? '1 foto' : `${keys.length} fotos`;
+        const albums = [...vaultAlbums.values()].sort((a, b) => (a.ts || 0) - (b.ts || 0));
+        const FOLDER = '<svg class="li" viewBox="0 0 24 24"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.3l1.8 2.2H18a2 2 0 0 1 2 2v7.3a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/></svg>';
+        let html = albums.map(a => `<button class="vs-opt" onclick="pickAlbum('${a.id}')"><span class="vs-ico orange">${FOLDER}</span><span class="vs-txt"><b>${escHtml(a.name)}</b></span></button>`).join('');
+        html += `<button class="vs-opt" onclick="pickAlbum('')"><span class="vs-ico">${FOLDER}</span><span class="vs-txt"><b>Quitar de álbum</b><small>Vuelve a “Todo”</small></span></button>`;
+        html += `<button class="vs-opt" onclick="closeAlbumPick();openAlbumNew()"><span class="vs-ico">+</span><span class="vs-txt"><b>Nuevo álbum…</b></span></button>`;
+        document.getElementById('albumPickList').innerHTML = html;
+        document.getElementById('albumPickOv').classList.add('on'); document.getElementById('albumPickSheet').classList.add('on');
+    }
+    window.closeAlbumPick = function() { document.getElementById('albumPickOv').classList.remove('on'); document.getElementById('albumPickSheet').classList.remove('on'); };
+    async function moveToAlbum(keys, albumId) {
+        for (const k of keys) { const it = vaultItems.get(k); if (it) { it.rec.album = albumId || undefined; try { await set(ref(db, `chat/vault/${myId}/${k}/album`), albumId || null); } catch {} } }
+        renderVaultMine();
+        showToast(albumId ? 'Movido al álbum' : 'Quitado del álbum');
+    }
+    window.pickAlbum = async function(albumId) { const keys = albumTargetKeys.slice(); albumTargetKeys = []; closeAlbumPick(); if (keys.length) await moveToAlbum(keys, albumId); };
+    window.mineAlbumSelected = function() { const keys = [...mineSel]; if (!keys.length) return; mineSelect = false; mineSel.clear(); document.getElementById('mineSelBtn').textContent = 'Seleccionar'; updateMineActions(); openAlbumPick(keys); };
+    window.vvAlbum = function() { if (vvCtx && vvCtx.itemKey) openAlbumPick([vvCtx.itemKey]); };
 
     // ── PIN del Baúl ──
     let vaultPinRec = null, vaultPinLoaded = false;
@@ -5440,115 +5550,156 @@
 
 </script>
 <style id="vaultStyles">
-svg.li{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;width:22px;height:22px}
-#vaultScreen,#pinPad{--v-accent:var(--purple-accent);--v-chest:#e8862f;--v-fill:color-mix(in srgb,var(--text-main) 8%,transparent);--v-fill2:color-mix(in srgb,var(--text-main) 14%,transparent)}
-.vault-open-btn{position:relative}
-.vault-open-btn .vault-dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#e8862f;border:2px solid var(--bg-nav,#1c1c1e);display:none}
+/* ====== BAÚL: tema oscuro propio, alto contraste, sin desenfoque ====== */
+#vaultScreen, #pinPad, #vaultViewer, .vault-sheet, .vault-sheet-ov, .vault-notice {
+  --vbg:#0e141b; --vpanel:#161f29; --vpanel2:#1e2a37; --vpanel3:#26323f; --vline:#2a3744;
+  --vtext:#f2f6fa; --vmut:#9fb1c2; --vacc:#f59e3c; --vblue:#4aa3f0; --vdanger:#ef4e57; --vgreen:#39c07a;
+}
+svg.li{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;width:22px;height:22px}
+
+/* botón del Baúl en la cabecera del chat: más contraste */
+.vault-open-btn{position:relative;color:#fff !important;background:rgba(255,255,255,.14) !important;border-color:rgba(255,255,255,.22) !important}
+.vault-open-btn .vault-dot{position:absolute;top:4px;right:4px;width:10px;height:10px;border-radius:50%;background:#f59e3c;border:2px solid #1c1c1e;display:none}
 .vault-open-btn .vault-dot.on{display:block}
-.vault-notice{position:fixed;left:50%;transform:translateX(-50%) translateY(-12px);top:calc(var(--safe-top,0px) + 68px);z-index:150;width:92%;max-width:440px;display:none;align-items:center;gap:12px;padding:11px 14px;border-radius:15px;background:var(--bg-card);color:var(--text-main);border:1px solid var(--border-color);box-shadow:0 10px 30px rgba(0,0,0,.18);text-align:left;opacity:0;transition:transform .3s cubic-bezier(.2,.9,.3,1.2),opacity .3s}
+
+/* aviso */
+.vault-notice{position:fixed;left:50%;transform:translateX(-50%) translateY(-14px);top:calc(var(--safe-top,0px) + 70px);z-index:150;width:calc(100% - 28px);max-width:440px;display:none;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;background:var(--vpanel);color:var(--vtext);border:1px solid var(--vline);box-shadow:0 14px 40px rgba(0,0,0,.5);text-align:left;opacity:0;transition:transform .3s cubic-bezier(.2,.9,.3,1.2),opacity .3s}
 .vault-notice.on{display:flex;opacity:1;transform:translateX(-50%) translateY(0)}
-.vault-notice .vn-ico{flex:none;width:36px;height:36px;border-radius:11px;background:color-mix(in srgb,#e8862f 18%,transparent);color:#e8862f;display:grid;place-items:center}
-.vault-notice .vn-txt{flex:1;min-width:0;font-size:14px;line-height:1.35;color:var(--text-muted)}
-.vault-notice .vn-txt b{color:var(--text-main)}
-.vault-notice .vn-go{flex:none;display:flex;align-items:center;gap:1px;color:var(--v-accent);font-weight:700;font-size:13.5px}
-.vault-notice .vn-go svg{width:17px;height:17px}
-.vault-screen{position:fixed;inset:0;z-index:1500;background:var(--chat-bg,#0d1117);color:var(--text-main);display:none;flex-direction:column}
+.vault-notice .vn-ico{flex:none;width:40px;height:40px;border-radius:12px;background:rgba(245,158,60,.18);color:var(--vacc);display:grid;place-items:center}
+.vault-notice .vn-txt{flex:1;min-width:0;font-size:14.5px;line-height:1.4;color:var(--vmut)}
+.vault-notice .vn-txt b{color:var(--vtext)}
+.vault-notice .vn-go{flex:none;display:flex;align-items:center;gap:2px;color:var(--vblue);font-weight:700;font-size:14px}
+.vault-notice .vn-go svg{width:18px;height:18px}
+
+/* pantalla */
+.vault-screen{position:fixed;inset:0;z-index:1500;background:var(--vbg);color:var(--vtext);display:none;flex-direction:column}
 .vault-screen.on{display:flex}
-.vault-head{display:flex;align-items:center;gap:6px;padding:calc(var(--safe-top,0px) + 10px) 8px 10px;border-bottom:1px solid var(--border-color);background:var(--bg-nav)}
-.vh-btn{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--text-main);flex:none}
-.vh-btn:active{background:var(--v-fill)}
-#vaultPinBtn{color:var(--text-muted)}
-#vaultPinBtn.on{color:#35c46a}
-.vault-title{flex:1;min-width:0;display:flex;flex-direction:column;padding-left:4px}
-.vault-title b{font-size:17px}
-.vault-title small{font-size:12.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vault-tabs{display:flex;gap:8px;padding:12px 14px 0;flex:none;background:var(--chat-bg)}
-.vault-tabs button{flex:1;padding:10px 0;border-radius:12px;font-size:14px;font-weight:700;color:var(--text-muted);background:var(--v-fill)}
-.vault-tabs button.on{color:#fff;background:var(--v-accent)}
-.vault-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px}
+.vault-head{display:flex;align-items:center;gap:10px;padding:calc(var(--safe-top,0px) + 14px) 16px 14px;background:var(--vpanel);border-bottom:1px solid var(--vline)}
+.vh-btn{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;color:var(--vtext);background:var(--vpanel3);flex:none;transition:transform .12s,background .15s}
+.vh-btn:active{transform:scale(.92);background:var(--vline)}
+.vh-btn svg.li{width:22px;height:22px}
+#vaultPinBtn{color:var(--vmut)}
+#vaultPinBtn.on{color:var(--vgreen);background:rgba(57,192,122,.16)}
+.vault-title{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;padding-left:2px}
+.vault-title b{font-size:18px;font-weight:800;letter-spacing:.2px}
+.vault-title small{font-size:12.5px;color:var(--vmut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* pestañas */
+.vault-tabs{display:flex;gap:10px;padding:16px 16px 4px;flex:none;background:var(--vbg)}
+.vault-tabs button{flex:1;padding:12px 0;border-radius:14px;font-size:14.5px;font-weight:700;color:var(--vmut);background:var(--vpanel2)}
+.vault-tabs button.on{color:#1a0e03;background:var(--vacc)}
+
+/* álbumes (chips) */
+.album-bar{display:flex;gap:8px;overflow-x:auto;padding:14px 16px 6px;flex:none;scrollbar-width:none}
+.album-bar::-webkit-scrollbar{display:none}
+.album-chip{flex:none;display:inline-flex;align-items:center;gap:6px;padding:9px 14px;border-radius:999px;font-size:13.5px;font-weight:700;color:var(--vmut);background:var(--vpanel2);border:1.5px solid transparent;white-space:nowrap}
+.album-chip svg{width:15px;height:15px}
+.album-chip.on{color:#fff;background:var(--vpanel3);border-color:var(--vblue)}
+.album-chip.fav.on{border-color:var(--vacc);color:var(--vacc)}
+.album-chip.add{color:var(--vblue);background:transparent;border:1.5px dashed var(--vline)}
+
+.vault-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 120px}
 #vaultHist{display:none}
-.hist-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px 12px}
-.hist-bar small{font-size:12.5px;color:var(--text-muted);line-height:1.35;flex:1;min-width:0}
-.hist-sel{flex:none;padding:8px 14px;border-radius:999px;background:var(--v-fill);color:var(--v-accent);font-weight:700;font-size:13.5px}
-.vault-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.hist-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:4px 2px 14px}
+.hist-bar small{font-size:12.5px;color:var(--vmut);line-height:1.4;flex:1;min-width:0}
+.hist-sel{flex:none;padding:9px 16px;border-radius:999px;background:var(--vpanel3);color:var(--vblue);font-weight:700;font-size:13.5px}
+
+.vault-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 @media(min-width:600px){.vault-grid{grid-template-columns:repeat(4,1fr)}}
-.v-tile{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--v-fill2)}
+.v-tile{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--vpanel2)}
 .v-tile img{width:100%;height:100%;object-fit:cover;display:block}
 .v-tile:active{transform:scale(.97)}
-.v-tile .v-ph{position:absolute;inset:0;background:var(--v-fill2)}
-.v-tile .v-saved{position:absolute;left:6px;top:6px;display:flex;align-items:center;gap:3px;background:rgba(10,20,15,.72);color:#67e39a;font-size:10.5px;font-weight:700;padding:3px 7px 3px 4px;border-radius:9px}
-.v-tile .v-saved svg{width:13px;height:13px;stroke:#67e39a;stroke-width:2.4}
-.v-tile .v-check{position:absolute;right:6px;top:6px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.35);display:grid;place-items:center}
-.v-tile .v-check svg{width:16px;height:16px;stroke:#fff;stroke-width:2.6}
-.v-tile.sel{outline:3px solid var(--v-accent);outline-offset:-3px}
-.v-tile.sel img{opacity:.75}
-.v-tile.sel .v-check{background:var(--v-accent);border-color:var(--v-accent)}
-.vault-empty{margin:50px auto 0;max-width:290px;text-align:center;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;gap:8px}
-.vault-empty .ve-ico{width:64px;height:64px;border-radius:20px;background:color-mix(in srgb,#e8862f 14%,transparent);color:#e8862f;display:grid;place-items:center;margin-bottom:4px}
-.vault-empty .ve-ico svg{width:32px;height:32px}
-.vault-empty b{color:var(--text-main);font-size:16px}
-.vault-empty p{font-size:13.5px;line-height:1.45}
-.hist-actions{position:absolute;left:14px;right:14px;bottom:calc(14px + var(--safe-bottom,0px));z-index:8;display:none;gap:8px;padding:8px;border-radius:18px;background:var(--bg-card);border:1px solid var(--border-color);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.v-tile .v-ph{position:absolute;inset:0;background:linear-gradient(135deg,#1e2a37,#141d26)}
+.v-tile .v-fav{position:absolute;left:7px;bottom:7px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.5);display:grid;place-items:center}
+.v-tile .v-fav svg{width:15px;height:15px;fill:var(--vacc);stroke:var(--vacc)}
+.v-tile .v-saved{position:absolute;left:7px;top:7px;display:flex;align-items:center;gap:3px;background:rgba(8,16,12,.78);color:var(--vgreen);font-size:10.5px;font-weight:800;padding:3px 8px 3px 5px;border-radius:9px}
+.v-tile .v-saved svg{width:13px;height:13px;stroke:var(--vgreen);stroke-width:2.6}
+.v-tile .v-check{position:absolute;right:7px;top:7px;width:26px;height:26px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.4);display:grid;place-items:center}
+.v-tile .v-check svg{width:16px;height:16px;stroke:#fff;stroke-width:2.8}
+.v-tile.sel{outline:3px solid var(--vblue);outline-offset:-3px}
+.v-tile.sel img{opacity:.7}
+.v-tile.sel .v-check{background:var(--vblue);border-color:var(--vblue)}
+
+.vault-empty{margin:60px auto 0;max-width:300px;text-align:center;color:var(--vmut);display:flex;flex-direction:column;align-items:center;gap:10px}
+.vault-empty .ve-ico{width:72px;height:72px;border-radius:22px;background:rgba(245,158,60,.14);color:var(--vacc);display:grid;place-items:center;margin-bottom:4px}
+.vault-empty .ve-ico svg{width:36px;height:36px}
+.vault-empty b{color:var(--vtext);font-size:17px}
+.vault-empty p{font-size:14px;line-height:1.5}
+
+/* barra de acciones (selección) */
+.hist-actions{position:absolute;left:16px;right:16px;bottom:calc(16px + var(--safe-bottom,0px));z-index:8;display:none;gap:10px;padding:10px;border-radius:20px;background:var(--vpanel);border:1px solid var(--vline);box-shadow:0 16px 44px rgba(0,0,0,.55)}
 .hist-actions.on{display:flex}
-.hist-actions button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:13px;font-size:12.5px;font-weight:600;color:var(--v-accent);background:color-mix(in srgb,var(--v-accent) 12%,transparent)}
-.hist-actions button.orange{color:#c56a16;background:color-mix(in srgb,#e8862f 15%,transparent)}
+.hist-actions button{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:11px 6px;border-radius:14px;font-size:12px;font-weight:700;color:var(--vblue);background:rgba(74,163,240,.14)}
+.hist-actions button.orange{color:var(--vacc);background:rgba(245,158,60,.14)}
+.hist-actions button.fav{color:var(--vacc);background:rgba(245,158,60,.14)}
+.hist-actions button.danger-act{color:#fff;background:var(--vdanger)}
 .hist-actions button svg{width:22px;height:22px}
+
+/* visor */
 .vault-viewer{position:fixed;inset:0;z-index:2600;background:#000;display:none;flex-direction:column}
 .vault-viewer.on{display:flex}
-.vv-top{display:flex;align-items:center;gap:12px;padding:calc(var(--safe-top,0px) + 8px) 12px 8px;position:relative;z-index:2}
-.vv-top>button,.vv-acts button{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center}
-.vv-top>button svg,.vv-acts button svg{width:21px;height:21px}
-.vv-info{flex:1;min-width:0;color:#d8dee6;font-size:13px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.vv-acts{display:flex;gap:8px}
-.vv-acts .orange{color:#ffb066}
-.vv-acts .danger{color:#ff8080}
-.vv-body{flex:1;display:grid;place-items:center;min-height:0;padding-bottom:var(--safe-bottom,0px)}
-.vv-body img{max-width:100%;max-height:100%;object-fit:contain}
-.vv-body .vv-spin{width:34px;height:34px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:vspin .7s linear infinite}
+.vv-top{display:flex;align-items:center;gap:12px;padding:calc(var(--safe-top,0px) + 12px) 16px 12px;position:relative;z-index:2}
+.vv-top>button,.vv-acts button{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center}
+.vv-top>button svg,.vv-acts button svg{width:22px;height:22px}
+.vv-info{flex:1;min-width:0;color:#e3e9ef;font-size:13px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vv-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end;max-width:62%}
+.vv-acts .fav.on svg{fill:var(--vacc);stroke:var(--vacc)}
+.vv-acts .orange{color:var(--vacc)}
+.vv-acts .danger{color:#ff8a8a}
+.vv-body{flex:1;display:grid;place-items:center;min-height:0;padding:0 6px calc(6px + var(--safe-bottom,0px))}
+.vv-body img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
+.vv-body .vv-spin{width:36px;height:36px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:vspin .7s linear infinite}
 @keyframes vspin{to{transform:rotate(360deg)}}
-.vault-sheet-ov{position:fixed;inset:0;z-index:2640;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s}
+
+/* hojas */
+.vault-sheet-ov{position:fixed;inset:0;z-index:2640;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .2s}
 .vault-sheet-ov.on{opacity:1;pointer-events:auto}
-.vault-sheet{position:fixed;left:12px;right:12px;bottom:calc(12px + var(--safe-bottom,0px));z-index:2650;max-width:420px;margin:0 auto;border-radius:22px;padding:18px 16px 16px;color:var(--text-main);background:var(--bg-card);border:1px solid var(--border-color);box-shadow:0 18px 50px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:14px;transform:translateY(calc(100% + 40px));transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.vault-sheet{position:fixed;left:14px;right:14px;bottom:calc(14px + var(--safe-bottom,0px));z-index:2650;max-width:430px;margin:0 auto;border-radius:24px;padding:22px 18px 18px;color:var(--vtext);background:var(--vpanel);border:1px solid var(--vline);box-shadow:0 22px 56px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:16px;transform:translateY(calc(100% + 48px));transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .vault-sheet.on{transform:none}
-.vs-head{display:flex;flex-direction:column;gap:4px;text-align:center;padding:0 8px}
-.vs-head b{font-size:17px}
-.vs-head small{font-size:13.5px;color:var(--text-muted);line-height:1.4}
-.vs-opt{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--text-main) 6%,transparent);text-align:left}
-.vs-opt:active{background:color-mix(in srgb,var(--text-main) 12%,transparent)}
-.vs-ico{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--v-accent) 16%,transparent);color:var(--v-accent)}
-.vs-ico.orange{background:color-mix(in srgb,#e8862f 16%,transparent);color:#d8781f}
-.vs-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
-.vs-txt b{font-size:15.5px}
-.vs-txt small{font-size:12.5px;color:var(--text-muted)}
-.vs-row{display:flex;gap:8px}
+.vs-head{display:flex;flex-direction:column;gap:6px;text-align:center;padding:0 8px}
+.vs-head b{font-size:18px;font-weight:800}
+.vs-head small{font-size:13.5px;color:var(--vmut);line-height:1.45}
+.vs-opt{display:flex;align-items:center;gap:15px;padding:14px 16px;border-radius:17px;background:var(--vpanel2);text-align:left}
+.vs-opt:active{background:var(--vpanel3)}
+.vs-ico{flex:none;width:44px;height:44px;border-radius:14px;display:grid;place-items:center;background:rgba(74,163,240,.18);color:var(--vblue)}
+.vs-ico.orange{background:rgba(245,158,60,.18);color:var(--vacc)}
+.vs-txt{display:flex;flex-direction:column;gap:3px;min-width:0}
+.vs-txt b{font-size:15.5px;font-weight:700}
+.vs-txt small{font-size:12.5px;color:var(--vmut)}
+.vs-row{display:flex;gap:10px}
 .vs-row>*{flex:1}
-.vs-cancel,.vs-danger{padding:13px;border-radius:14px;font-weight:700;font-size:15px;background:color-mix(in srgb,var(--text-main) 8%,transparent);color:var(--text-main)}
-.vs-danger{background:#e5484d;color:#fff}
-#pinMenuOpts{display:flex;flex-direction:column;gap:8px}
-.pinpad{position:fixed;inset:0;z-index:2700;background:var(--chat-bg,#0d1117);display:none;place-items:center;padding:calc(var(--safe-top,0px) + 24px) 24px calc(var(--safe-bottom,0px) + 24px);color:var(--text-main)}
+.vs-cancel,.vs-danger,.vs-ok{padding:14px;border-radius:15px;font-weight:700;font-size:15px;background:var(--vpanel3);color:var(--vtext)}
+.vs-danger{background:var(--vdanger);color:#fff}
+.vs-ok{background:var(--vblue);color:#fff}
+.vs-input{width:100%;border:1.5px solid var(--vline);background:var(--vpanel2);color:var(--vtext);border-radius:14px;padding:14px 16px;font-size:16px;outline:0}
+.vs-input:focus{border-color:var(--vblue)}
+.vs-list{display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow-y:auto}
+#pinMenuOpts{display:flex;flex-direction:column;gap:10px}
+
+/* teclado PIN */
+.pinpad{position:fixed;inset:0;z-index:2700;background:var(--vbg);display:none;place-items:center;padding:calc(var(--safe-top,0px) + 24px) 24px calc(var(--safe-bottom,0px) + 24px);color:var(--vtext)}
 .pinpad.on{display:grid}
 .pin-box{width:100%;max-width:300px;display:flex;flex-direction:column;align-items:center;text-align:center}
-.pin-ico{width:56px;height:56px;border-radius:18px;background:color-mix(in srgb,#e8862f 14%,transparent);color:#e8862f;display:grid;place-items:center;margin-bottom:16px}
-.pin-ico svg{width:28px;height:28px}
-.pin-box>b{font-size:19px}
-.pin-box>small{font-size:13.5px;color:var(--text-muted);margin-top:6px;min-height:18px}
-.pin-dots{display:flex;gap:18px;margin-top:28px}
-.pin-dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--text-muted);transition:background .12s,border-color .12s}
-.pin-dots i.on{background:var(--v-accent);border-color:var(--v-accent)}
+.pin-ico{width:60px;height:60px;border-radius:19px;background:rgba(245,158,60,.14);color:var(--vacc);display:grid;place-items:center;margin-bottom:18px}
+.pin-ico svg{width:30px;height:30px}
+.pin-box>b{font-size:20px;font-weight:800}
+.pin-box>small{font-size:14px;color:var(--vmut);margin-top:8px;min-height:18px}
+.pin-dots{display:flex;gap:20px;margin-top:30px}
+.pin-dots i{width:15px;height:15px;border-radius:50%;border:2px solid var(--vmut);transition:background .12s,border-color .12s}
+.pin-dots i.on{background:var(--vacc);border-color:var(--vacc)}
 .pin-dots.shake{animation:pinshake .35s}
-@keyframes pinshake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
-.pin-msg{min-height:20px;margin:16px 0 20px;font-size:13.5px;color:#e5484d}
-.pin-keys{display:grid;grid-template-columns:repeat(3,72px);gap:16px 24px;justify-content:center}
-.pin-keys button{width:72px;height:72px;border-radius:50%;background:var(--v-fill);font-size:28px;font-weight:500;color:var(--text-main);display:grid;place-items:center}
-.pin-keys button:active{background:var(--v-fill2)}
+@keyframes pinshake{20%,60%{transform:translateX(-9px)}40%,80%{transform:translateX(9px)}}
+.pin-msg{min-height:20px;margin:18px 0 22px;font-size:14px;color:#ff8a8a}
+.pin-keys{display:grid;grid-template-columns:repeat(3,74px);gap:18px 26px;justify-content:center}
+.pin-keys button{width:74px;height:74px;border-radius:50%;background:var(--vpanel2);font-size:29px;font-weight:500;color:var(--vtext);display:grid;place-items:center}
+.pin-keys button:active{background:var(--vpanel3)}
 .pin-keys button[data-d="del"]{background:none}
-.pin-keys button svg{width:26px;height:26px}
-.pin-cancel{margin-top:24px;color:var(--v-accent);font-weight:700;font-size:15px;padding:10px 20px}
-@media(max-height:640px){.pin-keys{grid-template-columns:repeat(3,62px);gap:12px 20px}.pin-keys button{width:62px;height:62px;font-size:24px}.pin-dots{margin-top:18px}.pin-msg{margin:10px 0 12px}.pin-ico{margin-bottom:10px}}
+.pin-keys button svg{width:27px;height:27px}
+.pin-cancel{margin-top:26px;color:var(--vblue);font-weight:700;font-size:15px;padding:10px 20px}
+@media(max-height:660px){.pin-keys{grid-template-columns:repeat(3,62px);gap:12px 20px}.pin-keys button{width:62px;height:62px;font-size:24px}.pin-dots{margin-top:18px}.pin-msg{margin:12px 0 14px}.pin-ico{margin-bottom:10px}}
+
+/* acciones de imagen en el menú de mensaje */
 #actionVaultCopy svg,#actionVaultMove svg,#actionVaultSend svg{width:20px;height:20px}
-.hist-actions button.danger-act{color:#fff;background:#e5484d}
-.hist-actions button.danger-act svg{stroke:#fff}
-#vaultTabs{transition:none}
 .chat-menu-item svg.li{width:20px;height:20px;margin-right:2px}
 </style>
 </body>
