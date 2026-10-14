@@ -20,8 +20,8 @@ Cada persona tiene su propio Baúl (ícono de cofre en la cabecera del chat). Lo
 - **Identidad visible:** el Baúl muestra "Baúl de León" / "Baúl de Luna". Para cambiar de usuario: menú del chat → "Cambiar de usuario" (vuelve a pedir el código y la identidad). Importante: el Baúl, el PIN y las notificaciones van atados al usuario; si entras con otra identidad verás otro Baúl.
 - **PIN:** al abrir el Baúl se pide el PIN si está puesto; si no se puede leer aún, NO abre sin protección (falla cerrado).
 - **Mi Baúl:** botón "Seleccionar" para elegir varias y Eliminar o Enviar al Baúl de la otra persona.
-- Notificaciones por usuario: cada telefono queda suscrito SOLO a la identidad actual. Al entrar, el telefono se reclama para ese usuario y se borra de la otra identidad (chat/push). Asi Leon solo recibe las de Luna y Luna las de Leon, nunca las propias. Con Cambiar de usuario se suelta la suscripcion de quien sale.
 
 ## Baul v3 (diseno + albumes)
 - Rediseno del Baúl: tema oscuro propio de alto contraste, sin desenfoque y con mas espaciado.
 - Albumes: en Mi Baúl hay chips Todo / Favoritos / tus albumes / + Album. Con Seleccionar marcas varias y usas Favorito, A album, Enviar o Eliminar. En el visor hay estrella (favorito) y carpeta (mover a album). Sirve para clasificar las fotos del Baúl.
+- Notificaciones: se dejaron igual que en el VibeStore original (cada telefono suscrito a su identidad; el que envia no recibe). En dos telefonos, Leon recibe las de Luna y Luna las de Leon. Tras actualizar, abre la app una vez en cada telefono para re-suscribir.

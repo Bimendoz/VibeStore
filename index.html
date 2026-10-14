@@ -4466,9 +4466,6 @@
         set(typingRef, null).catch(()=>{});
         set(presenceRef, null).catch(()=>{});          // marcar offline al salir
         inChat = false;
-        // Soltar las notificaciones de la identidad que sale, para que este
-        // teléfono no siga recibiendo los avisos de ese usuario tras cambiar.
-        try { if (myId) set(ref(db, `chat/push/${myId}`), null).catch(()=>{}); } catch (e) {}
         try { localStorage.removeItem('vibestore_session'); } catch (e) {}
         if (window._heartbeat) clearInterval(window._heartbeat);
         document.getElementById('seccion-chat').style.display = 'none';
@@ -4779,23 +4776,7 @@
             }
 
             window._pushSub = sub;
-            if (myId) {
-                await set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
-                // Este teléfono (endpoint) pertenece SOLO a la identidad actual.
-                // Si antes se usó como la otra persona, quitar esa suscripción vieja
-                // para no recibir en este teléfono los avisos destinados al otro
-                // usuario (que son, en la práctica, los de tus propios mensajes).
-                try {
-                    const myEndpoint = sub.endpoint;
-                    const snap = await get(ref(db, 'chat/push'));
-                    const all = (snap && snap.val()) || {};
-                    for (const [uid, val] of Object.entries(all)) {
-                        if (uid === myId) continue;
-                        let ep = null; try { ep = JSON.parse(val).endpoint; } catch (e) {}
-                        if (ep && ep === myEndpoint) { await set(ref(db, `chat/push/${uid}`), null); console.log('[Push] Quitada suscripción vieja de', uid); }
-                    }
-                } catch (e) {}
-            }
+            if (myId) await set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
             console.log('[Push] Suscrito y guardado en Firebase');
         } catch(e) {
             console.log('[Push] Error al suscribir:', e.message);
