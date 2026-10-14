@@ -292,6 +292,19 @@ listenFirebasePath('chat/messages', {
     }
 }, 'orderBy=%22$key%22&limitToLast=20');
 
+// ── Fotos dejadas en el Baúl: mismo aviso camuflado que un mensaje ──
+const seenVaultEv = new Set();
+listenFirebasePath('chat/vaultEvents', {
+    onInitial: (data) => { Object.keys(data).forEach(k => { seenVaultEv.add(k); fbDelete(`chat/vaultEvents/${k}`); }); },
+    onChild: (key, ev) => {
+        if (!ev || !ev.from || seenVaultEv.has(key)) return;
+        seenVaultEv.add(key); fbDelete(`chat/vaultEvents/${key}`);
+        if (!ev.ts || ev.ts < SERVER_START) return;
+        if (pendingNotify[ev.from]) clearTimeout(pendingNotify[ev.from]);
+        pendingNotify[ev.from] = setTimeout(() => { delete pendingNotify[ev.from]; notifyOthers(ev.from, 'message'); }, NOTIFY_DEBOUNCE_MS);
+    }
+});
+
 // ── Llamadas entrantes (antes NO enviaban notificación — si el teléfono tenía
 //    la app cerrada, la llamada nunca se sabía) ──────────────────────────────────────
 const seenCallKeys = new Set();

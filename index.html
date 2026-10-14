@@ -1072,6 +1072,7 @@
             <button class="btn-call-trigger video-style" onclick="initiateCall('video')" aria-label="Video">
                 <svg viewBox="0 0 24 24"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
             </button>
+            <button class="btn-header-more vault-open-btn" onclick="openVault()" aria-label="Baúl"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M3.5 13.5h17"/><rect x="10" y="12" width="4" height="4" rx="1"/></svg><i class="vault-dot" id="vaultDot"></i></button>
             <button class="btn-header-more" onclick="openChatMenu()" aria-label="Más">
                 <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
             </button>
@@ -1237,6 +1238,9 @@
         <div class="cw-blob cw-blob3"></div>
     </div>
 
+    <button class="vault-notice" id="vaultNotice" onclick="openVault()">
+      <span class="vn-ico"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M3.5 13.5h17"/><rect x="10" y="12" width="4" height="4" rx="1"/></svg></span><span class="vn-txt" id="vaultNoticeTxt"></span><span class="vn-go">Ver<svg class="li" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
+    </button>
     <div class="chat-messages" id="chatWorkspace">
         <div class="chat-empty-state" id="chatEmptyState">
             <div class="ces-icon">🦊</div>
@@ -1363,6 +1367,92 @@
     <button class="photo-menu-btn cancel" onclick="closeTrashMenu()">Cancelar</button>
 </div>
 
+<!-- ═════════ BAÚL ═════════ -->
+<section class="vault-screen" id="vaultScreen" aria-hidden="true">
+  <header class="vault-head">
+    <button class="vh-btn" onclick="closeVault()" aria-label="Volver"><svg class="li" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <div class="vault-title"><b>Baúl</b><small id="vaultSub">Solo tú puedes borrar lo que hay aquí</small></div>
+    <button class="vh-btn" id="vaultPinBtn" onclick="openPinMenu()" aria-label="PIN"><svg class="li" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg></button>
+    <button class="vh-btn" onclick="pickVaultUpload()" aria-label="Agregar"><svg class="li" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+  </header>
+  <nav class="vault-tabs" id="vaultTabs">
+    <button class="on" data-tab="mine" onclick="setVaultTab('mine')">Mi Baúl</button>
+    <button data-tab="hist" onclick="setVaultTab('hist')">Historial</button>
+  </nav>
+  <div class="vault-body" id="vaultMine">
+    <div class="vault-grid" id="vaultGrid"></div>
+    <div class="vault-empty" id="vaultEmpty">
+      <span class="ve-ico"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M3.5 13.5h17"/><rect x="10" y="12" width="4" height="4" rx="1"/></svg></span><b>Tu Baúl está vacío</b>
+      <p>Aquí quedan las fotos que te dejen o que guardes desde el chat. Solo tú puedes borrarlas.</p>
+    </div>
+  </div>
+  <div class="vault-body" id="vaultHist">
+    <div class="hist-bar"><small id="histInfo">Fotos que siguen en el chat</small><button class="hist-sel" id="histSelBtn" onclick="toggleHistSelect()">Seleccionar</button></div>
+    <div class="vault-grid" id="histGrid"></div>
+    <div class="vault-empty" id="histEmpty"><span class="ve-ico"><svg class="li" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><b id="histEmptyT">Buscando en el historial…</b><p id="histEmptyP">Aquí aparecen las fotos que siguen guardadas en el chat. Lo que ya se borró no se puede recuperar.</p></div>
+  </div>
+  <div class="hist-actions" id="histActions">
+    <button onclick="histSaveSelected()"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M3.5 13.5h17"/><rect x="10" y="12" width="4" height="4" rx="1"/></svg><span id="histSaveLbl">Guardar en mi Baúl</span></button>
+    <button onclick="histSendSelected()" class="orange"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M15 2.5l4 4-4 4M19 6.5h-7"/></svg><span id="histSendLbl">Enviar al Baúl</span></button>
+  </div>
+  <input type="file" id="vaultInput" accept="image/*" multiple style="display:none" onchange="handleVaultUpload(this)">
+</section>
+
+<!-- visor del Baúl -->
+<div class="vault-viewer" id="vaultViewer">
+  <div class="vv-top">
+    <button onclick="closeVaultViewer()" aria-label="Cerrar"><svg class="li" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <span class="vv-info" id="vvInfo"></span>
+    <div class="vv-acts">
+      <button onclick="vvSaveDevice()" aria-label="Guardar en el teléfono"><svg class="li" viewBox="0 0 24 24"><path d="M12 4v11M7 10.5l5 5 5-5"/><path d="M5 19.5h14"/></svg></button>
+      <button onclick="vvSendPeer()" id="vvPeer" class="orange" aria-label="Enviar al Baúl de la otra persona"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M15 2.5l4 4-4 4M19 6.5h-7"/></svg></button>
+      <button onclick="vvDelete()" id="vvDel" class="danger" aria-label="Borrar del Baúl"><svg class="li" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4h4M6.5 7l.8 11.6a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/><path d="M10 11v5M14 11v5"/></svg></button>
+    </div>
+  </div>
+  <div class="vv-body" id="vvBody"></div>
+</div>
+
+<!-- ¿Feed o Baúl? al enviar una foto -->
+<div class="vault-sheet-ov" id="destOv" onclick="closeDest()"></div>
+<div class="vault-sheet" id="destSheet">
+  <div class="vs-head"><b id="destTitle">Enviar foto</b><small>Elige dónde la recibe <span id="destPeer"></span></small></div>
+  <button class="vs-opt" onclick="chooseDest('feed')"><span class="vs-ico"><svg class="li" viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-11.6 7.1L4 20l1-4.1A8 8 0 1 1 20 12z"/><path d="M8.5 10.5h7M8.5 13.5h4.5"/></svg></span><span class="vs-txt"><b>Feed</b><small>Aparece en la conversación</small></span></button>
+  <button class="vs-opt" onclick="chooseDest('vault')"><span class="vs-ico orange"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M3.5 13.5h17"/><rect x="10" y="12" width="4" height="4" rx="1"/></svg></span><span class="vs-txt"><b id="destVaultName">Baúl</b><small id="destVaultSub">Se guarda en su Baúl</small></span></button>
+  <button class="vs-cancel" onclick="closeDest()">Cancelar</button>
+</div>
+
+<!-- confirmación de borrado del Baúl -->
+<div class="vault-sheet-ov" id="confirmOv"></div>
+<div class="vault-sheet" id="confirmSheet">
+  <div class="vs-head"><b id="confirmTitle"></b><small id="confirmTxt"></small></div>
+  <div class="vs-row"><button class="vs-cancel" id="confirmNo">Cancelar</button><button class="vs-danger" id="confirmYes">Borrar</button></div>
+</div>
+
+<!-- opciones del PIN -->
+<div class="vault-sheet-ov" id="pinMenuOv" onclick="closePinMenu()"></div>
+<div class="vault-sheet" id="pinMenu">
+  <div class="vs-head"><b>PIN del Baúl</b><small id="pinMenuTxt"></small></div>
+  <div id="pinMenuOpts"></div>
+  <button class="vs-cancel" onclick="closePinMenu()">Cerrar</button>
+</div>
+
+<!-- teclado del PIN -->
+<div class="pinpad" id="pinPad">
+  <div class="pin-box">
+    <span class="pin-ico"><svg class="li" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg></span>
+    <b id="pinTitle">Ingresa tu PIN</b><small id="pinSub"></small>
+    <div class="pin-dots" id="pinDots"><i></i><i></i><i></i><i></i></div>
+    <div class="pin-msg" id="pinMsg"></div>
+    <div class="pin-keys" id="pinKeys">
+      <button data-d="1">1</button><button data-d="2">2</button><button data-d="3">3</button>
+      <button data-d="4">4</button><button data-d="5">5</button><button data-d="6">6</button>
+      <button data-d="7">7</button><button data-d="8">8</button><button data-d="9">9</button>
+      <span></span><button data-d="0">0</button><button data-d="del" aria-label="Borrar"><svg class="li" viewBox="0 0 24 24"><path d="M9 6h10a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 18H9l-5.5-6L9 6z"/><path d="m11.5 9.5 5 5M16.5 9.5l-5 5"/></svg></button>
+    </div>
+    <button class="pin-cancel" id="pinCancel">Cancelar</button>
+  </div>
+</div>
+
 <div class="msg-action-overlay" id="msgActionOverlay" onclick="closeMsgActions()"></div>
 <div class="msg-action-sheet" id="msgActionSheet">
     <div class="reaction-row" id="reactionRow">
@@ -1383,6 +1473,9 @@
             <svg viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
             Copiar
         </div>
+        <div class="action-item" onclick="vaultCopyFromMsg(false)" id="actionVaultCopy"><svg class="li" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2.5"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></svg>Copia a mi Baúl</div>
+        <div class="action-item" onclick="vaultCopyFromMsg(true)" id="actionVaultMove"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M12 2.5v8M9 7.5l3 3 3-3"/></svg>Enviar a mi Baúl</div>
+        <div class="action-item" onclick="vaultSendFromMsg()" id="actionVaultSend"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M15 2.5l4 4-4 4M19 6.5h-7"/></svg><span id="actVaultSendLbl">Enviar al Baúl</span></div>
         <div class="action-item danger" onclick="deleteSelectedMsg()" id="actionDelete">
             <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
             Eliminar
@@ -1507,7 +1600,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, onChildAdded, get, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp }
+    import { getDatabase, ref, push, onValue, onChildAdded, get, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp, onChildRemoved }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
     const firebaseConfig = {
@@ -2158,7 +2251,7 @@
     // Escuchar los perfiles guardados: aplica MI propio perfil guardado (persiste
     // entre sesiones/dispositivos) y muestra el avatar REAL de la OTRA persona
     // en el header, en vez del mío propio (antes mostraba mi avatar por error).
-    let otherAvatar = '🦊'; let otherName = '';
+    let otherAvatar = '🦊'; let otherName = ''; let otherId = '';
     function listenProfiles() {
         onValue(ref(db, 'chat/profiles'), snap => {
             const data = snap.val() || {};
@@ -2169,6 +2262,7 @@
             }
             const otherEntry = Object.entries(data).find(([id]) => id !== myId);
             if (otherEntry) {
+                otherId = otherEntry[0] || otherId;
                 otherAvatar = otherEntry[1].avatar || otherAvatar;
                 otherName = otherEntry[1].name || otherName;
             }
@@ -2849,6 +2943,7 @@
         listenForIncomingCalls();
         listenForTyping();
         listenProfiles();
+        startVault();
         startKeyExchange();
         rerenderAllMessages();
         subscribeToPush();
@@ -3022,11 +3117,19 @@
         wrap.addEventListener('contextmenu', (e) => { e.preventDefault(); openMsgActions(key, isMine, plainText, senderName); });
     }
 
+    let selectedMsgImage = null;
     window.openMsgActions = function(key, isMine, plainText, senderName) {
         selectedMsgKey    = key;
         selectedMsgIsMine = isMine;
         selectedMsgText   = plainText || null;
         window._selectedMsgSender = senderName || (isMine ? myName : 'Otro');
+        const imgEl = document.querySelector(`#wrap-${key} .msg-image`);
+        selectedMsgImage = imgEl ? imgEl.src : null;
+        const showVault = !!selectedMsgImage;
+        document.getElementById('actionVaultCopy').style.display = showVault ? 'flex' : 'none';
+        document.getElementById('actionVaultMove').style.display = showVault ? 'flex' : 'none';
+        document.getElementById('actionVaultSend').style.display = showVault ? 'flex' : 'none';
+        if (showVault) document.getElementById('actVaultSendLbl').textContent = 'Enviar al Baúl de ' + vaultPeerName();
         document.getElementById('actionDelete').style.display = isMine ? 'flex' : 'none';
         document.getElementById('actionCopy').style.display   = plainText ? 'flex' : 'none';
         document.getElementById('actionReply').style.display  = 'flex';
@@ -3382,26 +3485,24 @@
         input.value = '';
         if (!file) return;
         if (!file.type.startsWith('image/')) { showToast('Eso no es una imagen'); return; }
-        compressImageToBlob(file, async (blob) => {
+        compressImageToBlob(file, (blob) => {
             if (!blob) { showToast('No se pudo procesar la imagen'); return; }
             const reader = new FileReader();
-            reader.onloadend = async () => {
-                const dataUrl = reader.result;
-                try {
-                    if (e2eReady) {
-                        const enc = await encryptText(dataUrl);
-                        await push(messagesRef, { type: 'image', enc, sender: myName, senderId: myId, ts: Date.now() });
-                    } else {
-                        await push(messagesRef, { type: 'image', image: dataUrl, sender: myName, senderId: myId, ts: Date.now() });
-                    }
-                    triggerPushForOther('Imagen');
-                } catch (err) {
-                    showToast('⚠️ No se pudo enviar la imagen. Revisa tu conexión.');
-                }
-            };
+            reader.onloadend = () => { openDest(reader.result); };
             reader.readAsDataURL(blob);
         });
     };
+    async function sendPhotoToFeed(dataUrl) {
+        try {
+            if (e2eReady) {
+                const enc = await encryptText(dataUrl);
+                await push(messagesRef, { type: 'image', enc, sender: myName, senderId: myId, ts: Date.now() });
+            } else {
+                await push(messagesRef, { type: 'image', image: dataUrl, sender: myName, senderId: myId, ts: Date.now() });
+            }
+            triggerPushForOther('Imagen');
+        } catch (err) { showToast('⚠️ No se pudo enviar la imagen. Revisa tu conexión.'); }
+    }
 
     function compressImageToBlob(file, callback) {
         const reader = new FileReader();
@@ -4657,6 +4758,383 @@
         // Esta función queda como respaldo local para notificaciones en primer plano.
     }
 
+    /* ═══════════════════════════ BAÚL ═══════════════════════════
+       Cada persona tiene su Baúl en chat/vault/<suId>. Lo que hay en tu Baúl es
+       tuyo: solo tú lo ves y solo tú lo borras, aunque te lo haya dejado el otro.
+       Las fotos van cifradas igual que el chat. Son copias: si alguien borra el
+       mensaje del chat, la del Baúl sigue. PIN opcional en chat/vaultPin/<suId>. */
+    const VCHEST = '<svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M3.5 13.5h17"/><rect x="10" y="12" width="4" height="4" rx="1"/></svg>';
+    const VLOCK = '<svg class="li" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg>';
+    const VEDIT = '<svg class="li" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="m13.5 6.5 4 4"/></svg>';
+    const VOPEN = '<svg class="li" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2"/><path d="M8 10.5V8a4 4 0 0 1 7.7-1.5"/></svg>';
+    const VCHECK = '<svg class="li" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+    function vaultPeerId() {
+        if (otherId) return otherId;
+        if (otherName) return identitySlug(otherName);
+        if (myId === 'user_luna') return 'user_leon';
+        if (myId === 'user_leon') return 'user_luna';
+        return '';
+    }
+    function vaultPeerName() {
+        if (otherName) return otherName;
+        if (myId === 'user_luna') return 'León';
+        if (myId === 'user_leon') return 'Luna';
+        return 'la otra persona';
+    }
+    async function vaultImage(rec) {
+        if (rec.image) return rec.image;
+        if (rec.enc) { try { return await decryptText(rec.enc); } catch { return null; } }
+        return null;
+    }
+    // Escribe una foto (cifrada) en el Baúl de ownerId. extra: { senderId, src }
+    async function putVaultItem(ownerId, dataUrl, extra) {
+        extra = extra || {};
+        const rec = { type: 'image', senderId: extra.senderId || myId, ts: Date.now(), seen: ownerId === myId };
+        if (extra.src) rec.src = extra.src;
+        if (e2eReady) { const enc = await encryptText(dataUrl); if (enc) rec.enc = enc; else rec.image = dataUrl; }
+        else rec.image = dataUrl;
+        const r = push(ref(db, `chat/vault/${ownerId}`));
+        await set(r, rec);
+        if (ownerId !== myId) { push(ref(db, 'chat/vaultEvents'), { from: myId, ts: Date.now() }).catch(() => {}); }
+        return r.key;
+    }
+
+    // ── estado y listeners ──
+    const vaultItems = new Map();   // key → { key, rec, img }
+    let vaultStarted = false, vaultOpen = false, vaultTab = 'mine';
+    let vaultFresh = new Set();
+    function startVault() {
+        if (vaultStarted || !myId) return;
+        vaultStarted = true;
+        const q = ref(db, `chat/vault/${myId}`);
+        onChildAdded(q, (snap) => vaultUpsert(snap.key, snap.val()));
+        onChildRemoved(q, (snap) => { vaultItems.delete(snap.key); vaultChanged(); });
+        watchVaultPin();
+    }
+    async function vaultUpsert(key, rec) {
+        if (!rec) return;
+        const img = await vaultImage(rec);
+        vaultItems.set(key, { key, rec, img });
+        vaultChanged();
+    }
+    let vaultT = null;
+    function vaultChanged() { clearTimeout(vaultT); vaultT = setTimeout(() => { updateVaultNotice(); if (vaultOpen && vaultTab === 'mine') renderVaultMine(); if (histLoaded) renderHist(); }, 60); }
+    const vaultUnseen = () => [...vaultItems.values()].filter(it => !it.rec.seen && it.rec.senderId !== myId);
+    function updateVaultNotice() {
+        const un = vaultUnseen();
+        document.getElementById('vaultDot').classList.toggle('on', un.length > 0);
+        const show = un.length > 0 && !vaultOpen && inChat;
+        const el = document.getElementById('vaultNotice');
+        el.classList.toggle('on', show);
+        if (!show) return;
+        const what = un.length === 1 ? 'una foto' : `${un.length} fotos`;
+        document.getElementById('vaultNoticeTxt').innerHTML = `<b>${escHtml(vaultPeerName())}</b> te dejó ${what} en el Baúl`;
+    }
+
+    // ── abrir / cerrar / pestañas ──
+    let vaultOpening = false;
+    window.openVault = async function() {
+        if (!inChat || vaultOpen || vaultOpening) return;
+        closePhotoMenu();
+        vaultOpening = true;
+        try {
+            for (let i = 0; i < 25 && !vaultPinLoaded; i++) await new Promise(r => setTimeout(r, 100));
+            if (vaultPinRec) { const ok = await askPin({ title: 'Baúl protegido', sub: 'Ingresa tu PIN de 4 números', check: verifyPin }); if (!ok) return; }
+        } finally { vaultOpening = false; }
+        vaultOpen = true;
+        const un = vaultUnseen();
+        vaultFresh = new Set(un.map(it => it.key));
+        un.forEach(it => set(ref(db, `chat/vault/${myId}/${it.key}/seen`), true).catch(() => {}));
+        histLoaded = false; histSelect = false; histSel.clear(); document.getElementById('histSelBtn').textContent = 'Seleccionar';
+        setVaultTab('mine');
+        document.getElementById('vaultScreen').classList.add('on');
+        document.getElementById('vaultScreen').setAttribute('aria-hidden', 'false');
+        updateVaultNotice();
+    };
+    window.closeVault = function() {
+        if (!vaultOpen) return;
+        vaultOpen = false; vaultFresh.clear();
+        document.getElementById('vaultScreen').classList.remove('on');
+        document.getElementById('vaultScreen').setAttribute('aria-hidden', 'true');
+        updateVaultNotice();
+    };
+    window.setVaultTab = function(t) {
+        vaultTab = t;
+        [...document.getElementById('vaultTabs').children].forEach(b => b.classList.toggle('on', b.dataset.tab === t));
+        document.getElementById('vaultMine').style.display = t === 'mine' ? 'block' : 'none';
+        document.getElementById('vaultHist').style.display = t === 'hist' ? 'block' : 'none';
+        updateHistActions();
+        if (t === 'mine') renderVaultMine();
+        if (t === 'hist' && !histLoaded) loadHistory();
+    };
+    const savedSrcSet = () => new Set([...vaultItems.values()].map(it => it.rec.src).filter(Boolean));
+    function tileHTML(key, img, badge, selMode, selected) {
+        return `<button class="v-tile${selected ? ' sel' : ''}" data-k="${escHtml(key)}">
+          ${img ? `<img src="${escHtml(img)}" alt="" loading="lazy">` : '<span class="v-ph"></span>'}
+          ${badge || ''}${selMode ? `<span class="v-check">${selected ? VCHECK : ''}</span>` : ''}</button>`;
+    }
+    function renderVaultMine() {
+        const list = [...vaultItems.values()].sort((a, b) => (b.rec.ts || 0) - (a.rec.ts || 0));
+        document.getElementById('vaultEmpty').style.display = list.length ? 'none' : '';
+        const n = list.length;
+        document.getElementById('vaultSub').textContent = n ? `${n} ${n === 1 ? 'foto' : 'fotos'} · solo tú puedes borrarlas` : 'Solo tú puedes borrar lo que hay aquí';
+        document.getElementById('vaultGrid').innerHTML = list.map(it =>
+            tileHTML(it.key, it.img, vaultFresh.has(it.key) ? '<span class="v-saved">Nuevo</span>' : '', false, false)).join('');
+    }
+    document.getElementById('vaultGrid').addEventListener('click', (e) => {
+        const t = e.target.closest('.v-tile'); if (!t) return;
+        const it = vaultItems.get(t.dataset.k); if (!it) return;
+        const who = it.rec.senderId === myId ? 'Guardada por ti' : `Te la dejó ${vaultPeerName()}`;
+        openVaultViewer({ img: it.img, info: `${who} · ${new Date(it.rec.ts).toLocaleDateString('es-CO',{day:'numeric',month:'short'})} ${new Date(it.rec.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`,
+            onDelete: () => deleteVaultItem(it.key), onSendPeer: () => sendDataUrlToPeer(it.img) });
+    });
+    async function deleteVaultItem(key) {
+        const it = vaultItems.get(key); if (!it) return false;
+        const ok = await vaultConfirm('¿Borrar esta foto del Baúl?', 'Se borra para siempre y no se puede recuperar.');
+        if (!ok) return false;
+        try { await remove(ref(db, `chat/vault/${myId}/${key}`)); showToast('Borrado del Baúl'); return true; }
+        catch { showToast('No se pudo borrar'); return false; }
+    }
+    async function sendDataUrlToPeer(dataUrl) {
+        try { await putVaultItem(vaultPeerId(), dataUrl, { senderId: myId }); showToast('Enviado al Baúl de ' + vaultPeerName()); }
+        catch { showToast('No se pudo enviar'); }
+    }
+
+    // ── subir del teléfono directo a mi Baúl ──
+    window.pickVaultUpload = function() { document.getElementById('vaultInput').click(); };
+    window.handleVaultUpload = function(input) {
+        const files = [...(input.files || [])]; input.value = '';
+        files.forEach(file => {
+            if (!file.type.startsWith('image/')) return;
+            compressImageToBlob(file, (blob) => {
+                if (!blob) return;
+                const reader = new FileReader();
+                reader.onloadend = async () => { try { await putVaultItem(myId, reader.result, { senderId: myId }); showToast('Guardado en tu Baúl'); } catch { showToast('No se pudo guardar'); } };
+                reader.readAsDataURL(blob);
+            });
+        });
+    };
+
+    // ── Historial: todas las fotos que SIGUEN en el chat ──
+    let histList = [], histLoaded = false, histSelect = false, histSel = new Set();
+    async function loadHistory() {
+        histLoaded = false; histList = []; renderHist();
+        try {
+            const snap = await get(messagesRef);
+            const all = (snap && snap.val()) || {};
+            const out = [];
+            for (const [key, d] of Object.entries(all)) {
+                if (!d || d.type !== 'image') continue;
+                let img = d.image || null;
+                if (!img && d.enc) { try { img = await decryptText(d.enc); } catch { img = null; } }
+                if (!img) continue;
+                out.push({ key, senderId: d.senderId, ts: d.ts || 0, img });
+            }
+            out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+            histList = out; histLoaded = true; renderHist();
+        } catch { histLoaded = true; histList = []; renderHist(); }
+    }
+    function renderHist() {
+        const saved = savedSrcSet();
+        document.getElementById('histInfo').textContent = histLoaded ? (histList.length ? `${histList.length} en el chat · lo ya borrado no se puede recuperar` : '') : 'Buscando en el historial…';
+        document.getElementById('histSelBtn').style.display = histLoaded && histList.length ? '' : 'none';
+        document.getElementById('histEmpty').style.display = histLoaded && !histList.length ? '' : 'none';
+        if (histLoaded && !histList.length) { document.getElementById('histEmptyT').textContent = 'No hay nada en el historial'; document.getElementById('histEmptyP').textContent = 'Las fotos que estén en el chat aparecen aquí. Lo que ya se borró no se puede recuperar.'; }
+        document.getElementById('histGrid').innerHTML = histList.map(it => {
+            const isSaved = saved.has(it.key), isSel = histSel.has(it.key);
+            const badge = (isSaved && !histSelect) ? `<span class="v-saved">${VCHECK}En tu Baúl</span>` : '';
+            return tileHTML(it.key, it.img, badge, histSelect, isSel);
+        }).join('');
+    }
+    document.getElementById('histGrid').addEventListener('click', (e) => {
+        const t = e.target.closest('.v-tile'); if (!t) return;
+        const it = histList.find(x => x.key === t.dataset.k); if (!it) return;
+        if (histSelect) { if (histSel.has(it.key)) histSel.delete(it.key); else histSel.add(it.key); renderHist(); updateHistActions(); return; }
+        const saved = savedSrcSet().has(it.key);
+        openVaultViewer({ img: it.img, info: `${it.senderId === myId ? 'La enviaste tú' : 'Te la envió ' + vaultPeerName()} · ${new Date(it.ts).toLocaleDateString('es-CO',{day:'numeric',month:'short'})} ${new Date(it.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`,
+            onSaveMine: saved ? null : () => histSaveOne(it), onSendPeer: () => sendDataUrlToPeer(it.img) });
+    });
+    async function histSaveOne(it) {
+        if (savedSrcSet().has(it.key)) { showToast('Ya está en tu Baúl'); return; }
+        try { await putVaultItem(myId, it.img, { senderId: it.senderId, src: it.key }); showToast('Guardado en tu Baúl'); renderHist(); } catch { showToast('No se pudo guardar'); }
+    }
+    window.toggleHistSelect = function() {
+        histSelect = !histSelect; histSel.clear();
+        document.getElementById('histSelBtn').textContent = histSelect ? 'Cancelar' : 'Seleccionar';
+        renderHist(); updateHistActions();
+    };
+    function updateHistActions() {
+        const show = vaultTab === 'hist' && histSelect && histSel.size > 0;
+        document.getElementById('histActions').classList.toggle('on', show);
+        const n = histSel.size;
+        document.getElementById('histSaveLbl').textContent = `Guardar en mi Baúl${n ? ` (${n})` : ''}`;
+        document.getElementById('histSendLbl').textContent = `Enviar al Baúl de ${vaultPeerName()}${n ? ` (${n})` : ''}`;
+    }
+    async function histRun(toPeer, okMsg) {
+        const picks = histList.filter(it => histSel.has(it.key));
+        if (!picks.length) return;
+        let ok = 0;
+        for (const it of picks) {
+            if (!toPeer && savedSrcSet().has(it.key)) { ok++; continue; }
+            try { if (toPeer) await putVaultItem(vaultPeerId(), it.img, { senderId: myId }); else await putVaultItem(myId, it.img, { senderId: it.senderId, src: it.key }); ok++; } catch {}
+        }
+        histSelect = false; histSel.clear(); document.getElementById('histSelBtn').textContent = 'Seleccionar';
+        renderHist(); updateHistActions();
+        showToast(okMsg(ok, picks.length));
+    }
+    window.histSaveSelected = () => histRun(false, (ok, tot) => ok === tot ? `${ok} ${ok === 1 ? 'guardada' : 'guardadas'} en tu Baúl` : `${ok} de ${tot} guardadas`);
+    window.histSendSelected = () => histRun(true, (ok, tot) => ok === tot ? `${ok} ${ok === 1 ? 'enviada' : 'enviadas'} al Baúl de ${vaultPeerName()}` : `${ok} de ${tot} enviadas`);
+
+    // ── acciones desde un mensaje de imagen del chat ──
+    window.vaultCopyFromMsg = async function(move) {
+        const src = selectedMsgImage, key = selectedMsgKey, mine = selectedMsgIsMine;
+        closeMsgActions(); if (!src) return;
+        try {
+            await putVaultItem(myId, src, { senderId: mine ? myId : vaultPeerId(), src: key });
+            if (move) { remove(ref(db, `chat/messages/${key}`)).catch(() => {}); const el = document.getElementById('wrap-' + key); if (el) el.remove(); showToast('Enviada a tu Baúl'); }
+            else showToast('Copia guardada en tu Baúl');
+        } catch { showToast('No se pudo guardar en el Baúl'); }
+    };
+    window.vaultSendFromMsg = async function() {
+        const src = selectedMsgImage; closeMsgActions(); if (!src) return;
+        await sendDataUrlToPeer(src);
+    };
+
+    // ── selector Feed / Baúl al enviar una foto ──
+    let destDataUrl = null;
+    function openDest(dataUrl) {
+        destDataUrl = dataUrl;
+        document.getElementById('destPeer').textContent = vaultPeerName();
+        document.getElementById('destVaultName').textContent = `Baúl de ${vaultPeerName()}`;
+        document.getElementById('destVaultSub').textContent = `Se guarda ahí y solo ${vaultPeerName()} puede borrarla`;
+        document.getElementById('destOv').classList.add('on'); document.getElementById('destSheet').classList.add('on');
+    }
+    window.closeDest = function() { document.getElementById('destOv').classList.remove('on'); document.getElementById('destSheet').classList.remove('on'); destDataUrl = null; };
+    window.chooseDest = async function(dest) {
+        const d = destDataUrl; closeDest(); if (!d) return;
+        if (dest === 'feed') await sendPhotoToFeed(d);
+        else { try { await putVaultItem(vaultPeerId(), d, { senderId: myId }); showToast(`Foto guardada en el Baúl de ${vaultPeerName()}`); } catch { showToast('No se pudo enviar'); } }
+    };
+
+    // ── confirmación propia ──
+    function vaultConfirm(title, txt, yes) {
+        return new Promise((resolve) => {
+            document.getElementById('confirmTitle').textContent = title;
+            document.getElementById('confirmTxt').textContent = txt;
+            document.getElementById('confirmYes').textContent = yes || 'Borrar';
+            const done = (v) => { document.getElementById('confirmOv').classList.remove('on'); document.getElementById('confirmSheet').classList.remove('on'); cY.onclick = cN.onclick = ov.onclick = null; resolve(v); };
+            const cY = document.getElementById('confirmYes'), cN = document.getElementById('confirmNo'), ov = document.getElementById('confirmOv');
+            cY.onclick = () => done(true); cN.onclick = ov.onclick = () => done(false);
+            ov.classList.add('on'); document.getElementById('confirmSheet').classList.add('on');
+        });
+    }
+
+    // ── visor del Baúl ──
+    let vvCtx = null;
+    function openVaultViewer(ctx) {
+        vvCtx = ctx;
+        document.getElementById('vaultViewer').classList.add('on');
+        document.getElementById('vvInfo').textContent = ctx.info || '';
+        document.getElementById('vvDel').style.display = ctx.onDelete ? '' : 'none';
+        document.getElementById('vvPeer').style.display = ctx.onSendPeer ? '' : 'none';
+        const body = document.getElementById('vvBody');
+        body.innerHTML = ctx.img ? `<img src="${escHtml(ctx.img)}" alt="">` : '<span class="vv-spin"></span>';
+    }
+    window.closeVaultViewer = function() { document.getElementById('vaultViewer').classList.remove('on'); document.getElementById('vvBody').innerHTML = ''; vvCtx = null; };
+    window.vvDelete = async function() { if (vvCtx && vvCtx.onDelete) { const ok = await vvCtx.onDelete(); if (ok) closeVaultViewer(); } };
+    window.vvSendPeer = function() { if (vvCtx && vvCtx.onSendPeer) vvCtx.onSendPeer(); };
+    window.vvSaveDevice = async function() {
+        if (!vvCtx || !vvCtx.img) return;
+        try {
+            const blob = await (await fetch(vvCtx.img)).blob();
+            const file = new File([blob], `foto_${Date.now()}.jpg`, { type: blob.type || 'image/jpeg' });
+            if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file] }); return; }
+            const a = document.createElement('a'); a.href = vvCtx.img; a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+        } catch (e) { if (e && e.name !== 'AbortError') showToast('No se pudo guardar'); }
+    };
+
+    // ── PIN del Baúl ──
+    let vaultPinRec = null, vaultPinLoaded = false;
+    const PIN_ITER = 150000, PIN_MAX_FAILS = 5, PIN_WAIT_MS = 60000;
+    async function pinHash(pin, saltB64) {
+        const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pin), { name: 'PBKDF2' }, false, ['deriveBits']);
+        const salt = new Uint8Array([...new Uint8Array(b64.to(saltB64)), ...new TextEncoder().encode(myId)]);
+        return b64.from(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: PIN_ITER, hash: 'SHA-256' }, base, 256));
+    }
+    function watchVaultPin() {
+        onValue(ref(db, `chat/vaultPin/${myId}`), async (snap) => {
+            const v = snap.val(); let rec = null;
+            if (v) { try { rec = JSON.parse(await decryptText(v)); } catch { rec = null; } }
+            vaultPinRec = rec; vaultPinLoaded = true;
+            document.getElementById('vaultPinBtn').classList.toggle('on', !!rec);
+        });
+    }
+    const pinFailKey = () => 'vibestore_pinfail_' + myId;
+    const pinGetFail = () => { try { return JSON.parse(localStorage.getItem(pinFailKey())) || { n: 0, until: 0 }; } catch { return { n: 0, until: 0 }; } };
+    const pinSetFail = (v) => { try { localStorage.setItem(pinFailKey(), JSON.stringify(v)); } catch {} };
+    const pinDelFail = () => { try { localStorage.removeItem(pinFailKey()); } catch {} };
+    async function verifyPin(pin) {
+        const f = pinGetFail();
+        if (f.until > Date.now()) return `Demasiados intentos. Espera ${Math.ceil((f.until - Date.now()) / 1000)} s`;
+        if (vaultPinRec && await pinHash(pin, vaultPinRec.salt) === vaultPinRec.hash) { pinDelFail(); return true; }
+        f.n = (f.n || 0) + 1;
+        if (f.n >= PIN_MAX_FAILS) { pinSetFail({ n: 0, until: Date.now() + PIN_WAIT_MS }); return `PIN incorrecto. Espera ${PIN_WAIT_MS / 1000} s`; }
+        pinSetFail(f); return `PIN incorrecto · te quedan ${PIN_MAX_FAILS - f.n} intentos`;
+    }
+    let pinState = null;
+    function askPin({ title, sub, check }) {
+        if (pinState) pinState.finish(null);
+        return new Promise((resolve) => {
+            let val = '', busy = false;
+            const dots = [...document.getElementById('pinDots').children];
+            const paint = () => dots.forEach((d, i) => d.classList.toggle('on', i < val.length));
+            const finish = (r) => { pinState = null; document.getElementById('pinPad').classList.remove('on'); document.getElementById('pinMsg').textContent = ''; resolve(r); };
+            const press = async (d) => {
+                if (busy) return;
+                if (d === 'del') { val = val.slice(0, -1); paint(); return; }
+                if (!/^\d$/.test(d) || val.length >= 4) return;
+                val += d; paint(); document.getElementById('pinMsg').textContent = '';
+                if (val.length < 4) return;
+                busy = true; const r = await check(val); busy = false;
+                if (!pinState || pinState.press !== press) return;
+                if (r === true) { finish(val); return; }
+                document.getElementById('pinMsg').textContent = r || 'PIN incorrecto';
+                const box = document.getElementById('pinDots'); box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+                vibrate([30, 40, 30]); setTimeout(() => { val = ''; paint(); }, 350);
+            };
+            pinState = { press, finish };
+            document.getElementById('pinTitle').textContent = title; document.getElementById('pinSub').textContent = sub || '';
+            document.getElementById('pinMsg').textContent = ''; paint();
+            document.getElementById('pinPad').classList.add('on');
+        });
+    }
+    document.getElementById('pinKeys').addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && pinState) pinState.press(b.dataset.d); });
+    document.getElementById('pinCancel').addEventListener('click', () => { if (pinState) pinState.finish(null); });
+    window.openPinMenu = function() {
+        const has = !!vaultPinRec;
+        document.getElementById('pinMenuTxt').textContent = has ? 'Tu Baúl está protegido. Se pide el PIN cada vez que lo abres.' : 'Pide un PIN de 4 números cada vez que abras tu Baúl.';
+        const opt = (fn, ico, t, sub) => `<button class="vs-opt" onclick="${fn}"><span class="vs-ico">${ico}</span><span class="vs-txt"><b>${t}</b><small>${sub}</small></span></button>`;
+        document.getElementById('pinMenuOpts').innerHTML = has
+            ? opt('pinChange()', VEDIT, 'Cambiar PIN', 'Necesitas el PIN actual') + opt('pinRemove()', VOPEN, 'Quitar PIN', 'El Baúl se abre sin PIN')
+            : opt('pinSet()', VLOCK, 'Proteger con PIN', 'Solo 4 números');
+        document.getElementById('pinMenuOv').classList.add('on'); document.getElementById('pinMenu').classList.add('on');
+    };
+    window.closePinMenu = function() { document.getElementById('pinMenuOv').classList.remove('on'); document.getElementById('pinMenu').classList.remove('on'); };
+    async function newPinFlow() {
+        const p1 = await askPin({ title: 'Nuevo PIN', sub: 'Escribe 4 números', check: () => true });
+        if (!p1) return false;
+        const p2 = await askPin({ title: 'Confirma el PIN', sub: 'Escríbelo otra vez', check: (p) => p === p1 || 'No coincide. Escríbelo otra vez' });
+        if (!p2) return false;
+        const salt = b64.from(crypto.getRandomValues(new Uint8Array(16)));
+        try { const enc = await encryptText(JSON.stringify({ v: 1, salt, hash: await pinHash(p1, salt) })); await set(ref(db, `chat/vaultPin/${myId}`), enc); return true; }
+        catch { showToast('No se pudo guardar el PIN'); return false; }
+    }
+    window.pinSet = async function() { closePinMenu(); if (await newPinFlow()) showToast('PIN activado'); };
+    window.pinChange = async function() { closePinMenu(); if (!await askPin({ title: 'PIN actual', sub: 'Escribe tu PIN de 4 números', check: verifyPin })) return; if (await newPinFlow()) showToast('PIN cambiado'); };
+    window.pinRemove = async function() { closePinMenu(); if (!await askPin({ title: 'Quitar PIN', sub: 'Escribe tu PIN para confirmar', check: verifyPin })) return; try { await remove(ref(db, `chat/vaultPin/${myId}`)); showToast('PIN quitado'); } catch { showToast('No se pudo quitar el PIN'); } };
+
+
     async function checkPendingNotification() {
         // El servidor maneja el envío real; nada que hacer aquí.
     }
@@ -4882,6 +5360,114 @@
     document.addEventListener('pointerdown', primeNotificationsOnce);
 
 </script>
+<style id="vaultStyles">
+svg.li{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;width:22px;height:22px}
+#vaultScreen,#pinPad{--v-accent:var(--purple-accent);--v-chest:#e8862f;--v-fill:color-mix(in srgb,var(--text-main) 8%,transparent);--v-fill2:color-mix(in srgb,var(--text-main) 14%,transparent)}
+.vault-open-btn{position:relative}
+.vault-open-btn .vault-dot{position:absolute;top:6px;right:6px;width:9px;height:9px;border-radius:50%;background:#e8862f;border:2px solid var(--bg-nav,#1c1c1e);display:none}
+.vault-open-btn .vault-dot.on{display:block}
+.vault-notice{position:fixed;left:50%;transform:translateX(-50%) translateY(-12px);top:calc(var(--safe-top,0px) + 68px);z-index:150;width:92%;max-width:440px;display:none;align-items:center;gap:12px;padding:11px 14px;border-radius:15px;background:var(--bg-card);color:var(--text-main);border:1px solid var(--border-color);box-shadow:0 10px 30px rgba(0,0,0,.18);text-align:left;opacity:0;transition:transform .3s cubic-bezier(.2,.9,.3,1.2),opacity .3s}
+.vault-notice.on{display:flex;opacity:1;transform:translateX(-50%) translateY(0)}
+.vault-notice .vn-ico{flex:none;width:36px;height:36px;border-radius:11px;background:color-mix(in srgb,#e8862f 18%,transparent);color:#e8862f;display:grid;place-items:center}
+.vault-notice .vn-txt{flex:1;min-width:0;font-size:14px;line-height:1.35;color:var(--text-muted)}
+.vault-notice .vn-txt b{color:var(--text-main)}
+.vault-notice .vn-go{flex:none;display:flex;align-items:center;gap:1px;color:var(--v-accent);font-weight:700;font-size:13.5px}
+.vault-notice .vn-go svg{width:17px;height:17px}
+.vault-screen{position:fixed;inset:0;z-index:1500;background:var(--chat-bg,#0d1117);color:var(--text-main);display:none;flex-direction:column}
+.vault-screen.on{display:flex}
+.vault-head{display:flex;align-items:center;gap:6px;padding:calc(var(--safe-top,0px) + 10px) 8px 10px;border-bottom:1px solid var(--border-color);background:var(--bg-nav)}
+.vh-btn{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--text-main);flex:none}
+.vh-btn:active{background:var(--v-fill)}
+#vaultPinBtn{color:var(--text-muted)}
+#vaultPinBtn.on{color:#35c46a}
+.vault-title{flex:1;min-width:0;display:flex;flex-direction:column;padding-left:4px}
+.vault-title b{font-size:17px}
+.vault-title small{font-size:12.5px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vault-tabs{display:flex;gap:8px;padding:12px 14px 0;flex:none;background:var(--chat-bg)}
+.vault-tabs button{flex:1;padding:10px 0;border-radius:12px;font-size:14px;font-weight:700;color:var(--text-muted);background:var(--v-fill)}
+.vault-tabs button.on{color:#fff;background:var(--v-accent)}
+.vault-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px}
+#vaultHist{display:none}
+.hist-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 2px 12px}
+.hist-bar small{font-size:12.5px;color:var(--text-muted);line-height:1.35;flex:1;min-width:0}
+.hist-sel{flex:none;padding:8px 14px;border-radius:999px;background:var(--v-fill);color:var(--v-accent);font-weight:700;font-size:13.5px}
+.vault-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media(min-width:600px){.vault-grid{grid-template-columns:repeat(4,1fr)}}
+.v-tile{position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden;background:var(--v-fill2)}
+.v-tile img{width:100%;height:100%;object-fit:cover;display:block}
+.v-tile:active{transform:scale(.97)}
+.v-tile .v-ph{position:absolute;inset:0;background:var(--v-fill2)}
+.v-tile .v-saved{position:absolute;left:6px;top:6px;display:flex;align-items:center;gap:3px;background:rgba(10,20,15,.72);color:#67e39a;font-size:10.5px;font-weight:700;padding:3px 7px 3px 4px;border-radius:9px}
+.v-tile .v-saved svg{width:13px;height:13px;stroke:#67e39a;stroke-width:2.4}
+.v-tile .v-check{position:absolute;right:6px;top:6px;width:24px;height:24px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.35);display:grid;place-items:center}
+.v-tile .v-check svg{width:16px;height:16px;stroke:#fff;stroke-width:2.6}
+.v-tile.sel{outline:3px solid var(--v-accent);outline-offset:-3px}
+.v-tile.sel img{opacity:.75}
+.v-tile.sel .v-check{background:var(--v-accent);border-color:var(--v-accent)}
+.vault-empty{margin:50px auto 0;max-width:290px;text-align:center;color:var(--text-muted);display:flex;flex-direction:column;align-items:center;gap:8px}
+.vault-empty .ve-ico{width:64px;height:64px;border-radius:20px;background:color-mix(in srgb,#e8862f 14%,transparent);color:#e8862f;display:grid;place-items:center;margin-bottom:4px}
+.vault-empty .ve-ico svg{width:32px;height:32px}
+.vault-empty b{color:var(--text-main);font-size:16px}
+.vault-empty p{font-size:13.5px;line-height:1.45}
+.hist-actions{position:absolute;left:14px;right:14px;bottom:calc(14px + var(--safe-bottom,0px));z-index:8;display:none;gap:8px;padding:8px;border-radius:18px;background:var(--bg-card);border:1px solid var(--border-color);box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.hist-actions.on{display:flex}
+.hist-actions button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;border-radius:13px;font-size:12.5px;font-weight:600;color:var(--v-accent);background:color-mix(in srgb,var(--v-accent) 12%,transparent)}
+.hist-actions button.orange{color:#c56a16;background:color-mix(in srgb,#e8862f 15%,transparent)}
+.hist-actions button svg{width:22px;height:22px}
+.vault-viewer{position:fixed;inset:0;z-index:2600;background:#000;display:none;flex-direction:column}
+.vault-viewer.on{display:flex}
+.vv-top{display:flex;align-items:center;gap:12px;padding:calc(var(--safe-top,0px) + 8px) 12px 8px;position:relative;z-index:2}
+.vv-top>button,.vv-acts button{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center}
+.vv-top>button svg,.vv-acts button svg{width:21px;height:21px}
+.vv-info{flex:1;min-width:0;color:#d8dee6;font-size:13px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vv-acts{display:flex;gap:8px}
+.vv-acts .orange{color:#ffb066}
+.vv-acts .danger{color:#ff8080}
+.vv-body{flex:1;display:grid;place-items:center;min-height:0;padding-bottom:var(--safe-bottom,0px)}
+.vv-body img{max-width:100%;max-height:100%;object-fit:contain}
+.vv-body .vv-spin{width:34px;height:34px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:vspin .7s linear infinite}
+@keyframes vspin{to{transform:rotate(360deg)}}
+.vault-sheet-ov{position:fixed;inset:0;z-index:2640;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s}
+.vault-sheet-ov.on{opacity:1;pointer-events:auto}
+.vault-sheet{position:fixed;left:12px;right:12px;bottom:calc(12px + var(--safe-bottom,0px));z-index:2650;max-width:420px;margin:0 auto;border-radius:22px;padding:18px 16px 16px;color:var(--text-main);background:var(--bg-card);border:1px solid var(--border-color);box-shadow:0 18px 50px rgba(0,0,0,.3);display:flex;flex-direction:column;gap:14px;transform:translateY(calc(100% + 40px));transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.vault-sheet.on{transform:none}
+.vs-head{display:flex;flex-direction:column;gap:4px;text-align:center;padding:0 8px}
+.vs-head b{font-size:17px}
+.vs-head small{font-size:13.5px;color:var(--text-muted);line-height:1.4}
+.vs-opt{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:16px;background:color-mix(in srgb,var(--text-main) 6%,transparent);text-align:left}
+.vs-opt:active{background:color-mix(in srgb,var(--text-main) 12%,transparent)}
+.vs-ico{flex:none;width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:color-mix(in srgb,var(--v-accent) 16%,transparent);color:var(--v-accent)}
+.vs-ico.orange{background:color-mix(in srgb,#e8862f 16%,transparent);color:#d8781f}
+.vs-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.vs-txt b{font-size:15.5px}
+.vs-txt small{font-size:12.5px;color:var(--text-muted)}
+.vs-row{display:flex;gap:8px}
+.vs-row>*{flex:1}
+.vs-cancel,.vs-danger{padding:13px;border-radius:14px;font-weight:700;font-size:15px;background:color-mix(in srgb,var(--text-main) 8%,transparent);color:var(--text-main)}
+.vs-danger{background:#e5484d;color:#fff}
+#pinMenuOpts{display:flex;flex-direction:column;gap:8px}
+.pinpad{position:fixed;inset:0;z-index:2700;background:var(--chat-bg,#0d1117);display:none;place-items:center;padding:calc(var(--safe-top,0px) + 24px) 24px calc(var(--safe-bottom,0px) + 24px);color:var(--text-main)}
+.pinpad.on{display:grid}
+.pin-box{width:100%;max-width:300px;display:flex;flex-direction:column;align-items:center;text-align:center}
+.pin-ico{width:56px;height:56px;border-radius:18px;background:color-mix(in srgb,#e8862f 14%,transparent);color:#e8862f;display:grid;place-items:center;margin-bottom:16px}
+.pin-ico svg{width:28px;height:28px}
+.pin-box>b{font-size:19px}
+.pin-box>small{font-size:13.5px;color:var(--text-muted);margin-top:6px;min-height:18px}
+.pin-dots{display:flex;gap:18px;margin-top:28px}
+.pin-dots i{width:14px;height:14px;border-radius:50%;border:2px solid var(--text-muted);transition:background .12s,border-color .12s}
+.pin-dots i.on{background:var(--v-accent);border-color:var(--v-accent)}
+.pin-dots.shake{animation:pinshake .35s}
+@keyframes pinshake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pin-msg{min-height:20px;margin:16px 0 20px;font-size:13.5px;color:#e5484d}
+.pin-keys{display:grid;grid-template-columns:repeat(3,72px);gap:16px 24px;justify-content:center}
+.pin-keys button{width:72px;height:72px;border-radius:50%;background:var(--v-fill);font-size:28px;font-weight:500;color:var(--text-main);display:grid;place-items:center}
+.pin-keys button:active{background:var(--v-fill2)}
+.pin-keys button[data-d="del"]{background:none}
+.pin-keys button svg{width:26px;height:26px}
+.pin-cancel{margin-top:24px;color:var(--v-accent);font-weight:700;font-size:15px;padding:10px 20px}
+@media(max-height:640px){.pin-keys{grid-template-columns:repeat(3,62px);gap:12px 20px}.pin-keys button{width:62px;height:62px;font-size:24px}.pin-dots{margin-top:18px}.pin-msg{margin:10px 0 12px}.pin-ico{margin-bottom:10px}}
+#actionVaultCopy svg,#actionVaultMove svg,#actionVaultSend svg{width:20px;height:20px}
+</style>
 </body>
 </html>
 
