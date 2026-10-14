@@ -1,21 +1,15 @@
 {
-  "name": "stockstore",
+  "name": "vibestore-server",
   "version": "1.0.0",
-  "private": true,
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "cap:sync": "npx cap sync android",
-    "cap:open": "npx cap open android"
+    "start": "node server.js"
   },
-  "engines": { "node": ">=18" },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
-    "express": "^4.19.2",
+    "express": "^4.18.2",
     "web-push": "^3.6.7"
-  },
-  "devDependencies": {
-    "@capacitor/android": "^7.0.0",
-    "@capacitor/cli": "^7.0.0",
-    "@capacitor/core": "^7.0.0"
   }
 }
