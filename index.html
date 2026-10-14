@@ -1084,6 +1084,10 @@
 
     <div class="chat-menu-overlay" id="chatMenuOverlay" onclick="closeChatMenu()"></div>
     <div class="chat-menu" id="chatMenu">
+        <div class="chat-menu-item" onclick="closeChatMenu(); panicExit()">
+            <svg class="li" viewBox="0 0 24 24"><path d="M4 8h13M14 5l3 3-3 3"/><path d="M20 16H7M10 13l-3 3 3 3"/></svg>
+            Cambiar de usuario
+        </div>
         <div class="chat-menu-item" onclick="closeChatMenu(); initiateCall('audio')">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
             Llamada de voz
@@ -1380,6 +1384,7 @@
     <button data-tab="hist" onclick="setVaultTab('hist')">Historial</button>
   </nav>
   <div class="vault-body" id="vaultMine">
+    <div class="hist-bar" id="mineBar"><small id="mineInfo"></small><button class="hist-sel" id="mineSelBtn" onclick="toggleMineSelect()">Seleccionar</button></div>
     <div class="vault-grid" id="vaultGrid"></div>
     <div class="vault-empty" id="vaultEmpty">
       <span class="ve-ico"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M3.5 13.5h17"/><rect x="10" y="12" width="4" height="4" rx="1"/></svg></span><b>Tu Baúl está vacío</b>
@@ -1390,6 +1395,10 @@
     <div class="hist-bar"><small id="histInfo">Fotos que siguen en el chat</small><button class="hist-sel" id="histSelBtn" onclick="toggleHistSelect()">Seleccionar</button></div>
     <div class="vault-grid" id="histGrid"></div>
     <div class="vault-empty" id="histEmpty"><span class="ve-ico"><svg class="li" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><b id="histEmptyT">Buscando en el historial…</b><p id="histEmptyP">Aquí aparecen las fotos que siguen guardadas en el chat. Lo que ya se borró no se puede recuperar.</p></div>
+  </div>
+  <div class="hist-actions" id="mineActions">
+    <button onclick="mineSendSelected()" class="orange"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M15 2.5l4 4-4 4M19 6.5h-7"/></svg><span id="mineSendLbl">Enviar al Baúl</span></button>
+    <button onclick="mineDeleteSelected()" class="danger-act"><svg class="li" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4h4M6.5 7l.8 11.6a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/><path d="M10 11v5M14 11v5"/></svg><span id="mineDelLbl">Eliminar</span></button>
   </div>
   <div class="hist-actions" id="histActions">
     <button onclick="histSaveSelected()"><svg class="li" viewBox="0 0 24 24"><path d="M3.5 10h17v8.5a1.5 1.5 0 0 1-1.5 1.5H5a1.5 1.5 0 0 1-1.5-1.5V10z"/><path d="M3.5 10V8a4 4 0 0 1 4-4h9a4 4 0 0 1 4 4v2"/><path d="M3.5 13.5h17"/><rect x="10" y="12" width="4" height="4" rx="1"/></svg><span id="histSaveLbl">Guardar en mi Baúl</span></button>
@@ -4804,6 +4813,8 @@
     const vaultItems = new Map();   // key → { key, rec, img }
     let vaultStarted = false, vaultOpen = false, vaultTab = 'mine';
     let vaultFresh = new Set();
+    let mineSelect = false, mineSel = new Set();
+    const isVaultAdmin = () => /le[oó]n/i.test(myName) || myId === 'user_leon';
     function startVault() {
         if (vaultStarted || !myId) return;
         vaultStarted = true;
@@ -4819,7 +4830,7 @@
         vaultChanged();
     }
     let vaultT = null;
-    function vaultChanged() { clearTimeout(vaultT); vaultT = setTimeout(() => { updateVaultNotice(); if (vaultOpen && vaultTab === 'mine') renderVaultMine(); if (histLoaded) renderHist(); }, 60); }
+    function vaultChanged() { clearTimeout(vaultT); vaultT = setTimeout(() => { updateVaultNotice(); if (vaultOpen && vaultTab === 'mine') { renderVaultMine(); updateMineActions(); } if (histLoaded) renderHist(); }, 60); }
     const vaultUnseen = () => [...vaultItems.values()].filter(it => !it.rec.seen && it.rec.senderId !== myId);
     function updateVaultNotice() {
         const un = vaultUnseen();
@@ -4847,6 +4858,11 @@
         vaultFresh = new Set(un.map(it => it.key));
         un.forEach(it => set(ref(db, `chat/vault/${myId}/${it.key}/seen`), true).catch(() => {}));
         histLoaded = false; histSelect = false; histSel.clear(); document.getElementById('histSelBtn').textContent = 'Seleccionar';
+        mineSelect = false; mineSel.clear(); document.getElementById('mineSelBtn').textContent = 'Seleccionar';
+        document.querySelector('#vaultScreen .vault-title b').textContent = 'Baúl de ' + (myName || '');
+        const admin = isVaultAdmin();
+        document.getElementById('vaultTabs').style.display = admin ? 'flex' : 'none';
+        document.querySelector('#vaultTabs button[data-tab=\"hist\"]').style.display = admin ? '' : 'none';
         setVaultTab('mine');
         document.getElementById('vaultScreen').classList.add('on');
         document.getElementById('vaultScreen').setAttribute('aria-hidden', 'false');
@@ -4860,11 +4876,12 @@
         updateVaultNotice();
     };
     window.setVaultTab = function(t) {
+        if (t === 'hist' && !isVaultAdmin()) t = 'mine';
         vaultTab = t;
         [...document.getElementById('vaultTabs').children].forEach(b => b.classList.toggle('on', b.dataset.tab === t));
         document.getElementById('vaultMine').style.display = t === 'mine' ? 'block' : 'none';
         document.getElementById('vaultHist').style.display = t === 'hist' ? 'block' : 'none';
-        updateHistActions();
+        updateHistActions(); updateMineActions();
         if (t === 'mine') renderVaultMine();
         if (t === 'hist' && !histLoaded) loadHistory();
     };
@@ -4879,12 +4896,45 @@
         document.getElementById('vaultEmpty').style.display = list.length ? 'none' : '';
         const n = list.length;
         document.getElementById('vaultSub').textContent = n ? `${n} ${n === 1 ? 'foto' : 'fotos'} · solo tú puedes borrarlas` : 'Solo tú puedes borrar lo que hay aquí';
+        document.getElementById('mineInfo').textContent = n ? 'Toca para ver · Seleccionar para borrar varias' : '';
+        document.getElementById('mineSelBtn').style.display = n ? '' : 'none';
         document.getElementById('vaultGrid').innerHTML = list.map(it =>
-            tileHTML(it.key, it.img, vaultFresh.has(it.key) ? '<span class="v-saved">Nuevo</span>' : '', false, false)).join('');
+            tileHTML(it.key, it.img, vaultFresh.has(it.key) ? '<span class="v-saved">Nuevo</span>' : '', mineSelect, mineSel.has(it.key))).join('');
     }
+    window.toggleMineSelect = function() {
+        mineSelect = !mineSelect; mineSel.clear();
+        document.getElementById('mineSelBtn').textContent = mineSelect ? 'Cancelar' : 'Seleccionar';
+        renderVaultMine(); updateMineActions();
+    };
+    function updateMineActions() {
+        const show = vaultTab === 'mine' && mineSelect && mineSel.size > 0;
+        document.getElementById('mineActions').classList.toggle('on', show);
+        const nn = mineSel.size;
+        document.getElementById('mineDelLbl').textContent = `Eliminar${nn ? ` (${nn})` : ''}`;
+        document.getElementById('mineSendLbl').textContent = `Enviar al Baúl de ${vaultPeerName()}${nn ? ` (${nn})` : ''}`;
+    }
+    window.mineDeleteSelected = async function() {
+        const keys = [...mineSel]; if (!keys.length) return;
+        const ok = await vaultConfirm(keys.length === 1 ? '¿Borrar esta foto del Baúl?' : `¿Borrar ${keys.length} fotos del Baúl?`, 'Se borran para siempre y no se pueden recuperar.');
+        if (!ok) return;
+        let done = 0;
+        for (const k of keys) { try { await remove(ref(db, `chat/vault/${myId}/${k}`)); done++; } catch {} }
+        mineSelect = false; mineSel.clear(); document.getElementById('mineSelBtn').textContent = 'Seleccionar';
+        renderVaultMine(); updateMineActions();
+        showToast(done === keys.length ? `${done} ${done === 1 ? 'borrada' : 'borradas'}` : `${done} de ${keys.length} borradas`);
+    };
+    window.mineSendSelected = async function() {
+        const items = [...mineSel].map(k => vaultItems.get(k)).filter(Boolean); if (!items.length) return;
+        let done = 0;
+        for (const it of items) { try { await putVaultItem(vaultPeerId(), it.img, { senderId: myId }); done++; } catch {} }
+        mineSelect = false; mineSel.clear(); document.getElementById('mineSelBtn').textContent = 'Seleccionar';
+        renderVaultMine(); updateMineActions();
+        showToast(`${done} ${done === 1 ? 'enviada' : 'enviadas'} al Baúl de ${vaultPeerName()}`);
+    };
     document.getElementById('vaultGrid').addEventListener('click', (e) => {
         const t = e.target.closest('.v-tile'); if (!t) return;
         const it = vaultItems.get(t.dataset.k); if (!it) return;
+        if (mineSelect) { if (mineSel.has(it.key)) mineSel.delete(it.key); else mineSel.add(it.key); renderVaultMine(); updateMineActions(); return; }
         const who = it.rec.senderId === myId ? 'Guardada por ti' : `Te la dejó ${vaultPeerName()}`;
         openVaultViewer({ img: it.img, info: `${who} · ${new Date(it.rec.ts).toLocaleDateString('es-CO',{day:'numeric',month:'short'})} ${new Date(it.rec.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`,
             onDelete: () => deleteVaultItem(it.key), onSendPeer: () => sendDataUrlToPeer(it.img) });
@@ -5062,12 +5112,21 @@
         const salt = new Uint8Array([...new Uint8Array(b64.to(saltB64)), ...new TextEncoder().encode(myId)]);
         return b64.from(await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: PIN_ITER, hash: 'SHA-256' }, base, 256));
     }
+    async function decodePin(v) {
+        let dec = null;
+        for (let i = 0; i < 25 && dec === null; i++) { dec = await decryptText(v); if (dec === null) await new Promise(r => setTimeout(r, 150)); }
+        try { return dec ? JSON.parse(dec) : null; } catch { return null; }
+    }
     function watchVaultPin() {
         onValue(ref(db, `chat/vaultPin/${myId}`), async (snap) => {
-            const v = snap.val(); let rec = null;
-            if (v) { try { rec = JSON.parse(await decryptText(v)); } catch { rec = null; } }
-            vaultPinRec = rec; vaultPinLoaded = true;
-            document.getElementById('vaultPinBtn').classList.toggle('on', !!rec);
+            const v = snap.val();
+            if (!v) { vaultPinRec = null; vaultPinLoaded = true; document.getElementById('vaultPinBtn').classList.toggle('on', false); return; }
+            const rec = await decodePin(v);
+            // Si existe el nodo pero aún no se pudo leer, NO abrir sin protección:
+            // se marca pendiente y verifyPin lo reintenta cuando el usuario escribe.
+            vaultPinRec = rec || { pending: true, raw: v };
+            vaultPinLoaded = true;
+            document.getElementById('vaultPinBtn').classList.toggle('on', true);
         });
     }
     const pinFailKey = () => 'vibestore_pinfail_' + myId;
@@ -5077,6 +5136,7 @@
     async function verifyPin(pin) {
         const f = pinGetFail();
         if (f.until > Date.now()) return `Demasiados intentos. Espera ${Math.ceil((f.until - Date.now()) / 1000)} s`;
+        if (vaultPinRec && vaultPinRec.pending) { const r = await decodePin(vaultPinRec.raw); if (r) vaultPinRec = r; else return 'No se pudo leer el PIN. Revisa tu conexión'; }
         if (vaultPinRec && await pinHash(pin, vaultPinRec.salt) === vaultPinRec.hash) { pinDelFail(); return true; }
         f.n = (f.n || 0) + 1;
         if (f.n >= PIN_MAX_FAILS) { pinSetFail({ n: 0, until: Date.now() + PIN_WAIT_MS }); return `PIN incorrecto. Espera ${PIN_WAIT_MS / 1000} s`; }
@@ -5467,6 +5527,10 @@ svg.li{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;strok
 .pin-cancel{margin-top:24px;color:var(--v-accent);font-weight:700;font-size:15px;padding:10px 20px}
 @media(max-height:640px){.pin-keys{grid-template-columns:repeat(3,62px);gap:12px 20px}.pin-keys button{width:62px;height:62px;font-size:24px}.pin-dots{margin-top:18px}.pin-msg{margin:10px 0 12px}.pin-ico{margin-bottom:10px}}
 #actionVaultCopy svg,#actionVaultMove svg,#actionVaultSend svg{width:20px;height:20px}
+.hist-actions button.danger-act{color:#fff;background:#e5484d}
+.hist-actions button.danger-act svg{stroke:#fff}
+#vaultTabs{transition:none}
+.chat-menu-item svg.li{width:20px;height:20px;margin-right:2px}
 </style>
 </body>
 </html>

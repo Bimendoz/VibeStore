@@ -13,3 +13,10 @@ Cada persona tiene su propio Baúl (ícono de cofre en la cabecera del chat). Lo
 - **PIN opcional** (candado): 4 números, se pide cada vez que se abre el Baúl. 5 intentos fallidos = esperar 60 s. Si se olvida, se borra en Firebase el nodo `chat/vaultPin/user_luna` (o `user_leon`).
 - Las copias del Baúl son independientes del chat: si alguien borra el mensaje, la del Baúl sigue.
 - Datos en Firebase: `chat/vault/`, `chat/vaultPin/` y `chat/vaultEvents/` (aviso para el servidor; se borra solo).
+
+
+## Ajustes (v2)
+- **Historial solo para León (admin):** Luna no ve la pestaña Historial ni puede recuperar; solo León. Luna sí tiene su Baúl: ve y borra lo que le enviaron.
+- **Identidad visible:** el Baúl muestra "Baúl de León" / "Baúl de Luna". Para cambiar de usuario: menú del chat → "Cambiar de usuario" (vuelve a pedir el código y la identidad). Importante: el Baúl, el PIN y las notificaciones van atados al usuario; si entras con otra identidad verás otro Baúl.
+- **PIN:** al abrir el Baúl se pide el PIN si está puesto; si no se puede leer aún, NO abre sin protección (falla cerrado).
+- **Mi Baúl:** botón "Seleccionar" para elegir varias y Eliminar o Enviar al Baúl de la otra persona.
