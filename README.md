@@ -25,3 +25,4 @@ Cada persona tiene su propio Baúl (ícono de cofre en la cabecera del chat). Lo
 - Rediseno del Baúl: tema oscuro propio de alto contraste, sin desenfoque y con mas espaciado.
 - Albumes: en Mi Baúl hay chips Todo / Favoritos / tus albumes / + Album. Con Seleccionar marcas varias y usas Favorito, A album, Enviar o Eliminar. En el visor hay estrella (favorito) y carpeta (mover a album). Sirve para clasificar las fotos del Baúl.
 - Notificaciones: se dejaron igual que en el VibeStore original (cada telefono suscrito a su identidad; el que envia no recibe). En dos telefonos, Leon recibe las de Luna y Luna las de Leon. Tras actualizar, abre la app una vez en cada telefono para re-suscribir.
+- Reparar avisos: en el menu del chat (tres puntos) esta "Activar / reparar avisos". Fuerza una suscripcion nueva; usalo en el telefono al que NO le llegan.

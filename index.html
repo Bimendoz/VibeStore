@@ -1088,6 +1088,10 @@
             <svg class="li" viewBox="0 0 24 24"><path d="M4 8h13M14 5l3 3-3 3"/><path d="M20 16H7M10 13l-3 3 3 3"/></svg>
             Cambiar de usuario
         </div>
+        <div class="chat-menu-item" onclick="closeChatMenu(); repairPush()">
+            <svg class="li" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15L6 16z"/><path d="M10 20.5a2 2 0 0 0 4 0"/></svg>
+            Activar / reparar avisos
+        </div>
         <div class="chat-menu-item" onclick="closeChatMenu(); initiateCall('audio')">
             <svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.24 1.02l-2.2 2.2z"/></svg>
             Llamada de voz
@@ -1978,6 +1982,24 @@
     ];
 
     function notificationsSupported() { return ('Notification' in window); }
+    // Reparar avisos: fuerza una suscripción NUEVA (desuscribe la vieja y crea
+    // otra). Es el arreglo cuando a alguien dejan de llegarle las notificaciones
+    // (suscripción muerta en iOS). Se llama desde el menú, con gesto del usuario.
+    window.repairPush = async function() {
+        try {
+            if (!('Notification' in window) || !('serviceWorker' in navigator)) { showToast('Este dispositivo no admite avisos'); return; }
+            const perm = await Notification.requestPermission();
+            if (perm !== 'granted') { showToast('Activa las notificaciones en Ajustes del teléfono'); return; }
+            showToast('Reparando avisos…', 1500);
+            if (!window._swReg) { try { window._swReg = await navigator.serviceWorker.ready; } catch (e) { showToast('No se pudo preparar el aviso'); return; } }
+            try { const old = await window._swReg.pushManager.getSubscription(); if (old) await old.unsubscribe(); } catch (e) {}
+            const sub = await window._swReg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY) });
+            window._pushSub = sub;
+            if (myId) await set(ref(db, `chat/push/${myId}`), JSON.stringify(sub));
+            showToast('Avisos activados ✓');
+        } catch (e) { showToast('No se pudo reparar: ' + (e.message || 'error')); }
+    };
+
     function requestNotificationPermission() {
         if (!notificationsSupported()) return;
         if (Notification.permission === 'default') {
