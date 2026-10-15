@@ -3001,6 +3001,35 @@
         subscribeToPush();
     };
 
+    function vDayLabel(d) {
+        const t = new Date(); const y = new Date(); y.setDate(t.getDate() - 1);
+        if (d.toDateString() === t.toDateString()) return 'Hoy';
+        if (d.toDateString() === y.toDateString()) return 'Ayer';
+        const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+        if (d.getFullYear() !== t.getFullYear()) opts.year = 'numeric';
+        const str = d.toLocaleDateString('es-CO', opts);
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+    let _daySepT = null;
+    function relayoutDaySeparators() {
+        clearTimeout(_daySepT);
+        _daySepT = setTimeout(() => {
+            const ws = document.getElementById('chatWorkspace'); if (!ws) return;
+            ws.querySelectorAll('.msg-daysep').forEach(e => e.remove());
+            let prevDay = '';
+            ws.querySelectorAll('.msg-wrap').forEach(w => {
+                const ts = parseInt(w.dataset.ts, 10) || Date.now();
+                const d = new Date(ts); const day = d.toDateString();
+                if (day !== prevDay) {
+                    const sep = document.createElement('div');
+                    sep.className = 'msg-daysep';
+                    sep.textContent = vDayLabel(d);
+                    ws.insertBefore(sep, w);
+                    prevDay = day;
+                }
+            });
+        }, 80);
+    }
     async function rerenderAllMessages() {
         try {
             const snap = await get(query(messagesRef, limitToLast(50)));
@@ -3013,6 +3042,7 @@
                 }
             });
             setTimeout(checkDestructThreshold, 200);
+            relayoutDaySeparators();
         } catch (e) {}
     }
 
@@ -3298,6 +3328,7 @@
         const wrap = document.createElement('div');
         wrap.className = `msg-wrap ${isMe ? 'mine' : 'theirs'}`;
         wrap.id = `wrap-${key}`;
+        wrap.dataset.ts = msg.ts || Date.now();
         const wasRead = msg.readBy && Object.keys(msg.readBy).some(id => id !== msg.senderId);
         const receiptHtml = isMe ? `<span class="msg-receipt ${wasRead ? 'read' : 'sent'}">
             <svg viewBox="0 0 24 24"><path d="M18 7l-8 8-2-2-1.4 1.4L10 17.8 19.4 8.4z M13 7l-1.4-1.4L6 11.2l-1.6-1.6L3 11l3 3z"/></svg></span>` : '';
@@ -5410,6 +5441,7 @@
         });
         if (!initialLoadDone) { setTimeout(() => { initialLoadDone = true; }, 600); }
         setTimeout(checkDestructThreshold, 300);
+        relayoutDaySeparators();
     }, (err) => {
         console.error('[Firebase] Error leyendo mensajes:', err);
         showToast('⚠️ No se pudieron cargar los mensajes. Revisa las reglas de Firebase.');
@@ -5703,6 +5735,8 @@ svg.li{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;strok
 
 /* acciones de imagen en el menú de mensaje */
 #actionVaultCopy svg,#actionVaultMove svg,#actionVaultSend svg{width:20px;height:20px}
+.msg-daysep{align-self:center;margin:14px auto 8px;padding:5px 14px;border-radius:13px;background:rgba(32,40,52,.9);color:#cfd8e2;font-size:12.5px;font-weight:700;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+[data-theme="light"] .msg-daysep{background:rgba(0,0,0,.08);color:#444}
 .chat-menu-item svg.li{width:20px;height:20px;margin-right:2px}
 </style>
 </body>
