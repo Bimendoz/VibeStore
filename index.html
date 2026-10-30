@@ -1817,7 +1817,29 @@
         rtcConfig = { iceServers: FALLBACK_ICE, iceCandidatePoolSize: 10 };
         return rtcConfig;
     }
-    const SECRET_PIN_HASH = "10231121";
+    // SEGURIDAD: la credencial NO está en el código. Solo queda un "verificador"
+    // cifrado; la llave de cifrado se deriva del código que la persona ESCRIBE
+    // al entrar, y ese código se guarda SOLO en este dispositivo (nunca en el
+    // código fuente ni en Firebase). La llave resultante es idéntica a la de
+    // antes, así que los mensajes y fotos ya cifrados se siguen descifrando.
+    const CODE_VERIFIER = {"iv":"LWIh3ukqiCzQkJkt","ct":"P7ua/aIRu0u/n834bneW+CkU/7mZvPsjM0Wrxg=="};
+    const VERIFY_SALT = 'vibestore-verify-v1';
+    const VERIFY_ITER = 600000;
+    const AK_STORE = 'vibestore_ak';
+    let ACCESS_CODE = null;
+    function _akX(s){ const k='vbst-key-9f3'; let o=''; for(let i=0;i<s.length;i++) o+=String.fromCharCode(s.charCodeAt(i)^k.charCodeAt(i%k.length)); return o; }
+    function loadAccessCode(){ try{ const v=localStorage.getItem(AK_STORE); return v? _akX(atob(v)) : null; }catch(e){ return null; } }
+    function saveAccessCode(code){ try{ localStorage.setItem(AK_STORE, btoa(_akX(code))); }catch(e){} }
+    try { ACCESS_CODE = loadAccessCode(); } catch(e) {}
+    async function _verifyKey(code){
+        const enc = new TextEncoder();
+        const base = await crypto.subtle.importKey('raw', enc.encode(code), { name:'PBKDF2' }, false, ['deriveKey']);
+        return crypto.subtle.deriveKey({ name:'PBKDF2', salt: enc.encode(VERIFY_SALT), iterations: VERIFY_ITER, hash:'SHA-256' }, base, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+    }
+    async function verifyAccessCode(code){
+        if (!(window.crypto && crypto.subtle)) return false;
+        try{ const key = await _verifyKey(code); const pt = await crypto.subtle.decrypt({ name:'AES-GCM', iv: b64.to(CODE_VERIFIER.iv) }, key, b64.to(CODE_VERIFIER.ct)); return new TextDecoder().decode(pt) === 'VIBESTORE-OK'; }catch(e){ return false; }
+    }
 
     const messagesRef = ref(db, 'chat/messages');
     let typingRef   = null; // se fija en joinChat(), cuando myId ya tiene su valor estable
@@ -1828,7 +1850,7 @@
     let sharedKey = null;
     let e2eReady = false;
     const cryptoOK = !!(window.crypto && window.crypto.subtle);
-    const E2E_SECRET = "VibeStore-" + SECRET_PIN_HASH + "-secure-channel";
+    const e2eSecret = () => "VibeStore-" + (ACCESS_CODE || '') + "-secure-channel";
 
     const b64 = {
         from: (buf) => {
@@ -1844,11 +1866,11 @@
     };
 
     async function deriveStableKey() {
-        if (!cryptoOK) return;
+        if (!cryptoOK || !ACCESS_CODE) return;
         try {
             const enc = new TextEncoder();
             const baseKey = await crypto.subtle.importKey(
-                'raw', enc.encode(E2E_SECRET), { name: 'PBKDF2' }, false, ['deriveKey']
+                'raw', enc.encode(e2eSecret()), { name: 'PBKDF2' }, false, ['deriveKey']
             );
             sharedKey = await crypto.subtle.deriveKey(
                 { name: 'PBKDF2', salt: enc.encode('vibestore-salt-v1'), iterations: 100000, hash: 'SHA-256' },
@@ -2161,10 +2183,13 @@
         }, 4000);
     };
 
-    window.submitSecretCode = function() {
+    window.submitSecretCode = async function() {
         const code = document.getElementById('secretCodeInput').value.trim();
         if (!code) { showToast('Ingresa tu código de acceso 🔐'); return; }
-        if (code === SECRET_PIN_HASH) {
+        const ok = await verifyAccessCode(code);
+        if (ok) {
+            ACCESS_CODE = code; saveAccessCode(code);
+            await deriveStableKey();
             closePaymentModalAndReset();
             document.getElementById('vista-tienda').style.display = 'none';
             document.getElementById('seccion-chat').style.display = 'flex';
@@ -5202,7 +5227,32 @@
         document.getElementById('vvAlbum').style.display = mineItem ? '' : 'none';
         document.getElementById('vvFav').classList.toggle('on', !!(mineItem && mineItem.rec.fav));
         const body = document.getElementById('vvBody');
-        body.innerHTML = ctx.img ? `<img src="${escHtml(ctx.img)}" alt="">` : '<span class="vv-spin"></span>';
+        body.innerHTML = ctx.img ? `<img src="${escHtml(ctx.img)}" alt="" draggable="false">` : '<span class="vv-spin"></span>';
+        const _zimg = body.querySelector('img'); if (_zimg) attachVaultZoom(_zimg);
+    }
+    // Zoom libre de la foto del Baúl: pellizco para acercar (hasta 6x), arrastrar
+    // para moverla, doble toque para acercar/alejar, y rueda del ratón en PC.
+    function attachVaultZoom(img){
+        let scale=1, tx=0, ty=0, startDist=0, startScale=1, sx=0, sy=0, stx=0, sty=0, panning=false, lastTap=0;
+        img.style.touchAction='none'; img.style.transformOrigin='center center'; img.style.willChange='transform'; img.style.userSelect='none';
+        const apply=()=>{ img.style.transform = `translate(${tx}px,${ty}px) scale(${scale})`; };
+        const reset=(anim)=>{ scale=1; tx=0; ty=0; if(anim){ img.style.transition='transform .2s'; apply(); setTimeout(()=>img.style.transition='',200);} else apply(); };
+        img.addEventListener('touchstart', e=>{
+            if(e.touches.length===2){ startDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); startScale=scale; panning=false; e.preventDefault(); }
+            else if(e.touches.length===1){
+                const now=Date.now();
+                if(now-lastTap<300){ lastTap=0; if(scale>1) reset(true); else { scale=2.5; img.style.transition='transform .2s'; apply(); setTimeout(()=>img.style.transition='',200);} e.preventDefault(); return; }
+                lastTap=now;
+                if(scale>1){ panning=true; sx=e.touches[0].clientX; sy=e.touches[0].clientY; stx=tx; sty=ty; }
+            }
+        }, {passive:false});
+        img.addEventListener('touchmove', e=>{
+            if(e.touches.length===2){ const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY); scale=Math.min(6, Math.max(1, startScale*d/(startDist||1))); if(scale<=1){tx=0;ty=0;} apply(); e.preventDefault(); }
+            else if(panning && e.touches.length===1){ tx=stx+(e.touches[0].clientX-sx); ty=sty+(e.touches[0].clientY-sy); apply(); e.preventDefault(); }
+        }, {passive:false});
+        img.addEventListener('touchend', e=>{ if(e.touches.length===0){ panning=false; if(scale<=1.02) reset(true); } });
+        img.addEventListener('wheel', e=>{ e.preventDefault(); scale=Math.min(6, Math.max(1, scale - e.deltaY*0.0025)); if(scale<=1){tx=0;ty=0;} apply(); }, {passive:false});
+        img.addEventListener('dblclick', ()=>{ if(scale>1) reset(true); else { scale=2.5; img.style.transition='transform .2s'; apply(); setTimeout(()=>img.style.transition='',200);} });
     }
     window.closeVaultViewer = function() { document.getElementById('vaultViewer').classList.remove('on'); document.getElementById('vvBody').innerHTML = ''; vvCtx = null; };
     window.vvDelete = async function() { if (vvCtx && vvCtx.onDelete) { const ok = await vvCtx.onDelete(); if (ok) closeVaultViewer(); } };
@@ -5565,7 +5615,7 @@
     (function() {
         try {
             const saved = JSON.parse(localStorage.getItem('vibestore_session') || 'null');
-            if (saved && saved.name) {
+            if (saved && saved.name && ACCESS_CODE) {
                 myAvatar = saved.avatar || myAvatar;
                 document.getElementById('nameInput').value = saved.name;
                 document.getElementById('vista-tienda').style.display = 'none';
@@ -5681,7 +5731,7 @@ svg.li{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;strok
 .vv-acts .fav.on svg{fill:var(--vacc);stroke:var(--vacc)}
 .vv-acts .orange{color:var(--vacc)}
 .vv-acts .danger{color:#ff8a8a}
-.vv-body{flex:1;display:grid;place-items:center;min-height:0;padding:0 6px calc(6px + var(--safe-bottom,0px))}
+.vv-body{flex:1;display:grid;place-items:center;min-height:0;overflow:hidden;padding:0 6px calc(6px + var(--safe-bottom,0px))}
 .vv-body img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
 .vv-body .vv-spin{width:36px;height:36px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:vspin .7s linear infinite}
 @keyframes vspin{to{transform:rotate(360deg)}}
