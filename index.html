@@ -687,10 +687,8 @@
         #trashMenu { z-index:2201; }
         .image-viewer { position:fixed; inset:0; background:rgba(0,0,0,0.96); z-index:4000; display:none; flex-direction:column; align-items:center; justify-content:center; -webkit-backdrop-filter:blur(24px); backdrop-filter:blur(24px); touch-action:none; user-select:none; }
         .image-viewer.open { display:flex; }
-        .image-viewer-img-wrap { position:relative; display:flex; align-items:center; justify-content:center; width:100%; height:100%; overflow:hidden; touch-action:none; }
-        .image-viewer img { max-width:95vw; max-height:88dvh; border-radius:8px; object-fit:contain; touch-action:none; transition:transform 0.15s ease-out; will-change:transform; transform-origin:center center; }
-        .image-viewer-img-wrap.zoomed img { transition:none; cursor:grab; }
-        .image-viewer-img-wrap.zoomed img:active { cursor:grabbing; }
+        .image-viewer-img-wrap { position:relative; display:flex; align-items:center; justify-content:center; width:100%; height:100%; overflow:hidden; }
+        .image-viewer img { max-width:95vw; max-height:88dvh; border-radius:8px; object-fit:contain; touch-action:none; transition:transform 0.1s ease-out; will-change:transform; }
         .image-viewer-close { position:absolute; top:calc(var(--safe-top, 44px) + 0.8rem); right:1rem; background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.15); border-radius:50%; width:38px; height:38px; color:#fff; font-size:1rem; cursor:pointer; z-index:4001; display:flex; align-items:center; justify-content:center; -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px); }
         .image-viewer-hint { position:absolute; bottom:calc(var(--safe-bottom,0) + 1.5rem); font-size:0.7rem; color:rgba(255,255,255,0.3); letter-spacing:0.3px; }
         .return-call-bar { display:none; align-items:center; justify-content:center; gap:0.5rem; background:#1e7e34; color:#fff; flex-shrink:0; padding:0.5rem 1rem; font-size:0.83rem; font-weight:700; cursor:pointer; position:relative; z-index:2; }
@@ -1827,16 +1825,10 @@
     const callsRef    = ref(db, 'chat/calls');
     const keysRef     = ref(db, 'chat/keys');
 
-    let sharedKey = null;       // clave principal (v2 si migrado)
-    let sharedKeyLegacy = null; // clave v1 para descifrar mensajes anteriores
+    let sharedKey = null;
     let e2eReady = false;
     const cryptoOK = !!(window.crypto && window.crypto.subtle);
     const E2E_SECRET = "VibeStore-" + SECRET_PIN_HASH + "-secure-channel";
-    // v2: salt aleatorio 16 bytes + 600K iteraciones PBKDF2 (OWASP 2024)
-    const KDF_SALT_V2 = 'Ouzp5VLi99u3Qsir4aXirQ=='; // crypto.getRandomValues(16) → base64
-    const KDF_ITER_V2 = 600000;
-    const KDF_SALT_V1 = 'vibestore-salt-v1';
-    const KDF_ITER_V1 = 100000;
 
     const b64 = {
         from: (buf) => {
@@ -1851,28 +1843,20 @@
         to: (str) => Uint8Array.from(atob(str), c => c.charCodeAt(0)).buffer
     };
 
-    async function deriveE2EKey(secret, saltBytes, iterations) {
-        const enc = new TextEncoder();
-        const baseKey = await crypto.subtle.importKey(
-            'raw', enc.encode(secret), { name: 'PBKDF2' }, false, ['deriveKey']
-        );
-        return crypto.subtle.deriveKey(
-            { name: 'PBKDF2', salt: saltBytes, iterations, hash: 'SHA-256' },
-            baseKey,
-            { name: 'AES-GCM', length: 256 },
-            false,
-            ['encrypt', 'decrypt']
-        );
-    }
-
     async function deriveStableKey() {
         if (!cryptoOK) return;
         try {
             const enc = new TextEncoder();
-            // v2: salt aleatorio + 600K iteraciones
-            sharedKey = await deriveE2EKey(E2E_SECRET, new Uint8Array(b64.to(KDF_SALT_V2)), KDF_ITER_V2);
-            // También derivar la clave legacy para descifrar mensajes anteriores
-            sharedKeyLegacy = await deriveE2EKey(E2E_SECRET, enc.encode(KDF_SALT_V1), KDF_ITER_V1);
+            const baseKey = await crypto.subtle.importKey(
+                'raw', enc.encode(E2E_SECRET), { name: 'PBKDF2' }, false, ['deriveKey']
+            );
+            sharedKey = await crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt: enc.encode('vibestore-salt-v1'), iterations: 100000, hash: 'SHA-256' },
+                baseKey,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
             e2eReady = true;
             const lock = document.getElementById('e2eLock');
             if (lock) lock.classList.add('secure');
@@ -1903,17 +1887,8 @@
         try {
             const iv = new Uint8Array(b64.to(payload.iv));
             const cipher = b64.to(payload.ct);
-            // Intentar con clave v2 primero
-            try {
-                const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, sharedKey, cipher);
-                return new TextDecoder().decode(plain);
-            } catch {}
-            // Fallback: clave legacy v1 para mensajes antiguos
-            if (sharedKeyLegacy) {
-                const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, sharedKeyLegacy, cipher);
-                return new TextDecoder().decode(plain);
-            }
-            return null;
+            const plain = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, sharedKey, cipher);
+            return new TextDecoder().decode(plain);
         } catch (e) { return null; }
     }
 
@@ -3633,81 +3608,32 @@
         reader.readAsDataURL(file);
     }
 
-    // ── visor de imágenes del chat (pinch-to-zoom completo) ──
-    let ivZoom = 1, ivPanX = 0, ivPanY = 0;
-    let ivPinchD0 = 0, ivPinchS0 = 1;
-    let ivPanSX = 0, ivPanSY = 0, ivPanOX = 0, ivPanOY = 0;
-    let ivLastTap = 0, ivTouches = 0;
-    (function initIvZoom() {
-        const wrap = document.getElementById('imageViewerWrap');
-        wrap.addEventListener('touchstart', e => {
-            ivTouches = e.touches.length;
-            if (e.touches.length === 2) {
-                ivPinchD0 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                ivPinchS0 = ivZoom; e.preventDefault();
-            } else if (e.touches.length === 1) {
-                const now = Date.now();
-                if (now - ivLastTap < 300) {
-                    ivZoom = ivZoom > 1.1 ? 1 : 2.5;
-                    if (ivZoom <= 1) { ivPanX = 0; ivPanY = 0; }
-                    wrap.classList.toggle('zoomed', ivZoom > 1);
-                    ivApply(); ivLastTap = 0; e.preventDefault(); return;
-                }
-                ivLastTap = now;
-                if (ivZoom > 1) { ivPanSX = e.touches[0].clientX; ivPanSY = e.touches[0].clientY; ivPanOX = ivPanX; ivPanOY = ivPanY; e.preventDefault(); }
-            }
-        }, { passive: false });
-        wrap.addEventListener('touchmove', e => {
-            if (e.touches.length === 2) {
-                const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                ivZoom = Math.max(1, Math.min(5, ivPinchS0 * d / ivPinchD0));
-                wrap.classList.toggle('zoomed', ivZoom > 1);
-                ivClamp(); ivApply(); e.preventDefault();
-            } else if (e.touches.length === 1 && ivZoom > 1 && ivTouches === 1) {
-                ivPanX = ivPanOX + (e.touches[0].clientX - ivPanSX);
-                ivPanY = ivPanOY + (e.touches[0].clientY - ivPanSY);
-                ivClamp(); ivApply(); e.preventDefault();
-            }
-        }, { passive: false });
-        wrap.addEventListener('touchend', e => {
-            ivTouches = e.touches.length;
-            if (ivZoom < 1.05) { ivZoom = 1; ivPanX = 0; ivPanY = 0; wrap.classList.remove('zoomed'); ivApply(); }
-        });
-        wrap.addEventListener('wheel', e => {
-            e.preventDefault();
-            ivZoom = Math.max(1, Math.min(5, ivZoom * (e.deltaY < 0 ? 1.15 : 0.87)));
-            if (ivZoom < 1.05) { ivZoom = 1; ivPanX = 0; ivPanY = 0; }
-            wrap.classList.toggle('zoomed', ivZoom > 1);
-            ivClamp(); ivApply();
-        }, { passive: false });
-    })();
-    function ivApply() {
-        const img = document.getElementById('imageViewerImg');
-        if (img) img.style.transform = `translate(${ivPanX}px, ${ivPanY}px) scale(${ivZoom})`;
-    }
-    function ivClamp() {
-        if (ivZoom <= 1) { ivPanX = 0; ivPanY = 0; return; }
-        const img = document.getElementById('imageViewerImg'); if (!img) return;
-        const r = img.getBoundingClientRect();
-        const wrap = document.getElementById('imageViewerWrap');
-        const maxX = Math.max(0, (r.width - wrap.clientWidth) / 2);
-        const maxY = Math.max(0, (r.height - wrap.clientHeight) / 2);
-        ivPanX = Math.max(-maxX, Math.min(maxX, ivPanX));
-        ivPanY = Math.max(-maxY, Math.min(maxY, ivPanY));
-    }
     window.openImageViewer = function(src) {
         const img = document.getElementById('imageViewerImg');
-        img.src = src; img.draggable = false;
-        ivZoom = 1; ivPanX = 0; ivPanY = 0;
+        img.src = src;
         img.style.transform = 'scale(1)';
-        const wrap = document.getElementById('imageViewerWrap');
-        wrap.classList.remove('zoomed');
         document.getElementById('imageViewer').classList.add('open');
+        let scale = 1, startDist = 0, startScale = 1;
+        img.ontouchstart = e => {
+            if (e.touches.length === 2) {
+                startDist  = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                startScale = scale;
+                e.preventDefault();
+            }
+        };
+        img.ontouchmove = e => {
+            if (e.touches.length === 2) {
+                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                scale = Math.min(4, Math.max(1, startScale * dist / startDist));
+                img.style.transform = `scale(${scale})`;
+                e.preventDefault();
+            }
+        };
+        img.ontouchend = e => {
+            if (e.touches.length < 2 && scale < 1.1) { scale = 1; img.style.transform = 'scale(1)'; }
+        };
     };
     window.closeImageViewer = function() {
-        ivZoom = 1; ivPanX = 0; ivPanY = 0;
-        const wrap = document.getElementById('imageViewerWrap');
-        wrap.classList.remove('zoomed');
         document.getElementById('imageViewer').classList.remove('open');
         const img = document.getElementById('imageViewerImg');
         img.src = ''; img.style.transform = 'scale(1)';
@@ -5263,80 +5189,10 @@
         });
     }
 
-    // ── visor del Baúl (con pinch-to-zoom) ──
+    // ── visor del Baúl ──
     let vvCtx = null;
-    let vvZoom = 1, vvPanX = 0, vvPanY = 0;
-    let vvPinchDist0 = 0, vvPinchScale0 = 1;
-    let vvPanSX = 0, vvPanSY = 0, vvPanOX = 0, vvPanOY = 0;
-    let vvLastTap = 0, vvTouches = 0;
-    const VV_ZOOM_MIN = 1, VV_ZOOM_MAX = 5;
-
-    function vvApply() {
-        const el = document.getElementById('vvBody').querySelector('img');
-        if (!el) return;
-        el.style.transform = `translate(${vvPanX}px, ${vvPanY}px) scale(${vvZoom})`;
-    }
-    function vvClamp() {
-        const body = document.getElementById('vvBody');
-        if (vvZoom <= 1) { vvPanX = 0; vvPanY = 0; return; }
-        const el = body.querySelector('img'); if (!el) return;
-        const r = el.getBoundingClientRect();
-        const bw = body.clientWidth, bh = body.clientHeight;
-        const maxX = Math.max(0, (r.width - bw) / 2);
-        const maxY = Math.max(0, (r.height - bh) / 2);
-        vvPanX = Math.max(-maxX, Math.min(maxX, vvPanX));
-        vvPanY = Math.max(-maxY, Math.min(maxY, vvPanY));
-    }
-    function vvResetZoom() { vvZoom = 1; vvPanX = 0; vvPanY = 0; }
-    function vvPinchDist(t) { return Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY); }
-
-    (function initVvZoom() {
-        const body = document.getElementById('vvBody');
-        body.addEventListener('touchstart', e => {
-            vvTouches = e.touches.length;
-            if (e.touches.length === 2) {
-                vvPinchDist0 = vvPinchDist(e.touches); vvPinchScale0 = vvZoom;
-                e.preventDefault();
-            } else if (e.touches.length === 1) {
-                const now = Date.now();
-                if (now - vvLastTap < 300) {
-                    vvZoom = vvZoom > 1.1 ? 1 : 2.5;
-                    if (vvZoom <= 1) { vvPanX = 0; vvPanY = 0; }
-                    body.classList.toggle('zoomed', vvZoom > 1);
-                    vvApply(); vvLastTap = 0; e.preventDefault(); return;
-                }
-                vvLastTap = now;
-                if (vvZoom > 1) { vvPanSX = e.touches[0].clientX; vvPanSY = e.touches[0].clientY; vvPanOX = vvPanX; vvPanOY = vvPanY; e.preventDefault(); }
-            }
-        }, { passive: false });
-        body.addEventListener('touchmove', e => {
-            if (e.touches.length === 2) {
-                const d = vvPinchDist(e.touches);
-                vvZoom = Math.max(VV_ZOOM_MIN, Math.min(VV_ZOOM_MAX, vvPinchScale0 * d / vvPinchDist0));
-                body.classList.toggle('zoomed', vvZoom > 1);
-                vvClamp(); vvApply(); e.preventDefault();
-            } else if (e.touches.length === 1 && vvZoom > 1 && vvTouches === 1) {
-                vvPanX = vvPanOX + (e.touches[0].clientX - vvPanSX);
-                vvPanY = vvPanOY + (e.touches[0].clientY - vvPanSY);
-                vvClamp(); vvApply(); e.preventDefault();
-            }
-        }, { passive: false });
-        body.addEventListener('touchend', e => {
-            vvTouches = e.touches.length;
-            if (vvZoom < 1.05) { vvZoom = 1; vvPanX = 0; vvPanY = 0; body.classList.remove('zoomed'); vvApply(); }
-        });
-        body.addEventListener('wheel', e => {
-            e.preventDefault();
-            vvZoom = Math.max(VV_ZOOM_MIN, Math.min(VV_ZOOM_MAX, vvZoom * (e.deltaY < 0 ? 1.15 : 0.87)));
-            if (vvZoom < 1.05) { vvZoom = 1; vvPanX = 0; vvPanY = 0; }
-            body.classList.toggle('zoomed', vvZoom > 1);
-            vvClamp(); vvApply();
-        }, { passive: false });
-    })();
-
     function openVaultViewer(ctx) {
         vvCtx = ctx;
-        vvResetZoom();
         document.getElementById('vaultViewer').classList.add('on');
         document.getElementById('vvInfo').textContent = ctx.info || '';
         document.getElementById('vvDel').style.display = ctx.onDelete ? '' : 'none';
@@ -5346,10 +5202,9 @@
         document.getElementById('vvAlbum').style.display = mineItem ? '' : 'none';
         document.getElementById('vvFav').classList.toggle('on', !!(mineItem && mineItem.rec.fav));
         const body = document.getElementById('vvBody');
-        body.classList.remove('zoomed');
-        body.innerHTML = ctx.img ? `<img src="${escHtml(ctx.img)}" alt="" draggable="false">` : '<span class="vv-spin"></span>';
+        body.innerHTML = ctx.img ? `<img src="${escHtml(ctx.img)}" alt="">` : '<span class="vv-spin"></span>';
     }
-    window.closeVaultViewer = function() { vvResetZoom(); const body = document.getElementById('vvBody'); body.classList.remove('zoomed'); body.innerHTML = ''; document.getElementById('vaultViewer').classList.remove('on'); vvCtx = null; };
+    window.closeVaultViewer = function() { document.getElementById('vaultViewer').classList.remove('on'); document.getElementById('vvBody').innerHTML = ''; vvCtx = null; };
     window.vvDelete = async function() { if (vvCtx && vvCtx.onDelete) { const ok = await vvCtx.onDelete(); if (ok) closeVaultViewer(); } };
     window.vvSendPeer = function() { if (vvCtx && vvCtx.onSendPeer) vvCtx.onSendPeer(); };
     window.vvSaveDevice = async function() {
@@ -5414,7 +5269,7 @@
 
     // ── PIN del Baúl ──
     let vaultPinRec = null, vaultPinLoaded = false;
-    const PIN_ITER = 600000, PIN_MAX_FAILS = 5, PIN_WAIT_MS = 60000;
+    const PIN_ITER = 150000, PIN_MAX_FAILS = 5, PIN_WAIT_MS = 60000;
     async function pinHash(pin, saltB64) {
         const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pin), { name: 'PBKDF2' }, false, ['deriveBits']);
         const salt = new Uint8Array([...new Uint8Array(b64.to(saltB64)), ...new TextEncoder().encode(myId)]);
@@ -5826,10 +5681,8 @@ svg.li{fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;strok
 .vv-acts .fav.on svg{fill:var(--vacc);stroke:var(--vacc)}
 .vv-acts .orange{color:var(--vacc)}
 .vv-acts .danger{color:#ff8a8a}
-.vv-body{flex:1;display:grid;place-items:center;min-height:0;padding:0 6px calc(6px + var(--safe-bottom,0px));overflow:hidden;touch-action:none}
-.vv-body img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px;transform-origin:center center;will-change:transform;transition:transform .15s ease-out}
-.vv-body.zoomed img{transition:none;cursor:grab}
-.vv-body.zoomed img:active{cursor:grabbing}
+.vv-body{flex:1;display:grid;place-items:center;min-height:0;padding:0 6px calc(6px + var(--safe-bottom,0px))}
+.vv-body img{max-width:100%;max-height:100%;object-fit:contain;border-radius:6px}
 .vv-body .vv-spin{width:36px;height:36px;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:vspin .7s linear infinite}
 @keyframes vspin{to{transform:rotate(360deg)}}
 
