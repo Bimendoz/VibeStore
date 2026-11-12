@@ -9,6 +9,38 @@ const https   = require('https');
 
 const DB_BASE = 'https://data-base-store-3bbf8-default-rtdb.firebaseio.com';
 
+// ── Autenticación anónima (para que las reglas de Firebase permitan al servidor
+//    leer/escribir sin abrir la base al público). La apiKey es pública (va en el
+//    cliente). Si el login anónimo no está activado, ID_TOKEN queda null y el
+//    servidor funciona igual que antes (útil mientras las reglas sigan abiertas).
+const FB_API_KEY = 'AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo';
+let ID_TOKEN = null;
+function withAuth(url) { return ID_TOKEN ? (url + (url.includes('?') ? '&' : '?') + 'auth=' + ID_TOKEN) : url; }
+function postJson(url, bodyObj) {
+    return new Promise((resolve) => {
+        const data = JSON.stringify(bodyObj || {});
+        const req = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(data) } }, (res) => {
+            let b = ''; res.on('data', c => b += c); res.on('end', () => { try { resolve(JSON.parse(b)); } catch { resolve(null); } });
+        });
+        req.on('error', () => resolve(null));
+        req.write(data); req.end();
+    });
+}
+async function authInit() {
+    const r = await postJson(`https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FB_API_KEY}`, { returnSecureToken: true });
+    if (r && r.idToken) {
+        ID_TOKEN = r.idToken;
+        const ms = ((parseInt(r.expiresIn, 10) || 3600) - 180) * 1000;
+        console.log('[Auth] Token anónimo obtenido ✓');
+        setTimeout(authInit, Math.max(60000, ms));
+    } else {
+        ID_TOKEN = null;
+        console.warn('[Auth] Sin token anónimo (¿login anónimo deshabilitado? las reglas abiertas siguen funcionando)');
+        setTimeout(authInit, 300000);
+    }
+}
+authInit();
+
 // ── Claves VAPID ───────────────────────────────────────────────────────────────────────
 const VAPID_PUBLIC  = 'BBddPNkEupysXpfhkNyhaNrYGqTAbigGlxyQAwckztPX_dJUWjBx3JHM4BRhagRu2lo2jFFmJNFI-nS7IhYugcE';
 const VAPID_PRIVATE = 's-Zjoqw8alKFo5h1I8Xchq_rXUqWAKGJdJNNIn6tgIU';
@@ -61,6 +93,77 @@ app.get('/notif-status', (_req, res) => {
     res.send(`<h2 style="font-family:sans-serif">${pushEnabled ? '🔔 ENCENDIDAS' : '🔕 APAGADAS'}</h2>`);
 });
 
+// ── Diagnóstico Firebase (temporal) ─────────────────────────────────────────────
+app.get('/diag', async (_req, res) => {
+    const results = [];
+    const t0 = Date.now();
+
+    // Test 0: Auth token
+    results.push({ test: 'Auth token (anónimo)', ok: !!ID_TOKEN, detail: ID_TOKEN ? 'Obtenido ✓' : 'Sin token (auth anónima no habilitada o fallo)' });
+
+    // Test 1: Leer la base
+    try {
+        const data = await fbGet('chat/messages');
+        if (data && data.error) {
+            results.push({ test: 'Leer mensajes', ok: false, detail: data.error });
+        } else {
+            const keys = data ? Object.keys(data) : [];
+            const size = data ? JSON.stringify(data).length : 0;
+            results.push({ test: 'Leer mensajes', ok: true, detail: `${keys.length} mensajes (${(size/1024).toFixed(1)} KB)` });
+        }
+    } catch (e) {
+        results.push({ test: 'Leer mensajes', ok: false, detail: e.message || String(e) });
+    }
+
+    // Test 2: Escribir dato de prueba
+    let testWritten = false;
+    try {
+        const writeResult = await fbPut('chat/_diag', { test: true, ts: Date.now() });
+        const parsed = writeResult ? JSON.parse(writeResult) : null;
+        if (parsed && parsed.error) {
+            results.push({ test: 'Escribir en Firebase', ok: false, detail: parsed.error });
+        } else {
+            testWritten = true;
+            results.push({ test: 'Escribir en Firebase', ok: true, detail: 'OK' });
+        }
+    } catch (e) {
+        results.push({ test: 'Escribir en Firebase', ok: false, detail: e.message || String(e) });
+    }
+
+    // Test 3: Borrar dato de prueba
+    if (testWritten) {
+        try { fbDelete('chat/_diag'); results.push({ test: 'Borrar dato de prueba', ok: true, detail: 'OK' }); }
+        catch (e) { results.push({ test: 'Borrar dato de prueba', ok: false, detail: e.message }); }
+    }
+
+    // Info extra
+    results.push({ test: 'Servidor activo desde', ok: true, detail: new Date(SERVER_START).toISOString() });
+    results.push({ test: 'Suscripciones push', ok: true, detail: `${Object.keys(subscriptions).length} dispositivos` });
+    results.push({ test: 'Notificaciones', ok: pushEnabled, detail: pushEnabled ? 'Encendidas' : 'Apagadas' });
+
+    const elapsed = Date.now() - t0;
+    const allOk = results.every(r => r.ok);
+
+    res.send(`<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width">
+    <title>VibeStore Diag</title><style>
+      body{font-family:system-ui;background:#0e141b;color:#f2f6fa;padding:16px;margin:0}
+      h1{font-size:1.3rem;margin:0 0 16px}
+      .t{background:#1a2332;border-radius:10px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+      .t-name{font-weight:600;font-size:.9rem;white-space:nowrap}
+      .t-detail{font-size:.8rem;color:#9fb1c2;text-align:right;word-break:break-all}
+      .ok{color:#39c07a}.fail{color:#ef4e57}
+      .summary{text-align:center;padding:20px;font-size:1.1rem;font-weight:700;border-radius:12px;margin-bottom:16px}
+      .summary.pass{background:#1a3328;color:#39c07a}
+      .summary.bad{background:#331a1c;color:#ef4e57}
+    </style></head><body>
+    <h1>🔧 VibeStore — Diagnóstico</h1>
+    <div class="summary ${allOk ? 'pass' : 'bad'}">${allOk ? '✅ Todo funciona' : '❌ Hay problemas'}</div>
+    ${results.map(r => `<div class="t"><div class="t-name">${r.ok ? '✅' : '❌'} ${r.test}</div><div class="t-detail ${r.ok ? 'ok' : 'fail'}">${r.detail}</div></div>`).join('')}
+    <div class="t"><div class="t-name">⏱ Tiempo</div><div class="t-detail">${elapsed}ms</div></div>
+    <p style="color:#666;font-size:.75rem;text-align:center;margin-top:20px">${new Date().toISOString()}</p>
+    </body></html>`);
+});
+
 // Catch-all: cualquier otra ruta sirve la tienda (debe ir AL FINAL)
 app.get('*', (_req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
@@ -69,7 +172,7 @@ app.listen(PORT, () => console.log(`[Server] Puerto ${PORT}`));
 // ── Helpers REST de Firebase ────────────────────────────────────────────────────────────
 function fbGet(pathName) {
     return new Promise((resolve) => {
-        https.get(`${DB_BASE}/${pathName}.json`, (res) => {
+        https.get(withAuth(`${DB_BASE}/${pathName}.json`), (res) => {
             let body = '';
             res.on('data', c => body += c);
             res.on('end', () => { try { resolve(JSON.parse(body)); } catch { resolve(null); } });
@@ -77,14 +180,14 @@ function fbGet(pathName) {
     });
 }
 function fbDelete(pathName) {
-    const req = https.request(`${DB_BASE}/${pathName}.json`, { method: 'DELETE' }, () => {});
+    const req = https.request(withAuth(`${DB_BASE}/${pathName}.json`), { method: 'DELETE' }, () => {});
     req.on('error', () => {});
     req.end();
 }
 function fbPut(pathName, value) {
     return new Promise((resolve) => {
         const data = JSON.stringify(value);
-        const req = https.request(`${DB_BASE}/${pathName}.json`, { method: 'PUT', headers: { 'Content-Type': 'application/json' } }, (res) => {
+        const req = https.request(withAuth(`${DB_BASE}/${pathName}.json`), { method: 'PUT', headers: { 'Content-Type': 'application/json' } }, (res) => {
             let body = '';
             res.on('data', c => body += c);
             res.on('end', () => resolve(body));
@@ -174,7 +277,7 @@ async function notifyOthers(senderId, kind) {
 const SERVER_START = Date.now();
 
 function listenFirebasePath(path, handlers, queryParams) {
-    const url = `${DB_BASE}/${path}.json${queryParams ? '?' + queryParams : ''}`;
+    const url = withAuth(`${DB_BASE}/${path}.json${queryParams ? '?' + queryParams : ''}`);
     const options = { headers: { 'Accept': 'text/event-stream' } };
 
     const req = https.get(url, options, (res) => {
