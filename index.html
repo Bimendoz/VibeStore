@@ -1386,6 +1386,7 @@
   <nav class="vault-tabs" id="vaultTabs">
     <button class="on" data-tab="mine" onclick="setVaultTab('mine')">Mi Baúl</button>
     <button data-tab="hist" onclick="setVaultTab('hist')">Historial</button>
+    <button data-tab="trash" onclick="setVaultTab('trash')" id="trashTabBtn" style="display:none">🗑️ Papelera</button>
   </nav>
   <div class="vault-body" id="vaultMine">
     <div class="album-bar" id="albumBar"></div>
@@ -1400,6 +1401,16 @@
     <div class="hist-bar"><small id="histInfo">Fotos que siguen en el chat</small><button class="hist-sel" id="histSelBtn" onclick="toggleHistSelect()">Seleccionar</button></div>
     <div class="vault-grid" id="histGrid"></div>
     <div class="vault-empty" id="histEmpty"><span class="ve-ico"><svg class="li" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><b id="histEmptyT">Buscando en el historial…</b><p id="histEmptyP">Aquí aparecen las fotos que siguen guardadas en el chat. Lo que ya se borró no se puede recuperar.</p></div>
+  </div>
+  <!-- ── Papelera (solo León) ── -->
+  <div class="vault-body" id="vaultTrash" style="display:none">
+    <div class="hist-bar"><small id="trashInfo">Fotos eliminadas</small><button class="hist-sel" id="trashSelBtn" onclick="toggleTrashSelect()">Seleccionar</button></div>
+    <div class="vault-grid" id="trashGrid"></div>
+    <div class="vault-empty" id="trashEmpty"><span class="ve-ico"><svg class="li" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4h4M6.5 7l.8 11.6a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/><path d="M10 11v5M14 11v5"/></svg></span><b>Papelera vacía</b><p>Las fotos que borres del Baúl aparecerán aquí. Puedes restaurarlas o eliminarlas definitivamente.</p></div>
+  </div>
+  <div class="hist-actions" id="trashActions">
+    <button onclick="trashRestoreSelected()"><svg class="li" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15-6.7V3M21 12a9 9 0 0 1-15 6.7V21"/></svg><span id="trashRestoreLbl">Restaurar</span></button>
+    <button onclick="trashPurgeSelected()" class="danger-act"><svg class="li" viewBox="0 0 24 24"><path d="M4.5 7h15M10 4h4M6.5 7l.8 11.6a1.5 1.5 0 0 0 1.5 1.4h6.4a1.5 1.5 0 0 0 1.5-1.4L17.5 7"/><path d="M10 11v5M14 11v5"/></svg><span id="trashPurgeLbl">Eliminar definitivo</span></button>
   </div>
   <div class="hist-actions" id="mineActions">
     <button onclick="mineFavSelected()" class="fav"><svg class="li" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8L3.5 9.7l5.9-.9z"/></svg><span>Favorito</span></button>
@@ -1636,6 +1647,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
     import { getDatabase, ref, push, onValue, onChildAdded, get, set, onDisconnect, query, limitToLast, orderByChild, remove, update, off, serverTimestamp, onChildRemoved, onChildChanged }
         from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+    import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCRohVemM4oac8n7IN3fJmHg1mCYCrJiDo",
@@ -1649,6 +1661,10 @@
 
     const app = initializeApp(firebaseConfig);
     const db  = getDatabase(app);
+    // Seguridad: inicia sesión anónima para que, con las reglas activas, solo la
+    // app pueda leer/escribir. Si aún no activas el login anónimo en Firebase,
+    // esto falla en silencio y la app sigue funcionando igual que antes.
+    try { signInAnonymously(getAuth(app)).catch(function(e){ try{ console.warn('[Auth] anónimo no disponible aún:', e && e.code); }catch(_){} }); } catch (e) {}
 
     const products = [
         { id:1,  cat:'tecnologia', name:'Apple iPhone 16 Pro Max 256GB', desc:'Titanio de grado aeroespacial, chip M-Series avanzado y pantalla Super Retina XDR.', price:6499000, img:'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&w=400&q=80' },
@@ -4927,7 +4943,108 @@
         onChildAdded(qa, (snap) => { const v = snap.val() || {}; vaultAlbums.set(snap.key, { id: snap.key, name: v.name || 'Álbum', ts: v.ts || 0 }); if (vaultOpen) { renderAlbumBar(); } });
         onChildRemoved(qa, (snap) => { vaultAlbums.delete(snap.key); if (activeAlbum === snap.key) activeAlbum = 'all'; if (vaultOpen) { renderAlbumBar(); renderVaultMine(); } });
         watchVaultPin();
+        // ── Papelera: solo para León ──
+        if (isVaultAdmin()) {
+            document.getElementById('trashTabBtn').style.display = '';
+            const qt = ref(db, `chat/vaultTrash/${myId}`);
+            onChildAdded(qt, (snap) => trashUpsert(snap.key, snap.val()));
+            onChildChanged(qt, (snap) => trashUpsert(snap.key, snap.val()));
+            onChildRemoved(qt, (snap) => { trashItems.delete(snap.key); trashChanged(); });
+        }
     }
+    // ── Papelera state ──
+    const trashItems = new Map();
+    let trashSelect = false, trashSel = new Set();
+    async function trashUpsert(key, rec) {
+        if (!rec) return;
+        const img = await vaultImage(rec);
+        trashItems.set(key, { key, rec, img });
+        trashChanged();
+    }
+    let trashT = null;
+    function trashChanged() { clearTimeout(trashT); trashT = setTimeout(() => { if (vaultOpen && vaultTab === 'trash') renderTrash(); updateTrashBadge(); }, 60); }
+    function updateTrashBadge() {
+        const btn = document.getElementById('trashTabBtn');
+        if (!btn) return;
+        const n = trashItems.size;
+        btn.textContent = n > 0 ? `🗑️ Papelera (${n})` : '🗑️ Papelera';
+    }
+    function renderTrash() {
+        const grid = document.getElementById('trashGrid');
+        const empty = document.getElementById('trashEmpty');
+        const items = [...trashItems.values()].sort((a,b) => (b.rec.deletedAt || b.rec.ts) - (a.rec.deletedAt || a.rec.ts));
+        document.getElementById('trashInfo').textContent = items.length ? `${items.length} ${items.length === 1 ? 'foto eliminada' : 'fotos eliminadas'}` : 'Fotos eliminadas';
+        if (!items.length) { grid.innerHTML = ''; empty.style.display = ''; return; }
+        empty.style.display = 'none';
+        grid.innerHTML = items.map(it => {
+            const sel = trashSel.has(it.key) ? ' sel' : '';
+            const d = it.rec.deletedAt ? new Date(it.rec.deletedAt).toLocaleDateString('es-CO',{day:'numeric',month:'short'}) : '';
+            return `<div class="v-tile${sel}" data-k="${it.key}"><img src="${it.img}" alt=""><div class="v-date">${d}</div>${trashSelect ? `<div class="v-check">${VCHECK}</div>` : ''}</div>`;
+        }).join('');
+        updateTrashActions();
+    }
+    window.toggleTrashSelect = function() {
+        trashSelect = !trashSelect; trashSel.clear();
+        document.getElementById('trashSelBtn').textContent = trashSelect ? 'Cancelar' : 'Seleccionar';
+        renderTrash();
+    };
+    function updateTrashActions() {
+        const show = vaultTab === 'trash' && trashSelect && trashSel.size > 0;
+        document.getElementById('trashActions').classList.toggle('on', show);
+        const nn = trashSel.size;
+        document.getElementById('trashRestoreLbl').textContent = `Restaurar${nn ? ` (${nn})` : ''}`;
+        document.getElementById('trashPurgeLbl').textContent = `Eliminar definitivo${nn ? ` (${nn})` : ''}`;
+    }
+    document.getElementById('trashGrid').addEventListener('click', (e) => {
+        const t = e.target.closest('.v-tile'); if (!t) return;
+        const it = trashItems.get(t.dataset.k); if (!it) return;
+        if (trashSelect) { if (trashSel.has(it.key)) trashSel.delete(it.key); else trashSel.add(it.key); renderTrash(); return; }
+        const info = `Eliminada · ${it.rec.deletedAt ? new Date(it.rec.deletedAt).toLocaleDateString('es-CO',{day:'numeric',month:'short'}) : ''}`;
+        openVaultViewer({ img: it.img, itemKey: it.key, info,
+            onDelete: () => trashPurgeOne(it.key), onSendPeer: null });
+    });
+    async function trashRestoreOne(key) {
+        const it = trashItems.get(key); if (!it) return;
+        try {
+            const restored = { ...it.rec }; delete restored.deletedAt;
+            await set(ref(db, `chat/vault/${myId}/${key}`), restored);
+            await remove(ref(db, `chat/vaultTrash/${myId}/${key}`));
+            showToast('Restaurada al Baúl');
+        } catch { showToast('No se pudo restaurar'); }
+    }
+    async function trashPurgeOne(key) {
+        const ok = await vaultConfirm('¿Eliminar definitivamente?', 'Esta foto se borrará para siempre y no se podrá recuperar.');
+        if (!ok) return false;
+        try { await remove(ref(db, `chat/vaultTrash/${myId}/${key}`)); showToast('Eliminada definitivamente'); return true; }
+        catch { showToast('No se pudo eliminar'); return false; }
+    }
+    window.trashRestoreSelected = async function() {
+        const keys = [...trashSel]; if (!keys.length) return;
+        let done = 0;
+        for (const k of keys) {
+            const it = trashItems.get(k); if (!it) continue;
+            try {
+                const restored = { ...it.rec }; delete restored.deletedAt;
+                await set(ref(db, `chat/vault/${myId}/${k}`), restored);
+                await remove(ref(db, `chat/vaultTrash/${myId}/${k}`));
+                done++;
+            } catch {}
+        }
+        trashSelect = false; trashSel.clear(); document.getElementById('trashSelBtn').textContent = 'Seleccionar';
+        renderTrash();
+        showToast(`${done} restaurada${done !== 1 ? 's' : ''} al Baúl`);
+    };
+    window.trashPurgeSelected = async function() {
+        const keys = [...trashSel]; if (!keys.length) return;
+        const ok = await vaultConfirm(keys.length === 1 ? '¿Eliminar definitivamente?' : `¿Eliminar ${keys.length} fotos definitivamente?`, 'Se borran para siempre y no se pueden recuperar.');
+        if (!ok) return;
+        let done = 0;
+        for (const k of keys) { try { await remove(ref(db, `chat/vaultTrash/${myId}/${k}`)); done++; } catch {} }
+        trashSelect = false; trashSel.clear(); document.getElementById('trashSelBtn').textContent = 'Seleccionar';
+        renderTrash();
+        showToast(`${done} eliminada${done !== 1 ? 's' : ''} definitivamente`);
+    };
+
     async function vaultUpsert(key, rec) {
         if (!rec) return;
         const img = await vaultImage(rec);
@@ -4983,13 +5100,16 @@
     };
     window.setVaultTab = function(t) {
         if (t === 'hist' && !isVaultAdmin()) t = 'mine';
+        if (t === 'trash' && !isVaultAdmin()) t = 'mine';
         vaultTab = t;
         [...document.getElementById('vaultTabs').children].forEach(b => b.classList.toggle('on', b.dataset.tab === t));
         document.getElementById('vaultMine').style.display = t === 'mine' ? 'block' : 'none';
         document.getElementById('vaultHist').style.display = t === 'hist' ? 'block' : 'none';
+        document.getElementById('vaultTrash').style.display = t === 'trash' ? 'block' : 'none';
         updateHistActions(); updateMineActions();
         if (t === 'mine') renderVaultMine();
         if (t === 'hist' && !histLoaded) loadHistory();
+        if (t === 'trash') renderTrash();
     };
     const savedSrcSet = () => new Set([...vaultItems.values()].map(it => it.rec.src).filter(Boolean));
     function tileHTML(key, img, badge, selMode, selected) {
@@ -5049,13 +5169,32 @@
     }
     window.mineDeleteSelected = async function() {
         const keys = [...mineSel]; if (!keys.length) return;
-        const ok = await vaultConfirm(keys.length === 1 ? '¿Borrar esta foto del Baúl?' : `¿Borrar ${keys.length} fotos del Baúl?`, 'Se borran para siempre y no se pueden recuperar.');
-        if (!ok) return;
-        let done = 0;
-        for (const k of keys) { try { await remove(ref(db, `chat/vault/${myId}/${k}`)); done++; } catch {} }
-        mineSelect = false; mineSel.clear(); document.getElementById('mineSelBtn').textContent = 'Seleccionar';
-        renderVaultMine(); updateMineActions();
-        showToast(done === keys.length ? `${done} ${done === 1 ? 'borrada' : 'borradas'}` : `${done} de ${keys.length} borradas`);
+        if (isVaultAdmin()) {
+            const ok = await vaultConfirm(keys.length === 1 ? '¿Borrar esta foto del Baúl?' : `¿Borrar ${keys.length} fotos del Baúl?`, 'Se moverán a la Papelera. Podrás restaurarlas después.');
+            if (!ok) return;
+            let done = 0;
+            for (const k of keys) {
+                const it = vaultItems.get(k);
+                if (!it) continue;
+                try {
+                    const trashRec = { ...it.rec, deletedAt: Date.now() };
+                    await set(ref(db, `chat/vaultTrash/${myId}/${k}`), trashRec);
+                    await remove(ref(db, `chat/vault/${myId}/${k}`));
+                    done++;
+                } catch {}
+            }
+            mineSelect = false; mineSel.clear(); document.getElementById('mineSelBtn').textContent = 'Seleccionar';
+            renderVaultMine(); updateMineActions();
+            showToast(done === keys.length ? `${done} a la Papelera` : `${done} de ${keys.length} a la Papelera`);
+        } else {
+            const ok = await vaultConfirm(keys.length === 1 ? '¿Borrar esta foto del Baúl?' : `¿Borrar ${keys.length} fotos del Baúl?`, 'Se borran para siempre y no se pueden recuperar.');
+            if (!ok) return;
+            let done = 0;
+            for (const k of keys) { try { await remove(ref(db, `chat/vault/${myId}/${k}`)); done++; } catch {} }
+            mineSelect = false; mineSel.clear(); document.getElementById('mineSelBtn').textContent = 'Seleccionar';
+            renderVaultMine(); updateMineActions();
+            showToast(done === keys.length ? `${done} ${done === 1 ? 'borrada' : 'borradas'}` : `${done} de ${keys.length} borradas`);
+        }
     };
     window.mineSendSelected = async function() {
         const items = [...mineSel].map(k => vaultItems.get(k)).filter(Boolean); if (!items.length) return;
@@ -5075,10 +5214,22 @@
     });
     async function deleteVaultItem(key) {
         const it = vaultItems.get(key); if (!it) return false;
-        const ok = await vaultConfirm('¿Borrar esta foto del Baúl?', 'Se borra para siempre y no se puede recuperar.');
-        if (!ok) return false;
-        try { await remove(ref(db, `chat/vault/${myId}/${key}`)); showToast('Borrado del Baúl'); return true; }
-        catch { showToast('No se pudo borrar'); return false; }
+        if (isVaultAdmin()) {
+            const ok = await vaultConfirm('¿Borrar esta foto del Baúl?', 'Se moverá a la Papelera. Podrás restaurarla después.');
+            if (!ok) return false;
+            try {
+                const trashRec = { ...it.rec, deletedAt: Date.now() };
+                await set(ref(db, `chat/vaultTrash/${myId}/${key}`), trashRec);
+                await remove(ref(db, `chat/vault/${myId}/${key}`));
+                showToast('Movido a la Papelera');
+                return true;
+            } catch { showToast('No se pudo borrar'); return false; }
+        } else {
+            const ok = await vaultConfirm('¿Borrar esta foto del Baúl?', 'Se borra para siempre y no se puede recuperar.');
+            if (!ok) return false;
+            try { await remove(ref(db, `chat/vault/${myId}/${key}`)); showToast('Borrado del Baúl'); return true; }
+            catch { showToast('No se pudo borrar'); return false; }
+        }
     }
     async function sendDataUrlToPeer(dataUrl) {
         try { await putVaultItem(vaultPeerId(), dataUrl, { senderId: myId }); showToast('Enviado al Baúl de ' + vaultPeerName()); }
