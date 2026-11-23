@@ -280,11 +280,41 @@ function listenFirebasePath(path, handlers, queryParams) {
     const url = withAuth(`${DB_BASE}/${path}.json${queryParams ? '?' + queryParams : ''}`);
     const options = { headers: { 'Accept': 'text/event-stream' } };
 
-    const req = https.get(url, options, (res) => {
+    // Una sola reconexión por stream. Antes, cuando la conexión se cortaba,
+    // 'end' y 'error' podían dispararse los dos y abrir DOS streams nuevos;
+    // con los días se acumulaban conexiones hasta agotar el límite de
+    // conexiones simultáneas del plan Spark de Firebase (100), y los
+    // teléfonos ya no podían conectarse para enviar ni recibir mensajes.
+    let finished = false;
+    let watchdog = null;
+    let req = null;
+    const reconnect = (why, delay) => {
+        if (finished) return;
+        finished = true;
+        clearTimeout(watchdog);
+        try { if (req) req.destroy(); } catch (_) {}
+        console.log(`[Firebase] Stream ${path} cerrado (${why}), reconectando en ${delay / 1000}s...`);
+        setTimeout(() => listenFirebasePath(path, handlers, queryParams), delay);
+    };
+    // Firebase manda keep-alive cada ~30s. Si pasan 90s sin nada, la conexión
+    // quedó colgada: se cierra y se abre una nueva (sin duplicar).
+    const armWatchdog = () => {
+        clearTimeout(watchdog);
+        watchdog = setTimeout(() => reconnect('sin actividad', 1000), 90000);
+    };
+
+    req = https.get(url, options, (res) => {
+        if (res.statusCode !== 200) {
+            res.resume();
+            reconnect(`HTTP ${res.statusCode}`, 10000);
+            return;
+        }
         console.log(`[Firebase] Stream conectado: ${path}`);
+        armWatchdog();
         let buffer = '';
 
         res.on('data', (chunk) => {
+            armWatchdog();
             buffer += chunk.toString();
             let sepIndex;
             while ((sepIndex = buffer.indexOf('\n\n')) !== -1) {
@@ -298,6 +328,10 @@ function listenFirebasePath(path, handlers, queryParams) {
 
                 const eventType = eventLine.slice(6).trim();
                 if (eventType === 'keep-alive') continue;
+                if (eventType === 'cancel' || eventType === 'auth_revoked') {
+                    reconnect(eventType, 10000);
+                    return;
+                }
 
                 let payload;
                 try { payload = JSON.parse(dataLine.slice(5).trim()); }
@@ -307,26 +341,25 @@ function listenFirebasePath(path, handlers, queryParams) {
                 const p = payload.path || '';
                 const data = payload.data;
 
-                if (p === '/' && data && typeof data === 'object') {
-                    handlers.onInitial(data);
-                } else if (p && p !== '/' && data && typeof data === 'object') {
-                    const cleanPath = p.replace(/^\//, '');
-                    if (cleanPath.includes('/')) continue; // sub-ruta (readBy, reaction, etc.), ignorar
-                    handlers.onChild(cleanPath, data);
+                try {
+                    if (p === '/' && data && typeof data === 'object') {
+                        handlers.onInitial(data);
+                    } else if (p && p !== '/' && data && typeof data === 'object') {
+                        const cleanPath = p.replace(/^\//, '');
+                        if (cleanPath.includes('/')) continue; // sub-ruta (readBy, reaction, etc.), ignorar
+                        handlers.onChild(cleanPath, data);
+                    }
+                } catch (e) {
+                    console.error(`[Firebase] Error procesando evento de ${path}:`, e.message);
                 }
             }
         });
 
-        res.on('end', () => {
-            console.log(`[Firebase] Stream cerrado (${path}), reconectando en 3s...`);
-            setTimeout(() => listenFirebasePath(path, handlers, queryParams), 3000);
-        });
+        res.on('end',   () => reconnect('fin', 3000));
+        res.on('error', (e) => reconnect('error de respuesta: ' + e.message, 5000));
     });
 
-    req.on('error', (e) => {
-        console.error(`[Firebase] Error de stream (${path}):`, e.message, '— reintentando en 5s');
-        setTimeout(() => listenFirebasePath(path, handlers, queryParams), 5000);
-    });
+    req.on('error', (e) => reconnect('error: ' + e.message, 5000));
 }
 
 // ── Presencia en tiempo real (para saber si la otra persona YA está viendo
